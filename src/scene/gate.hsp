@@ -1,0 +1,10 @@
+#deffunc on_update_gate
+	// Note: ソースコード公開用に削除
+	dialog "This version does not support INPUT GATE."
+	wait 100
+	chdir dir_stat
+	statep=st_gate
+	state=st_standby
+	standbyselp=2
+	stateinit=1
+	return

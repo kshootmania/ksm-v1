@@ -1,0 +1,1388 @@
+#deffunc on_update_option
+	keshuoff=0
+	if(stateinit=1){
+		JStickSearchID 0,joylist
+		length_joylist=stat
+		chdir dir_default+"\\imgs"
+		// コンフィグの画像を読み込み
+		imgbufload_bg "bg.jpg",28,"image/jpeg",1
+		buffer 2
+		picload "config_fx.gif"
+		buffer 36,getsize(96)*3,getsize(96)
+		pos 0,0
+		gzoom 96*scrsize_h/480*3,getsize(96),2,0,0,192*3,192
+		buffer 2
+		picload "config_item.gif"
+		buffer 132,getsize(480),getsize(80)*4
+		pos 0,0
+		gzoom 480*scrsize_h/480,getsize(80)*4,2,0,0,960,160*4,1
+		buffer 2
+		picload "config_item2.gif"
+		buffer 136,getsize(300),getsize(24)*4
+		pos 0,0
+		gzoom 300*scrsize_h/480,getsize(24)*4,2,0,0,600,48*4,1
+		buffer 2
+		picload "config_item_0.gif"
+		buffer 137,getsize(300),getsize(24)*10
+		pos 0,0
+		gzoom 300*scrsize_h/480,getsize(24)*10,2,0,0,600,48*10,1
+		// 135は空き
+		// 138～140はコンフィグアイテム（予定）
+		buffer 2
+		picload "config_item_1.gif"
+		buffer 138,getsize(300),getsize(24)*14
+		pos 0,0
+		gzoom 300*scrsize_h/480,getsize(24)*14,2,0,0,600,48*14,1
+		buffer 2
+		picload "config_item_2.gif"
+		buffer 139,getsize(300),getsize(24)*7
+		pos 0,0
+		gzoom 300*scrsize_h/480,getsize(24)*7,2,0,0,600,48*7,1
+		buffer 2
+		picload "config_item_cur.gif"
+		buffer 141,getsize(600),getsize(24)
+		pos 0,0
+		gzoom 600*scrsize_h/480,getsize(24),2,0,0,1200,48,1
+		alCreateImageByFile 3,"config_top.png"
+		alCreateImage 81,getsize(270),getsize(24)*5
+		alStretchImageToImage 3,81,0,0,540,48*5,0,0,getsize(270),getsize(24)*5
+		alDeleteImage 3
+		if(imeget()=1):imeset 0
+		fullscrp=fullscr
+		lowqualityp=lowquality
+		pagenow=-1
+		selnow=0
+		keyp=2
+		keystat5p=1
+		stateinit=0
+		timestatestart=d3timer()
+		onkey gosub *confkeshu
+		BASS_ChannelSetPosition_ms optionbgmid,0
+		BASS_ChannelSetAttribute optionbgmid,2,double(mastervol)/100
+		BASS_ChannelPlay optionbgmid
+	}
+	gosub *getjoystat
+	timenow=d3timer()-timestatestart
+	gsel 0
+	pos 0,0
+	color 0,0,0
+	boxf
+	gmode 0
+	gcopy 28,0,0,scrsize_w,scrsize_h
+	getkey keystat0_,32 ; Space
+	getkey stat2,key.4
+	getkey stat2_,key.5
+	getkey stat3,key2.4
+	getkey stat3_,key2.5
+	keystat0_=keystat0_|((stat2|stat3)&(stat2_|stat3_))
+	if((keystat0_=1)&(keystat0_p=0)&(ginfo2()=0)){
+		if(pagenow=3){
+			if(selnow<=9){
+				if(selnow<6){
+					if(ckey=0){
+						key.selnow=-1
+					}else:if(ckey=1){
+						key2.selnow=-1
+					}else{
+						joykey.(ckey-2).selnow=-1
+					}
+				}else:if(selnow<8){
+					if(ckey=0){
+						key.(6+(selnow-6)*2)=-1
+						key.(7+(selnow-6)*2)=-1
+					}else:if(ckey=1){
+						key2.(6+(selnow-6)*2)=-1
+						key2.(7+(selnow-6)*2)=-1
+					}else{
+						joykey.(ckey-2).(6+(selnow-6)*2)=-1
+						joykey.(ckey-2).(7+(selnow-6)*2)=-1
+					}
+				}else:if(selnow=8){
+					if(ckey=0){
+						key.10=-1
+					}else:if(ckey=1){
+						key2.10=-1
+					}else{
+						joykey.(ckey-2).10=-1
+					}
+				}
+			}else:if(selnow<=12){
+				if(ckey=0){
+					key.(selnow+1)=-1
+				}else:if(ckey=1){
+					key2.(selnow+1)=-1
+				}else{
+					joykey.(ckey-2).(selnow+1)=-1
+				}
+			}
+		}
+	}
+	keystat0_p=keystat0_
+	getkey_a keystat1,38 ; ↑
+	getkey keystat1_2,key.(8-2*analogsw)
+	getkey keystat1_2_,key2.(8-2*analogsw)
+	keystat1=keystat1//|keystat1_2|keystat1_2_
+	getkey stat2,key.2
+	getkey stat2_,key2.2
+	keystat1=keystat1|stat2|stat2_|getjoykeystat(2)
+	if((keystat1=1)&(keyp=0)&(ginfo2()=0)){
+		if(pagenow=3){
+			if((selnow=0)|(selnow=3)){
+				selnow=6+selnow/2
+			}else:if(selnow<4){
+				if(ckey>=2){
+					selnow=11
+				}else{
+					selnow=6+selnow/2
+				}
+			}else:if(selnow<6){
+				selnow=(selnow-4)*3
+			}else:if(selnow=8){
+				selnow=3
+			}else:if(selnow=9){
+				selnow=4
+			}else:if(selnow=11){
+				selnow=10
+			}
+		}else{
+			selnow--
+		}
+	}
+	getkey_a keystat2,40 ; ↓
+	getkey keystat2_2,key.(9-2*analogsw)
+	getkey keystat2_2_,key2.(9-2*analogsw)
+	keystat2=keystat2//|keystat2_2|keystat2_2_
+	getkey stat2,key.1
+	getkey stat2_,key2.1
+	keystat2=keystat2|stat2|stat2_|getjoykeystat(1)
+	if((keystat2=1)&(keyp=0)&(ginfo2()=0)){
+		if(pagenow=3){
+			if((selnow>=0)&(selnow<4)){
+				selnow=4+selnow/2
+			}else:if(selnow<6){
+				selnow=9
+			}else:if(selnow<8){
+				selnow=(selnow-6)*3
+			}else:if(selnow=10){
+				selnow=11
+			}else:if(selnow=11){
+				selnow=1
+			}
+		}else{
+			selnow++
+		}
+	}
+	if(selnow<0):selnow=0
+	if((pagenow=-1)&(selnow>3)):selnow=3
+	if((pagenow=0)&(selnow>9)):selnow=9
+	if((pagenow=1)&(selnow>13)):selnow=13
+	if((pagenow=2)&(selnow>6)):selnow=6
+	getkey_a keystat3,37 ; ←
+	getkey keystat3_2,key.(6+2*analogsw)
+	getkey keystat3_2_,key2.(6+2*analogsw)
+	keystat3=keystat3//|keystat3_2|keystat3_2_
+	getkey stat2,key.0
+	getkey stat2_,key2.0
+	keystat3=keystat3|stat2|stat2_|getjoykeystat(0)
+	if((keystat3=1)&(keyp=0)&(ginfo2()=0)){
+		if(pagenow=0){
+			if(selnow=0){
+				fullscr=max(fullscr-1,0)
+			}else:if(selnow=1){
+				if((windowsize.0>1280)&(windowsize.1>1024)){
+					windowsize=1280,1024
+				}else:if((windowsize.0>=1280)&(windowsize.1>720)){
+					windowsize=1280,720
+				}else:if((windowsize.0>1024)&(windowsize.1>=720)){
+					windowsize=1024,768
+				}else:if((windowsize.0>800)&(windowsize.1>600)){
+					windowsize=800,600
+				}else:if((windowsize.0>640)&(windowsize.1>480)){
+					windowsize=640,480
+				}else:if((windowsize.0>580)&(windowsize.1>435)){
+					windowsize=580,435
+				}else:if((windowsize.0>512)&(windowsize.1>384)){
+					windowsize=512,384
+				}else:if((windowsize.0>480)&(windowsize.1>360)){
+					windowsize=480,360
+				}else:if((windowsize.0>=480)&(windowsize.1>320)){
+					windowsize=480,320
+				}else:if((windowsize.0>320)&(windowsize.1>240)){
+					windowsize=320,240
+				}
+			}else:if(selnow=2){
+				if((fullscrsize.0>1920)&(fullscrsize.1>1200)){
+					fullscrsize=1920,1200
+				}else:if((fullscrsize.0>=1920)&(fullscrsize.1>1080)){
+					fullscrsize=1920,1080
+				}else:if((fullscrsize.0>1366)&(fullscrsize.1>768)){
+					fullscrsize=1366,768
+				}else:if(((fullscrsize.0>1280)&(fullscrsize.1>1024))|((fullscrsize.0=1366)&(fullscrsize.1=768))){
+					fullscrsize=1280,1024
+				}else:if((fullscrsize.0>=1280)&(fullscrsize.1>800)){
+					fullscrsize=1280,800
+				}else:if((fullscrsize.0>=1280)&(fullscrsize.1>720)){
+					fullscrsize=1280,720
+				}else:if((fullscrsize.0>1024)&(fullscrsize.1>=720)){
+					fullscrsize=1024,768
+				}else:if((fullscrsize.0>=1024)&(fullscrsize.1>600)){
+					fullscrsize=1024,600
+				}else:if((fullscrsize.0>800)&(fullscrsize.1>=600)){
+					fullscrsize=800,600
+				}else:if((fullscrsize.0>640)&(fullscrsize.1>480)){
+					fullscrsize=640,480
+				}
+			}else:if(selnow=3){
+				curlang--
+				if(curlang<0):curlang=0
+				clang=getpath(langlist.curlang,1)
+				gosub *refreshlang
+			}else:if(selnow=4){
+				lowquality++
+				if(lowquality>2):lowquality=2
+			}else:if(selnow=5){
+				bg--
+				if(bg<0):bg=0
+			}else:if(selnow=6){
+				valldir--
+				if(valldir<0):valldir=0
+			}else:if(selnow=7){
+				hidealldir--
+				if(hidealldir<0):hidealldir=0
+			}else:if(selnow=8){
+				mastervol=max(mastervol-5,0)
+			}else:if(selnow=9){
+				vsync=0
+			}
+		}else:if(pagenow=1){
+			if(selnow=0){
+				shortmodedef--
+				if(shortmodedef<0):shortmodedef=0
+				shortmode=shortmodedef
+			}else:if(selnow=1){
+				longmodedef--
+				if(longmodedef<0):longmodedef=0
+				longmode=longmodedef
+			}else:if(selnow=2){
+				analogmodedef--
+				if(analogmodedef<0):analogmodedef=0
+				analogmode=analogmodedef
+			}else:if(selnow=3){
+				if(analoginput=4){
+					analoginput=0
+				}else:if(analoginput=2){
+					analoginput=4
+				}else:if(analoginput=1){
+					analoginput=2
+				}else:if(analoginput=3){
+					analoginput=1
+				}else:if(analoginput=5){
+					analoginput=3
+				}
+			}else:if(selnow=4){
+				assisttick=max(assisttick-1,0)
+			}else:if(selnow=5){
+				disableime--
+				if(disableime<0):disableime=0
+			}else:if(selnow=6){
+				//globaloffset--
+				judgedelay--
+			}else:if(selnow=7){
+				analogdelayconf--
+			}else:if(selnow=8){
+				mx=max(0,mx-1)
+			}else:if(selnow=9){
+				my=max(0,my-1)
+			}else:if(selnow=10){
+				msen--
+			}else:if(selnow=11){
+				analogsw=max(0,analogsw-1)
+			}else:if(selnow=12){
+				closekey=max(0,closekey-1)
+			}else:if(selnow=13){
+				esc_bt3=max(0,esc_bt3-1)
+			}
+		}else:if(pagenow=2){
+			if(selnow=5){
+				hidem--
+				if(hidem<0):hidem=0
+			}else:if(selnow>=0)&(selnow<=4){
+				vhstype.(selnow)--
+				if(vhstype.(selnow)<0):vhstype.(selnow)=0
+			}else:if(selnow=6){
+				usenumpad--
+				if(usenumpad<0):usenumpad=0
+			}
+		}else{
+			if((selnow>0)&(selnow<4)){
+				selnow--
+			}else:if((selnow=5)|((selnow=7)&(ckey=0))){
+				selnow--
+			}else:if((selnow=7)&(ckey>=1)){
+				selnow=10
+			}else:if(selnow=8){
+				selnow=5
+			}else:if(selnow=9){
+				ckey=max(ckey-1,0)
+			}else:if((selnow=10)|(selnow=11)){
+				selnow=6
+			}
+		}
+	}
+	getkey_a keystat4,39 ; →
+	getkey keystat4_2,key.(7+2*analogsw)
+	getkey keystat4_2_,key2.(7+2*analogsw)
+	keystat4=keystat4//|keystat4_2|keystat4_2_
+	getkey stat2,key.3
+	getkey stat2_,key2.3
+	keystat4=keystat4|stat2|stat2_|getjoykeystat(3)
+	if((keystat4=1)&(keyp=0)&(ginfo2()=0)){
+		if(pagenow=0){
+			if(selnow=0){
+				fullscr=min(fullscr+1,1)
+			}else:if(selnow=1){
+				if((windowsize.0<320)&(windowsize.1<240)){
+					windowsize=320,240
+				}else:if((windowsize.0<=480)&(windowsize.1<320)){
+					windowsize=480,320
+				}else:if((windowsize.0<=480)&(windowsize.1<360)){
+					windowsize=480,360
+				}else:if((windowsize.0<512)&(windowsize.1<384)){
+					windowsize=512,384
+				}else:if((windowsize.0<580)&(windowsize.1<435)){
+					windowsize=580,435
+				}else:if((windowsize.0<640)&(windowsize.1<480)){
+					windowsize=640,480
+				}else:if((windowsize.0<800)&(windowsize.1<600)){
+					windowsize=800,600
+				}else:if((windowsize.0<1024)&(windowsize.1<768)){
+					windowsize=1024,768
+				}else:if((windowsize.0<1280)&(windowsize.1<=768)){
+					windowsize=1280,720
+				}else:if((windowsize.0<=1280)&(windowsize.1<1024)){
+					windowsize=1280,1024
+				}
+			}else:if(selnow=2){
+				if((fullscrsize.0<640)&(fullscrsize.1<480)){
+					fullscrsize=640,480
+				}else:if((fullscrsize.0<800)&(fullscrsize.1<600)){
+					fullscrsize=800,600
+				}else:if((fullscrsize.0<1024)&(fullscrsize.1<=600)){
+					fullscrsize=1024,600
+				}else:if((fullscrsize.0<=1024)&(fullscrsize.1<768)){
+					fullscrsize=1024,768
+				}else:if((fullscrsize.0<1280)&(fullscrsize.1<=768)){
+					fullscrsize=1280,720
+				}else:if((fullscrsize.0<=1280)&(fullscrsize.1<800)){
+					fullscrsize=1280,800
+				}else:if((fullscrsize.0<=1280)&(fullscrsize.1<1024)){
+					fullscrsize=1280,1024
+				}else:if((fullscrsize.0<1366)&(fullscrsize.1<=1024)){
+					fullscrsize=1366,768
+				}else:if((fullscrsize.0<1920)&(fullscrsize.1<1080)){
+					fullscrsize=1920,1080
+				}else:if((fullscrsize.0<=1920)&(fullscrsize.1<1200)){
+					fullscrsize=1920,1200
+				}
+			}else:if(selnow=3){
+				curlang++
+				if(curlang>=length(langlist)):curlang=length(langlist)-1
+				clang=getpath(langlist.curlang,1)
+				gosub *refreshlang
+			}else:if(selnow=4){
+				lowquality--
+				if(lowquality<0):lowquality=0
+			}else:if(selnow=5){
+				bg++
+				if(bg>2):bg=2
+			}else:if(selnow=6){
+				valldir++
+				if(valldir>1):valldir=1
+			}else:if(selnow=7){
+				hidealldir++
+				if(hidealldir>1):hidealldir=1
+			}else:if(selnow=8){
+				mastervol=min(mastervol+5,100)
+			}else:if(selnow=9){
+				vsync=1
+			}
+		}else:if(pagenow=1){
+			if(selnow=0){
+				shortmodedef++
+				if(shortmodedef>3):shortmodedef=3
+				shortmode=shortmodedef
+			}else:if(selnow=1){
+				longmodedef++
+				if(longmodedef>3):longmodedef=3
+				longmode=longmodedef
+			}else:if(selnow=2){
+				analogmodedef++
+				if(analogmodedef>3):analogmodedef=3
+				analogmode=analogmodedef
+			}else:if(selnow=3){
+				if(analoginput=0){
+					analoginput=4
+				}else:if(analoginput=4){
+					analoginput=2
+				}else:if(analoginput=2){
+					analoginput=1
+				}else:if(analoginput=1){
+					analoginput=3
+				}else:if(analoginput=3){
+					analoginput=5
+				}
+			}else:if(selnow=4){
+				assisttick=min(assisttick+1,1)
+			}else:if(selnow=5){
+				disableime++
+				if(disableime>3):disableime=3
+			}else:if(selnow=6){
+				//globaloffset++
+				judgedelay++
+			}else:if(selnow=7){
+				analogdelayconf++
+			}else:if(selnow=8){
+				mx=min(mx+1,1)
+			}else:if(selnow=9){
+				my=min(my+1,1)
+			}else:if(selnow=10){
+				msen++
+			}else:if(selnow=11){
+				analogsw=min(analogsw+1,1)
+			}else:if(selnow=12){
+				closekey=min(closekey+1,1)
+			}else:if(selnow=13){
+				esc_bt3=min(esc_bt3+1,1)
+			}
+		}else:if(pagenow=2){
+			if(selnow=5){
+				hidem++
+				if(hidem>1):hidem=1
+			}else:if(selnow>=0)&(selnow<=4){
+				vhstype.(selnow)++
+				if(vhstype.(selnow)>1):vhstype.(selnow)=1
+			}else:if(selnow=6){
+				usenumpad++
+				if(usenumpad>2):usenumpad=2
+			}
+		}else{
+			if(selnow<3){
+				selnow++
+			}else:if((selnow=4)|((selnow=6)&(ckey=0))){
+				selnow++
+			}else:if((selnow=6)&(ckey>=1)){
+				selnow=10
+			}else:if(selnow=5){
+				selnow=8
+			}else:if(selnow=9){
+				ckey=min(ckey+1,3)
+			}else:if((selnow=10)|(selnow=11)){
+				selnow=7
+			}
+		}
+	}
+	keychstat=0
+	if(pagenow=-1){
+		repeat 4
+			pos scrsize_w/2-getsize(480)/2,getsize(40)+getsize(100)*cnt
+			gmode 3,,,100+(132+min(int(sin(double(d3timer())/150+1.0)/2*96),24))*(selnow=cnt)
+			gcopy 132,0,getsize(80)*cnt,getsize(480),getsize(80)
+		loop
+		font lang.0.1,getsize(18)
+		color 255,255,255
+		pos 20*scrsize_w/640,getsize(456)
+		mes lang.3.90
+	}else:if(pagenow=0){
+		gmode 0
+		alCopyImageToScreen 81,0,getsize(12),getsize(10),getsize(270),getsize(24),0,getsize(24)
+		pos centersh+20*scrsize_w/640,getsize(40)
+		gcopy 137,0,0,getsize(300),getsize(24)
+		stat3=20*scrsize_w/640+getsize(300):stat4=40*scrsize_h/480
+		if(fullscr=0):stat1=lang.3.0/*"WINDOW"*/:stat2=1
+		if(fullscr=1):stat1=lang.3.1/*"FULL SCREEN"*/:stat2=0
+		gosub *drawconfigitem
+		pos centersh+20*scrsize_w/640,getsize(40)+getsize(30)*1
+		gcopy 137,0,getsize(24)*1,getsize(300),getsize(24)
+		stat3=20*scrsize_w/640+getsize(300):stat4=40*scrsize_h/480+getsize(30)*1
+		stat1=""+windowsize.0+lang.3.2+windowsize.1
+		if((windowsize.0<=320)&(windowsize.1<=240)){
+			stat2=1
+		}else:if((windowsize.0>=1280)&(windowsize.1>=1024)){
+			stat2=0
+		}else{
+			stat2=2
+		}
+		gosub *drawconfigitem
+		pos centersh+20*scrsize_w/640,getsize(40)+getsize(30)*2
+		gcopy 137,0,getsize(24)*2,getsize(300),getsize(24)
+		stat3=20*scrsize_w/640+getsize(300):stat4=40*scrsize_h/480+getsize(30)*2
+		stat1=""+fullscrsize.0+lang.3.2+fullscrsize.1
+		if((fullscrsize.0<=640)&(fullscrsize.1<=480)){
+			stat2=1
+		}else:if((fullscrsize.0>=1920)&(fullscrsize.1>=1200)){
+			stat2=0
+		}else{
+			stat2=2
+		}
+		gosub *drawconfigitem
+		pos centersh+20*scrsize_w/640,getsize(40)+getsize(30)*3
+		gcopy 137,0,getsize(24)*3,getsize(300),getsize(24)
+		stat3=20*scrsize_w/640+getsize(300):stat4=40*scrsize_h/480+getsize(30)*3
+		stat1=clang
+		if(curlang=0){
+			stat2=1
+		}else:if(curlang=length(langlist)-1){
+			stat2=0
+		}else{
+			stat2=2
+		}
+		if(length(langlist)<=1){
+			stat2=3
+		}
+		gosub *drawconfigitem
+		pos centersh+20*scrsize_w/640,getsize(40)+getsize(30)*4
+		gcopy 137,0,getsize(24)*4,getsize(300),getsize(24)
+		stat3=20*scrsize_w/640+getsize(300):stat4=40*scrsize_h/480+getsize(30)*4
+		if(lowquality=0):stat1=lang.3.3/*"LARGE (きれい)"*/:stat2=0
+		if(lowquality=1):stat1=lang.3.4/*"MEDIUM (普通)"*/:stat2=2
+		if(lowquality=2):stat1=lang.3.5/*"SMALL (粗い/非推奨)"*/:stat2=1
+		gosub *drawconfigitem
+		pos centersh+20*scrsize_w/640,getsize(40)+getsize(30)*5
+		gcopy 137,0,getsize(24)*5,getsize(300),getsize(24)
+		stat3=20*scrsize_w/640+getsize(300):stat4=40*scrsize_h/480+getsize(30)*5
+		if(bg=0):stat1=lang.3.10/*"HIDE"*/:stat2=1
+		if(bg=1):stat1=lang.3.11/*"SHOW (ANIMATION: OFF)"*/:stat2=2
+		if(bg=2):stat1=lang.3.12/*"SHOW (ANIMATION: ON)"*/:stat2=0
+		gosub *drawconfigitem
+		pos centersh+20*scrsize_w/640,getsize(40)+getsize(30)*6
+		gcopy 137,0,getsize(24)*6,getsize(300),getsize(24)
+		stat3=20*scrsize_w/640+getsize(300):stat4=40*scrsize_h/480+getsize(30)*6
+		if(valldir=0):stat1=lang.3.6/*"OFF (フォルダ内で他フォルダ非表示)"*/:stat2=1
+		if(valldir=1):stat1=lang.3.7/*"ON (フォルダ内で他フォルダ表示)"*/:stat2=0
+		gosub *drawconfigitem
+		pos centersh+20*scrsize_w/640,getsize(40)+getsize(30)*7
+		gcopy 137,0,getsize(24)*7,getsize(300),getsize(24)
+		stat3=20*scrsize_w/640+getsize(300):stat4=40*scrsize_h/480+getsize(30)*7
+		if(hidealldir=0):stat1=lang.3.8/*"OFF (Allフォルダを表示)"*/:stat2=1
+		if(hidealldir=1):stat1=lang.3.9/*"ON (Allフォルダを非表示)"*/:stat2=0
+		gosub *drawconfigitem
+		pos centersh+20*scrsize_w/640,getsize(40)+getsize(30)*8
+		gcopy 137,0,getsize(24)*8,getsize(300),getsize(24)
+		stat3=20*scrsize_w/640+getsize(300):stat4=40*scrsize_h/480+getsize(30)*8
+		stat1=str(mastervol)+lang.3.13
+		stat2=2
+		if(mastervol=0):stat2=1
+		if(mastervol=100):stat2=0
+		gosub *drawconfigitem
+		pos centersh+20*scrsize_w/640,getsize(40)+getsize(30)*9
+		gcopy 137,0,getsize(24)*9,getsize(300),getsize(24)
+		stat3=20*scrsize_w/640+getsize(300):stat4=40*scrsize_h/480+getsize(30)*9
+		if(vsync=0):stat1=lang.3.14/*"無効"*/:stat2=1
+		if(vsync=1):stat1=lang.3.15/*"有効"*/:stat2=0
+		gosub *drawconfigitem
+		gmode 5,,,120+int(sin(double(d3timer())/150+1.0)/2*136)
+		pos centersh+20*scrsize_w/640,getsize(40)+getsize(30)*selnow
+		gcopy 141,0,0,getsize(600),getsize(24)
+		font lang.0.1,getsize(18)
+		color 255,255,255
+		pos 20*scrsize_w/640,getsize(456)
+		mes lang.3.91
+	}else:if(pagenow=1){
+		alCopyImageToScreen 81,0,getsize(12),getsize(10),getsize(270),getsize(24),0,getsize(24)*2
+		pos centersh+20*scrsize_w/640,getsize(40)
+		gcopy 138,0,0,getsize(300),getsize(24)
+		stat3=20*scrsize_w/640+getsize(300):stat4=40*scrsize_h/480
+		pos centersh+40*scrsize_w/640,getsize(40)
+		if(shortmodedef=0):stat1=lang.3.16/*"ON (表示あり・判定あり)"*/:stat2=1
+		if(shortmodedef=1):stat1=lang.3.17/*"OFF (表示あり・判定なし)"*/:stat2=2
+		if(shortmodedef=2):stat1=lang.3.18/*"AUTO (表示あり・オートプレイ)"*/:stat2=2
+		if(shortmodedef=3):stat1=lang.3.19/*"HIDE (表示なし・判定なし)"*/:stat2=0
+		gosub *drawconfigitem
+		pos centersh+20*scrsize_w/640,getsize(40)+getsize(30)*1
+		gcopy 138,0,getsize(24)*1,getsize(300),getsize(24)
+		stat3=20*scrsize_w/640+getsize(300):stat4=40*scrsize_h/480+getsize(30)*1
+		if(longmodedef=0):stat1=lang.3.16/*"ON (表示あり・判定あり)"*/:stat2=1
+		if(longmodedef=1):stat1=lang.3.17/*"OFF (表示あり・判定なし)"*/:stat2=2
+		if(longmodedef=2):stat1=lang.3.18/*"AUTO (表示あり・オートプレイ)"*/:stat2=2
+		if(longmodedef=3):stat1=lang.3.19/*"HIDE (表示なし・判定なし)"*/:stat2=0
+		gosub *drawconfigitem
+		pos centersh+20*scrsize_w/640,getsize(40)+getsize(30)*2
+		gcopy 138,0,getsize(24)*2,getsize(300),getsize(24)
+		stat3=20*scrsize_w/640+getsize(300):stat4=40*scrsize_h/480+getsize(30)*2
+		if(analogmodedef=0):stat1=lang.3.16/*"ON (表示あり・判定あり)"*/:stat2=1
+		if(analogmodedef=1):stat1=lang.3.17/*"OFF (表示あり・判定なし)"*/:stat2=2
+		if(analogmodedef=2):stat1=lang.3.18/*"AUTO (表示あり・オートプレイ)"*/:stat2=2
+		if(analogmodedef=3):stat1=lang.3.19/*"HIDE (表示なし・判定なし)"*/:stat2=0
+		gosub *drawconfigitem
+		pos centersh+20*scrsize_w/640,getsize(40)+getsize(30)*3
+		gcopy 138,0,getsize(24)*3,getsize(300),getsize(24)
+		stat3=20*scrsize_w/640+getsize(300):stat4=40*scrsize_h/480+getsize(30)*3
+		if(analoginput=0):stat1=lang.3.20/*"キーボードプレイ(長押し式)"*/:stat2=1
+		if(analoginput=4):stat1=lang.3.24/*"専用ｺﾝﾄﾛｰﾗｰ(ｹﾞｰﾑﾊﾟｯﾄﾞｽﾗｲﾀﾞｰ入力)"*/:stat2=2
+		if(analoginput=2):stat1=lang.3.22/*"専用ｺﾝﾄﾛｰﾗｰ(マウスX/Y座標)"*/:stat2=2
+		if(analoginput=1):stat1=lang.3.21/*"PowerMate(連打式)"*/:stat2=2
+		if(analoginput=3):stat1=lang.3.23/*"アナログスティック"*/:stat2=2
+		if(analoginput=5):stat1=lang.3.25/*"ｱﾅﾛｸﾞｽﾃｨｯｸX/Y座標(-127～127)"*/:stat2=0
+		gosub *drawconfigitem
+		pos centersh+20*scrsize_w/640,getsize(40)+getsize(30)*4
+		gcopy 138,0,getsize(24)*4,getsize(300),getsize(24)
+		stat3=20*scrsize_w/640+getsize(300):stat4=40*scrsize_h/480+getsize(30)*4
+		if(assisttick=0):stat1=lang.3.28/*"OFF"*/:stat2=1
+		if(assisttick=1):stat1=lang.3.29/*"ON"*/:stat2=0
+		gosub *drawconfigitem
+		pos centersh+20*scrsize_w/640,getsize(40)+getsize(30)*5
+		gcopy 138,0,getsize(24)*5,getsize(300),getsize(24)
+		stat3=20*scrsize_w/640+getsize(300):stat4=40*scrsize_h/480+getsize(30)*5
+		if(disableime=0):stat1=lang.3.30/*"OFF"*/:stat2=1
+		if(disableime=1):stat1=lang.3.31/*"ON - LOW"*/:stat2=2
+		if(disableime=2):stat1=lang.3.32/*"ON - MID"*/:stat2=2
+		if(disableime=3):stat1=lang.3.33/*"ON - HIGH (推奨)"*/:stat2=0
+		//if(disableime=4):stat1="ON - HIGHEST (非推奨)":stat2=0
+		gosub *drawconfigitem
+		pos centersh+20*scrsize_w/640,getsize(40)+getsize(30)*6
+		gcopy 138,0,getsize(24)*6,getsize(300),getsize(24)
+		stat3=20*scrsize_w/640+getsize(300):stat4=40*scrsize_h/480+getsize(30)*6
+		if(judgedelay=0){
+			stat1=""
+			stat2=lang.3.34/*" (調整なし)"*/
+		}else:if(judgedelay>0){
+			stat1="+"
+			stat2=lang.3.35/*" (判定位置を遅くします)"*/
+		}else{
+			stat1=""
+			stat2=lang.3.36/*" (判定位置を早くします)"*/
+		}
+		stat1=stat1+judgedelay+lang.3.37/*"msec"*/+stat2
+		stat2=2
+		gosub *drawconfigitem
+		pos centersh+20*scrsize_w/640,getsize(40)+getsize(30)*7
+		gcopy 138,0,getsize(24)*7,getsize(300),getsize(24)
+		stat3=20*scrsize_w/640+getsize(300):stat4=40*scrsize_h/480+getsize(30)*7
+		if(analogdelayconf=0){
+			stat1=""
+			stat2=lang.3.34/*" (調整なし)"*/
+		}else:if(analogdelayconf>0){
+			stat1="+"
+			stat2=lang.3.38/*" (鍵盤より判定位置を遅くします)"*/
+		}else{
+			stat1=""
+			stat2=lang.3.39/*" (鍵盤より判定位置を早くします)"*/
+		}
+		stat1=stat1+analogdelayconf+lang.3.37/*"msec"*/+stat2
+		stat2=2
+		gosub *drawconfigitem
+		pos centersh+20*scrsize_w/640,getsize(40)+getsize(30)*8
+		gcopy 138,0,getsize(24)*8,getsize(300),getsize(24)
+		stat3=20*scrsize_w/640+getsize(300):stat4=40*scrsize_h/480+getsize(30)*8
+		if(mx=0):stat1=lang.3.40/*" Left signal > Right move"*/:stat2=1
+		if(mx=1):stat1=lang.3.41/*"Right signal > Right move"*/:stat2=0
+		gosub *drawconfigitem
+		pos centersh+20*scrsize_w/640,getsize(40)+getsize(30)*9
+		gcopy 138,0,getsize(24)*9,getsize(300),getsize(24)
+		stat3=20*scrsize_w/640+getsize(300):stat4=40*scrsize_h/480+getsize(30)*9
+		if(my=0):stat1=lang.3.42/*"  Up  signal > Right move"*/:stat2=1
+		if(my=1):stat1=lang.3.43/*" Down signal > Right move"*/:stat2=0
+		gosub *drawconfigitem
+		pos centersh+20*scrsize_w/640,getsize(40)+getsize(30)*10
+		gcopy 138,0,getsize(24)*10,getsize(300),getsize(24)
+		stat3=20*scrsize_w/640+getsize(300):stat4=40*scrsize_h/480+getsize(30)*10
+		if(msen=0){
+			stat1=lang.3.44/*"0 (カーソルは動きません)"*/:stat2=1
+		}else{
+			stat1=""+msen:stat2=2
+		}
+		gosub *drawconfigitem
+		pos centersh+20*scrsize_w/640,getsize(40)+getsize(30)*11
+		gcopy 138,0,getsize(24)*11,getsize(300),getsize(24)
+		stat3=20*scrsize_w/640+getsize(300):stat4=40*scrsize_h/480+getsize(30)*11
+		if(analogsw=0):stat1=lang.3.45/*"OFF"*/:stat2=1
+		if(analogsw=1):stat1=lang.3.46/*"ON"*/:stat2=0
+		gosub *drawconfigitem
+		pos centersh+20*scrsize_w/640,getsize(40)+getsize(30)*12
+		gcopy 138,0,getsize(24)*12,getsize(300),getsize(24)
+		stat3=20*scrsize_w/640+getsize(300):stat4=40*scrsize_h/480+getsize(30)*12
+		if(closekey=0):stat1=lang.3.47/*"BackSpaceキー"*/:stat2=1
+		if(closekey=1):stat1=lang.3.48/*"Escキー (BACKボタン)"*/:stat2=0
+		gosub *drawconfigitem
+		pos centersh+20*scrsize_w/640,getsize(40)+getsize(30)*13
+		gcopy 138,0,getsize(24)*13,getsize(300),getsize(24)
+		stat3=20*scrsize_w/640+getsize(300):stat4=40*scrsize_h/480+getsize(30)*13
+		if(esc_bt3=0):stat1=lang.3.14/*"無効"*/:stat2=1
+		if(esc_bt3=1):stat1=lang.3.15/*"有効"*/:stat2=0
+		gosub *drawconfigitem
+		gmode 5,,,120+int(sin(double(d3timer())/150+1.0)/2*136)
+		pos centersh+20*scrsize_w/640,getsize(40)+getsize(30)*selnow
+		gcopy 141,0,0,getsize(600),getsize(24)
+		font lang.0.1,getsize(18)
+		color 255,255,255
+		pos 20*scrsize_w/640,getsize(456)
+		mes lang.3.91
+	}else:if(pagenow=2){
+		gmode 0
+		alCopyImageToScreen 81,0,getsize(12),getsize(10),getsize(270),getsize(24),0,getsize(24)*3
+		repeat 5
+			pos centersh+20*scrsize_w/640,getsize(40)+getsize(30)*cnt
+			gcopy 139,0,getsize(24)*cnt,getsize(300),getsize(24)
+			stat3=20*scrsize_w/640+getsize(300):stat4=40*scrsize_h/480+getsize(30)*cnt
+			if(vhstype.cnt=0):stat1=lang.3.53/*"非表示"*/:stat2=1
+			if(vhstype.cnt=1):stat1=lang.3.54/*"表示"*/:stat2=0
+			gosub *drawconfigitem
+		loop
+		pos centersh+20*scrsize_w/640,getsize(40)+getsize(30)*5
+		gcopy 139,0,getsize(24)*5,getsize(300),getsize(24)
+		stat3=20*scrsize_w/640+getsize(300):stat4=40*scrsize_h/480+getsize(30)*5
+		if(hidem=0):stat1=lang.3.55/*"OFF"*/:stat2=1
+		if(hidem=1):stat1=lang.3.56/*"ON"*/:stat2=0
+		gosub *drawconfigitem
+		pos centersh+20*scrsize_w/640,getsize(40)+getsize(30)*6
+		gcopy 139,0,getsize(24)*6,getsize(300),getsize(24)
+		stat3=20*scrsize_w/640+getsize(300):stat4=40*scrsize_h/480+getsize(30)*6
+		if(usenumpad=0):stat1=lang.3.57/*"OFF"*/:stat2=1
+		if(usenumpad=1):stat1=lang.3.58/*"ON (キーボード)"*/:stat2=2
+		if(usenumpad=2):stat1=lang.3.59/*"ON (コントローラー付属)"*/:stat2=0
+		gosub *drawconfigitem
+		gmode 5,,,120+int(sin(double(d3timer())/150+1.0)/2*136)
+		pos centersh+20*scrsize_w/640,getsize(40)+getsize(30)*selnow
+		gcopy 141,0,0,getsize(600),getsize(24)
+		font lang.0.1,getsize(18)
+		color 255,255,255
+		pos 20*scrsize_w/640,getsize(456)
+		mes lang.3.92
+	}else{
+		// キーコンフィグ
+		if((selnow>=100)&(confkey!=-1)&(ckey<2)){
+			if((confkey!=13)&((confkey<37)|(confkey>40))/*&(confkey!=123)&(confkey!=255)&(confkey!=122)&(confkey!=255)*/){
+				getkey shift_key,16
+				if((ckey<2)&((confkey=229)|(confkey=243)|(confkey=244))){
+					confkey=28
+				}
+				if((selnow<=105)|(selnow=108)){
+					if(ckey=0):key.(selnow-100+(selnow=108)*2)=confkey
+					if(ckey=1):key2.(selnow-100+(selnow=108)*2)=confkey
+					if(ckey<2):selnow-=100
+					keychstat=1
+				}else:if((selnow>=110)&(selnow<=112)){
+					if((confkey!=13)&(confkey!=32)&(confkey!=122)){
+						//if(ckey=0):key.(selnow-99)=confkey
+						if(ckey=1):key2.(selnow-99)=confkey
+						if(ckey<2):selnow-=100
+						keychstat=1
+					}
+				}else{
+					if(selnow<200){
+						if(ckey=0):key.(6+(selnow-106)*2)=confkey
+						if(ckey=1):key2.(6+(selnow-106)*2)=confkey
+						if(ckey<2):selnow+=100
+					}else{
+						if(ckey=0):key.(6+(selnow-206)*2+1)=confkey
+						if(ckey=1):key2.(6+(selnow-206)*2+1)=confkey
+						if(ckey<2):selnow-=200
+					}
+					keychstat=1
+				}
+			}
+		}
+		if((selnow>=100)&(ckey>=2)){
+			repeat length_joylist
+				cnt2=joylist.cnt
+				repeat 32
+					if((joystat.cnt2.cnt=1)&(joystatp.cnt2.cnt=0)){
+						if((selnow<=105)|(selnow=108)){
+							joykey.(ckey-2).(selnow-100+(selnow=108)*2)=cnt2*32+cnt
+							selnow-=100
+						}else:if((selnow>=110)&(selnow<=112)){
+							joykey.(ckey-2).(selnow-99)=cnt2*32+cnt
+							selnow-=100
+						}else{
+							if(selnow<200){
+								joykey.(ckey-2).(6+(selnow-106)*2)=cnt2*32+cnt
+								selnow+=100
+							}else{
+								joykey.(ckey-2).(6+(selnow-206)*2+1)=cnt2*32+cnt
+								selnow-=200
+							}
+						}
+						keychstat=1
+					}
+				loop
+			loop
+		}
+		dim keyovl,14
+		repeat 14
+			cnt2=cnt
+			repeat 14
+				if(cnt=cnt2):continue
+				if((key.cnt=key.cnt2)&(key.cnt!=-1)):keyovl.cnt=1
+			loop
+			repeat 14
+				if((key.cnt=key2.cnt2)&(key.cnt!=-1)):keyovl.cnt=1
+			loop
+		loop
+		dim keyovl2,14
+		repeat 14
+			cnt2=cnt
+			repeat 14
+				if((key2.cnt=key.cnt2)&(key2.cnt!=-1)):keyovl2.cnt=1
+			loop
+			repeat 14
+				if(cnt=cnt2):continue
+				if((key2.cnt=key2.cnt2)&(key2.cnt!=-1)):keyovl2.cnt=1
+			loop
+		loop
+		dim joykeyovl,2,11
+		repeat 2
+			cnt3=cnt
+			repeat 14
+				cnt2=cnt
+				repeat 14
+					if((joykey.cnt3.cnt2=joykey.(1-cnt3).cnt)&(joykey.cnt3.cnt2!=-1)):joykeyovl.cnt3.cnt2=1
+				loop
+				repeat 14
+					if(cnt=cnt2):continue
+					if((joykey.cnt3.cnt2=joykey.cnt3.cnt)&(joykey.cnt3.cnt2!=-1)):joykeyovl.cnt3.cnt2=1
+				loop
+			loop
+		loop
+		repeat 2
+			if(selnow=cnt+6){
+				color 255,0,0
+				circle centersh+(135+cnt*320-5)*scrsize_h/480,getsize(45),centersh+(135+cnt*320+60+5)*scrsize_h/480,(50+60+5)*scrsize_h/480
+			}
+			if(selnow=100+cnt+6){
+				color 128,255,0
+				circle centersh+(135+cnt*320-5)*scrsize_h/480,getsize(45),centersh+(135+cnt*320+60+5)*scrsize_h/480,(50+60+5)*scrsize_h/480
+			}
+			if(selnow=200+cnt+6){
+				color 255,128,0
+				circle centersh+(135+cnt*320-5)*scrsize_h/480,getsize(45),centersh+(135+cnt*320+60+5)*scrsize_h/480,(50+60+5)*scrsize_h/480
+			}
+			if(cnt=0):color 64,96,255
+			if(cnt=1):color 255,64,96
+			circle centersh+(135+cnt*320)*scrsize_h/480,getsize(50),centersh+(135+cnt*320+60)*scrsize_h/480,(50+60)*scrsize_h/480
+			if(ckey=0){
+				pos centersh+(107+cnt*320+10)*scrsize_h/480,getsize(28)
+				font lang.0.1,getsize(18),(keyovl.(6+cnt*2)=1)
+				color 127+(key.(6+cnt*2)!=-1)*128,(keyovl.(6+cnt*2)=0)*(127+(key.(6+cnt*2)!=-1)*128),(keyovl.(6+cnt*2)=0)*(127+(key.(6+cnt*2)!=-1)*128)
+				mes ""+getkeylabel(key.(6+cnt*2))
+				pos centersh+(147+cnt*320+10)*scrsize_h/480,getsize(28)
+				font lang.0.1,getsize(18),0
+				color 255,255,255
+				mes lang.3.62
+				pos centersh+(157+cnt*320+10)*scrsize_h/480,getsize(28)
+				font lang.0.1,getsize(18),(keyovl.(7+cnt*2)=1)
+				color 127+(key.(7+cnt*2)!=-1)*128,(keyovl.(7+cnt*2)=0)*(127+(key.(7+cnt*2)!=-1)*128),(keyovl.(7+cnt*2)=0)*(127+(key.(7+cnt*2)!=-1)*128)
+				mes getkeylabel(key.(7+cnt*2))
+			}else:if(ckey=1){
+				pos centersh+(107+cnt*320+10)*scrsize_h/480,getsize(28)
+				font lang.0.1,getsize(18),(keyovl2.(6+cnt*2)=1)
+				color 127+(key2.(6+cnt*2)!=-1)*128,(keyovl2.(6+cnt*2)=0)*(127+(key2.(6+cnt*2)!=-1)*128),(keyovl2.(6+cnt*2)=0)*(127+(key2.(6+cnt*2)!=-1)*128)
+				mes ""+getkeylabel(key2.(6+cnt*2))
+				pos centersh+(147+cnt*320+10)*scrsize_h/480,getsize(28)
+				font lang.0.1,getsize(18),0
+				color 255,255,255
+				mes lang.3.62
+				pos centersh+(157+cnt*320+10)*scrsize_h/480,getsize(28)
+				font lang.0.1,getsize(18),(keyovl2.(7+cnt*2)=1)
+				color 127+(key2.(7+cnt*2)!=-1)*128,(keyovl2.(7+cnt*2)=0)*(127+(key2.(7+cnt*2)!=-1)*128),(keyovl2.(7+cnt*2)=0)*(127+(key2.(7+cnt*2)!=-1)*128)
+				mes getkeylabel(key2.(7+cnt*2))
+			}else{
+				pos centersh+(107+cnt*320+10)*scrsize_h/480,getsize(28)
+				font lang.0.1,getsize(18),(keyovl2.(6+cnt*2)=1)
+				color 127+(joykey.(ckey-2).(6+cnt*2)!=-1)*128,127+(joykey.(ckey-2).(6+cnt*2)!=-1)*128,127+(joykey.(ckey-2).(6+cnt*2)!=-1)*128
+				if(joykey.(ckey-2).(6+cnt*2)!=-1){
+					mes ""+(joykey.(ckey-2).(6+cnt*2)/32+1)+lang.3.67/*"-"*/+(joykey.(ckey-2).(6+cnt*2)\32+1)
+				}else{
+					mes lang.3.63/*"  ×"*/
+				}
+				pos centersh+(147+cnt*320+10)*scrsize_h/480,getsize(28)
+				font lang.0.1,getsize(18),0
+				color 255,255,255
+				mes lang.3.62
+				pos centersh+(157+cnt*320+10)*scrsize_h/480,getsize(28)
+				font lang.0.1,getsize(18)
+				color 127+(joykey.(ckey-2).(7+cnt*2)!=-1)*128,(joykeyovl.(ckey-2).(7+cnt*2)=0)*(127+(joykey.(ckey-2).(7+cnt*2)!=-1)*128),(joykeyovl.(ckey-2).(7+cnt*2)=0)*(127+(joykey.(ckey-2).(7+cnt*2)!=-1)*128)
+				if(joykey.(ckey-2).(7+cnt*2)!=-1){
+					mes ""+(joykey.(ckey-2).(7+cnt*2)/32+1)+lang.3.67/*"-"*/+(joykey.(ckey-2).(7+cnt*2)\32+1)
+				}else{
+					mes lang.3.63/*"  ×"*/
+				}
+			}
+		loop
+		//if(ckey>=2){
+			if(selnow=10){
+				color 255,0,0
+				boxf centersh+getsize(256),getsize(28),centersh+getsize(388),getsize(62)
+			}
+			if(selnow=110){
+				color 255,255,0
+				boxf centersh+getsize(256),getsize(28),centersh+getsize(388),getsize(62)
+			}
+			color 0,24,128
+			boxf centersh+getsize(260),getsize(32),centersh+getsize(384),getsize(58)
+			pos centersh+getsize(270),getsize(36)
+			font lang.0.1,getsize(18),(keyovl.11=1)
+			color 127+(key.11!=-1)*128,(keyovl.11=0)*(127+(key.11!=-1)*128),(keyovl.11=0)*(127+(key.11!=-1)*128)
+			if(ckey=0):mes "*"+lang.3.64/*"START:"*/+getkeylabel(key.11)
+			font lang.0.1,getsize(18),(keyovl2.11=1)
+			color 127+(key2.11!=-1)*128,(keyovl2.11=0)*(127+(key2.11!=-1)*128),(keyovl2.11=0)*(127+(key2.11!=-1)*128)
+			if(ckey=1):mes lang.3.64/*"START:"*/+" "+getkeylabel(key2.11)
+			if(ckey>=2){
+				font lang.0.1,getsize(18)
+				color 255/(1+(joykey.(ckey-2).11=-1)),255/(1+(joykey.(ckey-2).11=-1)),255/(1+(joykey.(ckey-2).11=-1))
+				if(joykey.(ckey-2).11!=-1){
+					mes lang.3.64/*"START:"*/+" "+(joykey.(ckey-2).11/32+1)+lang.3.67/*"-"*/+(joykey.(ckey-2).11\32+1)
+				}else{
+					mes lang.3.64/*"START:"*/+lang.3.63/*"  ×"*/
+				}
+			}
+			if(selnow=11){
+				color 255,0,0
+				boxf centersh+getsize(256),getsize(78),centersh+getsize(388),getsize(112)
+			}
+			if(selnow=111){
+				color 255,255,0
+				boxf centersh+getsize(256),getsize(78),centersh+getsize(388),getsize(112)
+			}
+			color 0,24,128
+			boxf centersh+getsize(260),getsize(82),centersh+getsize(384),getsize(108)
+			pos centersh+getsize(270),getsize(86)
+			font lang.0.1,getsize(18),(keyovl.12=1)
+			color 127+(key.12!=-1)*128,(keyovl.12=0)*(127+(key.12!=-1)*128),(keyovl.12=0)*(127+(key.12!=-1)*128)
+			if(ckey=0):mes "*"+lang.3.65/*"BACK :"*/+getkeylabel(key.12)
+			font lang.0.1,getsize(18),(keyovl2.12=1)
+			color 127+(key2.12!=-1)*128,(keyovl2.12=0)*(127+(key2.12!=-1)*128),(keyovl2.12=0)*(127+(key2.12!=-1)*128)
+			if(ckey=1):mes lang.3.65/*"BACK :"*/+" "+getkeylabel(key2.12)
+			if(ckey>=2){
+				font lang.0.1,getsize(18)
+				color 255/(1+(joykey.(ckey-2).12=-1)),255/(1+(joykey.(ckey-2).12=-1)),255/(1+(joykey.(ckey-2).12=-1))
+				if(joykey.(ckey-2).12!=-1){
+					mes lang.3.65/*"BACK :"*/+" "+(joykey.(ckey-2).12/32+1)+lang.3.67/*"-"*/+(joykey.(ckey-2).12\32+1)
+				}else{
+					mes lang.3.65/*"BACK :"*/+lang.3.63/*"  ×"*/
+				}
+			}
+		//}
+		repeat 4
+			if(selnow=cnt){
+				color 255,0,0
+				boxf centersh+(95+cnt*120-5)*scrsize_h/480,getsize(145),centersh+(95+cnt*120+105)*scrsize_h/480,(150+105)*scrsize_h/480
+			}
+			if(selnow=100+cnt){
+				color 255,255,0
+				boxf centersh+(95+cnt*120-5)*scrsize_h/480,getsize(145),centersh+(95+cnt*120+105)*scrsize_h/480,(150+105)*scrsize_h/480
+			}
+			color 255,255,255
+			boxf centersh+(95+cnt*120)*scrsize_h/480,getsize(150),centersh+(95+cnt*120+100)*scrsize_h/480,(150+100)*scrsize_h/480
+			color 0,0,0
+			pos centersh+(82+cnt*120+42)*scrsize_h/480,getsize(195)
+			font lang.0.1,getsize(18),(keyovl.cnt=1)
+			color (key.cnt=-1)*128+(keyovl.cnt=1)*255,(keyovl.cnt=0)*(key.cnt=-1)*128,(keyovl.cnt=0)*(key.cnt=-1)*128
+			if(ckey=0):mes getkeylabel(key.cnt)
+			font lang.0.1,getsize(18),(keyovl2.cnt=1)
+			color (key2.cnt=-1)*128+(keyovl2.cnt=1)*255,(keyovl2.cnt=0)*(key2.cnt=-1)*128,(keyovl2.cnt=0)*(key2.cnt=-1)*128
+			if(ckey=1):mes getkeylabel(key2.cnt)
+			if(ckey>=2){
+				font lang.0.1,getsize(18)
+				color (joykey.(ckey-2).cnt=-1)*128+(joykeyovl.(ckey-2).cnt=1)*255,(joykeyovl.(ckey-2).cnt=0)*(joykey.(ckey-2).cnt=-1)*128,(joykeyovl.(ckey-2).cnt=0)*(joykey.(ckey-2).cnt=-1)*128
+				if(joykey.(ckey-2).cnt!=-1){
+					mes ""+(joykey.(ckey-2).cnt/32+1)+lang.3.67/*"-"*/+(joykey.(ckey-2).cnt\32+1)
+				}else{
+					mes lang.3.63/*"  ×"*/
+				}
+			}
+		loop
+		repeat 2
+			if(selnow=cnt+4){
+				color 255,0,0
+				boxf centersh+(185+cnt*150-5)*scrsize_h/480,getsize(285),centersh+(185+cnt*150+135)*scrsize_h/480,(295+60)*scrsize_h/480
+			}
+			if(selnow=100+cnt+4){
+				color 255,255,0
+				boxf centersh+(185+cnt*150-5)*scrsize_h/480,getsize(285),centersh+(185+cnt*150+135)*scrsize_h/480,(295+60)*scrsize_h/480
+			}
+			color 96,96,96
+			boxf centersh+(185+cnt*150)*scrsize_h/480,getsize(290),centersh+(185+cnt*150+130)*scrsize_h/480,(290+60)*scrsize_h/480
+			pos centersh+(230+cnt*150)*scrsize_h/480,getsize(314)
+			font lang.0.1,getsize(18),(keyovl.(cnt+4)=1)
+			color 127+(key.(cnt+4)!=-1)*128,(keyovl.(cnt+4)=0)*(127+(key.(cnt+4)!=-1)*128),(keyovl.(cnt+4)=0)*(127+(key.(cnt+4)!=-1)*128)
+			if(ckey=0):mes getkeylabel(key.(cnt+4))
+			font lang.0.1,getsize(18),(keyovl2.(cnt+4)=1)
+			color 127+(key2.(cnt+4)!=-1)*128,(keyovl2.(cnt+4)=0)*(127+(key2.(cnt+4)!=-1)*128),(keyovl2.(cnt+4)=0)*(127+(key2.(cnt+4)!=-1)*128)
+			if(ckey=1):mes getkeylabel(key2.(cnt+4))
+			if(ckey>=2){
+				font lang.0.1,getsize(18)
+				color 127+(joykey.(ckey-2).(cnt+4)!=-1)*128,(joykeyovl.(ckey-2).(cnt+4)=0)*(127+(joykey.(ckey-2).(cnt+4)!=-1)*128),(joykeyovl.(ckey-2).(cnt+4)=0)*(127+(joykey.(ckey-2).(cnt+4)!=-1)*128)
+				if(joykey.(ckey-2).(cnt+4)!=-1){
+					mes ""+(joykey.(ckey-2).(cnt+4)/32+1)+lang.3.67/*"-"*/+(joykey.(ckey-2).(cnt+4)\32+1)
+				}else{
+					mes lang.3.63/*"  ×"*/
+				}
+			}
+		loop
+		pos centersh+getsize(500),getsize(270)
+		gmode 2
+		gcopy 36,getsize(96)*((selnow=8)+(selnow=108)*2+(selnow=208)*3),0,getsize(96),getsize(96)
+		gmode 0
+		font lang.0.1,getsize(18)
+		pos centersh+getsize(526),getsize(370)
+		font lang.0.1,getsize(18),(keyovl.10=1)
+		color 127+(key.10!=-1)*128,(keyovl.10=0)*(127+(key.10!=-1)*128),(keyovl.10=0)*(127+(key.10!=-1)*128)
+		if(ckey=0):mes getkeylabel(key.10)
+		font lang.0.1,getsize(18),(keyovl2.10=1)
+		color 127+(key2.10!=-1)*128,(keyovl2.10=0)*(127+(key2.10!=-1)*128),(keyovl2.10=0)*(127+(key2.10!=-1)*128)
+		if(ckey=1):mes getkeylabel(key2.10)
+		if(ckey>=2){
+			font lang.0.1,getsize(18)
+			color 127+(joykey.(ckey-2).10!=-1)*128,(joykeyovl.(ckey-2).10=0)*(127+(joykey.(ckey-2).10!=-1)*128),(joykeyovl.(ckey-2).10=0)*(127+(joykey.(ckey-2).10!=-1)*128)
+			if(joykey.(ckey-2).10!=-1){
+				mes ""+(joykey.(ckey-2).10/32+1)+lang.3.67/*"-"*/+(joykey.(ckey-2).10\32+1)
+			}else{
+				mes lang.3.63/*"  ×"*/
+			}
+		}
+		color 0,0,0
+		//boxf 240*scrsize_h/480,getsize(390),getsize(410),getsize(420)
+		font lang.0.1,getsize(16)
+		color 255,255,255*(selnow!=9)
+		pos centersh+getsize(250),getsize(410)
+		if(ckey<=1){
+			stat1="<"
+			if(ckey=0):stat1=" "
+			mes stat1+lang.3.70/*"      KEYBOARD"*/+(ckey+1)+lang.3.72/*"      "*/+">"
+		}else{
+			stat1=">"
+			if(ckey=3):stat1=" "
+			mes "<"+lang.3.71/*"      GAMEPAD "*/+(ckey-1)+lang.3.72/*"      "*/+stat1
+		}
+		font lang.0.1,getsize(16)
+		color 255,255,255
+		pos 20*scrsize_w/640,getsize(456)
+		mes lang.3.93
+	}
+	keystat5=getesckey() ; Esc
+	if((keystat5=1)&(keystat5p=0)&(ginfo2()=0)){
+		if(pagenow=-1){
+			stat1=0
+			foreach vhstype
+				stat1+=vhstype.cnt
+			loop
+			if(stat1=0):vhstype=1,1,0,0,0
+			gsel 0
+			pos 0,0
+			gcopy 28,0,0,scrsize_w,scrsize_h
+			statep=st_option
+			state=st_standby
+			dim bufdel,1
+			bufdel=36,132,136,137,138,139,141
+			foreach bufdel
+				buffer bufdel.cnt,1,1
+			loop
+			alDeleteImage 81
+			standbyselp=1
+			stateinit=1
+			gosub *saveconfig
+			if(fullscr=1){
+				stat1=fullscrsize.0
+				stat2=fullscrsize.1
+			}else{
+				stat1=windowsize.0
+				stat2=windowsize.1
+			}
+			if((fullscr!=fullscrp)|(scrsize_w!=stat1)|(scrsize_h!=stat2)|(lowquality!=lowqualityp)){
+				if(fullscr=1){
+					scrsize_w=fullscrsize.0
+					scrsize_h=fullscrsize.1
+					chgdisp 1,scrsize_w,scrsize_h
+					bgscr 0,scrsize_w,scrsize_h,0,0,0
+				}else{
+					if(fullscrp=1):chgdisp 1,disp_x,disp_y
+					scrsize_w=windowsize.0
+					scrsize_h=windowsize.1
+					screen 0,scrsize_w,scrsize_h
+				}
+				gosub *refreshgetsize
+				imgrefresh=1
+				dir_t=dir_cur
+				chdir dir_default
+				dirlist buf,"cache",5
+				if(buf!=""):{
+					chdir "./cache"
+					dirlist stat1,"*",1
+					notesel stat1
+					repeat notemax
+						noteget stat2,cnt
+						DeleteFile dir_default+"\\cache\\"+stat2
+					loop
+					dirlist buf,"bg",5
+					if(buf!=""){
+						chdir "./bg"
+						dirlist stat1,"*",1
+						notesel stat1
+						repeat notemax
+							noteget stat2,cnt
+							DeleteFile dir_default+"\\cache\\bg\\"+stat2
+						loop
+						chdir ".."
+						RemoveDirectory dir_default+"\\cache\\bg"
+					}
+					dirlist buf,"gate",5
+					if(buf!=""){
+						chdir "./gate"
+						dirlist stat1,"*",1
+						notesel stat1
+						repeat notemax
+							noteget stat2,cnt
+							DeleteFile dir_default+"\\cache\\gate\\"+stat2
+						loop
+						chdir ".."
+						RemoveDirectory dir_default+"\\cache\\gate"
+					}
+					chdir ".."
+					RemoveDirectory dir_default+"\\cache"
+				}
+				chdir dir_default
+				dirlist buf,"cache",5
+				while (buf="")
+					chdir dir_default
+					mkdir "cache"
+					wait 100
+					dirlist buf,"cache",5
+				wend
+				chdir dir_default+"\\cache"
+				dirlist buf,"gate",5
+				if(buf=""):mkdir "gate"
+				dirlist buf,"bg",5
+				if(buf=""):mkdir "bg"
+				chdir "gate"
+				dirlist buf,"jacket",5
+				if(buf=""):mkdir "jacket"
+				chdir dir_t
+			}
+			BASS_ChannelSlideAttribute optionbgmid,2,0.0,500
+			blackout 500
+		}else{
+			selnow=pagenow
+			pagenow=-1
+		}
+	}
+	keystat5p=keystat5
+	getkey keystat0,13 ; Enter
+	keystat0=keystat0|(getjoykeystat(11)&(pagenow!=3))
+	if((keystat0=1)&(keyp=0)&(ginfo2()=0)){
+		if(pagenow=-1){
+			pagenow=selnow
+			selnow=0
+			ckey=0
+		}else:if(pagenow=3){
+			if(selnow!=9){
+				if(selnow>=200){
+					selnow-=200
+				}else:if(selnow>=100){
+					selnow-=100
+				}else{
+					selnow+=100
+				}
+			}
+		}
+	}
+	if(keystat0+keystat1+keystat2+keystat3+keystat4+keychstat>0){
+		keyp=1
+	}else{
+		keyp=0
+	}
+	keshuoff=0
+	if((timenow<100)&(timenow>=0)){
+		gsel 0
+		gmode 3,,,(100-timenow)*256/100
+		color 0,0,0
+		gsquare -1,sx_a,sy_a
+	}
+	return
+
+*drawconfigitem
+	alCreateImage 3,getsize(300),getsize(24)
+	alCopyScreenToImage 136,3,0,0,getsize(300),getsize(24),0,getsize(24)*stat2
+	alColor 255,255,255
+	alFont lang.0.0,getsize(15)
+	alDrawText str(stat1),0,0,getsize(300),getsize(24),1,1
+	alCopyImageToScreen 3,0,centersh+stat3,stat4
+	return
+
+#defcfunc getkeylabel int num
+	keylabel=getkeylabel2(num)
+	repeat max(0,(5-strlen(keylabel))/2)
+		keylabel=" "+keylabel+" "
+	loop
+	repeat max(0,5-strlen(keylabel))
+		keylabel=" "+keylabel
+	loop
+	return keylabel
+
+#defcfunc getkeylabel2 int num
+	switch num
+	case -1
+		return lang.3.61
+		swbreak
+	case 28
+		return "変換"
+		swbreak
+	case 29
+		return "無変換"
+		swbreak
+	case 37
+		return "←"
+		swbreak
+	case 38
+		return "↑"
+		swbreak
+	case 39
+		return "→"
+		swbreak
+	case 40
+		return "↓"
+		swbreak
+	case 27
+		return "Esc"
+		swbreak
+	case 32
+		return "Space"
+		swbreak
+	case 8
+		return "BS"
+		swbreak
+	case 9
+		return "Tab"
+		swbreak
+	case 13
+		return "Enter"
+		swbreak
+	case 16
+		return "Shift"
+		swbreak
+	case 17
+		return "Ctrl"
+		swbreak
+	case 19
+		return "Pause"
+		swbreak
+	case 33
+		return "PgUp"
+		swbreak
+	case 34
+		return "PgDn"
+		swbreak
+	case 35
+		return "End"
+		swbreak
+	case 36
+		return "Home"
+		swbreak
+	case 45
+		return "Insert"
+		swbreak
+	case 46
+		return "Del"
+		swbreak
+	case 91
+		return "Win"
+		swbreak
+	case 93
+		return "Menu"
+		swbreak
+	case 112
+		return "F1"
+		swbreak
+	case 113
+		return "F2"
+		swbreak
+	case 114
+		return "F3"
+		swbreak
+	case 115
+		return "F4"
+		swbreak
+	case 116
+		return "F5"
+		swbreak
+	case 117
+		return "F6"
+		swbreak
+	case 118
+		return "F7"
+		swbreak
+	case 119
+		return "F8"
+		swbreak
+	case 120
+		return "F9"
+		swbreak
+	case 121
+		return "F10"
+		swbreak
+	case 122
+		return "F11"
+		swbreak
+	case 123
+		return "F12"
+		swbreak
+	case 145
+		return "ScrLk"
+		swbreak
+	case 186
+		return ":"
+		swbreak
+	case 187
+		return ";"
+		swbreak
+	case 188
+		return ","
+		swbreak
+	case 189
+		return "-"
+		swbreak
+	case 190
+		return "."
+		swbreak
+	case 191
+		return "/"
+		swbreak
+	case 192
+		return "@"
+		swbreak
+	case 219
+		return "["
+		swbreak
+	case 220
+		return "\\"
+		swbreak
+	case 221
+		return "]"
+		swbreak
+	case 222
+		return "^"
+		swbreak
+	case 226
+		return "＼"
+		swbreak
+	case 229
+		return "半/全"
+		swbreak
+	case 240
+		return "CapsLock"
+		swbreak
+	default
+		sdim char,1
+		if((num>='A')&(num<='Z')){
+			poke char,0,num
+			return char
+		}
+		if((num>='0')&(num<='9')){
+			poke char,0,num
+			return char
+		}
+		if((num>=96)&(num<=106)){
+			return "Num"+(num-96)
+		}
+		return "("+num+")"
+		swbreak
+	swend

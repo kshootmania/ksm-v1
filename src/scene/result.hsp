@@ -1,0 +1,871 @@
+#deffunc on_update_result
+	keshuoff=0
+	timestatestart=d3timer()
+	ir_popup_init
+	if(cmdline_from>0):end
+	if((auto=1)|(adjmode=1)){
+		if((iscourse=1)&(autodemo>=0)){
+			coursenow++
+			coursetotalscore+=totalscore
+			coursecritical+=critical
+			coursenear+=near
+			courseerrorn+=errorn
+			if((coursenow>=courselistnum)|(courseendfl=1)|(isendbyesckey=1)){
+				refreshsonglistoff=1
+				state=st_select
+				courseendfl=0
+			}else{
+				state=st_playing
+			}
+		}else{
+			autodemo=0
+			refreshsonglistoff=1
+			state=st_select
+		}
+		gsel 0
+		gmode 0
+		color 255,255,255
+		pos 0,0
+		gcopy 29,0,0,scrsize_w,scrsize_h
+		alCopyImageToScreen IMG_LOADING,0,scrsize_w-getsize(208),getsize(442)
+		redraw 1
+	}else{
+		dir_tmp=dir_cur
+		alSelectImage 3
+		alCreateImage 109,alGetWidth(),alGetHeight()
+		alCopyImageToImage 3,109
+		chdir dir_default+"\\imgs"
+		alDeleteImage 3
+		alCreateImageByFile 3,"result.png"
+		alCreateImage 31,556*450*2*scrsize_h/480/1532,700*450*2*scrsize_h/480/1532
+		alStretchImageToImage 3,31,0,0,556,700,0,0,556*450*2*scrsize_h/480/1532,700*450*2*scrsize_h/480/1532
+		alDeleteImage 3
+		alCreateImage 32,556*450*2*scrsize_h/480/1532,700*450*2*scrsize_h/480/1532 // 作業用
+		alCreateImageByFile 3,"result_grade.png"
+		alCreateImage 33,100*450*2*scrsize_h/480/1532,100*450*2*scrsize_h/480/1532*7
+		alStretchImageToImage 3,33,0,0,100,100*7,0,0,100*450*2*scrsize_h/480/1532,100*450*2*scrsize_h/480/1532*7
+		alDeleteImage 3
+		// Image35は作業用
+		alCreateImageByFile 3,"result_newrecord.png"
+		alCreateImage 36,420*450*2*scrsize_h/480/1532,90*450*2*scrsize_h/480/1532
+		alStretchImageToImage 3,36,0,0,420,90,0,0,420*450*2*scrsize_h/480/1532,90*450*2*scrsize_h/480/1532
+		alDeleteImage 3
+		alCreateImageByFile 3,"result_top.png"
+		alCreateImage 39,600*450*2*scrsize_h/480/1532,50*450*2*scrsize_h/480/1532*20
+		alStretchImageToImage 3,39,0,0,600,50*20,0,0,600*450*2*scrsize_h/480/1532,50*450*2*scrsize_h/480/1532*20
+		alDeleteImage 3
+		// Image37は作業用(ハイスコア更新画面用)
+		// Image64は作業用(BPM表示用)
+		alCreateImageByFile 3,"result_unlocked.png"
+		alCreateImage 95,getsize(300),getsize(169)
+		alStretchImageToImage 3,95,0,0,600,338,0,0,getsize(300),getsize(169)
+		alDeleteImage 3
+		chdir dir_tmp
+		repeat
+			redraw 0
+			t=d3timer()
+			gsel 0
+			gmode 0
+			color 0,0,0
+			pos 0,0
+			boxf
+			redraw 1
+			if(t-timestatestart>200):break
+			gosub *volactive
+			await 7
+		loop
+		ddim dstat,1
+		shortnum=0
+		critical=0
+		near=0
+		errorn=0
+
+		// v1.68cで追加
+		// ※注意: 昔の実装でのshort/longはBT/FXを指しているのに対し(例:shortmodeなど), これらは判定上のshort/longを指している
+		critical_short=0
+		critical_long=0
+		near_short=0
+		errorn_short=0
+		errorn_long=0
+
+		//totalscore=0
+		stat3=0
+		tochu=0
+		repeat notenum
+			if(note.cnt.2=0){
+				if(((note.cnt.0<=3)&(shortmode!=mode_off))|((note.cnt.0>3)&(longmode!=mode_off))){
+					if(noteresult.cnt<=1):errorn++:errorn_short++
+					if(noteresult.cnt=2):near++:near_short++
+					if(noteresult.cnt=3):critical++:critical_short++
+					if(note.cnt.0<=3){
+						shortnum++
+					}else{
+						lshnum++
+					}
+					if(noteresult.cnt=0):tochu=1
+				}
+			}
+		loop
+		if(tochu=0){
+			tochu_esc=0
+		}
+		if(shortnum=0){
+			nscore=0
+		}else:nscore=50*nscore/shortnum
+		repeat shljnum
+			if(shlj.cnt.3=1){
+				//totalscore+=2
+				critical++
+				critical_long++
+			}else{
+				errorn++
+				errorn_long++
+			}
+			if(shlj.cnt.3=0):tochu=1
+		loop
+		repeat longjnum
+			if(longj.cnt.3=1){
+				//totalscore+=2
+				critical++
+				critical_long++
+			}else{
+				errorn++
+				errorn_long++
+			}
+			if(longj.cnt.3=0):tochu=1
+		loop
+		repeat analoganjnum
+			if(analoganj.cnt.2=1){
+				//totalscore+=2
+				critical++
+				critical_short++
+			}else{
+				errorn++
+				errorn_short++
+			}
+			if(analoganj.cnt.2=0):tochu=1
+		loop
+		repeat analogjnum
+			if(analogj.cnt.2=1){
+				//totalscore+=2
+				critical++
+				critical_long++
+			}else{
+				errorn++
+				errorn_long++
+			}
+			if(analogj.cnt.2=0):tochu=1
+		loop
+		if(courseend!=1){
+			alCreateImage 32,556*450*2*scrsize_h/480/1532,700*450*2*scrsize_h/480/1532
+			alCopyImageToImage 31,32
+			// 曲名・アーティスト名の表示
+			alSelectImage 32
+			alColor 255,255,255
+			if(csongtitleimg=""){
+				alFont lang.0.0,18
+				alDrawText_CalcRect_ tsize,csongtitle
+				if(tsize.2/9>42){
+					alFont lang.0.0,getsize(11)
+				}else:if(tsize.2/9>36){
+					alFont lang.0.0,getsize(12)
+				}else:if(tsize.2/9>32){
+					alFont lang.0.0,getsize(13)
+				}else:if(tsize.2/9>28){
+					alFont lang.0.0,getsize(14)
+				}else{
+					alFont lang.0.0,getsize(16)
+				}
+				alDrawText csongtitle, 132*450*scrsize_h/480/1532, 24*450*scrsize_h/480/1532, 950*450*scrsize_h/480/1532, 70*450*scrsize_h/480/1532, 1, 1
+			}else{
+				alCreateImageByFile 85,dir_default+"\\songs\\"+csongpath+"\\"+csongtitleimg
+				alCopyModeColorMatrix colmatrix
+				alSelectImage 85
+				alStretchImageToImage 85,32,0,0,alGetWidth(),alGetHeight(),(132+125+340)*450*scrsize_h/480/1532-alGetWidth()*(66*450*scrsize_h/480/1532)/alGetHeight()/2, 26*450*scrsize_h/480/1532, alGetWidth()*(66*450*scrsize_h/480/1532)/alGetHeight(), 66*450*scrsize_h/480/1532
+				alSelectImage 32
+				alResetCopyMode
+			}
+			if(csongartistimg=""){
+				alFont lang.0.0,getsize(13)
+				alDrawText csongartist, 132*450*scrsize_h/480/1532, 96*450*scrsize_h/480/1532, 950*450*scrsize_h/480/1532, 60*450*scrsize_h/480/1532, 1, 1
+			}else{
+				alCreateImageByFile 85,dir_default+"\\songs\\"+csongpath+"\\"+csongartistimg
+				alCopyModeColorMatrix colmatrix
+				alSelectImage 85
+				alStretchImageToImage 85,32,0,0,alGetWidth(),alGetHeight(),(132+125+340)*450*scrsize_h/480/1532-alGetWidth()*(56*450*scrsize_h/480/1532)/alGetHeight()/2, 98*450*scrsize_h/480/1532, alGetWidth()*(56*450*scrsize_h/480/1532)/alGetHeight(), 56*450*scrsize_h/480/1532
+				alSelectImage 32
+				alResetCopyMode
+			}
+			// ジャケット画像の表示
+			if(csongjacket!=""){
+				alSelectImage 35
+				alStretchImageToImage 35,32,0,0,alGetWidth(),alGetHeight(),180*450*2*scrsize_h/480/1532,85*450*2*scrsize_h/480/1532,246*450*2*scrsize_h/480/1532+1,246*450*2*scrsize_h/480/1532+1
+			}
+			// 難易度の表示
+			alCopyImageToImage IMG_RESULT_DIFFICULTY,32,94*450*2*scrsize_h/480/1532,366*450*2*scrsize_h/480/1532,getsize(42),getsize(12),0,getsize(12)*csongdifficulty
+			// レベルの表示
+			stat1=csonglevel-1
+			if(stat1>19):stat1=19
+			if(stat1<0):stat1=0
+			alCopyImageToImage 58,32,210*450*2*scrsize_h/480/1532,362*450*2*scrsize_h/480/1532,75*450*scrsize_h/480/1532,60*450*scrsize_h/480/1532,0,60*450*scrsize_h/480/1532*stat1
+			// GRADEの表示
+			if((effratetype<=0)&(iscourse=0)){
+				totalscore2=totalscore*9/10+(gauge*100/gaugemax)*10000
+			}else{
+				totalscore2=totalscore*9/10+(ngauge*100/gaugemax)*10000
+			}
+			stat1_=(totalscore2>=7000000)+(totalscore2>=8000000)+(totalscore2>=8900000)+(totalscore2>=9400000)+(totalscore2>=9800000)
+			if(tochu=1):stat1_=0
+			alCopyImageToImage 33,32,430*450*2*scrsize_h/480/1532,286*450*2*scrsize_h/480/1532,100*450*2*scrsize_h/480/1532,100*450*2*scrsize_h/480/1532,0,100*450*2*scrsize_h/480/1532*stat1_
+			timestatestart=d3timer()
+			// パーセンテージ表示
+			if((effratetype<=0)&(iscourse=0)){
+				stat2=100*gauge/gaugemax
+			}else{
+				if(gauge>=0){
+					stat2=gauge/1000
+				}else{
+					stat2=0
+				}
+			}
+			stat3=0
+			repeat 3
+				stat1=stat2\(powf(10,3-cnt))/powf(10,2-cnt)
+				if((stat1!=0)|(stat3=1)|(cnt=2)):alStretchImageToImage 10,32,0,120*450*scrsize_h/480/1532*stat1,136*450*scrsize_h/480/1532,120*450*scrsize_h/480/1532,getsize(8)*cnt,446*450*2*scrsize_h/480/1532,getsize(7),getsize(8)
+				if(stat1!=0):stat3=1
+			loop
+			// トータルスコアの表示
+			stat1=""
+			stat2=str(totalscore)
+			repeat 8-strlen(stat2)
+				stat1+="0"
+			loop
+			stat2=stat1+stat2
+			repeat 8
+				stat1=int(strmid(stat2,cnt,1))
+				alCopyImageToImage 34,32,(100+50*cnt)*450*2*scrsize_h/480/1532,400*450*2*scrsize_h/480/1532,64*450*2*scrsize_h/480/1532,64*450*2*scrsize_h/480/1532,0,64*450*2*scrsize_h/480/1532*stat1
+			loop
+			// 最高CHAIN数の表示
+			stat1=""
+			stat2=str(chainmax_song)
+			if(strlen(stat2)<4){
+				repeat 4-strlen(stat2)
+					stat1+="0"
+				loop
+			}
+			stat2=stat1+stat2
+			repeat strlen(stat2)
+				alStretchImageToImage 13,32,0,120*450*scrsize_h/480/1532*int(strmid(stat2,strlen(stat2)-cnt-1,1)),136*450*scrsize_h/480/1532,120*450*scrsize_h/480/1532,500*450*2*scrsize_h/480/1532-27*450*2*scrsize_h/480/1532*cnt,472*450*2*scrsize_h/480/1532,20*450*2*scrsize_h/480/1532,20*450*2*scrsize_h/480/1532
+			loop
+			// CRITICAL数の表示
+			dim scorear,3
+			scorear=critical,near,errorn
+			foreach scorear
+				cnt2=cnt
+				stat1=""
+				stat2=str(scorear.cnt)
+				if(strlen(stat2)<4){
+					repeat 4-strlen(stat2)
+						stat1+="0"
+					loop
+				}
+				stat2=stat1+stat2
+				repeat strlen(stat2)
+					alStretchImageToImage 10,32,0,120*450*scrsize_h/480/1532*int(strmid(stat2,strlen(stat2)-cnt-1,1)),136*450*scrsize_h/480/1532,120*450*scrsize_h/480/1532,448*450*2*scrsize_h/480/1532-30*450*2*scrsize_h/480/1532*cnt,(532+54*cnt2)*450*2*scrsize_h/480/1532,26*450*2*scrsize_h/480/1532,24*450*2*scrsize_h/480/1532
+				loop
+			loop
+			stat5=0
+			stat6=0
+			if((effratetype<=0)&(iscourse=0)){
+				if((gauge*100/gaugemax)>=70){
+					stat6=1
+				}
+				if(errorn=0){
+					stat6=2
+				}
+				if(totalscore=10000000){
+					stat6=3
+				}
+			}else{
+				if((gauge/1000)>0){
+					stat6=1
+				}
+				if(errorn=0){
+					stat6=2
+				}
+				if(totalscore=10000000){
+					stat6=3
+				}
+			}
+			if(tochu=1){
+				stat6=0
+			}
+			if(iscourse=1){
+				course_sc.coursenow=totalscore
+				course_md.coursenow=stat6
+				course_gr.coursenow=stat1_
+			}
+			// IR用
+			switch stat6
+			case 0:
+				medal="failed"
+				swbreak
+			case 1:
+				if(effratetype=-1){
+					medal="easy_cleared"
+				}else:if(effratetype=0){
+					medal="cleared"
+				}else:if(effratetype=1){
+					medal="hard_cleared"
+				}
+				swbreak
+			case 2:
+				if(effratetype=-1){
+					medal="easy_fullcombo"
+				}else{
+					medal="fullcombo"
+				}
+				swbreak
+			case 3:
+				if(effratetype=-1){
+					medal="easy_perfect"
+				}else{
+					medal="perfect"
+				}
+				swbreak
+			swend
+			if(iscourse=1){
+				medal="course_play"
+			}
+			diff=0
+			if((auto=0)&(adjmode=0)&(iscmdline=0)){
+				if((effratetype<=0)&(iscourse=0)){
+					gpercent=100*gauge/gaugemax
+				}else{
+					if(gauge>=0){
+						gpercent=gauge/1000
+					}else{
+						gpercent=0
+					}
+				}
+				buf=""
+				stat2="normal"
+				stat2_2="normal"
+				if(effratetype=1):stat2="hard"
+				if(effratetype=-1):stat2="easy"
+				stat2_1="normal"
+				if(turn=1):stat2_1="mirror"
+				if(turn=2):stat2_1="random"
+				if(turn=3):stat2_1="s-random"
+				if(turn=4):stat2_1="h-random"
+				stat3_0="on"
+				if(shortmode=1):stat3_0="off"
+				if(shortmode=2):stat3_0="auto"
+				if(shortmode=3):stat3_0="hide"
+				stat3="on"
+				if(longmode=1):stat3="off"
+				if(longmode=2):stat3="auto"
+				if(longmode=3):stat3="hide"
+				stat4="on"
+				if(analogmode=1):stat4="off"
+				if(analogmode=2):stat4="auto"
+				if(analogmode=3):stat4="hide"
+				stat5_=stat2+","+stat2_1+","+stat2_2+","+stat3_0+","+stat3+","+stat4
+				stat5_2=",,,,,"
+				if(effratetype=1):stat5_2="normal"+","+stat2_1+","+stat2_2+","+stat3_0+","+stat3+","+stat4
+				if(effratetype=0):stat5_2="hard"+","+stat2_1+","+stat2_2+","+stat3_0+","+stat3+","+stat4
+				exist dir_default+"\\score\\"+players.cplayer+"\\"+csongdir+"\\"+getpath(cnotesfile,9)+".ksc"
+				f=1
+				_stat6=stat6
+				if(iscourse=1){
+					if(_stat6<2):_stat6=0
+				}
+				if(strsize>0){
+					notesel stat1_2
+					noteload dir_default+"\\score\\"+players.cplayer+"\\"+csongdir+"\\"+getpath(cnotesfile,9)+".ksc"
+					cnt3=cnt
+					totalscorep=0
+					repeat notemax
+						noteget stat1,cnt
+						split stat1,"=",scorestat
+						scorestat.1+=",,,,,,,,"
+						if(scorestat.0=stat5_){
+							sdim scorestat2,16,9
+							split scorestat.1,",",scorestat2
+							totalscorep=max(int(scorestat2.0),totalscorep)
+							if(int(scorestat2.0)<totalscore){
+								scorestat2.0=""+totalscore
+							}
+							playcount=1
+							clearcount=(int(scorestat2.1)>=1)
+							fullcombocount=(int(scorestat2.1)>=2)
+							perfectcount=(int(scorestat2.1)>=3)
+							if(int(scorestat2.1)<_stat6){
+								scorestat2.1=""+_stat6
+							}
+							if(int(scorestat2.2)<stat1_){
+								scorestat2.2=""+stat1_
+							}
+							if((int(scorestat2.3)<gpercent)&(tochu=0)){
+								scorestat2.3=""+gpercent
+							}
+							if(int(scorestat2.4)<chainmax_song){
+								scorestat2.4=""+chainmax_song
+							}
+							if(length(scorestat2)>=6):playcount=max(int(scorestat2.5),playcount)
+							playcount++
+							if(length(scorestat2)>=7):clearcount=max(int(scorestat2.6),clearcount)
+							if(_stat6>=1):clearcount++
+							if(length(scorestat2)>=8):fullcombocount=max(int(scorestat2.7),fullcombocount)
+							if(_stat6>=2):fullcombocount++
+							if(length(scorestat2)>=9):perfectcount=max(int(scorestat2.8),perfectcount)
+							if(_stat6>=3):perfectcount++
+							buf+=stat5_+"="+scorestat2.0+","+scorestat2.1+","+scorestat2.2+","+scorestat2.3+","+scorestat2.4+","+playcount+","+clearcount+","+fullcombocount+","+perfectcount+"\n"
+							f=0
+						}else:if(scorestat.0=stat5_2){
+							sdim scorestat2,16,9
+							split scorestat.1,",",scorestat2
+							totalscorep=max(int(scorestat2.0),totalscorep)
+							buf+=stat1+"\n"
+						}else:buf+=stat1+"\n"
+					loop
+					if(totalscore>totalscorep){
+						diff=totalscore-totalscorep
+					}else:diff=0
+				}else:diff=totalscore
+				if(f=1){
+					buf+=stat5_+"="+totalscore+","+_stat6+","+stat1_+","+gpercent*(tochu=0)+","+chainmax+",1,"+(_stat6>=1)+","+(_stat6>=2)+","+(_stat6>=3)+"\n"
+				}
+				dir_stat1=dir_cur
+				chdir dir_default+"\\score"
+				dirlist stat1,"*",5
+				notesel stat1
+				f=1
+				repeat notemax
+					noteget stat2,cnt
+					if(stat2=players.cplayer){
+						f=0
+						break
+					}
+				loop
+				if(f=1):mkdir players.cplayer
+				sdim sndirstat,1,1
+				split csongdir,"\\",sndirstat
+				chdir dir_default+"\\score\\"+players.cplayer
+				dirlist filelistdir,sndirstat.0,5
+				if(stat=0):mkdir sndirstat.0
+				chdir dir_default+"\\score\\"+players.cplayer+"\\"+sndirstat.0
+				if(length(sndirstat)>=2){
+					dirlist filelistdir,sndirstat.1,5
+					if(stat=0):mkdir sndirstat.1
+					chdir sndirstat.1
+					if(length(sndirstat)>=3){
+						dirlist filelistdir,sndirstat.2,5
+						if(stat=0):mkdir sndirstat.2
+					}
+				}
+				notesel buf
+				notesave dir_default+"\\score\\"+players.cplayer+"\\"+csongdir+"\\"+getpath(cnotesfile,9)+".ksc"
+				chdir dir_stat1
+				completedlist=""
+				if((shortmode+longmode+analogmode=0)&(turn=0)&(adjmode=0)&(auto=0)&(iscourse=0)){
+					// Note: ソースコード公開用に条件解禁処理を削除
+				}
+			}
+			timestatestart=d3timer()
+			diffstartt=timestatestart
+			// 解禁条件達成の通知
+			if(completedlist!=""){
+				alCreateImage 96,getsize(300),getsize(169)
+				alCopyImageToImage 95,96
+				alSelectImage 96
+				alColor 0,0,0
+				alFont lang.4.10,getsize(19)
+				alDrawText lang.2.70/*"インプット条件を達成！"*/+"\n"+completedlist,getsize(20),getsize(20),(300-20*2)*scrsize_h/480,(169-20*2)*scrsize_h/480,1,1
+				diffstartt=timestatestart+2500
+			}
+			compendt=timestatestart+2500
+			// ハイスコア更新の通知
+			if(diff>0){
+				alCreateImage 37,420*450*2*scrsize_h/480/1532,90*450*2*scrsize_h/480/1532
+				alCopyImageToImage 36,37
+				stat1=str(diff)
+				stat2=""
+				repeat 8-strlen(stat1)
+					stat2+="0"
+				loop
+				stat2+=stat1
+				repeat 8
+					stat1=int(strmid(stat2,cnt,1))
+					alStretchImageToImage 10,37,0,120*450*scrsize_h/480/1532*stat1,136*450*scrsize_h/480/1532,120*450*scrsize_h/480/1532,83*450*2*scrsize_h/480/1532+38*450*2*scrsize_h/480/1532*cnt,38*450*2*scrsize_h/480/1532,30*450*2*scrsize_h/480/1532,30*450*2*scrsize_h/480/1532
+				loop
+			}
+			diffendt=timestatestart+3000+2000*(completedlist!="")
+			stat12p=1
+			BASS_ChannelSetPosition_ms resultbgmid,0
+			BASS_ChannelSetAttribute resultbgmid,2,double(mastervol)/100
+			BASS_ChannelPlay resultbgmid
+		}
+		// Twitter連携
+		click_keyp=1
+		tweet_keyp=1
+		tweetfl=0
+		if(iscourse=1){
+			if(is_course_utf8=1){
+				_ccoursetitle=strmid(ccoursetitle,3,256)
+			}else{
+				_ccoursetitle=utf8enc(ccoursetitle)
+			}
+		}else:_ccoursetitle=""
+		if(isutf8=1){
+			_csongtitle=strmid(csongtitle,3,256)
+			_csongartist=strmid(csongartist,3,256)
+		}else{
+			_csongtitle=utf8enc(csongtitle)
+			_csongartist=utf8enc(csongartist)
+		}
+		if(stat6=0){
+			if(effratetype=0){
+				stat1="FAILED..."
+			}else:if(effratetype=1){
+				stat1="HARD FAILED..."
+			}else:if(effratetype=-1){
+				stat1="EASY FAILED..."
+			}
+		}else:if(stat6=1){
+			if(effratetype=0){
+				stat1="CLEARED!"
+			}else:if(effratetype=1){
+				stat1="HARD CLEAR!"
+			}else:if(effratetype=-1){
+				stat1="EASY CLEAR!"
+			}
+		}else:if(stat6=2){
+			if(effratetype=-1){
+				stat1="EASY FULL COMBO!"
+			}else{
+				stat1="FULL COMBO!"
+			}
+		}else:if(stat6=3){
+			if(effratetype=-1){
+				stat1="EASY PERFECT!"
+			}else{
+				stat1="PERFECT!"
+			}
+		}
+		if(shortmode+longmode+analogmode>0){
+			stat1="ASSIST "+stat1
+		}
+		stat3=""
+		stat4=str(totalscore)
+		repeat 8-strlen(stat4)
+			stat3+="0"
+		loop
+		if(csongdifficulty=0){
+			stat2="LT"
+		}else:if(csongdifficulty=1){
+			stat2="CH"
+		}else:if(csongdifficulty=2){
+			stat2="EX"
+		}else{
+			stat2="IN"
+		}
+		if(iscourse=1){
+			_tweet_text=_ccoursetitle+"\n"
+		}else:_tweet_text=""
+		_tweet_text+=_csongtitle+" / "+_csongartist+"\n["+stat2+"] Lv"+csonglevel+" "+stat1+" (SCORE: "+stat3+stat4+")\n"+dirtweetopt
+		if(dirtweetopt!=""):_tweet_text+=" "
+		_tweet_text+="#kshootmania\n"
+		sdim tweet_text,140*3
+		tweet_text=_tweet_text
+		tweet_notifyt=-50000
+		tweet_notifytype=0
+		
+		// IR送信
+		ir_regchart_wait=0
+		if((auto=0)&(adjmode=0)&(iscmdline=0)&(shortmode+longmode+analogmode=0)&(tochu_esc=0)){
+			is_chart_registered=-1 // -1:不明, 0:未登録, 1:登録済
+			if(ksm_id){
+				if(no_hstype_c=1){
+					ir_send_score
+					is_chart_registered=stat
+					if(is_chart_registered=0){
+						ir_regchart_wait=1
+						ir_popup_set_text "Unregistered chart\nHold FX-L+R to register this chart", 5000, 0
+					}else{
+						ir_popup_set_text bom+output@ksm_ir, 5000, 0
+					}
+				}else{
+					ir_popup_set_text "Score was not sent\n(HiSPEED type \"C\" was used)", 5000, 0
+				}
+			}
+		}
+		hold_fxlr_time=0
+		tp=d3timer()-16
+		
+		repeat
+			gsel 0
+			redraw 0
+			gosub *getjoystat
+			t=d3timer()
+			if(courseend!=1){
+				gsel 0
+				gmode 0
+				color 0,0,0
+				pos 0,0
+				gcopy 29,0,0,scrsize_w,scrsize_h
+			}
+			mxy=ginfo_mx,ginfo_my
+			ScreenToClient hwnd, varptr(mxy)
+			if(t-timestatestart>=768){
+				getkey tweet_key,122 // F11
+				tweet_key=tweet_key|getjoykeystat(13)
+			}else:tweet_key=0
+			getkey click_key,1
+			if((t-timestatestart>=768)&(mxy.0<scrsize_w)&(mousex>scrsize_w-getsize(90))&(mxy.1>=0)&(mousey<getsize(24))&(tweetfl=0)&(click_key=1)&(click_keyp=0)&(ginfo2()=0)){
+				tweet_key=1
+			}
+			click_keyp=click_key
+			if((tweet_key=1)&(tweet_keyp=0)&(tweetfl=0)){
+				diffstartt=t-1000
+				diffendt=max(diffendt,t+5000)
+				tweetfl=1
+			}else:tweet_key=0
+			getkey stat1,13
+			stat1=stat1|getjoykeystat(11)
+			stat2=getesckey()
+			if((courseend=1)|((stat1=1)|(stat2=1))&(ginfo2()=0)&(stat12p=0)){
+				if((completedlist!="")&(t<compendt)){
+					compendt=t
+					diffstartt=t
+				}else:if((diff>0)&(t<diffendt)){
+					diffendt=t
+				}else{
+					BASS_ChannelSlideAttribute resultbgmid,2,0.0,100
+					if(iscourse=1){
+						coursenow++
+						coursetotalscore+=totalscore
+						coursecritical+=critical
+						coursenear+=near
+						courseerrorn+=errorn
+						//if(stat6=0):courseend=1
+						if((coursenow>=courselistnum)|(stat6=0)){
+							refreshsonglistoff=1
+							//vload_start dir_default+"\\cache\\cache.tmp"
+							//vload_get minfo
+							//vload_get minfostr
+							//vload_end
+							state=st_courseresult
+						}else{
+							state=st_playing
+						}
+					}else{
+						refreshsonglistoff=1
+						//vload_start dir_default+"\\cache\\cache.tmp"
+						//vload_get minfo
+						//vload_get minfostr
+						//vload_end
+						state=st_select
+					}
+					if(courseend!=1){
+						gsel 0
+						//color 255,255,255
+						//font lang.0.1,getsize(18)
+						//pos scrsize_w-80*scrsize_w/480,getsize(456)
+						//mes lang.2.0//"LOADING..."
+						alCopyImageToScreen IMG_LOADING,0,scrsize_w-getsize(208),getsize(442)
+						redraw 1
+					}
+					break
+				}
+			}
+			stat12p=((stat1=1)|(stat2=1))
+			stat1=stat6
+			if(effratetype=-1):stat1+=8
+			if((effratetype=1)&(stat1<2)):stat1+=16
+			if(shortmode+longmode+analogmode>0){
+				stat1+=2+2*(stat1<16)
+			}
+			alResetCopyMode
+			if(cnt=0){
+				alCopyImageToScreen 39,0,getsize(138)+(scrsize_w-getsize(640))/2,getsize(20),600*450*2*scrsize_h/480/1532,50*450*2*scrsize_h/480/1532,0,50*450*2*scrsize_h/480/1532*stat1
+				alCopyImageToScreen 32,0,getsize(140)+(scrsize_w-getsize(640))/2,getsize(60)
+				buffer BUF_RESULT_TEMP,scrsize_w,scrsize_h
+				gsel BUF_RESULT_TEMP
+				pos 0,0
+				gcopy 0,0,0,scrsize_w,scrsize_h
+				gsel 0
+			}else{
+				gsel 0
+				pos 0,0
+				gcopy BUF_RESULT_TEMP,0,0,scrsize_w,scrsize_h
+			}
+			if((effratetype<=0)&(iscourse=0)){
+				stat1=100*gauge/gaugemax
+			}else{
+				if(gauge>=0){
+					stat1=gauge/1000
+				}else{
+					stat1=0
+				}
+			}
+			if((diff>0)&(t-diffstartt>350)){
+				if((t>diffendt)&(t<=diffendt+150)){
+					if(t-diffstartt-350<=150){
+						alCopyModeAlpha 1.0-double(t-diffendt)/150*double(t-diffstartt-350)/150
+					}else{
+						alCopyModeAlpha 1.0-double(t-diffendt)/150
+					}
+				}else:if(t>diffendt+150){
+					alCopyModeAlpha 0.0
+				}else:if(t-diffstartt-350<=150){
+					alCopyModeAlpha 1.0*double(t-diffstartt-350)/150
+				}
+				alCopyImageToScreen 37,0,getsize(198)+(scrsize_w-getsize(640))/2,getsize(140),420*450*2*scrsize_h/480/1532,90*450*2*scrsize_h/480/1532,0,0
+				alCopyModeAlpha 1.0
+			}
+			if((completedlist!="")&(t-timestatestart>350)){
+				if((t>compendt)&(t<=compendt+150)){
+					if(t-timestatestart-350<=150){
+						alCopyModeAlpha 1.0-double(t-compendt)/150*double(t-timestatestart-350)/150
+					}else{
+						alCopyModeAlpha 1.0-double(t-compendt)/150
+					}
+				}else:if(t>compendt+150){
+					alCopyModeAlpha 0.0
+				}else:if(t-timestatestart-350<=150){
+					alCopyModeAlpha 1.0*double(t-timestatestart-350)/150
+				}
+				alCopyImageToScreen 96,0,scrsize_w/2-getsize(300)/2,scrsize_h/2-getsize(169)/2
+				alCopyModeAlpha 1.0
+			}
+			gsel 0
+			gmode 0
+			pos 140*scrsize_h/480+4*450*2*scrsize_h/480/1532+(scrsize_w-getsize(640))/2,getsize(60)+(4+436-436*stat1/100)*450*2*scrsize_h/480/1532
+			gzoom ceil(double(48)*450*2*scrsize_h/480/1532),ceil(double(436)*stat1/100*450*2*scrsize_h/480/1532),23,(effratetype+1)*ceil(48.0f*errate1*scrsize_h/480)*2+((effratetype<=0)&(iscourse=0))*((stat1>=70)*ceil(48.0f*errate1*scrsize_h/480))+((effratetype=1)|(iscourse=1))*((stat1>=30)*ceil(48.0f*errate1*scrsize_h/480)),ceil(435.0f*errate1*scrsize_h/480)-ceil(435.0f*errate1*scrsize_h/480)*stat1/100,ceil(48.0f*errate1*scrsize_h/480),ceil(435.0f*errate1*scrsize_h/480)*stat1/100
+			stat3=""
+			getkey stat1,key.4
+			getkey stat2,key2.4
+			fxl_key=stat1|stat2|getjoykeystat(4)
+			getkey stat1,key.5
+			getkey stat2,key2.5
+			fxr_key=stat1|stat2|getjoykeystat(5)
+			if(fxl_key=1){
+				stat3+="[SHORT]\nC/N/E: "+critical_short+"/"+near_short+"/"+errorn_short+"\n"
+				stat3+="[LONG]\nC/E: "+critical_long+"/"+errorn_long+"\n"
+			}
+			if((zuremax>0)&(fxl_key=1)){
+				stat1=""
+				if(-zure/zuremax>0):stat1="+"
+				stat3+="\nFAST: "+fast+" / SLOW: "+slow+"\n(Average: "+stat1+(-zure/zuremax)+"ms)\n"
+			}
+			if(fxr_key=1){
+				stat3+="\n"
+				if((effratetype<=0)&(iscourse=0)){
+					if(effratetype=-1){
+						stat3+="TOTAL: "+(csongtotal*55/50)+"\n" // EASYゲージの場合は55/50倍(110%)になる
+					}else{
+						stat3+="TOTAL: "+csongtotal+"\n" // EASYゲージの場合は55/50倍になる
+					}
+				}
+				stat3+="GAIN: "+100*unlimited_gauge/gaugemax+"\n"
+			}
+			if(fxl_key+fxr_key=2){
+				if(t>diffendt+150):diffstartt=t
+				diffendt=max(t+3000,diffendt)
+				if(t>popup_endt@ksm_ir+150):popup_startt@ksm_ir=t
+				popup_endt@ksm_ir=max(t+2500,popup_endt@ksm_ir)
+				hold_fxlr_time+=t-tp
+			}else{
+				hold_fxlr_time=0
+			}
+			
+			// IR譜面登録
+			if((hold_fxlr_time>=500)&(hold_fxlr_time<50000)&(ir_regchart_wait=1)){
+				ir_send_chart
+				ir_send_score
+				is_chart_registered=stat
+				if(is_chart_registered=0){
+					ir_regchart_wait=1
+					ir_popup_set_text "Unregistered chart\nHold FX-L+R to register this chart", 5000, 0
+				}else{
+					ir_popup_set_text bom+output@ksm_ir, 5000, 0
+					ir_regchart_wait=0
+				}
+				hold_fxlr_time=50000
+			}
+			
+			if(globaloffset!=0){
+				stat1=""
+				if(globaloffset>0):stat1="+"
+				stat3+="globaloffset: "+stat1+globaloffset+"msec"
+			}
+			if(tweet_key=1){
+				if(stat3!=""):stat3+="\n"
+				_atitle=atitle
+				strrep _atitle," -ADVANCED KEY SHOOTING GAME-",""
+				stat3+=_atitle
+				stat3+="\n"+siteurl
+			}
+			notesel stat3
+			pos 9*scrsize_h/480+(scrsize_w-getsize(640))/2,scrsize_h-getsize(12)*notemax
+			color 128,192,96
+			font "MS Gothic",getsize(12)
+			mes stat3
+			if((mxy.0<scrsize_w)&(mousex>scrsize_w-getsize(90))&(mxy.1>=0)&(mousey<getsize(24))&(tweetfl=0)&(stat12p=0)){
+				alCopyImageToScreen IMG_RESULT_TWEETBTN,0,scrsize_w-getsize(90),0,getsize(90),getsize(24)
+			}
+			if(tweet_notifyt+1200>t-timestatestart){
+				alCopyModeAlpha 1.0-double(max(t-timestatestart-tweet_notifyt,800)-800)/400
+				alCopyImageToScreen IMG_RESULT_TWEETBTN,0,scrsize_w-getsize(90),0,getsize(90),getsize(24),0,getsize(24)*tweet_notifytype
+				alCopyModeAlpha 1.0
+			}
+			if(t-timestatestart<768){
+				color 255,255,255
+				gmode 3,,,256-256*(t-timestatestart)/768
+				gsquare -1,sx_a,sy_a
+			}
+			ir_popup_draw
+			redraw 1
+			if(tweet_key=1){
+				// Note: ソースコード公開用につき削除
+				dialog "This version does not support linking with Twitter."
+			}
+			await 7
+			gosub *volactive
+			while (ginfo2()!=0)
+				await 100
+			wend
+			tp=t
+			tweet_keyp=tweet_key
+		loop
+		ir_regchart_wait=0
+		dim bufdel,1
+		bufdel=31,32,33,36,39,95
+		foreach bufdel
+			alDeleteImage bufdel.cnt
+		loop
+	}
+	return
+
+*tweet_pin_okbtn
+	tweet_stat=1
+	return
+
+*tweet_btn
+	if(280-KSHLib_GetTwitterStringLength(tweet_text)>=0){
+		tweet_stat=1
+	}
+	return
+
+*tweet_btn_cancel
+	tweet_stat=-1
+	return
+
+*tweet_btn_logout
+	ACCESS_TOKEN=""
+	ACCESS_SECRET=""
+	ACCESS_SECRET1=""
+	ACCESS_SECRET2=""
+	tweet_stat=-1
+	return

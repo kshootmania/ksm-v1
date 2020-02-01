@@ -1,0 +1,16 @@
+cache/
+cache/gate/jacket/*
+courses/
+data/
+score/
+songs/
+config.ini
+*.exe
+hsptmp
+hsptmp.*
+obj
+*.ax
+*.hsp.i
+packfile
+start.ax
+backup.bak

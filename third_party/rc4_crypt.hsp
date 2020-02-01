@@ -1,0 +1,50 @@
+// RC4 crypt  by K-K 2003
+// (modified by masaka)
+#module "RC4"
+
+#deffunc rc4_encode val data1,str key1,int size1
+	rc4_init key1
+	rc4_crypt data1,size1
+	return
+
+//rc4_init password [,length_of_password]
+#deffunc rc4_init str key
+	kl=strlen(key)
+	// RC4 init
+	rc4_x=0
+	rc4_y=0
+	dim rc4_dat,256
+	repeat 256
+		rc4_dat.cnt=cnt
+	loop
+	b=0
+	key2=key
+	repeat 256
+		a=rc4_dat.cnt
+		c=peek(key2,cnt\kl)
+		b=b+a+c & 0xff
+		rc4_dat.cnt=rc4_dat.b
+		rc4_dat.b=a
+	loop
+return
+
+// rc4_crypt data, size [,offset]
+#deffunc rc4_crypt val data,int size,int offset
+	// RC4 crypt
+	repeat size
+		rc4_x=rc4_x+1 & 0xff
+		a=rc4_dat.rc4_x
+		rc4_y=rc4_y+a & 0xff
+		b=rc4_dat.rc4_y
+		rc4_dat.rc4_x=rc4_dat.rc4_y
+		rc4_dat.rc4_y=a
+		;
+		
+		c=peek(data,cnt+offset)
+		a=a+b & 0xff
+		c=c^rc4_dat.a
+		poke data,cnt+offset,c
+	loop
+return
+
+#global

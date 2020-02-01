@@ -1,0 +1,4898 @@
+#deffunc start_select
+	if(iscmdline=1):end
+	keshuoff=1
+	keshukeyp=-1
+	keshukeypp=-1
+	alphabetjump=0
+	if(imeget()=1):imeset 0
+	dim note,1
+	dim notefx,1
+	dim notese,1
+	dim notesej,1
+	dim analog,1
+	dim analoganj,1
+	dim spin,1
+	dim spr,1
+	dim stp,1
+	dim bpml,1
+	dim rotate,1
+	courseendfl=0
+	isendbyesckey=0
+	chdir dir_default+"\\songs"
+	dir=dirp
+	dirvol=100
+	diroffset=0
+	dircache=0
+	dirtweetopt=""
+	dirclosep=0
+	if((dir!="")&(dir!=".\\")&(strmid(dir,0,1)!="?")&(strmid(dir,0,1)!="..\\courses")){
+		dirlist stat1,dir
+		if(stat1!=""){
+			chdir dir
+		}else{
+			dir=""
+		}
+	}
+	if(refreshsonglistoff=0){
+		footerdirnum=0
+		gosub *refreshfilelist
+	}
+	refreshsonglistoff=0
+	selnow=max(min(selp,mnum-1),0)
+	levnow=max(min(levnow,3),0)
+	selnowp=selnow
+	csongp=""
+	stat2p=1
+	stat2ap=2
+	stat2astartt=0
+	favselnow=0
+	dialognow=0
+	autop=1
+	adjmodep=1
+	escstatp=1
+	playerplustp=0
+	playerminustp=0
+	selplustp=-5000
+	selminustp=-5000
+	selplustpstart=-5000
+	selminustpstart=-5000
+	selplustpr=0
+	selminustpr=0
+	levplustp=0
+	levminustp=0
+	jselnow=0
+	sselnow=0
+	levm=levnow
+	levmp=levnow
+	mfl=0
+	if(auto&autodemo){
+		autodemo=2
+		selnow++
+		if(selnow>=mnum){
+			selnow=0
+		}
+		if(minfo.selnow.0.0=-3){
+			selnow++
+			if(selnow>=mnum){
+				selnow=0
+			}
+		}
+		if(minfo.selnow.0.0<0){
+			selnow=0
+			autodemo=0
+		}
+	}else:autodemo=0
+	if((minfostr.selnow.levm.0="")&(minfo.selnow.0.0>=0)){
+		if(levm=3){
+			if(minfostr.selnow.2.0!=""){
+				levm=2
+			}else:if(minfostr.selnow.1.0!=""){
+				levm=1
+			}else{
+				levm=0
+			}
+		}else:if(levm=2){
+			if(minfostr.selnow.1.0!=""){
+				levm=1
+			}else:if(minfostr.selnow.3.0!=""){
+				levm=3
+			}else{
+				levm=0
+			}
+		}else:if(levm=1){
+			if(minfostr.selnow.0.0!=""){
+				levm=0
+			}else:if(minfostr.selnow.2.0!=""){
+				levm=2
+			}else{
+				levm=3
+			}
+		}else{
+			if(minfostr.selnow.1.0!=""){
+				levm=1
+			}else:if(minfostr.selnow.2.0!=""){
+				levm=2
+			}else{
+				levm=3
+			}
+		}
+	}
+	gosub *reloadscore
+	gosub *refreshscore
+	gosub *refreshjacket
+	gosub *refreshsonginfo
+	selslider=SELSLIDER_MAX/2
+	levslider=LEVSLIDER_MAX/2
+	dim sliderp,2
+	if(analoginput=4){
+		repeat 2
+			cnt0=cnt
+			sliderp.cnt=0
+			repeat length_joylist
+				joyGetPosEx joystat2,joylist.cnt
+				sliderp.cnt0+=joystat2.(4+(cnt0^analogsw))
+			loop
+		loop
+	}
+	slider=0
+	BASS_ChannelSetPosition_ms selbgmid,0
+	BASS_ChannelPlay selbgmid
+	if(minfo.selnow.0.0<0){
+		BASS_ChannelSetAttribute selbgmid,2,double(mastervol)/100
+	}else{
+		BASS_ChannelSetAttribute selbgmid,2,0.0
+	}
+	if(analoginput=2){
+		if(hidem=1):mouse -1,-1
+		mouse defx,defy
+	}
+	timestatestart=d3timer()
+	repeat
+		gosub *getjoystat
+		timenow=d3timer()-timestatestart
+		if((ginfo2()!=0)|(dialognow!=0)){
+			escstatp=1
+		}else{
+			esc_key=getesckey()
+			if((esc_key=1)&(dir!="")&(escstatp=0)&(closekey=1)&(ginfo2()=0)){
+				dirpp=dir
+				dir=""
+				dirp=""
+				dirvol=100
+				diroffset=0
+				chdir ".."
+				gosub *refreshfilelist
+				selnow=0
+				repeat mnum
+					if((minfo.cnt.0.0=-1)&(minfostr.cnt.0.0=dirpp)):selnow=cnt:break
+					if((minfo.cnt.0.0=-5)&("?"+minfostr.cnt.0.0=dirpp)):selnow=cnt:break
+				loop
+				levm=levnow
+				gosub *refreshjacket
+				gosub *refreshscore
+				gosub *refreshsonginfo
+				stat2ap=2
+				stat2a=0
+			}else:if((esc_key=1)&(escstatp=0)&(ginfo2()=0)){
+				BASS_StreamFree mpid
+				stateinit=1
+				statep=st_select
+				state=st_standby
+				hgbye
+				standbyselp=0
+				selp=selnow
+				dirp=dir
+				BASS_ChannelSlideAttribute selbgmid,2,0.0,500
+				blackout 500
+				redraw 0
+				break
+			}
+			escstatp=esc_key
+			if((dialognow=0)&(closekey=0)&(dir!="")){
+				getkey stat1,8 // BackSpace
+				if((stat1=1)&(ginfo2()=0)){
+					dirpp=dir
+					dir=""
+					dirp=""
+					dirvol=100
+					diroffset=0
+					chdir ".."
+					gosub *refreshfilelist
+					selnow=0
+					repeat mnum
+						if((minfo.cnt.0.0=-1)&(minfostr.cnt.0.0=dirpp)):selnow=cnt:break
+						if((minfo.cnt.0.0=-6)&(dirpp="?"+minfostr.cnt.0.0)):selnow=cnt:break
+						if((minfo.cnt.0.0=-8)&(dirpp="..\\courses")):selnow=cnt:break
+					loop
+					levm=levnow
+					gosub *refreshjacket
+					gosub *refreshscore
+					gosub *refreshsonginfo
+				}
+			}
+			repeat 2
+				stat1=0
+				getkey stat2,key.(4+cnt)
+				if(stat2=1):stat1=1
+				getkey stat2,key2.(4+cnt)
+				if(stat2=1):stat1=1
+				if(getjoykeystat(4+cnt)=1):stat1=1
+				fxkey.cnt=stat1
+			loop
+			getkey stat1,37
+			if((dialognow=0)&(timenow-playerminustp>160)&(btkey.1+btkey.2=2)&(stat1=1)&(ginfo2()=0)){
+				cplayer--
+				if(cplayer<0):cplayer=playersnum-1
+				gosub *reloadscore
+				gosub *refreshscore
+				gosub *refreshsonginfo
+				playerminustp=timenow
+			}
+			getkey_a stat1,39
+			if((dialognow=0)&(timenow-playerplustp>160)&(btkey.1+btkey.2=2)&(stat1=1)&(ginfo2()=0)){
+				cplayer++
+				if(cplayer>=playersnum):cplayer=0
+				gosub *reloadscore
+				gosub *refreshscore
+				gosub *refreshsonginfo
+				playerplustp=timenow
+			}
+			if((dialognow=0)&(fxkey.0+fxkey.1=2)&(fxkeyp.0+fxkeyp.1<=1)&(ginfo2()=0)){
+				sorttype=1-sorttype
+				selpdir=minfostr.selnow.levm.0
+				selpdif=levm
+				selnow=0
+				levnow=levm
+				gosub *refreshfilelist
+				repeat mnum
+					if(minfostr.cnt.selpdif.0=selpdir){
+						selnow=cnt
+						break
+					}
+				loop
+				gosub *refreshjacket
+				gosub *reloadscore
+				gosub *refreshscore
+				gosub *refreshsonginfo
+				sortfl=1,1
+			}
+			fxkey_home=0
+			fxkey_end=0
+			getkey shift_key_,16
+			repeat 2
+				f=0
+				cnt3=cnt
+				if((dialognow=0)&(fxkey.cnt=0)&(ginfo2()=0)&(fxkeyp.cnt=1)&(dir!="")){
+					if(sortfl.cnt=0){
+						if((btkey.0+btkey.1+btkey.2+btkey.3!=0)|(dir="")){
+							if(cnt3=0):fxkey_home=1
+							if(cnt3=1):fxkey_end=1
+						}else:if(sorttype=0){
+							if(selnow>mnum-footerdirnum-1){
+								if(cnt3=1){
+									f=0
+								}else:f=mnum-footerdirnum-1
+							}else:if((selnow=0)&(cnt3=0)){
+								f=mnum-footerdirnum-1
+							}else:if((selnow=mnum-footerdirnum-1)&(cnt3=1)){
+								f=0
+							}else{
+								stat1=selnow
+								f=selnow
+								g=""
+								fname=minfostr.selnow.levm.0+"\\"
+								split fname,"\\",sndirstat2
+								stat2=stat
+								if(stat2>=4){
+									g=strlowerf(strmid(sndirstat2.2,0,1))
+									subnamep=sndirstat2.1
+								}else{
+									g=strlowerf(strmid(sndirstat2.1,0,1))
+									subnamep=""
+								}
+								repeat max(mnum-1,0),1
+									if(cnt3=0):cnt2=selnow-cnt
+									if(cnt3=1):cnt2=selnow+cnt
+									if(cnt2>=mnum):cnt2-=mnum
+									if(cnt2<0):cnt2+=mnum
+									fname=""
+									h=0
+									repeat 4
+										if(minfostr.cnt2.cnt.0!=""):fname=minfostr.cnt2.cnt.0+"\\":break
+									loop
+									split fname,"\\",sndirstat1
+									stat2=stat
+									if(stat2>=4){
+										stat3=strlowerf(strmid(sndirstat1.2,0,1))
+										subname=sndirstat1.1
+									}else{
+										stat3=strlowerf(strmid(sndirstat1.1,0,1))
+										subname=""
+									}
+									if((fname="")|(minfo.cnt2.0.0<0)){
+										if(f!=selnow):break
+										f=cnt2
+										break
+									}else:if((stat3=g)&(subname=subnamep)){
+										f=cnt2
+									}else{
+										if((f!=selnow)&((cnt3=0)|(h=1))):break
+										f=cnt2
+										g=stat3
+										h=1
+										if(cnt3=1):break
+									}
+									subnamep=subname
+								loop
+							}
+							if((f>=0)&(selnow!=f)){
+								stat1=BASS_SampleGetChannel(selmid,0)
+								BASS_ChannelSetAttribute stat1,2,double(mastervol)/100
+								BASS_ChannelPlay stat1
+								selnow=f
+								selnow_confsave=selnow
+								levm=levnow
+								if((minfostr.selnow.levm.0="")&(minfo.selnow.0.0>=0)){
+									if(levm=3){
+										if(minfostr.selnow.2.0!=""){
+											levm=2
+										}else:if(minfostr.selnow.1.0!=""){
+											levm=1
+										}else{
+											levm=0
+										}
+									}else:if(levm=2){
+										if(minfostr.selnow.1.0!=""){
+											levm=1
+										}else:if(minfostr.selnow.3.0!=""){
+											levm=3
+										}else{
+											levm=0
+										}
+									}else:if(levm=1){
+										if(minfostr.selnow.0.0!=""){
+											levm=0
+										}else:if(minfostr.selnow.2.0!=""){
+											levm=2
+										}else{
+											levm=3
+										}
+									}else{
+										if(minfostr.selnow.1.0!=""){
+											levm=1
+										}else:if(minfostr.selnow.2.0!=""){
+											levm=2
+										}else{
+											levm=3
+										}
+									}
+								}
+								gosub *refreshjacket
+								gosub *refreshscore
+								gosub *refreshsonginfo
+							}
+						}else:if(sorttype=1){
+							stat1=BASS_SampleGetChannel(seldirid,0)
+							BASS_ChannelSetAttribute stat1,2,double(mastervol)/100
+							BASS_ChannelPlay stat1
+							if(cnt=0){
+								if(selnow=1){
+									selnow=0
+								}else{
+									if(selnow=0):selnow=mnum
+									repeat 20
+										if((levcnt.(19-cnt)<selnow)&(levcnt.(19-cnt)!=-1)){
+											selnow=levcnt.(19-cnt)
+											break
+										}
+									loop
+									selnow=min(selnow,mnum-1)
+								}
+							}else{
+								f=1
+								repeat 20
+									if(levcnt.cnt>selnow){
+										selnow=levcnt.cnt
+										f=0
+										break
+									}
+								loop
+								if(f=1):selnow=0
+							}
+							levm=levnow
+							gosub *refreshjacket
+							gosub *reloadscore
+							gosub *refreshscore
+							gosub *refreshsonginfo
+						}
+					}else:if(sortfl.cnt=1):sortfl.cnt=0
+				}
+			loop
+			fxkeyp=fxkey.0,fxkey.1
+			stat2=0
+			repeat 6
+				getkey stat3,key.cnt
+				getkey stat3_,key2.cnt
+				stat2+=stat3|stat3_|getjoykeystat(cnt)
+			loop
+			stat2+=shift_key_
+			dim stickstat,2
+			mouserange=0
+			if(analoginput=2){
+				// マウスXY
+				repeat 2
+					cnt0=cnt
+					ddim dstat1,1
+					dstat1=0.0f
+					if(cnt0=0):dstat1=(ginfo_mx-defx)*2*(mx*2-1)
+					if(cnt0=1):dstat1=(ginfo_my-defy)*2*(my*2-1)
+					stat1=int(round(dstat1*msen*2))
+					mouserange=abs(stat1)
+					if(abs(stat1)<5){
+						stickstat.cnt=0
+					}else{
+						stickstat.cnt=sgn(stat1)*min(abs(int(double(sgn(stat1)*(abs(stat1)-10))))/120,22000*max(timenow-timep,2)/16/300)
+					}
+				loop
+			}
+			if(analoginput=4){
+				// SLIDER
+				repeat 2
+					cnt0=cnt
+					slider=0
+					repeat length_joylist
+						joyGetPosEx joystat2,joylist.cnt
+						slider+=joystat2.(4+(cnt0^analogsw))
+					loop
+					stat1=slider-sliderp.cnt0
+					sliderp.cnt0=slider
+					if(abs(stat1)>32768):stat1-=sgn(stat1)*65536
+					stat1=stat1*msen/400
+					if(abs(stat1)<13){
+						stickstat.cnt=0
+					}else{
+						stickstat.cnt=sgn(stat1)*min(abs(int(double(sgn(stat1)*(abs(stat1)-25))*max(timenow-timep,2)/150)),max(timenow-timep,2))
+					}
+				loop
+			}
+			if(analoginput=5){
+				// アナログスティック循環
+				repeat 2
+					cnt0=cnt
+					slider=0
+					repeat length_joylist
+						joyGetPosEx joystat2,joylist.cnt
+						slider+=joystat2.(2+(cnt0^analogsw))
+					loop
+					stat1=slider-sliderp.cnt0
+					sliderp.cnt0=slider
+					if(abs(stat1)>32768):stat1-=sgn(stat1)*65536
+					stat1=stat1*msen/400
+					if(abs(stat1)<13){
+						stickstat.cnt=0
+					}else{
+						stickstat.cnt=sgn(stat1)*min(abs(int(double(sgn(stat1)*(abs(stat1)-25))*max(timenow-timep,2)/150)),max(timenow-timep,2))
+					}
+				loop
+			}
+			if(analoginput=3){
+				// アナログスティック
+				repeat 2
+					cnt0=cnt
+					stat1=0
+					repeat length_joylist
+						joyGetPosEx joystat2,joylist.cnt
+						stat1+=joystat2.(2+(cnt0^analogsw)*2)-32768
+					loop
+					if(abs(stat1)<12000){
+						stickstat.cnt=0
+					}else{
+						stickstat.cnt=sgn(stat1)*min(abs(int(double(sgn(stat1)*(abs(stat1)-12000))*max(timenow-timep,2)/16/300)),18000*max(timenow-timep,2)/16/300)
+					}
+				loop
+			}
+			if((analoginput=2)|(analoginput=4)|(analoginput=5)){
+				if(stickstat.0>=0){
+					levslider+=int(double(stickstat.0)*cos(minf(double(stickstat.0)/6,M_PI/2.1f)))
+				}else{
+					levslider-=int(double(-stickstat.0)*cos(minf(double(-stickstat.0)/6,M_PI/2.1f)))
+				}
+				if(stickstat.1>=0){
+					selslider+=int(double(stickstat.1)*cos(minf(double(stickstat.1)/6,M_PI/2.1f)))
+				}else{
+					selslider-=int(double(-stickstat.1)*cos(minf(double(-stickstat.1)/6,M_PI/2.1f)))
+				}
+				repeat min(max(selslider/SELSLIDER_MAX,0),2)
+					if((dialognow=0)&(stat2=0)&(ginfo2()=0)){
+						stat1=BASS_SampleGetChannel(selmid,0)
+						BASS_ChannelSetAttribute stat1,2,double(mastervol)/100
+						BASS_ChannelPlay stat1
+						selnow++
+						if(selnow>=mnum){
+							selnow=0
+						}
+						selnow_confsave=selnow
+						selplustpr=timenow
+						if(selpluskeyp=0):selplustpstart=timenow
+						if((selpluskeyp=0)&(stickstat.(1-analogsw)=0)){
+							selplustp=timenow+250
+						}else:selplustp=timenow
+						if(analoginput=2){
+							selplustp-=35-48+min(mouserange,384)/8
+						}else:if(stickstat.(1-analogsw)>0):selplustp+=stickstat.(1-analogsw)*3-200
+						levm=levnow
+						if((minfostr.selnow.levm.0="")&(minfo.selnow.0.0>=0)){
+							if(levm=3){
+								if(minfostr.selnow.2.0!=""){
+									levm=2
+								}else:if(minfostr.selnow.1.0!=""){
+									levm=1
+								}else{
+									levm=0
+								}
+							}else:if(levm=2){
+								if(minfostr.selnow.1.0!=""){
+									levm=1
+								}else:if(minfostr.selnow.3.0!=""){
+									levm=3
+								}else{
+									levm=0
+								}
+							}else:if(levm=1){
+								if(minfostr.selnow.0.0!=""){
+									levm=0
+								}else:if(minfostr.selnow.2.0!=""){
+									levm=2
+								}else{
+									levm=3
+								}
+							}else{
+								if(minfostr.selnow.1.0!=""){
+									levm=1
+								}else:if(minfostr.selnow.2.0!=""){
+									levm=2
+								}else{
+									levm=3
+								}
+							}
+						}
+						gosub *refreshjacketdown
+						gosub *refreshscore
+						gosub *refreshsonginfo
+					}
+				loop
+				repeat min(-1*min((selslider-SELSLIDER_MAX)/SELSLIDER_MAX,0),2)*(selslider<0)
+					if((dialognow=0)&(stat2=0)&(ginfo2()=0)){
+						stat1=BASS_SampleGetChannel(selmid,0)
+						BASS_ChannelSetAttribute stat1,2,double(mastervol)/100
+						BASS_ChannelPlay stat1
+						selnow--
+						if(selnow<0){
+							selnow=mnum-1
+						}
+						selminustpr=timenow
+						if(selminuskeyp=0):selminustpstart=timenow
+						selnow_confsave=selnow
+						if((selminuskeyp=0)&(stickstat.(1-analogsw)=0)){
+							selminustp=timenow+250
+						}else:selminustp=timenow
+						if(analoginput=2){
+							selminustp-=35-48+min(mouserange,384)/8
+						}else:if(stickstat.(1-analogsw)>0):selminustp+=stickstat.(1-analogsw)*3+200
+						levm=levnow
+						if((minfostr.selnow.levm.0="")&(minfo.selnow.0.0>=0)){
+							if(levm=3){
+								if(minfostr.selnow.2.0!=""){
+									levm=2
+								}else:if(minfostr.selnow.1.0!=""){
+									levm=1
+								}else{
+									levm=0
+								}
+							}else:if(levm=2){
+								if(minfostr.selnow.1.0!=""){
+									levm=1
+								}else:if(minfostr.selnow.3.0!=""){
+									levm=3
+								}else{
+									levm=0
+								}
+							}else:if(levm=1){
+								if(minfostr.selnow.0.0!=""){
+									levm=0
+								}else:if(minfostr.selnow.2.0!=""){
+									levm=2
+								}else{
+									levm=3
+								}
+							}else{
+								if(minfostr.selnow.1.0!=""){
+									levm=1
+								}else:if(minfostr.selnow.2.0!=""){
+									levm=2
+								}else{
+									levm=3
+								}
+							}
+						}
+						gosub *refreshjacketup
+						gosub *refreshscore
+						gosub *refreshsonginfo
+					}
+				loop
+				repeat min(max(levslider/LEVSLIDER_MAX,0),1)
+					if((dialognow=0)&(stat2=0)&(ginfo2()=0)&(levnow<3)){
+						stat3=0
+						if(minfostr.selnow.(levnow+1).0!=""){
+							stat1=BASS_SampleGetChannel(sellid,0)
+							BASS_ChannelSetAttribute stat1,2,double(mastervol)/100
+							BASS_ChannelPlay stat1
+							levnow++
+							levplustp=timenow
+							stat3=1
+						}else:if((levnow=0)&(minfostr.selnow.2.0!="")){
+							stat1=BASS_SampleGetChannel(sellid,0)
+							BASS_ChannelSetAttribute stat1,2,double(mastervol)/100
+							if(levm!=2):BASS_ChannelPlay stat1
+							levnow=2
+							levplustp=timenow
+							stat3=1
+						}else:if((levnow<=1)&(minfostr.selnow.3.0!="")){
+							stat1=BASS_SampleGetChannel(sellid,0)
+							BASS_ChannelSetAttribute stat1,2,double(mastervol)/100
+							if(levm!=3):BASS_ChannelPlay stat1
+							levnow=3
+							levplustp=timenow
+							stat3=1
+						}
+						if(stickstat.(analogsw)>0):levplustp-=stickstat.(analogsw)*3-200
+						levm=levnow
+						if(minfostr.selnow.levm.0=""){
+							if(levm=3){
+								if(minfostr.selnow.2.0!=""){
+									levm=2
+								}else:if(minfostr.selnow.1.0!=""){
+									levm=1
+								}else{
+									levm=0
+								}
+							}else:if(levm=2){
+								if(minfostr.selnow.1.0!=""){
+									levm=1
+								}else:if(minfostr.selnow.3.0!=""){
+									levm=3
+								}else{
+									levm=0
+								}
+							}else:if(levm=1){
+								if(minfostr.selnow.0.0!=""){
+									levm=0
+								}else:if(minfostr.selnow.2.0!=""){
+									levm=2
+								}else{
+									levm=3
+								}
+							}else{
+								if(minfostr.selnow.1.0!=""){
+									levm=1
+								}else:if(minfostr.selnow.2.0!=""){
+									levm=2
+								}else{
+									levm=3
+								}
+							}
+						}
+						if(stat3=1){
+							gosub *refreshscore
+							gosub *refreshjacket
+							gosub *refreshsonginfo
+						}
+					}
+				loop
+				repeat min(-1*min((levslider-LEVSLIDER_MAX)/LEVSLIDER_MAX,0),1)*(levslider<0)
+					if((dialognow=0)&(stat2=0)&(ginfo2()=0)&(levnow>0)){
+						stat3=0
+						if(minfostr.selnow.(levnow-1).0!=""){
+							stat1=BASS_SampleGetChannel(sellid,0)
+							BASS_ChannelSetAttribute stat1,2,double(mastervol)/100
+							BASS_ChannelPlay stat1
+							levnow--
+							levminustp=timenow
+							stat3=1
+						}else:if((levnow=3)&(minfostr.selnow.1.0!="")){
+							stat1=BASS_SampleGetChannel(sellid,0)
+							BASS_ChannelSetAttribute stat1,2,double(mastervol)/100
+							if(levm!=1):BASS_ChannelPlay stat1
+							levnow=1
+							levminustp=timenow
+							stat3=1
+						}else:if((levnow>=2)&(minfostr.selnow.0.0!="")){
+							stat1=BASS_SampleGetChannel(sellid,0)
+							BASS_ChannelSetAttribute stat1,2,double(mastervol)/100
+							if(levm!=0):BASS_ChannelPlay stat1
+							levnow=0
+							levminustp=timenow
+							stat3=1
+						}
+						if(stickstat.(analogsw)>0):levminustp+=stickstat.(analogsw)*3+200
+						levm=levnow
+						if(minfostr.selnow.levm.0=""){
+							if(levm=3){
+								if(minfostr.selnow.2.0!=""){
+									levm=2
+								}else:if(minfostr.selnow.1.0!=""){
+									levm=1
+								}else{
+									levm=0
+								}
+							}else:if(levm=2){
+								if(minfostr.selnow.1.0!=""){
+									levm=1
+								}else:if(minfostr.selnow.3.0!=""){
+									levm=3
+								}else{
+									levm=0
+								}
+							}else:if(levm=1){
+								if(minfostr.selnow.0.0!=""){
+									levm=0
+								}else:if(minfostr.selnow.2.0!=""){
+									levm=2
+								}else{
+									levm=3
+								}
+							}else{
+								if(minfostr.selnow.1.0!=""){
+									levm=1
+								}else:if(minfostr.selnow.2.0!=""){
+									levm=2
+								}else{
+									levm=3
+								}
+							}
+						}
+						if(stat3=1){
+							gosub *refreshscore
+							gosub *refreshjacket
+							gosub *refreshsonginfo
+						}
+					}
+				loop
+				selslider=selslider\SELSLIDER_MAX
+				if(selslider<0):selslider+=SELSLIDER_MAX
+				levslider=levslider\LEVSLIDER_MAX
+				if(levslider<0):levslider+=LEVSLIDER_MAX
+			}
+			getkey_a stat1,40
+			getkey stat1_2,key.(9-2*analogsw)
+			getkey stat1_2_,key2.(9-2*analogsw)
+			stat1=stat1|stat1_2|stat1_2_|getjoykeystat(9-2*analogsw)|((stickstat.(1-analogsw)>0)&(analoginput=3/* アナログスティックのみ */))
+			stat_=((stat1=1)&(stat2=0)&(ginfo2()=0))
+			if((dialognow=0)&((timenow-selplustp>50)|(selpluskeyp=0))&(stat1=1)&(stat2=0)&(ginfo2()=0)){
+				stat1=BASS_SampleGetChannel(selmid,0)
+				BASS_ChannelSetAttribute stat1,2,double(mastervol)/100
+				BASS_ChannelPlay stat1
+				selnow++
+				if(selnow>=mnum){
+					selnow=0
+				}
+				selnow_confsave=selnow
+				selplustpr=timenow
+				if(selpluskeyp=0):selplustpstart=timenow
+				if((selpluskeyp=0)&(stickstat.(1-analogsw)=0)){
+					selplustp=timenow+250
+				}else:selplustp=timenow
+				if(analoginput=2){
+					selplustp-=35-48+min(mouserange,384)/8
+					/*
+					gsel 0
+					title ""+mouserange+","+(timenow-timep)
+					if((analoginput=2)&(timenow-timep>50)&(mouserange>=1024)){
+						stat1=BASS_SampleGetChannel(selmid,0)
+						BASS_ChannelSetAttribute stat1,2,double(mastervol)/100
+						BASS_ChannelPlay stat1
+						selnow++
+						if(selnow>=mnum){
+							selnow=0
+						}
+					}*/
+				}else:if(stickstat.(1-analogsw)>0):selplustp+=stickstat.(1-analogsw)*3-200
+				levm=levnow
+				if((minfostr.selnow.levm.0="")&(minfo.selnow.0.0>=0)){
+					if(levm=3){
+						if(minfostr.selnow.2.0!=""){
+							levm=2
+						}else:if(minfostr.selnow.1.0!=""){
+							levm=1
+						}else{
+							levm=0
+						}
+					}else:if(levm=2){
+						if(minfostr.selnow.1.0!=""){
+							levm=1
+						}else:if(minfostr.selnow.3.0!=""){
+							levm=3
+						}else{
+							levm=0
+						}
+					}else:if(levm=1){
+						if(minfostr.selnow.0.0!=""){
+							levm=0
+						}else:if(minfostr.selnow.2.0!=""){
+							levm=2
+						}else{
+							levm=3
+						}
+					}else{
+						if(minfostr.selnow.1.0!=""){
+							levm=1
+						}else:if(minfostr.selnow.2.0!=""){
+							levm=2
+						}else{
+							levm=3
+						}
+					}
+				}
+				gosub *refreshjacketdown
+				gosub *refreshscore
+				gosub *refreshsonginfo
+			}
+			selpluskeyp=stat_
+			getkey_a stat1,38
+			getkey stat1_2,key.(8-2*analogsw)
+			getkey stat1_2_,key2.(8-2*analogsw)
+			stat1=stat1|stat1_2|stat1_2_|getjoykeystat(8-2*analogsw)|((stickstat.(1-analogsw)<0)&(analoginput=3/* アナログスティックのみ */))
+			stat_=((stat1=1)&(stat2=0)&(ginfo2()=0))
+			if((dialognow=0)&((timenow-selminustp>50)|(selminuskeyp=0))&(stat1=1)&(stat2=0)&(ginfo2()=0)){
+				stat1=BASS_SampleGetChannel(selmid,0)
+				BASS_ChannelSetAttribute stat1,2,double(mastervol)/100
+				BASS_ChannelPlay stat1
+				selnow--
+				if(selnow<0){
+					selnow=mnum-1
+				}
+				selminustpr=timenow
+				if(selminuskeyp=0):selminustpstart=timenow
+				selnow_confsave=selnow
+				if((selminuskeyp=0)&(stickstat.(1-analogsw)=0)){
+					selminustp=timenow+250
+				}else:selminustp=timenow
+				if(analoginput=2){
+					selminustp-=35-48+min(mouserange,384)/8
+					/*
+					gsel 0
+					title ""+mouserange
+					if((analoginput=2)&(timenow-timep>30)&(mouserange>=1024)){
+						stat1=BASS_SampleGetChannel(selmid,0)
+						BASS_ChannelSetAttribute stat1,2,double(mastervol)/100
+						BASS_ChannelPlay stat1
+						selnow--
+						if(selnow<0){
+							selnow=mnum-1
+						}
+					}*/
+				}else:if(stickstat.(1-analogsw)>0):selminustp+=stickstat.(1-analogsw)*3+200
+				levm=levnow
+				if((minfostr.selnow.levm.0="")&(minfo.selnow.0.0>=0)){
+					if(levm=3){
+						if(minfostr.selnow.2.0!=""){
+							levm=2
+						}else:if(minfostr.selnow.1.0!=""){
+							levm=1
+						}else{
+							levm=0
+						}
+					}else:if(levm=2){
+						if(minfostr.selnow.1.0!=""){
+							levm=1
+						}else:if(minfostr.selnow.3.0!=""){
+							levm=3
+						}else{
+							levm=0
+						}
+					}else:if(levm=1){
+						if(minfostr.selnow.0.0!=""){
+							levm=0
+						}else:if(minfostr.selnow.2.0!=""){
+							levm=2
+						}else{
+							levm=3
+						}
+					}else{
+						if(minfostr.selnow.1.0!=""){
+							levm=1
+						}else:if(minfostr.selnow.2.0!=""){
+							levm=2
+						}else{
+							levm=3
+						}
+					}
+				}
+				gosub *refreshjacketup
+				gosub *refreshscore
+				gosub *refreshsonginfo
+			}
+			selminuskeyp=stat_
+			getkey stat1,36 // Home
+			stat3=0
+			if(usenumpad=1){
+				getkey stat3,numkey_k.0
+			}else{
+				getkey stat3,numkey_c.0
+			}
+			stat1=stat1|stat3|fxkey_home
+			if((dialognow=0)&(stat1=1)&(selnow!=0)&((stat2=0)|(fxkey_home=1))&(ginfo2()=0)){
+				stat1=BASS_SampleGetChannel(selmid,0)
+				BASS_ChannelSetAttribute stat1,2,double(mastervol)/100
+				BASS_ChannelPlay stat1
+				selnow=0
+				selnow_confsave=selnow
+				levm=levnow
+				if((minfostr.selnow.levm.0="")&(minfo.selnow.0.0>=0)){
+					if(levm=3){
+						if(minfostr.selnow.2.0!=""){
+							levm=2
+						}else:if(minfostr.selnow.1.0!=""){
+							levm=1
+						}else{
+							levm=0
+						}
+					}else:if(levm=2){
+						if(minfostr.selnow.1.0!=""){
+							levm=1
+						}else:if(minfostr.selnow.3.0!=""){
+							levm=3
+						}else{
+							levm=0
+						}
+					}else:if(levm=1){
+						if(minfostr.selnow.0.0!=""){
+							levm=0
+						}else:if(minfostr.selnow.2.0!=""){
+							levm=2
+						}else{
+							levm=3
+						}
+					}else{
+						if(minfostr.selnow.1.0!=""){
+							levm=1
+						}else:if(minfostr.selnow.2.0!=""){
+							levm=2
+						}else{
+							levm=3
+						}
+					}
+				}
+				gosub *refreshjacket
+				gosub *refreshscore
+				gosub *refreshsonginfo
+			}
+			getkey stat1,35 // End
+			stat3=0
+			if(usenumpad=1){
+				getkey stat3,numkey_k.8
+			}else{
+				getkey stat3,numkey_c.8
+			}
+			stat1=stat1|stat3|fxkey_end
+			if((dialognow=0)&(stat1=1)&(selnow!=mnum-1)&((stat2=0)|(fxkey_end=1))&(ginfo2()=0)){
+				stat1=BASS_SampleGetChannel(selmid,0)
+				BASS_ChannelSetAttribute stat1,2,double(mastervol)/100
+				BASS_ChannelPlay stat1
+				selnow=max(0,mnum-1-footerdirnum)
+				selnow_confsave=selnow
+				levm=levnow
+				if((minfostr.selnow.levm.0="")&(minfo.selnow.0.0>=0)){
+					if(levm=3){
+						if(minfostr.selnow.2.0!=""){
+							levm=2
+						}else:if(minfostr.selnow.1.0!=""){
+							levm=1
+						}else{
+							levm=0
+						}
+					}else:if(levm=2){
+						if(minfostr.selnow.1.0!=""){
+							levm=1
+						}else:if(minfostr.selnow.3.0!=""){
+							levm=3
+						}else{
+							levm=0
+						}
+					}else:if(levm=1){
+						if(minfostr.selnow.0.0!=""){
+							levm=0
+						}else:if(minfostr.selnow.2.0!=""){
+							levm=2
+						}else{
+							levm=3
+						}
+					}else{
+						if(minfostr.selnow.1.0!=""){
+							levm=1
+						}else:if(minfostr.selnow.2.0!=""){
+							levm=2
+						}else{
+							levm=3
+						}
+					}
+				}
+				gosub *refreshjacket
+				gosub *refreshscore
+				gosub *refreshsonginfo
+			}
+			getkey stat1,34
+			stat3=0
+			if(usenumpad=1){
+				getkey stat3,numkey_k.6
+			}else{
+				getkey stat3,numkey_c.6
+			}
+			stat1=stat1|stat3
+			stat_=((stat1=1)&(stat2=0)&(ginfo2()=0))
+			if(((timenow-selplustp>50)|(selppluskeyp=0))&(stat1=1)&(stat2=0)&(ginfo2()=0)){
+				repeat 8
+					selnow++
+					if(selnow>=mnum){
+						selnow=0
+					}
+				loop
+				selnow_confsave=selnow
+				stat1=BASS_SampleGetChannel(selmid,0)
+				BASS_ChannelSetAttribute stat1,2,double(mastervol)/100
+				BASS_ChannelPlay stat1
+				selplustpr=timenow
+				if(selppluskeyp=0):selplustpstart=timenow
+				if(selppluskeyp=0){
+					selplustp=timenow+250
+				}else:selplustp=timenow
+				levm=levnow
+				if((minfostr.selnow.levm.0="")&(minfo.selnow.0.0>=0)){
+					if(levm=3){
+						if(minfostr.selnow.2.0!=""){
+							levm=2
+						}else:if(minfostr.selnow.1.0!=""){
+							levm=1
+						}else{
+							levm=0
+						}
+					}else:if(levm=2){
+						if(minfostr.selnow.1.0!=""){
+							levm=1
+						}else:if(minfostr.selnow.3.0!=""){
+							levm=3
+						}else{
+							levm=0
+						}
+					}else:if(levm=1){
+						if(minfostr.selnow.0.0!=""){
+							levm=0
+						}else:if(minfostr.selnow.2.0!=""){
+							levm=2
+						}else{
+							levm=3
+						}
+					}else{
+						if(minfostr.selnow.1.0!=""){
+							levm=1
+						}else:if(minfostr.selnow.2.0!=""){
+							levm=2
+						}else{
+							levm=3
+						}
+					}
+				}
+				gosub *refreshjacket
+				gosub *refreshscore
+				gosub *refreshsonginfo
+			}
+			selppluskeyp=stat_
+			getkey stat1,33
+			stat3=0
+			if(usenumpad=1){
+				getkey stat3,numkey_k.2
+			}else{
+				getkey stat3,numkey_c.2
+			}
+			stat1=stat1|stat3
+			stat_=((stat1=1)&(stat2=0)&(ginfo2()=0))
+			if((dialognow=0)&((timenow-selminustp>50)|(selpminuskeyp=0))&(stat1=1)&(stat2=0)&(ginfo2()=0)){
+				repeat 8
+					selnow--
+					if(selnow<0){
+						selnow=mnum-1
+					}
+				loop
+				selnow_confsave=selnow
+				stat1=BASS_SampleGetChannel(selmid,0)
+				BASS_ChannelSetAttribute stat1,2,double(mastervol)/100
+				BASS_ChannelPlay stat1
+				selminustpr=timenow
+				if(selminuskeyp=0):selminustpstart=timenow
+				if(selpminuskeyp=0){
+					selminustp=timenow+250
+				}else:selminustp=timenow
+				levm=levnow
+				if((minfostr.selnow.levm.0="")&(minfo.selnow.0.0>=0)){
+					if(levm=3){
+						if(minfostr.selnow.2.0!=""){
+							levm=2
+						}else:if(minfostr.selnow.1.0!=""){
+							levm=1
+						}else{
+							levm=0
+						}
+					}else:if(levm=2){
+						if(minfostr.selnow.1.0!=""){
+							levm=1
+						}else:if(minfostr.selnow.3.0!=""){
+							levm=3
+						}else{
+							levm=0
+						}
+					}else:if(levm=1){
+						if(minfostr.selnow.0.0!=""){
+							levm=0
+						}else:if(minfostr.selnow.2.0!=""){
+							levm=2
+						}else{
+							levm=3
+						}
+					}else{
+						if(minfostr.selnow.1.0!=""){
+							levm=1
+						}else:if(minfostr.selnow.2.0!=""){
+							levm=2
+						}else{
+							levm=3
+						}
+					}
+				}
+				gosub *refreshjacket
+				gosub *refreshscore
+				gosub *refreshsonginfo
+			}
+			selpminuskeyp=stat_
+			getkey_a stat1,39
+			getkey stat1_2,key.(7+2*analogsw)
+			getkey stat1_2_,key2.(7+2*analogsw)
+			stat1=stat1|stat1_2|stat1_2_|getjoykeystat(7+2*analogsw)|((stickstat.(analogsw)>0)&(analoginput=3/* アナログスティックのみ */))
+			if((dialognow=0)&(timenow-levplustp>120)&(stat1=1)&(stat2=0)&(levnow<3)&(ginfo2()=0)&(minfo.j.0.0>=0)&(minfo.j.0.0<4)){
+				stat3=0
+				if(minfostr.selnow.(levnow+1).0!=""){
+					stat1=BASS_SampleGetChannel(sellid,0)
+					BASS_ChannelSetAttribute stat1,2,double(mastervol)/100
+					BASS_ChannelPlay stat1
+					levnow++
+					levplustp=timenow
+					stat3=1
+				}else:if((levnow=0)&(minfostr.selnow.2.0!="")){
+					stat1=BASS_SampleGetChannel(sellid,0)
+					BASS_ChannelSetAttribute stat1,2,double(mastervol)/100
+					if(levm!=2):BASS_ChannelPlay stat1
+					levnow=2
+					levplustp=timenow
+					stat3=1
+				}else:if((levnow<=1)&(minfostr.selnow.3.0!="")){
+					stat1=BASS_SampleGetChannel(sellid,0)
+					BASS_ChannelSetAttribute stat1,2,double(mastervol)/100
+					if(levm!=3):BASS_ChannelPlay stat1
+					levnow=3
+					levplustp=timenow
+					stat3=1
+				}
+				if(stickstat.(analogsw)>0):levplustp-=stickstat.(analogsw)*3-200
+				levm=levnow
+				if(minfostr.selnow.levm.0=""){
+					if(levm=3){
+						if(minfostr.selnow.2.0!=""){
+							levm=2
+						}else:if(minfostr.selnow.1.0!=""){
+							levm=1
+						}else{
+							levm=0
+						}
+					}else:if(levm=2){
+						if(minfostr.selnow.1.0!=""){
+							levm=1
+						}else:if(minfostr.selnow.3.0!=""){
+							levm=3
+						}else{
+							levm=0
+						}
+					}else:if(levm=1){
+						if(minfostr.selnow.0.0!=""){
+							levm=0
+						}else:if(minfostr.selnow.2.0!=""){
+							levm=2
+						}else{
+							levm=3
+						}
+					}else{
+						if(minfostr.selnow.1.0!=""){
+							levm=1
+						}else:if(minfostr.selnow.2.0!=""){
+							levm=2
+						}else{
+							levm=3
+						}
+					}
+				}
+				if(stat3=1){
+					gosub *refreshscore
+					gosub *refreshjacket
+					gosub *refreshsonginfo
+				}
+			}
+			getkey stat1,37
+			getkey stat1_2,key.(6+2*analogsw)
+			getkey stat1_2_,key2.(6+2*analogsw)
+			stat1=stat1|stat1_2|stat1_2_|getjoykeystat(6+2*analogsw)|((stickstat.(analogsw)<0)&(analoginput=3/* アナログスティックのみ */))
+			if((dialognow=0)&(timenow-levminustp>120)&(stat1=1)&(stat2=0)&(levnow>0)&(ginfo2()=0)&(minfo.j.0.0>=0)&(minfo.j.0.0<4)){
+				stat3=0
+				if(minfostr.selnow.(levnow-1).0!=""){
+					stat1=BASS_SampleGetChannel(sellid,0)
+					BASS_ChannelSetAttribute stat1,2,double(mastervol)/100
+					BASS_ChannelPlay stat1
+					levnow--
+					levminustp=timenow
+					stat3=1
+				}else:if((levnow=3)&(minfostr.selnow.1.0!="")){
+					stat1=BASS_SampleGetChannel(sellid,0)
+					BASS_ChannelSetAttribute stat1,2,double(mastervol)/100
+					if(levm!=1):BASS_ChannelPlay stat1
+					levnow=1
+					levminustp=timenow
+					stat3=1
+				}else:if((levnow>=2)&(minfostr.selnow.0.0!="")){
+					stat1=BASS_SampleGetChannel(sellid,0)
+					BASS_ChannelSetAttribute stat1,2,double(mastervol)/100
+					if(levm!=0):BASS_ChannelPlay stat1
+					levnow=0
+					levminustp=timenow
+					stat3=1
+				}
+				if(stickstat.(analogsw)>0):levminustp+=stickstat.(analogsw)*3+200
+				levm=levnow
+				if(minfostr.selnow.levm.0=""){
+					if(levm=3){
+						if(minfostr.selnow.2.0!=""){
+							levm=2
+						}else:if(minfostr.selnow.1.0!=""){
+							levm=1
+						}else{
+							levm=0
+						}
+					}else:if(levm=2){
+						if(minfostr.selnow.1.0!=""){
+							levm=1
+						}else:if(minfostr.selnow.3.0!=""){
+							levm=3
+						}else{
+							levm=0
+						}
+					}else:if(levm=1){
+						if(minfostr.selnow.0.0!=""){
+							levm=0
+						}else:if(minfostr.selnow.2.0!=""){
+							levm=2
+						}else{
+							levm=3
+						}
+					}else{
+						if(minfostr.selnow.1.0!=""){
+							levm=1
+						}else:if(minfostr.selnow.2.0!=""){
+							levm=2
+						}else{
+							levm=3
+						}
+					}
+				}
+				if(stat3=1){
+					gosub *refreshscore
+					gosub *refreshjacket
+					gosub *refreshsonginfo
+				}
+			}
+		}
+		if(alphabetjump!=0){
+			if((dialognow=0)&(ginfo2()=0)){
+				stat3___=0
+				if(minfo.selnow.0.0=0){
+					repeat selnow
+						if(minfo.(selnow-1-cnt).0.0=-3){
+							stat3___=selnow-cnt
+							break
+						}
+					loop
+				}else:if(minfo.selnow.0.0=-3){
+					stat3___=selnow+1
+				}
+				if(stat3___>=mnum):stat3___=0
+				stat3__=-1
+				stat3_="*"
+				poke stat3_,0,alphabetjump
+				repeat mnum-stat3___,stat3___
+					if((minfo.cnt.0.0=-3)&(stat3___>0)):break
+					_cnt=cnt
+					repeat 4
+						stat3=(strmid(minfostr._cnt.cnt.0,instr(minfostr._cnt.cnt.0,0,"\\")+1,strlen(minfostr._cnt.cnt.0)-instr(minfostr._cnt.cnt.0,0,"\\")-1))
+						stat3=(strmid(stat3,instr(stat3,0,"\\")+1,strlen(stat3)-instr(stat3,0,"\\")-1))
+						if((minfo._cnt.0.0=0)&(strupperf(strmid(stat3,0,1))=stat3_)){
+							stat3__=_cnt
+							break
+						}
+					loop
+					if(stat3__>=0):break
+				loop
+				if((stat3__>=0)&(stat3__!=selnow)){
+					stat1=BASS_SampleGetChannel(selmid,0)
+					BASS_ChannelSetAttribute stat1,2,double(mastervol)/100
+					BASS_ChannelPlay stat1
+					selnow=stat3__
+					selnow_confsave=selnow
+					levm=levnow
+					if((minfostr.selnow.levm.0="")&(minfo.selnow.0.0>=0)){
+						if(levm=3){
+							if(minfostr.selnow.2.0!=""){
+								levm=2
+							}else:if(minfostr.selnow.1.0!=""){
+								levm=1
+							}else{
+								levm=0
+							}
+						}else:if(levm=2){
+							if(minfostr.selnow.1.0!=""){
+								levm=1
+							}else:if(minfostr.selnow.3.0!=""){
+								levm=3
+							}else{
+								levm=0
+							}
+						}else:if(levm=1){
+							if(minfostr.selnow.0.0!=""){
+								levm=0
+							}else:if(minfostr.selnow.2.0!=""){
+								levm=2
+							}else{
+								levm=3
+							}
+						}else{
+							if(minfostr.selnow.1.0!=""){
+								levm=1
+							}else:if(minfostr.selnow.2.0!=""){
+								levm=2
+							}else{
+								levm=3
+							}
+						}
+					}
+				}
+				gosub *refreshjacket
+				gosub *refreshscore
+				gosub *refreshsonginfo
+			}
+			alphabetjump=0
+		}
+		getkey stat2a,13
+		stat2a=(stat2a|getjoykeystat(11))&(ginfo2()=0)
+		if((stat2a=1)&(stat2ap=2)):stat2ap=0:stat2a=2
+		if((stat2a=0)&(stat2ap=2)):stat2ap=0:stat2a=0
+		getkey auto,122
+		auto=auto|getjoykeystat(13)
+		if(autodemo!=2):getkey autodemo,16
+		getkey adjmode,123
+		getkey shift_key,16
+		adjmode=adjmode*shift_key
+		dircache=0
+		if(autodemo=2):auto=1:autodemo=2:autop=0:adjmode=0
+		dirclosep_=0
+		if((dialognow=0)&(dirclosep=0)&(((((stat2a=0)&(stat2ap=1))+((auto*(autop=0))|(adjmode*(adjmodep=0)))*((minfo.selnow.0.0!=-1)&(minfo.selnow.0.0!=-1))>=1)&(ginfo2()=0)&((stat2p=0)|((stat2a=0)&(stat2ap=1))))|(autodemo=2))){
+			if(autodemo=2):autodemo=1
+			if(minfo.selnow.0.0=-1){
+				stat1=BASS_SampleGetChannel(seldirid,0)
+				BASS_ChannelSetAttribute stat1,2,double(mastervol)/100
+				BASS_ChannelPlay stat1
+				dir=minfostr.selnow.0.0
+				dir_confsave=dir
+				dirp=dir
+				dirvol=100
+				diroffset=0
+				gosub *refreshfilelist
+				selnow=0
+				levm=levnow
+				gosub *refreshjacket
+				gosub *reloadscore
+				gosub *refreshscore
+				gosub *refreshsonginfo
+				dirclosep_=1
+			}else:if(minfo.selnow.0.0=-2){
+				if(dir!=""){
+					stat1=BASS_SampleGetChannel(seldirid,0)
+					BASS_ChannelSetAttribute stat1,2,double(mastervol)/100
+					BASS_ChannelPlay stat1
+					dirpp=dir
+					dir=""
+					dirp=""
+					dirvol=100
+					diroffset=0
+					dir_confsave=dir
+					gosub *refreshfilelist
+					selnow=0
+					repeat mnum
+						if((minfo.cnt.0.0=-1)&(minfostr.cnt.0.0=dirpp)):selnow=cnt:break
+					loop
+					levm=levnow
+					gosub *refreshjacket
+					gosub *refreshscore
+					gosub *refreshsonginfo
+					dirclosep_=1
+				}
+			}else:if(minfo.selnow.0.0=-3){
+				stat1=BASS_SampleGetChannel(seldirid,0)
+				BASS_ChannelSetAttribute stat1,2,double(mastervol)/100
+				BASS_ChannelPlay stat1
+				if(sorttype=1){
+					if(minfo.selnow.1.0<19){
+						stat2=0
+						while (levcnt.(minfo.selnow.1.0+1+stat2)=-1)
+							stat2++
+							if(minfo.selnow.1.0+1+stat2>19):stat2=minfo.selnow.1.0-1:_break
+						wend
+						while (minfo.selnow.1.0+1+stat2<=19)
+							if(levcnt.(minfo.selnow.1.0+1+stat2)!=-1):_break
+							stat2++
+						wend
+						if(minfo.selnow.1.0+1+stat2<=19){
+							selnow=levcnt.(minfo.selnow.1.0+1+stat2)
+						}else{
+							selnow=0
+						}
+					}else{
+						selnow=0
+					}
+				}else{
+					if(minfo.selnow.1.0+1<filelistsubdirnum){
+						selnow=subcnt.(minfo.selnow.1.0+1)
+					}else{
+						selnow=0
+					}
+				}
+				levm=levnow
+				gosub *refreshjacket
+				gosub *reloadscore
+				gosub *refreshscore
+				gosub *refreshsonginfo
+				dirclosep_=1
+			}else:if(minfo.selnow.0.0=-4){
+				stat1=BASS_SampleGetChannel(seldirid,0)
+				BASS_ChannelSetAttribute stat1,2,double(mastervol)/100
+				BASS_ChannelPlay stat1
+				dir=".\\"
+				dir_confsave=".\\"
+				dirp=dir
+				dirvol=100
+				diroffset=0
+				gosub *refreshfilelist
+				selnow=0
+				levm=levnow
+				gosub *refreshjacket
+				gosub *reloadscore
+				gosub *refreshscore
+				gosub *refreshsonginfo
+				dirclosep_=1
+			}else:if(minfo.selnow.0.0=-5){
+				if(dir=".\\"){
+					stat1=BASS_SampleGetChannel(seldirid,0)
+					BASS_ChannelSetAttribute stat1,2,double(mastervol)/100
+					BASS_ChannelPlay stat1
+					dirpp=dir
+					dir=""
+					dirp=""
+					dirvol=100
+					diroffset=0
+					dir_confsave=dir
+					gosub *refreshfilelist
+					selnow=0
+					repeat mnum
+						if(minfo.cnt.0.0=-4):selnow=cnt:break
+					loop
+					levm=levnow
+					gosub *refreshjacket
+					gosub *refreshscore
+					gosub *refreshsonginfo
+					dirclosep_=1
+				}
+			}else:if(minfo.selnow.0.0=-6){
+				stat1=BASS_SampleGetChannel(seldirid,0)
+				BASS_ChannelSetAttribute stat1,2,double(mastervol)/100
+				BASS_ChannelPlay stat1
+				dir="?"+minfostr.selnow.0.0
+				dir_confsave=dir
+				dirp=dir
+				dirvol=100
+				diroffset=0
+				gosub *refreshfilelist
+				selnow=0
+				levm=levnow
+				gosub *refreshjacket
+				gosub *reloadscore
+				gosub *refreshscore
+				gosub *refreshsonginfo
+				dirclosep_=1
+			}else:if(minfo.selnow.0.0=-7){
+				if(strmid(dir,0,1)="?"){
+					stat1=BASS_SampleGetChannel(seldirid,0)
+					BASS_ChannelSetAttribute stat1,2,double(mastervol)/100
+					BASS_ChannelPlay stat1
+					dirpp=dir
+					dir=""
+					dirp=""
+					dirvol=100
+					diroffset=0
+					dir_confsave=dir
+					gosub *refreshfilelist
+					selnow=0
+					repeat mnum
+						if((minfo.cnt.0.0=-6)&("?"+minfostr.cnt.0.0=dirpp)):selnow=cnt:break
+					loop
+					levm=levnow
+					gosub *refreshjacket
+					gosub *refreshscore
+					gosub *refreshsonginfo
+					dirclosep_=1
+				}
+			}else:if(minfo.selnow.0.0=-8){
+				stat1=BASS_SampleGetChannel(seldirid,0)
+				BASS_ChannelSetAttribute stat1,2,double(mastervol)/100
+				BASS_ChannelPlay stat1
+				dir="..\\courses"
+				dir_confsave=dir
+				dirp=dir
+				dirvol=100
+				diroffset=0
+				gosub *refreshfilelist
+				selnow=0
+				levm=levnow
+				gosub *refreshjacket
+				gosub *reloadscore
+				gosub *refreshscore
+				gosub *refreshsonginfo
+				dirclosep_=1
+			}else:if(minfo.selnow.0.0=-9){
+				if(dir!=""){
+					stat1=BASS_SampleGetChannel(seldirid,0)
+					BASS_ChannelSetAttribute stat1,2,double(mastervol)/100
+					BASS_ChannelPlay stat1
+					dirpp=dir
+					dir=""
+					dirp=""
+					dirvol=100
+					diroffset=0
+					dir_confsave=dir
+					gosub *refreshfilelist
+					selnow=0
+					repeat mnum
+						if(minfo.cnt.0.0=-8):selnow=cnt:break
+					loop
+					levm=levnow
+					gosub *refreshjacket
+					gosub *refreshscore
+					gosub *refreshsonginfo
+					dirclosep_=1
+				}
+			}else:if(minfo.selnow.0.0=4){
+				// コースモード
+				cnotesfile=minfostr.selnow.levm.5
+				dirp=dir
+				dir=minfostr.selnow.levm.0
+				selp=selnow
+				stateinit=1
+				state=st_playing_
+				iscourse=1
+				dirvol=100
+				diroffset=0
+				stat1=dir
+				sync=0
+				BASS_StreamFree mpid
+				gsel 0
+				break
+			}else{
+				levm=levnow
+				if(minfostr.selnow.levm.0=""){
+					if(levm=3){
+						if(minfostr.selnow.2.0!=""){
+							levm=2
+						}else:if(minfostr.selnow.1.0!=""){
+							levm=1
+						}else{
+							levm=0
+						}
+					}else:if(levm=2){
+						if(minfostr.selnow.1.0!=""){
+							levm=1
+						}else:if(minfostr.selnow.3.0!=""){
+							levm=3
+						}else{
+							levm=0
+						}
+					}else:if(levm=1){
+						if(minfostr.selnow.0.0!=""){
+							levm=0
+						}else:if(minfostr.selnow.2.0!=""){
+							levm=2
+						}else{
+							levm=3
+						}
+					}else{
+						if(minfostr.selnow.1.0!=""){
+							levm=1
+						}else:if(minfostr.selnow.2.0!=""){
+							levm=2
+						}else{
+							levm=3
+						}
+					}
+				}
+				cnotesfile=minfostr.selnow.levm.5
+				csongdir=minfostr.selnow.levm.0
+				dirp=dir
+				selp=selnow
+				stateinit=1
+				state=st_playing_
+				iscourse=0
+				dirvol=100
+				diroffset=0
+				dirtweetopt=""
+				split csongdir,"\\",sndirstat
+				stat1=sndirstat.0
+				exist dir_default+"\\songs\\"+stat1+"\\conf.ini" // 楽曲選曲時
+				if(strsize!=-1){
+					notesel buf
+					noteload dir_default+"\\songs\\"+stat1+"\\conf.ini"
+					repeat notemax
+						noteget stat1,cnt
+						if(headcmp(stat1,7,"volume=")){
+							dirvol=max(int(strmid(stat1,7,4)),0)
+						}
+						if(headcmp(stat1,7,"offset=")){
+							diroffset=int(strmid(stat1,7,16))
+						}
+						if(headcmp(stat1,13,"tweet_option=")){
+							dirtweetopt=strmid(stat1,13,280)
+						}
+					loop
+				}
+				BASS_StreamFree mpid
+				gsel 0
+				break
+			}
+		}
+		if((dirclosep=1)&(stat2a=1)):dirclosep_=1
+		if((dialognow=0)&(stat2ap=0)&(stat2a=1)):stat2astartt=timenow
+		if((dialognow=0)&(stat2ap=1)&(stat2a=1)&(minfo.selnow.levm.1>=1)&(timenow-stat2astartt>750)){
+			// お気に入りの追加/削除
+			favstartt=timenow
+			favkeyp=1
+			if(strmid(dir,0,1)!="?"){
+				dialognow=1
+				favselnum=1
+				repeat 9
+					exist dir_default+"\\songs\\Favorite"+cnt+".fav"
+					if(strsize>0):favselnum=cnt+1
+				loop
+				if(favselnow<0):favselnow=favselnum-1
+				if(favselnow>=favselnum):favselnow=0
+			}else{
+				dialognow=2
+				favselnow2=0
+			}
+		}
+		stat2ap=stat2a
+		dirclosep=dirclosep_
+		// 選曲画面の背景を表示
+		gsel 0
+		redraw 0
+		gmode 0
+		pos 0,0
+		gcopy 29,0,0,scrsize_w,scrsize_h
+		repeat 2
+			gmode 5,,,255+64-min(int(double(256)*sin(double(timenow\4500)*M_PI/4500))*2+64,256)
+			pos -(timenow\18000)*(getsize(853))/18000,getsize(11)+(scrsize_h-getsize(5)-getsize(45))*cnt+int(6.0-minf(double(10)*sin(double((timenow+2250)\4500)*M_PI/4500)*2,6.0)*scrsize_h/480)
+			gcopy 148,0,int(6.0-minf(double(10)*sin(double((timenow+2250)\4500)*M_PI/4500)*2,6.0)*scrsize_h/480),getsize(853),(12-int(12.0-minf(double(10)*sin(double((timenow+2250)\4500)*M_PI/4500)*2,12.0))*scrsize_h/480)
+			pos 853*scrsize_h/480-(timenow\18000)*(getsize(853))/18000,getsize(11)+(scrsize_h-getsize(5)-getsize(45))*cnt+int(6.0-minf(double(10)*sin(double((timenow+2250)\4500)*M_PI/4500)*2,6.0)*scrsize_h/480)
+			gcopy 148,0,int(6.0-minf(double(10)*sin(double((timenow+2250)\4500)*M_PI/4500)*2,6.0)*scrsize_h/480),getsize(853),(12-int(12.0-minf(double(10)*sin(double((timenow+2250)\4500)*M_PI/4500)*2,12.0))*scrsize_h/480)
+		loop
+		font lang.0.0,getsize(18),1
+		autop=auto
+		adjmodep=adjmode
+		stat2p=stat2a
+		stat3=0
+		ts+=max(timenow-timep,1)
+		ts2+=max(timenow-timep,1)
+		ts3+=max(timenow-timep,1)
+		if(s=0):s=1
+		repeat 4
+			getkey stat1,key.cnt
+			getkey stat1_,key2.cnt
+			btkey.cnt=(stat1|stat1_|getjoykeystat(cnt))&(ginfo2()=0)
+		loop
+		optionfl=0
+		if((dialognow=0)&(btkey.0=1)&(btkey.0+btkey.1+btkey.2+btkey.3=1)){
+			getkey stat1,37
+			getkey stat1_,key.(6+analogsw*2)
+			stat1=stat1|stat1_
+			getkey stat1_,key2.(6+analogsw*2)
+			stat1=stat1|stat1_
+			stat1=stat1|(stickstat.(analogsw)<-min(timenow-timep,80)/8)
+			if((stat1=1)&(jselnow=0)&(ts>80)&(shortmode>0)):shortmode--:stat3=1
+			if((stat1=1)&(jselnow=1)&(ts>80)&(longmode>0)):longmode--:stat3=1
+			if((stat1=1)&(jselnow=2)&(ts>80)&(analogmode>0)):analogmode--:stat3=1
+			getkey_a stat1,39
+			getkey stat1_,key.(7+analogsw*2)
+			stat1=stat1|stat1_
+			getkey stat1_,key2.(7+analogsw*2)
+			stat1=stat1|stat1_
+			stat1=stat1|(stickstat.(analogsw)>min(timenow-timep,80)/8)
+			if((stat1=1)&(jselnow=0)&(ts>80)&(shortmode<3)):shortmode++:stat3=1
+			if((stat1=1)&(jselnow=1)&(ts>80)&(longmode<3)):longmode++:stat3=1
+			if((stat1=1)&(jselnow=2)&(ts>80)&(analogmode<3)):analogmode++:stat3=1
+			getkey_a stat1,38
+			getkey stat1_,key.(8-analogsw*2)
+			stat1=stat1|stat1_
+			getkey stat1_,key2.(8-analogsw*2)
+			stat1=stat1|stat1_
+			stat1=stat1|(stickstat.(1-analogsw)<-min(timenow-timep,80)/8)
+			if((stat1=1)&(ts>80)):jselnow--
+			getkey_a stat1,40
+			getkey stat1_,key.(9-analogsw*2)
+			stat1=stat1|stat1_
+			getkey stat1_,key2.(9-analogsw*2)
+			stat1=stat1|stat1_
+			stat1=stat1|(stickstat.(1-analogsw)>min(timenow-timep,80)/8)
+			if((stat1=1)&(ts>80)):jselnow++
+			if(jselnow<0):jselnow=0
+			if(jselnow>2):jselnow=2
+			color 255,255,0
+			pos scrsize_w-170*scrsize_w/480,getsize(388)
+			stat2=lang.1.2
+			if((jselnow=0)&(shortmode>0)){
+				stat2+="<"
+			}else:stat2+=" "
+			if(shortmode=0){
+				stat2+=lang.1.5
+			}else:if(shortmode=1){
+				stat2+=lang.1.6
+			}else:if(shortmode=2){
+				stat2+=lang.1.7
+			}else{
+				stat2+=lang.1.8
+			}
+			if((jselnow=0)&(shortmode<3)){
+				stat2+=">"
+			}
+			stat2+="\n"+lang.1.3
+			if((jselnow=1)&(longmode>0)){
+				stat2+="<"
+			}else:stat2+=" "
+			if(longmode=0){
+				stat2+=lang.1.5
+			}else:if(longmode=1){
+				stat2+=lang.1.6
+			}else:if(longmode=2){
+				stat2+=lang.1.7
+			}else{
+				stat2+=lang.1.8
+			}
+			if((jselnow=1)&(longmode<3)){
+				stat2+=">"
+			}
+			stat2+="\n"+lang.1.4
+			if((jselnow=2)&(analogmode>0)){
+				stat2+="<"
+			}else:stat2+=" "
+			if(analogmode=0){
+				stat2+=lang.1.5
+			}else:if(analogmode=1){
+				stat2+=lang.1.6
+			}else:if(analogmode=2){
+				stat2+=lang.1.7
+			}else{
+				stat2+=lang.1.8
+			}
+			if((jselnow=2)&(analogmode<3)){
+				stat2+=">"
+			}
+			alCreateImage 87,getsize(320),getsize(180)
+			alCopyImageToImage 86,87
+			alFont lang.0.1,getsize(19)
+			alColor 240,255,248
+			alDrawText lang.1.1+"\n\n"+stat2,getsize(30),getsize(20),getsize(260),getsize(140),0,1
+			optionfl=1
+		}else:if((dialognow=0)&(btkey.1=1)&(btkey.0+btkey.1+btkey.2+btkey.3=1)){
+			getkey keystat1,37
+			getkey stat1_,key.(6+analogsw*2)
+			keystat1=keystat1|stat1_
+			getkey stat1_,key2.(6+analogsw*2)
+			keystat1=keystat1|stat1_
+			keystat1=keystat1|(stickstat.(analogsw)<-min(timenow-timep,80)/8)
+			getkey_a keystat2,39
+			getkey stat1_,key.(7+analogsw*2)
+			keystat2=keystat2|stat1_
+			getkey stat1_,key2.(7+analogsw*2)
+			keystat2=keystat2|stat1_
+			keystat2=keystat2|(stickstat.(analogsw)>min(timenow-timep,80)/8)
+			if(dselnow=0){
+				if((keystat1=1)&(ts>80)):effratetype2=max(-1,effratetype2-1):stat3=1
+				if((keystat2=1)&(ts>80)):effratetype2=min(1,effratetype2+1):stat3=1
+			}else{
+				if((keystat1=1)&(ts>80)&(turn>0)):turn--:stat3=1
+				if((keystat2=1)&(ts>80)&(turn<2/*4*/)):turn++:stat3=1
+			}
+			getkey_a stat1,38
+			getkey stat1_,key.(8-analogsw*2)
+			stat1=stat1|stat1_
+			getkey stat1_,key2.(8-analogsw*2)
+			stat1=stat1|stat1_
+			stat1=stat1|(stickstat.(1-analogsw)<-min(timenow-timep,80)/8)
+			if((stat1=1)&(ts>80)):dselnow--
+			getkey_a stat1,40
+			getkey stat1_,key.(9-analogsw*2)
+			stat1=stat1|stat1_
+			getkey stat1_,key2.(9-analogsw*2)
+			stat1=stat1|stat1_
+			stat1=stat1|(stickstat.(1-analogsw)>min(timenow-timep,80)/8)
+			if((stat1=1)&(ts>80)):dselnow++
+			if(dselnow<0):dselnow=0
+			if(dselnow>1):dselnow=1
+			stat2=lang.1.9+"\n        "
+			if((dselnow=0)&(effratetype2>-1)){
+				stat2+="<"
+			}else:stat2+=" "
+			if(effratetype2=-1):stat2+=lang.1.10
+			if(effratetype2=0):stat2+=lang.1.11
+			if(effratetype2=1):stat2+=lang.1.12
+			if((dselnow=0)&(effratetype2<1)):stat2+=">"
+			stat2+="\n\n"+lang.1.15+"\n        "
+			if((dselnow=1)&(turn>0)){
+				stat2+="<"
+			}else:stat2+=" "
+			if(turn=0):stat2+=lang.1.16
+			if(turn=1):stat2+=lang.1.17
+			if(turn=2):stat2+=lang.1.18
+			if(turn=3):stat2+=lang.1.19
+			if(turn=4):stat2+=lang.1.20
+			if((dselnow=1)&(turn<2/*4*/)):stat2+=">"
+			alCreateImage 87,getsize(320),getsize(180)
+			alCopyImageToImage 86,87
+			alFont lang.0.1,getsize(20)
+			alColor 240,255,248
+			alDrawText stat2,getsize(35),getsize(20),getsize(250),getsize(140),0,1
+			optionfl=1
+		}else:if((dialognow=0)&(btkey.2=1)&(btkey.0+btkey.1+btkey.2+btkey.3=1)){
+			getkey stat1,37
+			getkey stat1_,key.(6+analogsw*2)
+			stat1=stat1|stat1_
+			getkey stat1_,key2.(6+analogsw*2)
+			stat1=stat1|stat1_
+			stat1=stat1|(stickstat.(analogsw)<-min(timenow-timep,80)/8)
+			getkey_a stat2,39
+			getkey stat1_,key.(7+analogsw*2)
+			stat2=stat2|stat1_
+			getkey stat1_,key2.(7+nalogsw*2)
+			stat2=stat2|stat1_
+			stat2=stat2|(stickstat.(analogsw)>min(timenow-timep,80)/8)
+			if(s=0):s=1
+			if(sselnow=0){
+				if((stat1=1)&(ts>80)&(assisttick>0)):assisttick--
+				if((stat2=1)&(ts>80)&(assisttick<1)):assisttick++
+			}else:if(sselnow=1){
+				if((stat1=1)&(ts>80)&(autosync>0)):autosync--
+				if((stat2=1)&(ts>80)&(autosync<3)):autosync++
+			}else:if(sselnow=2){
+				if((stat1=1)&(ts>80)&(vtiming>0)):vtiming--
+				if((stat2=1)&(ts>80)&(vtiming<1)):vtiming++
+			}else:if(sselnow=3){
+				if((stat1=1)&(ts>80)&(coloring>0)):coloring--
+				if((stat2=1)&(ts>80)&(coloring<1)):coloring++
+			}else{
+				if((stat1=1)&(ts>80)&(vmov>0)):vmov--
+				if((stat2=1)&(ts>80)&(vmov<1/*2*/)):vmov++
+			}
+			getkey_a stat1,38
+			getkey stat1_,key.(8-analogsw*2)
+			stat1=stat1|stat1_
+			getkey stat1_,key2.(8-analogsw*2)
+			stat1=stat1|stat1_
+			stat1=stat1|(stickstat.(1-analogsw)<-min(timenow-timep,80)/8)
+			if((stat1=1)&(ts>80)):sselnow--
+			getkey_a stat1,40
+			getkey stat1_,key.(9-analogsw*2)
+			stat1=stat1|stat1_
+			getkey stat1_,key2.(9-analogsw*2)
+			stat1=stat1|stat1_
+			stat1=stat1|(stickstat.(1-analogsw)>min(timenow-timep,80)/8)
+			if((stat1=1)&(ts>80)):sselnow++
+			if(sselnow<0):sselnow=0
+			if(sselnow>4):sselnow=4
+			color 255,255,0
+			pos scrsize_w-180*scrsize_w/480,getsize(360)
+			stat2=lang.1.30
+			if((sselnow=0)&(assisttick=1)){
+				stat2+="<"
+			}else:stat2+=" "
+			if(assisttick=1){
+				stat2+=lang.1.31
+			}else{
+				stat2+=lang.1.32
+			}
+			if((sselnow=0)&(assisttick=0)){
+				stat2+=">"
+			}
+			stat2+="\n"+lang.1.37
+			if((sselnow=1)&(autosync>0)){
+				stat2+="<"
+			}else:stat2+=" "
+			if(autosync=3){
+				stat2+=lang.1.38
+			}else:if(autosync=2){
+				stat2+=lang.1.39
+			}else:if(autosync=1){
+				stat2+=lang.1.40
+			}else{
+				stat2+=lang.1.41
+			}
+			if((sselnow=1)&(autosync<3)){
+				stat2+=">"
+			}
+			stat2+="\n"+lang.1.42
+			if((sselnow=2)&(vtiming>0)){
+				stat2+="<"
+			}else:stat2+=" "
+			if(vtiming=0){
+				stat2+=lang.1.43
+			}else{
+				stat2+=lang.1.44
+			}
+			if((sselnow=2)&(vtiming<1)){
+				stat2+=">"
+			}
+			stat2+="\n"+lang.1.45
+			if((sselnow=3)&(coloring>0)){
+				stat2+="<"
+			}else:stat2+=" "
+			if(coloring=0){
+				stat2+=lang.1.46
+			}else{
+				stat2+=lang.1.47
+			}
+			if((sselnow=3)&(coloring<1)){
+				stat2+=">"
+			}
+			stat2+="\n"+lang.1.60
+			if((sselnow=4)&(vmov>0)){
+				stat2+="<"
+			}else:stat2+=" "
+			if(vmov=0){
+				stat2+=lang.1.61
+			}else:if(vmov=1){
+				stat2+=lang.1.62
+			}
+			if((sselnow=4)&(vmov<1/*2*/)){
+				stat2+=">"
+			}
+			alCreateImage 87,getsize(320),getsize(180)
+			alCopyImageToImage 86,87
+			alFont lang.0.1,getsize(18)
+			alColor 240,255,248
+			alDrawText stat2,getsize(20),getsize(20),getsize(280),getsize(140),0,1
+			optionfl=1
+		}else:if((dialognow=0)&(btkey.3=1)&(btkey.0+btkey.1+btkey.2+btkey.3=1)){
+			gosub *refreshhs
+			if(hstypenow=0){
+				stat2=bpm*hsr/10
+			}else:if(hstypenow=1){
+				stat2=hso
+			}else:if(hstypenow=2){
+				stat2=hsc
+			}else:if(hstypenow=3){
+				stat2=hsm
+			}else:if(hstypenow=4){
+				stat2=hsa
+			}
+			getkey_a stat1,38
+			getkey stat1_,key.(9-analogsw*2)
+			stat1=stat1|stat1_
+			getkey stat1_,key2.(9-analogsw*2)
+			stat1=stat1|stat1_
+			stat1=stat1|(stickstat.(1-analogsw)>min(timenow-timep,80)/8)
+			sdim splitstat,64
+			split minfostr.selnow.levm.9,"-",splitstat
+			bpm=max(int(splitstat.(max(length(splitstat)-1,0))),1)
+			if((stat1=1)&(ts3>30)){
+				if((hstypenow=0)&(hsr<99)){
+					hsr++
+				}else:if((hstypenow=1)&(hso<2000)){
+					hso+=25
+				}else:if((hstypenow=2)&(hsc<2000)){
+					hsc+=25
+				}else:if((hstypenow=3)&(hsm<2000)){
+					hsm+=25
+				}else:if((hstypenow=4)&(hsa<2000)){
+					hsa+=25
+				}
+			}
+			getkey_a stat1,40
+			getkey stat1_,key.(8-analogsw*2)
+			stat1=stat1|stat1_
+			getkey stat1_,key2.(8-analogsw*2)
+			stat1=stat1|stat1_
+			stat1=stat1|(stickstat.(1-analogsw)<-min(timenow-timep,80)/8)
+			if((stat1=1)&(ts3>30)){
+				if((hstypenow=0)&(hsr>5)){
+					hsr--
+				}else:if((hstypenow=1)&(hso>25)){
+					hso-=25
+				}else:if((hstypenow=2)&(hsc>25)){
+					hsc-=25
+				}else:if((hstypenow=3)&(hsm>25)){
+					hsm-=25
+				}else:if((hstypenow=4)&(hsa>25)){
+					hsa-=25
+				}
+			}
+			getkey stat1,37
+			getkey stat1_,key.(6+analogsw*2)
+			stat1=stat1|stat1_
+			getkey stat1_,key2.(6+analogsw*2)
+			stat1=stat1|stat1_
+			stat1=stat1|(stickstat.(analogsw)<-min(timenow-timep,80)/4)
+			if((stat1=1)&(ts>80)){
+				gosub *refreshhs
+				hsr=10
+				hso=-1
+				hsc=-1
+				hsm=-1
+				hsa=-1
+				repeat 5
+					hstypenow--
+					if(hstypenow<0):hstypenow=4
+					if(vhstype.hstypenow=1):break
+				loop
+				if(hstypenow=0){
+					hsr=max(min(int(round(double(stat2)/bpm*10)),99),5)
+				}else:if(hstypenow=1){
+					hso=ran(int(round(double(stat2)/25))*25,25,2000)
+				}else:if(hstypenow=2){
+					hsc=ran(int(round(double(stat2)/25))*25,25,2000)
+				}else:if(hstypenow=3){
+					hsm=ran(int(round(double(stat2)/25))*25,25,2000)
+				}else:if(hstypenow=4){
+					hsa=ran(int(round(double(stat2)/25))*25,25,2000)
+				}
+			}
+			getkey_a stat1,39
+			getkey stat1_,key.(7+analogsw*2)
+			stat1=stat1|stat1_
+			getkey stat1_,key2.(7+analogsw*2)
+			stat1=stat1|stat1_
+			stat1=stat1|(stickstat.(analogsw)>min(timenow-timep,80)/4)
+			if((stat1=1)&(ts>80)){
+				gosub *refreshhs
+				hsr=10
+				hsc=-1
+				hsm=-1
+				hsa=-1
+				hso=-1
+				repeat 5
+					hstypenow++
+					if(hstypenow>4):hstypenow=0
+					if(vhstype.hstypenow=1):break
+				loop
+				if(hstypenow=0){
+					hsr=max(min(int(round(double(stat2)/bpm*10)),99),5)
+				}else:if(hstypenow=1){
+					hso=ran(int(round(double(stat2)/25))*25,25,2000)
+				}else:if(hstypenow=2){
+					hsc=ran(int(round(double(stat2)/25))*25,25,2000)
+				}else:if(hstypenow=3){
+					hsm=ran(int(round(double(stat2)/25))*25,25,2000)
+				}else:if(hstypenow=4){
+					hsa=ran(int(round(double(stat2)/25))*25,25,2000)
+				}
+			}
+			color 255,255,0
+			pos scrsize_w-128*scrsize_w/480,getsize(408)
+			if(hstypenow=0){
+				if(strlen(str(hsr))=1){
+					stat1="x0."+hsr
+				}else{
+					stat1=str(hsr)
+					stat1="x"+strmid(stat1,0,1)+"."+strmid(stat1,1,1)
+				}
+			}else:if(hstypenow=1){
+				stat1=""+hso
+			}else:if(hstypenow=2){
+				stat1="C"+hsc
+			}else:if(hstypenow=3){
+				stat1="m"+hsm
+			}else{
+				stat1="a"+hsa
+			}
+			alCreateImage 87,getsize(320),getsize(180)
+			alCopyImageToImage 86,87
+			alFont lang.0.1,getsize(24)
+			alColor 240,255,248
+			alDrawText lang.1.63+"\n          "+stat1,getsize(40),getsize(20),getsize(240),getsize(140),0,1
+			optionfl=1
+		}
+		if(stat3=1):gosub *reloadscore:gosub *refreshscore:gosub *refreshsonginfo
+		cnt2=0
+		// 曲の項目を描画
+		for i,selnow-4,selnow+4,1
+			levmn=levnow
+			if(i<selnow){
+				j=i
+			}else{
+				j=selnow+3-(i-selnow)
+				cnt2=7-(i-selnow)
+			}
+			while (j<0)|(j>=mnum)
+				if(j<0){
+					j+=mnum
+				}else{
+					j-=mnum
+				}
+			wend
+			if(minfostr.j.levmn.0=""){
+				if(levmn=3){
+					if(minfostr.j.2.0!=""){
+						levmn=2
+					}else:if(minfostr.j.1.0!=""){
+						levmn=1
+					}else{
+						levmn=0
+					}
+				}else:if(levmn=2){
+					if(minfostr.j.1.0!=""){
+						levmn=1
+					}else:if(minfostr.j.3.0!=""){
+						levmn=3
+					}else{
+						levmn=0
+					}
+				}else:if(levmn=1){
+					if(minfostr.j.0.0!=""){
+						levmn=0
+					}else:if(minfostr.j.2.0!=""){
+						levmn=2
+					}else{
+						levmn=3
+					}
+				}else{
+					if(minfostr.j.1.0!=""){
+						levmn=1
+					}else:if(minfostr.j.2.0!=""){
+						levmn=2
+					}else{
+						levmn=3
+					}
+				}
+			}
+			if(cnt2<4){
+				alCopyImageToScreen 110+cnt2,0,centersh+getsize(85)+(abs(cnt2-4)*20+abs(cnt2-4)*abs(cnt2-4)*10/4+3-10)*scrsize_h/480,(cnt2*(30+cnt2*2/3)-3)*scrsize_h/480
+				alCopyImageToScreen 101+cnt2,0,centersh+getsize(345)+(abs(cnt2-4)*20+abs(cnt2-4)*abs(cnt2-4)*10/4+3-10)*scrsize_h/480,(cnt2*(30+cnt2*2/3)-10)*scrsize_h/480
+			}else:if(cnt2>4){
+				alCopyImageToScreen 109+cnt2,0,centersh+getsize(85)+(abs(cnt2-4)*20+abs(cnt2-4)*abs(cnt2-4)*13/4+3-10)*scrsize_h/480,(139+cnt2*(34-(cnt2-5)*4/9)-3)*scrsize_h/480
+				alCopyImageToScreen 101+cnt2,0,centersh+getsize(345)+(abs(cnt2-4)*20+abs(cnt2-4)*abs(cnt2-4)*13/4+3-10)*scrsize_h/480,(178+cnt2*(34-(cnt2-5)*3)-13-(cnt2=6)*8)*scrsize_h/480
+			}else:levmn2=levmn
+			cnt2++
+		next
+		alCopyImageToScreen 2,0,centersh+getsize(65),(128+int(round(yure3(timenow-selplustpr,60,1)*3-yure3(timenow-selminustpr,60,1)*3)))*scrsize_h/480,,,0,0
+		// アイコン
+		if(minfostr.selnow.levm.12!=""):alCopyImageToScreen 101+4,0,centersh+getsize(440),getsize(96)+(int(round(yure3(timenow-selplustpr,60,1)*4-yure3(timenow-selminustpr,60,1)*4)))*scrsize_h/480,,,0,0
+		gsel 0
+		// 選択レベルのカーソルを表示
+		gmode 5,,,255
+		if((minfo.selnow.0.0>=0)&(minfo.selnow.0.0<4)){
+			pos centersh+getsize(65)+(236*levmn2)*450*scrsize_h/480/1532-getsize(13),getsize(125)+246*450*scrsize_h/480/1532
+			gcopy 26,0,400*450*scrsize_h/480/1532*((timenow/75)\12),400*450*scrsize_h/480/1532,400*450*scrsize_h/480/1532
+		}
+		// コースモードの曲目を表示
+		if(minfo.selnow.0.0=4){
+			alSelectImage IMG_MSEL_COURSETEMP
+			if(alGetHeight()>96*450*scrsize_h/480/1532+(96-10)*450*scrsize_h/480/1532*4){
+				stat1=(750*(alGetHeight()-(96*450*scrsize_h/480/1532+(96-10)*450*scrsize_h/480/1532*4))/((96-10)*450*scrsize_h/480/1532))
+				alCopyImageToScreen IMG_MSEL_COURSETEMP,0,centersh+getsize(290)-alGetWidth()/2,getsize(240)-(96*450*scrsize_h/480/1532+(96-10)*450*scrsize_h/480/1532*4)/2,,96*450*scrsize_h/480/1532+(96-10)*450*scrsize_h/480/1532*4,,(alGetHeight()-(96*450*scrsize_h/480/1532+(96-10)*450*scrsize_h/480/1532*4))*(max(min((timenow-max(selplustpr,selminustpr))\(stat1+1750),stat1+750),750)-750)/stat1
+			}else{
+				alCopyImageToScreen IMG_MSEL_COURSETEMP,0,centersh+getsize(290)-alGetWidth()/2,getsize(240)-alGetHeight()/2
+			}
+		}
+		// オプションの描画
+		if((optionfl=0)&(dialognow=0)&(btkey.0+btkey.1+btkey.2+btkey.3>=3)){
+			stat2=lang.1.70+mscore.selnow.levmn2.5+"\n"+lang.1.71+mscore.selnow.levmn2.6+"\n"+lang.1.72+mscore.selnow.levmn2.7+"\n"+lang.1.73+mscore.selnow.levmn2.8
+			alCreateImage 87,getsize(320),getsize(180)
+			alCopyImageToImage 86,87
+			alFont lang.0.1,getsize(20)
+			alColor 240,255,248
+			alDrawText stat2,getsize(35),getsize(20),getsize(250),getsize(140),0,1
+			optionfl=1
+		}
+		if(optionfl=1):alCopyImageToScreen 87,0,scrsize_w-getsize(340),(480-200)*scrsize_h/480
+		// 右スクロールバーを表示
+		alCopyImageToScreen 60,0,scrsize_w-getsize(20),0
+		alCopyImageToScreen 61,0,scrsize_w-getsize(20),selnow*scrsize_h/mnum-getsize(10)
+		gmode 7,,,256
+		pos scrsize_w-getsize(430),getsize(456)
+		gcopy 128,0,0,getsize(405),getsize(24)
+		//font lang.0.1,getsize(16),1
+		color 255,255,255
+		pos 8*scrsize_h/480,getsize(458)
+		if(ksm_id@ksm_ir){
+			_drawtxt players.cplayer+"[IR]",getsize(320),getsize(24),getsize(16),0,0
+		}else{
+			_drawtxt players.cplayer,getsize(320),getsize(24),getsize(16),0,0
+		}
+		gmode 0
+		// ダイアログの処理
+		if(dialognow=1){
+			// お気に入り追加ダイアログ
+			getkey_a keystat1,38 ; ↑
+			getkey stat2,key.2
+			getkey stat2_,key2.2
+			keystat1=keystat1|stat2|stat2_|getjoykeystat(2)
+			if((keystat1=1)&(favkeyp=0)&(ginfo2()=0)){
+				favselnow--
+				if(favselnow<0):favselnow=favselnum-1
+			}
+			getkey_a keystat2,40 ; ↓
+			getkey stat2,key.1
+			getkey stat2_,key2.1
+			keystat2=keystat2|stat2|stat2_|getjoykeystat(1)
+			if((keystat2=1)&(favkeyp=0)&(ginfo2()=0)){
+				favselnow++
+				if(favselnow>=favselnum):favselnow=0
+			}
+			getkey enter_key,13
+			enter_key=(enter_key|getjoykeystat(11))
+			if((enter_key=1)&(favkeyp=0)&(ginfo2()=0)){
+				dialognow=0
+				stat2a=2
+				stat2ap=2
+				buf=""
+				notesel buf
+				exist dir_default+"\\songs\\Favorite"+(favselnow+1)+".fav"
+				f=1
+				if(strsize>0):noteload dir_default+"\\songs\\Favorite"+(favselnow+1)+".fav"
+				stat3=notemax
+				repeat notemax
+					noteget stat2,cnt
+					if(stat2=minfostr.selnow.levm.0):f=0
+				loop
+				if(f=1){
+					if((strmid(buf,-1,2)!="\n")&(strlen(buf)>0)):buf+="\n"
+					buf+=minfostr.selnow.levm.0+"\n"
+					buf=replace(buf,"\\\\","/")
+					notesave dir_default+"\\songs\\Favorite"+(favselnow+1)+".fav"
+					if((stat3=0)&(valldir=1)){
+						gosub *refreshfilelist
+						gosub *refreshjacket
+						gosub *refreshscore
+						gosub *refreshsonginfo
+					}
+				}
+			}
+			esc_key=getesckey()
+			if((esc_key=1)&(favkeyp=0)&(ginfo2()=0)){
+				dialognow=0
+			}
+			favkeyp=enter_key|esc_key|keystat1|keystat2
+		}else:if(dialognow=2){
+			// お気に入り削除ダイアログ
+			getkey_a keystat4,39 ; →
+			getkey stat2,key.3
+			getkey stat2_,key2.3
+			keystat4=keystat4|stat2|stat2_|getjoykeystat(3)
+			getkey_a keystat3,37 ; ←
+			getkey stat2,key.0
+			getkey stat2_,key2.0
+			keystat3=keystat3|stat2|stat2_|getjoykeystat(0)
+			if(((keystat3=1)|(keystat4=1))&(favkeyp=0)&(ginfo2()=0)){
+				favselnow2=1-favselnow2
+			}
+			getkey enter_key,13
+			enter_key=(enter_key|getjoykeystat(11))
+			if((enter_key=1)&(favkeyp=0)&(ginfo2()=0)){
+				dialognow=0
+				stat2a=2
+				stat2ap=2
+				if(favselnow2=1){
+					buf=""
+					notesel buf
+					exist dir_default+"\\songs\\"+strmid(dir,1,strlen(dir)-1)+".fav"
+					if(strsize>0):noteload dir_default+"\\songs\\"+strmid(dir,1,strlen(dir)-1)+".fav"
+					f=0
+					repeat notemax
+						noteget stat2,cnt
+						if(stat2=replace(minfostr.selnow.levm.0,"\\\\","/")){
+							notedel cnt
+							f=1
+							break
+						}
+					loop
+					if(f=1){
+						if(buf="\n"):buf=""
+						buf=replace(buf,"\\\\","/")
+						notesave dir_default+"\\songs\\"+strmid(dir,1,strlen(dir)-1)+".fav"
+						if(notemax=0){
+							dir=""
+							selnow=0
+						}
+						gosub *refreshfilelist
+						if((minfostr.selnow.levm.0="")&(minfo.selnow.0.0>=0)){
+							if(levm=3){
+								if(minfostr.selnow.2.0!=""){
+									levm=2
+								}else:if(minfostr.selnow.1.0!=""){
+									levm=1
+								}else{
+									levm=0
+								}
+							}else:if(levm=2){
+								if(minfostr.selnow.1.0!=""){
+									levm=1
+								}else:if(minfostr.selnow.3.0!=""){
+									levm=3
+								}else{
+									levm=0
+								}
+							}else:if(levm=1){
+								if(minfostr.selnow.0.0!=""){
+									levm=0
+								}else:if(minfostr.selnow.2.0!=""){
+									levm=2
+								}else{
+									levm=3
+								}
+							}else{
+								if(minfostr.selnow.1.0!=""){
+									levm=1
+								}else:if(minfostr.selnow.2.0!=""){
+									levm=2
+								}else{
+									levm=3
+								}
+							}
+						}
+						if((dir!="")&(minfo.selnow.levm.1<=0)):selnow--
+						gosub *refreshjacket
+						gosub *refreshscore
+						gosub *refreshsonginfo
+					}
+				}
+			}
+			esc_key=getesckey()
+			if((esc_key=1)&(favkeyp=0)&(ginfo2()=0)){
+				dialognow=0
+			}
+			favkeyp=enter_key|esc_key|keystat3|keystat4
+		}
+		// ダイアログの描画
+		if(dialognow=1){
+			// お気に入り追加ダイアログ
+			gsel 0
+			gmode 6,,,32
+			color 255,255,255
+			gsquare -1,sx_a,sy_a
+			//alCopyModeAlpha double(min(timenow-favstartt,200))/200.0f
+			alCopyImageToScreen 119,0,scrsize_w/2-getsize(288)/2,scrsize_h/2-getsize(96)/2
+			alCopyImageToScreen 120,0,scrsize_w/2-getsize(288)/2+getsize(202),scrsize_h/2-getsize(96)/2+getsize(36),getsize(33),getsize(33),0,getsize(33)*favselnow
+			//alResetCopyMode
+		}else:if(dialognow=2){
+			// お気に入り削除ダイアログ
+			gsel 0
+			gmode 6,,,32
+			color 255,255,255
+			gsquare -1,sx_a,sy_a
+			//alCopyModeAlpha double(min(timenow-favstartt,200))/200.0f
+			alCopyImageToScreen 121,0,scrsize_w/2-getsize(288)/2,scrsize_h/2-getsize(96)/2,getsize(288),getsize(96),0,getsize(96)*favselnow2
+			//alResetCopyMode
+		}
+		// 曲のプレビュー
+		if((csongp!=minfostr.selnow.levmn2.0+"\\"+minfostr.selnow.levmn2.7)&(mfl=1)){
+			BASS_StreamFree mpid
+			mfl=0
+		}
+		if((((minfo.selnow.0.0<0)|(minfo.selnow.0.0>=4)&(timenow-max(selplustp,selminustp)>=150))|((selnow!=selnowp)&(timenow-max(selplustpstart,selminustpstart)>=250)))&(mfl=0)){
+			BASS_ChannelSlideAttribute selbgmid,2,double(mastervol)/100,500-((minfo.selnow.0.0<0)&(timenow-max(selplustp,selminustp)>=250))*250
+		}
+		if((minfo.selnow.0.0>=0)&(minfo.selnow.0.0<4)&(timenow-max(selplustp,selminustp)>=200)&(mfl=0)){
+			chdir dir_default+"\\songs\\"+minfostr.selnow.levmn2.0
+			exist minfostr.selnow.levmn2.7
+			csongfile_exist=1
+			if(strsize<=0):csongfile_exist=0:mfl=0
+			if(strmid(minfostr.selnow.levmn2.7,0,5)="http:"){
+				mpid=BASS_StreamCreateURL(minfostr.selnow.levmn2.7,0,0x20000,0,0)
+				mlength=max(BASS_ChannelGetLength_ms(mpid),1500)
+				csongfile_exist=1
+				BASS_ChannelSetPosition_ms mpid,minfo.selnow.levmn2.2
+				BASS_ChannelSetAttribute mpid,2,0
+				//if(minfo.selnow.levmn2.4>100){
+					hVolFX_p=BASS_ChannelSetFX(mpid,0x10003,0)
+					dim volfx,2
+					volfx=0,tofloat(double(minfo.selnow.levmn2.4)/100.0f)
+					BASS_FXSetParameters hVolFX_p,volfx
+				//}
+				BASS_ChannelSlideAttribute mpid,2,/*double(minfo.selnow.levmn2.4)/100*/double(mastervol)/100,500
+				BASS_ChannelSlideAttribute selbgmid,2,0.0,250
+				BASS_ChannelPlay mpid
+				mfl=1
+			}else:if(csongfile_exist=1){
+				filepath=dir_default+"\\songs\\"+minfostr.selnow.levmn2.0+"\\"+minfostr.selnow.levmn2.7
+				mpid=BASS_StreamCreateFile(0,filepath,0,0,0,0,0x20000)
+				mlength=BASS_ChannelGetLength_ms(mpid)
+				BASS_ChannelSetPosition_ms mpid,minfo.selnow.levmn2.2
+				BASS_ChannelSetAttribute mpid,2,0
+				BASS_ChannelSlideAttribute mpid,2,/*double(minfo.selnow.levmn2.4)/100*/double(mastervol)/100,500
+				//if(minfo.selnow.levmn2.4>100){
+					hVolFX_p=BASS_ChannelSetFX(mpid,0x10003,0)
+					dim volfx,2
+					volfx=0,tofloat(double(minfo.selnow.levmn2.4)/100.0f)
+					BASS_FXSetParameters hVolFX_p,volfx
+				//}
+				BASS_ChannelSlideAttribute selbgmid,2,0.0,250
+				BASS_ChannelPlay mpid
+				mfl=1
+			}
+		}
+		if((minfo.selnow.0.0>=0)&(minfo.selnow.0.0<4)&(timenow-max(selplustp,selminustp)>=250)&(mfl=2)){
+			if(csongfile_exist=1){
+				// フェードイン処理
+				BASS_ChannelSetPosition_ms mpid,minfo.selnow.levmn2.2
+				BASS_ChannelSetAttribute mpid,2,0
+				BASS_ChannelSlideAttribute mpid,2,/*double(minfo.selnow.levmn2.4)/100*/double(mastervol)/100,500
+				BASS_ChannelPlay mpid
+				mfl=1
+			}
+		}
+		if(mfl=1){
+			stat1=BASS_ChannelGetPosition_ms(mpid)
+			if((minfo.selnow.levmn2.2+minfo.selnow.levmn2.3-stat1<=2000)&(minfo.selnow.levmn2.3>0)){
+				// フェードアウト処理
+				BASS_ChannelSlideAttribute mpid,2,0.0,500
+			}
+			if(((minfo.selnow.levmn2.2+minfo.selnow.levmn2.3-stat1<=0)&(minfo.selnow.levmn2.3>0))|(mlength-1<=stat1)){
+				mfl=2
+			}
+		}
+		csongp=minfostr.selnow.levmn2.0+"\\"+minfostr.selnow.levmn2.7
+		if((timenow<100)&(timenow>=0)){
+			gsel 0
+			gmode 3,,,(100-timenow)*256/100
+			color 0,0,0
+			gsquare -1,sx_a,sy_a
+		}
+		if((analoginput=2)&((((timenow-selminustp>50)|(timenow-selplustp>50))&(ts3>30)&(btkey.0+btkey.1+btkey.2+btkey.3!=1))|((ts>80)&(btkey.0+btkey.1+btkey.2+btkey.3=1)))){
+			if(hidem=1):mouse -1,-1
+			mouse defx,defy
+		}
+		redraw 1
+		keshuoff=0
+		await 30
+		gosub *volactive
+		while (ginfo2()!=0)
+			if(timenow<100):gsel 0,1
+			await 100
+		wend
+		if(analoginput=1){
+			keshucnt=0:onkey 1
+		}
+		timep=timenow
+		selnowp=selnow
+		if(ts>80):ts=0
+		if(ts2>60):ts2=0
+		if(ts3>30):ts3=0
+	loop
+	return
+
+*refreshfilelist
+	dir_curp=dir_cur
+	chdir dir_default+"\\songs"
+	dirlist filelistdir2,"*",5
+	filelistdir3=strlowerf(filelistdir2)
+	sortnote filelistdir3,0
+	__dir=dir
+	// filelistdir  … ソート済みディレクトリリスト
+	// filelistdir2 … 未ソートディレクトリリスト
+	// filelistdir3 … ソート済みディレクトリリスト(小文字)
+	notesel filelistdir2
+	filelistdir2_stat=notemax // songsディレクトリ直下のフォルダ数
+	dim sortlist,notemax
+	stat2=0
+	repeat notemax
+		sortget stat2,cnt
+		sortlist.cnt=stat2
+	loop
+	dim minfo,SONG_MAX,4,5
+	sdim minfostr,128,SONG_MAX,4,13
+	mnum=0
+	filelist=""
+	filelistkco=""
+	filelistkco_courses=""
+	if(dir=""){
+		notesel filelistdir2
+		if((notemax>1)&(hidealldir=0)){
+			minfo.mnum.0.0=-4
+			minfostr.mnum.0.0="All"
+			mnum++
+		}
+		notesel filelistkco_courses
+		chdir dir_default+"\\courses"
+		dirlist filelistkco_courses,"*.kco",1
+		if(notemax>0){
+			minfo.mnum.0.0=-8
+			minfostr.mnum.0.0="Courses"
+			mnum++
+		}
+		chdir dir_default+"\\songs"
+		dirlist favlist,"*.fav",1
+		notesel favlist
+		stat1=0
+		repeat notemax
+			noteget fname,cnt-stat1
+			exist dir_default+"\\songs\\"+fname
+			if(strsize<=0){
+				notedel cnt-stat1
+				stat1++
+			}
+		loop
+		favlist2=strlowerf(favlist)
+		if(favlist2!=""):sortnote favlist2,0
+		stat3=0
+		notesel favlist
+		stat1=0
+		repeat notemax
+			sortget stat3,cnt
+			noteget fname,stat3
+			minfo.mnum.0.0=-6
+			minfostr.mnum.0.0=strmid(fname,0,strlen(fname)-4)
+			mnum++
+		loop
+		stat2=0
+		notesel filelistdir2
+		repeat notemax
+			noteget stat1,sortlist.cnt
+			if(stat1=""):continue
+			minfo.mnum.0.0=-1
+			minfostr.mnum.0.0=stat1
+			mnum++
+		loop
+		chdir dir_curp
+		return
+	}
+	if(dir=".\\"){
+		minfo.mnum.0.0=-5
+		minfostr.mnum.0.0="All"
+		dirtype=1
+	}else:if(strmid(dir,0,1)="?"){
+		minfo.mnum.0.0=-7
+		minfostr.mnum.0.0=strmid(dir,1,strlen(dir)-1)
+		dirtype=2
+	}else:if(strmid(dir,0,2)=".."){
+		minfo.mnum.0.0=-9
+		minfostr.mnum.0.0="Courses"
+		dirtype=3
+	}else{
+		sortlist.0=0
+		minfo.mnum.0.0=-2
+		minfostr.mnum.0.0=dir
+		dirtype=0
+	}
+	mnum++
+	if(dirtype=0):filelistdir2=dir
+	dir2=dir
+	dim fvol,SONG_MAX*4
+	dim foffset,SONG_MAX*4
+	filelistnum=0
+	// dirtype
+	//  0…通常
+	//  1…All
+	//  2…Favorite
+	//  3…Courses
+	if(dirtype=3){
+		// Courses
+		dirvol=100
+		diroffset=0
+		filelistdir=""
+		chdir dir_default+"\\courses"
+		dirlist stat1,"*.kco",1
+		notesel stat1
+		repeat notemax
+			noteget stat2,cnt
+			filelistkco+=dir_cur+"\\"+stat2+"\n"
+		loop
+	}else:if(dirtype=2){
+		// Favorite
+		filelistdir=""
+		chdir dir_default+"\\songs"
+		exist strmid(dir,1,strlen(dir)-1)+".fav"
+		if(strsize>0){
+			f=0
+			buf=""
+			notesel filelistdir
+			noteload strmid(dir,1,strlen(dir)-1)+".fav"
+			filelistdir=replace(filelistdir,"/","\\")
+			stat3=""
+			filelistdir3=""
+			repeat notemax
+				noteget stat3,cnt
+				stat3+="\\"
+				split stat3,"\\",sndirstat
+				filelistdir3+=strlowerf(sndirstat.1)+"\n"
+			loop
+			if(filelistdir3!=""):sortnote filelistdir3,0
+			stat3=0
+			dir_p=""
+			repeat notemax
+				sortget stat3,cnt
+				notesel filelistdir
+				noteget stat1,stat3
+				if(stat1=""):f=1:continue
+				stat1+="\\"
+				sdim sndirstat,1
+				split stat1,"\\",sndirstat
+				dir=sndirstat.0
+				if(dir!=dir_p){
+					dirvol=100
+					diroffset=0
+					dirtweetopt=""
+					exist dir_default+"\\songs\\"+dir+"\\conf.ini"
+					if(strsize!=-1){
+						notesel buf
+						noteload dir_default+"\\songs\\"+dir+"\\conf.ini"
+						repeat notemax
+							noteget stat1,cnt
+							if(headcmp(stat1,7,"volume=")){
+								dirvol=max(int(strmid(stat1,7,4)),0)
+							}
+							if(headcmp(stat1,7,"offset=")){
+								diroffset=int(strmid(stat1,7,16))
+							}
+							if(headcmp(stat1,13,"tweet_option=")){
+								dirtweetopt=strmid(stat1,13,280)
+							}
+						loop
+					}
+				}
+				dir_p=dir
+				sndir=sndirstat.1
+				chdir dir_default+"\\songs"
+				dirlist stat1,dir,5
+				if(stat>0){
+					chdir dir_default+"\\songs\\"+dir
+					dirlist stat1,sndir,5
+					if(stat>0){
+						if(length(sndirstat)>=4){
+							chdir dir_default+"\\songs\\"+dir+"\\"+sndir
+							dirlist stat1,sndirstat.2,5
+							if(stat>0){
+								chdir dir_default+"\\songs\\"+dir+"\\"+sndir+"\\"+sndirstat.2
+								dirlist stat1,"*.ksh",1
+								notesel stat1
+								repeat notemax
+									noteget stat2,cnt
+									filelist+=dir_cur+"\\"+stat2+"\n"
+									fvol.filelistnum=dirvol
+									foffset.filelistnum=diroffset
+									filelistnum++
+								loop
+								if(notemax=0):f=1 // 削除フラグ
+							}else{
+								f=1
+							}
+						}else{
+							chdir dir_default+"\\songs\\"+dir+"\\"+sndir
+							dirlist stat1,"*.ksh",1
+							notesel stat1
+							repeat notemax
+								noteget stat2,cnt
+								filelist+=dir_cur+"\\"+stat2+"\n"
+								fvol.filelistnum=dirvol
+								foffset.filelistnum=diroffset
+								filelistnum++
+							loop
+							if(notemax=0):f=1 // 削除フラグ
+						}
+					}else{
+						f=1
+					}
+				}else{
+					f=1
+				}
+			loop
+			if(f=1){
+				stat3=0
+				notesel filelistdir
+				repeat notemax
+					f=0
+					notesel filelistdir
+					noteget stat1,cnt-stat3
+					if(stat1=""){
+						notedel cnt-stat3
+						stat3++
+						continue
+					}
+					stat1+="\\"
+					split stat1,"\\",sndirstat
+					chdir dir_default+"\\songs"
+					dirlist stat1,sndirstat.0,5
+					if(stat>0){
+						chdir dir_default+"\\songs\\"+sndirstat.0
+						dirlist stat1,sndirstat.1,5
+						if(stat>0){
+							chdir dir_default+"\\songs\\"+sndirstat.0+"\\"+sndirstat.1
+							dirlist stat1,"*.ksh",1
+							notesel stat1
+							if(notemax=0):f=1
+						}else{
+							f=1
+						}
+					}else{
+						f=1
+					}
+					if(f=1){
+						notedel cnt-stat3
+						stat3++
+					}
+				loop
+				if(filelistdir="\n"):filelistdir=""
+				notesel filelistdir
+				filelistdir=replace(filelistdir,"\\\\","/")
+				notesave dir_default+"\\songs\\"+strmid(dir2,1,strlen(dir2)-1)+".fav"
+			}
+			buf=""
+		}
+	}else{
+		// All or 通常
+		notesel filelistdir2
+		repeat notemax
+			dirvol=100
+			diroffset=0
+			notesel filelistdir2
+			noteget dir,sortlist.cnt
+			exist dir_default+"\\songs\\"+dir+"\\conf.ini" // フォルダを開いたとき(起動時およびソート方式変更時を含む)
+			if(strsize!=-1){
+				notesel buf
+				noteload dir_default+"\\songs\\"+dir+"\\conf.ini"
+				repeat notemax
+					noteget stat1,cnt
+					if(headcmp(stat1,7,"volume=")){
+						dirvol=max(int(strmid(stat1,7,4)),0)
+					}
+					if(headcmp(stat1,7,"offset=")){
+						diroffset=int(strmid(stat1,7,16))
+					}
+					if(headcmp(stat1,6,"cache=")){
+						dircache=int(strmid(stat1,6,1))
+					}
+				loop
+			}
+			subnamelistnum=0
+			exist dir_default+"\\songs\\"+dir+"\\foldername.csv"
+			if(strsize!=-1){
+				notesel buf
+				noteload dir_default+"\\songs\\"+dir+"\\foldername.csv"
+				if (lpeek(buf, 0) & 0x00FFFFFF) == 0xBFBBEF{
+					isutf8_sub=1
+					DeleteUTF8BOM buf
+				}
+				sdim subnamelist,256,notemax,2
+				repeat notemax
+					noteget stat1,cnt
+					sdim csvstat,256,2
+					csvstr2 csvstat,stat1
+					repeat 2
+						csvstat.cnt=strtrim(csvstat.cnt,0,'"')
+						strrep csvstat.cnt,"\"\"","\""
+					loop
+					if(isutf8_sub=1){
+						subnamelist.subnamelistnum.0=sjisenc(csvstat.0)
+						if(csvstat.1=""){
+							subnamelist.subnamelistnum.1=""
+						}else:subnamelist.subnamelistnum.1=bom+csvstat.1
+					}else{
+						subnamelist.subnamelistnum.0=csvstat.0
+						subnamelist.subnamelistnum.1=csvstat.1
+					}
+					subnamelistnum++
+				loop
+			}
+			chdir dir_default+"\\songs\\"+dir
+			dirlist filelistdir,"*",5
+			filelistdir3=strlowerf(filelistdir)
+			if(filelistdir3!=""):sortnote filelistdir3,0
+			if(dirtype!=1){
+				dirlist stat1,"*.kco",1
+				notesel stat1
+				repeat notemax
+					noteget stat2,cnt
+					filelistkco+=dir_cur+"\\"+stat2+"\n"
+				loop
+			}
+			filelistsubdir="" // 未ソート
+			notesel filelistdir
+			repeat notemax
+				sortget stat3,cnt
+				notesel filelistdir
+				noteget sndir,stat3
+				chdir dir_default+"\\songs\\"+dir+"\\"+sndir
+				dirlist stat1,"*.ksh",1
+				notesel stat1
+				if(notemax=0){
+					filelistsubdir+=sndir+"\n"
+				}
+				repeat notemax
+					noteget stat2,cnt
+					filelist+=dir_cur+"\\"+stat2+"\n"
+					fvol.filelistnum=dirvol
+					foffset.filelistnum=diroffset
+					filelistnum++
+				loop
+			loop
+			filelistsub_start=filelistnum
+			filelistsubdir2=strlowerf(filelistsubdir)  // ソート済み(小文字)
+			notesel filelistsubdir2
+			if(filelistsubdir2!=""):sortnote filelistsubdir2,0
+			filelistsubdirnum=0
+			notesel filelistsubdir
+			dim sortlist2,notemax
+			repeat notemax
+				sortget stat3,cnt
+				sortlist2.cnt=stat3
+			loop
+			repeat notemax
+				notesel filelistsubdir
+				noteget sndir,sortlist2.cnt
+				chdir dir_default+"\\songs\\"+dir
+				chdir sndir
+				filelistsubdir_sndir="" // 未ソート
+				dirlist filelistsubdir_sndir,"*",5
+				filelistsubdir_sndir2=strlowerf(filelistsubdir_sndir)
+				if(filelistsubdir_sndir2!=""):sortnote filelistsubdir_sndir2,0
+				notesel filelistsubdir_sndir
+				if(notemax!=0){
+					filelistsubdirnum++
+				}
+				repeat notemax
+					sortget stat3,cnt
+					notesel filelistsubdir_sndir
+					noteget sndir2,stat3
+					chdir dir_default+"\\songs\\"+dir
+					chdir sndir
+					chdir sndir2
+					dirlist stat1,"*.ksh",1
+					//////////////!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+					notesel stat1
+					repeat notemax
+						noteget stat2,cnt
+						filelist+=dir_cur+"\\"+stat2+"\n"
+						fvol.filelistnum=dirvol
+						foffset.filelistnum=diroffset
+						filelistnum++
+					loop
+				loop
+			loop
+		loop
+	}
+	// コース追加 ここから
+	notesel filelistkco
+	repeat notemax
+		cnt2=cnt
+		notesel filelistkco
+		noteget fname,cnt
+		split fname,"\\",sndirstat
+		stat1=stat
+		sndir=""
+		if(fname=""):continue
+		dim minfonow,5
+		sdim minfonowstr,128,13
+		minfonowstr.0=dir
+		minfonowstr.5=sndirstat.(max(stat1-1,0))
+		mnum++
+		notesel buf
+		noteload fname
+		is_course_utf8=0
+		if (lpeek(buf, 0) & 0x00FFFFFF) == 0xBFBBEF{
+			is_course_utf8=1
+			DeleteUTF8BOM buf
+		}
+		minfonow.4=100
+		csongver=""
+		//if(vfoldername=1):split minfonowstr.0,"\\",dbuf
+		repeat notemax
+			noteget stat1,cnt
+			if(strmid(stat1,0,2)="--"):break
+			if(headcmp(stat1,6,"title=")){
+				minfonowstr.8=strmid(stat1,6,128)
+				if(is_course_utf8=1):minfonowstr.8=bom+minfonowstr.8
+			}else:if(headcmp(stat1,10,"title_img=")){
+				minfonowstr.10=strmid(stat1,10,128)
+				course_sjis_ minfonowstr.10
+			}else:if(headcmp(stat1,12,"information=")){// ※minfonowstr.5はファイル名
+				minfonowstr.6=strmid(stat1,12,128)
+				if(is_course_utf8=1):minfonowstr.6=bom+minfonowstr.6
+			}else:if(headcmp(stat1,5,"icon=")){
+				minfonowstr.12=strmid(stat1,5,128)
+				course_sjis_ minfonowstr.12
+				if(instr(minfonowstr.12,0,".")=-1){
+					minfonowstr.12="..\\..\\imgs\\icon\\"+minfonowstr.12+".png"
+				}
+			}
+		loop
+		minfonow.0=4/*
+		if(vfoldername=1){
+			minfonowstr.8+="("+utf8enc(sndirstat.(max(stat1-1,0)))+")"
+		}*/
+		foreach minfonow
+			minfo.(mnum-1).0.cnt=minfonow.cnt
+		loop
+		foreach minfonowstr
+			minfostr.(mnum-1).0.cnt=minfonowstr.cnt
+		loop
+	loop
+	// コース追加 ここまで
+	//aaaa=d3timer()
+	
+	filelistsub_start=filelistnum //?
+	if(sorttype=0){
+		dirHash=""
+		nowTime = ""+gettime(0)+"/"+gettime(1)+"/"+gettime(3)+" "+gettime(4)+":"+gettime(5)+":"+gettime(6)
+		lastUpdated = nowTime
+		f = 1
+		if (dirtype=0) {
+			exist dir_default+"\\cache\\songs\\"+dir+"_abc.cacheinfo"
+			if (strsize >= 0) {
+				vload dir_default+"\\cache\\songs\\"+dir+"_abc.cacheinfo"
+				f = KSHLib_IsDirectoryUpdated(dir_default+"\\songs\\"+dir, lastUpdated, dirHash)
+				exist dir_default+"\\cache\\songs\\"+dir+"_abc.cache"
+				if (strsize = -1) {
+					f = 1
+				}
+				if (f = 0) {
+					vload dir_default+"\\cache\\songs\\"+dir+"_abc.cache"
+				}
+			} else {
+				_ = KSHLib_IsDirectoryUpdated(dir_default+"\\songs\\"+dir, lastUpdated, dirHash)
+			}
+		}
+		if (f) {
+			dim subcnt,max(filelistsubdirnum,1)
+			subcntnum=0
+			subp=""
+			notesel filelist
+			sdim fnamesort,64,filelistsub_start
+			repeat filelistsub_start
+				notesel filelist
+				noteget fname,cnt
+				split fname,"\\",sndirstat
+				if((strmid(__dir,0,1)="?")|(__dir=".\\")){
+					fnamesort.cnt=strlowerf(sndirstat.(max(stat-2,0)))
+				}else{
+					if(sndirstat.(max(stat-4,0))="songs"){
+						fnamesort.cnt=strlowerf(sndirstat.(max(stat-2,0)))
+					}else{
+						fnamesort.cnt=strlowerf(sndirstat.(max(stat-3,0)))
+					}
+				}
+			loop
+			subnameallfl=0
+			subnameall=""
+			repeat subnamelistnum
+				if(subnamelist.cnt.0="*"){
+					subnameall=subnamelist.cnt.1
+					subnameallfl=1
+					break
+				}
+			loop
+			sortstr fnamesort,0
+			repeat notemax
+				cnt2=cnt
+				stat1=0
+				if(cnt>=filelistsub_start){
+					stat1=cnt
+				}else:sortget stat1,cnt
+				notesel filelist
+				noteget fname,stat1
+				split fname,"\\",sndirstat
+				stat1=stat
+				if(sndirstat.(max(stat1-5,0))="songs"){
+					dir=sndirstat.(max(stat1-4,0))
+					sndir=sndirstat.(max(stat1-3,0))+"\\"+sndirstat.(max(stat1-2,0))
+					if((subp!=sndirstat.(max(stat1-4,0))+"\\"+sndirstat.(max(stat1-3,0)))&(__dir!=".\\")&(strmid(__dir,0,1)!="?")){
+						minfo.mnum.0.0=-3
+						minfo.mnum.2.0=1  // レベル項目とサブフォルダ項目の区別
+						minfostr.mnum.0.0=sndirstat.(max(stat1-3,0))
+						f=1
+						repeat subnamelistnum
+							if(subnamelist.cnt.0=minfostr.mnum.0.0){
+								minfostr.mnum.0.0=subnamelist.cnt.1
+								f=0
+								break
+							}
+						loop
+						if((f=1)&(subnameallfl=1)):minfostr.mnum.0.0=subnameall
+						if(minfostr.mnum.0.0!=""){
+							minfo.mnum.1.0=subcntnum
+							subcnt.subcntnum=mnum
+							subcntnum++
+							mnum++
+						}else{
+							minfo.mnum.0.0=0
+							minfo.mnum.2.0=0
+							minfostr.mnum.0.0=""
+						}
+					}
+					subp=sndirstat.(max(stat1-4,0))+"\\"+sndirstat.(max(stat1-3,0))
+				}else{
+					dir=sndirstat.(max(stat1-3,0))
+					sndir=sndirstat.(max(stat1-2,0))
+				}
+				if((fname = "") | (getpath(fname, 2) != ".ksh")):continue
+	
+				dim minfonow,5
+				sdim minfonowstr,128,13
+				minfonowstr.0=dir+"\\"+sndir
+				minfonowstr.5=sndirstat.(max(stat1-1,0))
+				mnum++
+	
+				/*pChart = KSHLib_OpenChartFile(fname)
+				prefix = ""
+				if (KSHLib_IsChartUTF8(pChart)) {
+					prefix = bom
+				}
+				minfonowstr.8 = prefix + KSHLib_GetChartMetaDataValue(pChart, "title", "")
+				minfonowstr.10 = KSHLib_GetChartMetaDataValue(pChart, "title_img", "") : _sjis_ minfonowstr.10
+				minfonowstr.1 = prefix + KSHLib_GetChartMetaDataValue(pChart, "artist", "")
+				minfonowstr.11 = KSHLib_GetChartMetaDataValue(pChart, "artist_img", "") : _sjis_ minfonowstr.11
+				minfonowstr.2 = prefix + KSHLib_GetChartMetaDataValue(pChart, "effect", "")
+				minfonowstr.3 = KSHLib_GetChartMetaDataValue(pChart, "jacket", "") : _sjis_ minfonowstr.3
+				if(instr(minfonowstr.3,0,".")=-1){
+					if(instr(minfonowstr.0,instr(minfonowstr.0,0,"\\")+1,"\\")>=0){
+						minfonowstr.3="..\\..\\..\\..\\imgs\\jacket\\"+minfonowstr.3+".jpg"
+					}else:minfonowstr.3="..\\..\\..\\imgs\\jacket\\"+minfonowstr.3+".jpg"
+				}
+				minfonowstr.4 = prefix + KSHLib_GetChartMetaDataValue(pChart, "illustrator", "")
+				minfonowstr.6 = prefix + KSHLib_GetChartMetaDataValue(pChart, "information", "")
+				
+				stat2 = KSHLib_GetChartMetaDataValue(pChart, "m", "") : _sjis_ stat2
+				split stat2,";",csongstat
+				minfonowstr.7=csongstat.0
+				
+				minfonow.4 = int(KSHLib_GetChartMetaDataValue(pChart, "mvol", "100"))
+				csongver = KSHLib_GetChartMetaDataValue(pChart, "ver", "")
+				minfonowstr.9 = KSHLib_GetChartMetaDataValue(pChart, "t", "")
+				minfonowstr.12 = KSHLib_GetChartMetaDataValue(pChart, "icon", "") : _sjis_ minfonowstr.12
+	
+				stat2 = KSHLib_GetChartMetaDataValue(pChart, "difficulty", "")
+				if(stat2="light"){
+					minfonow.0=0
+				}else:if(stat2="challenge"){
+					minfonow.0=1
+				}else:if(stat2="extended"){
+					minfonow.0=2
+				}else:minfonow.0=3
+	
+				minfonow.1 = max(int(KSHLib_GetChartMetaDataValue(pChart, "level", "1")), 1)
+				minfonow.2 = int(KSHLib_GetChartMetaDataValue(pChart, "po", "0"))
+				minfonow.3 = int(KSHLib_GetChartMetaDataValue(pChart, "plength", "0"))
+	
+				KSHLib_CloseChartFile pChart*/
+	
+				/**/
+				notesel buf
+				noteload fname,400
+				if(instr(buf,0,"\n--\n")=-1):noteload fname
+				isutf8=0
+				if (lpeek(buf, 0) & 0x00FFFFFF) == 0xBFBBEF{
+					isutf8=1
+					DeleteUTF8BOM buf
+				}
+				minfonowstr.0=dir+"\\"+sndir
+				minfonow.4=100
+				csongver=""
+				//if(vfoldername=1):split minfonowstr.0,"\\",dbuf
+				repeat notemax
+					noteget stat1,cnt
+					if(strmid(stat1,0,2)="--"):break
+					if(headcmp(stat1,6,"title=")){
+						minfonowstr.8=strmid(stat1,6,128)
+						if(isutf8=1):minfonowstr.8=bom+minfonowstr.8
+					}else:if(headcmp(stat1,10,"title_img=")){
+						minfonowstr.10=strmid(stat1,10,128)
+						_sjis_ minfonowstr.10
+					}else:if(headcmp(stat1,7,"artist=")){
+						minfonowstr.1=strmid(stat1,7,128)
+						if(isutf8=1):minfonowstr.1=bom+minfonowstr.1
+					}else:if(headcmp(stat1,11,"artist_img=")){
+						minfonowstr.11=strmid(stat1,11,128)
+						_sjis_ minfonowstr.11
+					}else:if(headcmp(stat1,7,"effect=")){
+						minfonowstr.2=strmid(stat1,7,128)
+						if(isutf8=1):minfonowstr.2=bom+minfonowstr.2
+					}else:if(headcmp(stat1,7,"jacket=")){
+						minfonowstr.3=strmid(stat1,7,128)
+						_sjis_ minfonowstr.3
+						if(instr(minfonowstr.3,0,".")=-1){
+							if(instr(minfonowstr.0,instr(minfonowstr.0,0,"\\")+1,"\\")>=0){
+								minfonowstr.3="..\\..\\..\\..\\imgs\\jacket\\"+minfonowstr.3+".jpg"
+							}else:minfonowstr.3="..\\..\\..\\imgs\\jacket\\"+minfonowstr.3+".jpg"
+						}
+					}else:if(headcmp(stat1,12,"illustrator=")){
+						minfonowstr.4=strmid(stat1,12,128)
+						if(isutf8=1):minfonowstr.4=bom+minfonowstr.4
+					}else:if(headcmp(stat1,12,"information=")){// ※minfonowstr.5はファイル名
+						minfonowstr.6=strmid(stat1,12,128)
+						if(isutf8=1):minfonowstr.6=bom+minfonowstr.6
+					}else:if(headcmp(stat1,2,"m=")){
+						stat2=strmid(stat1,2,1024)
+						_sjis_ stat2
+						split stat2,";",csongstat
+						minfonowstr.7=csongstat.0
+					}else:if(headcmp(stat1,5,"mvol=")){
+						minfonow.4=int(strmid(stat1,5,3))
+					}else:if(headcmp(stat1,4,"ver=")){
+						csongver=strmid(stat1,4,128)
+					}else:if(headcmp(stat1,2,"t=")){
+						minfonowstr.9=strmid(stat1,2,128)
+					}else:if(headcmp(stat1,5,"icon=")){
+						minfonowstr.12=strmid(stat1,5,128)
+						_sjis_ minfonowstr.12
+						if(instr(minfonowstr.12,0,".")=-1){
+							if(instr(minfonowstr.0,instr(minfonowstr.0,0,"\\")+1,"\\")>=0){
+								minfonowstr.12="..\\..\\..\\..\\imgs\\icon\\"+minfonowstr.12+".png"
+							}else:minfonowstr.12="..\\..\\..\\imgs\\icon\\"+minfonowstr.12+".png"
+						}
+					}else:if(headcmp(stat1,11,"difficulty=")){
+						stat2=strmid(stat1,11,16)
+						if(stat2="light"){
+							minfonow.0=0
+						}else:if(stat2="challenge"){
+							minfonow.0=1
+						}else:if(stat2="extended"){
+							minfonow.0=2
+						}else:minfonow.0=3
+					}else:if(headcmp(stat1,6,"level=")){
+						minfonow.1=max(int(strmid(stat1,6,2)),1)
+					}else:if(headcmp(stat1,3,"po=")){
+						minfonow.2=int(strmid(stat1,3,64))
+					}else:if(headcmp(stat1,8,"plength=")){
+						minfonow.3=int(strmid(stat1,8,64))
+					}
+				loop
+				/**/
+				if(csongver=""){
+					minfonow.4=minfonow.4*6/10
+				}
+				if(vfoldername=1){
+					minfonowstr.8+="("+utf8enc(strmid(minfonowstr.0,instr(minfonowstr.0,0,"\\")+1,strlen(minfonowstr.0)-instr(minfonowstr.0,0,"\\")-1))+")"
+				}
+				minfonow.4=minfonow.4*fvol.cnt/100
+				// フォルダが同じものがあれば別難易度として追加
+				mcnt=mnum-1
+				if(mnum-2>0){
+					repeat 4
+						if(minfonowstr.0=minfostr.(mnum-2).cnt.0){
+							mcnt=mnum-2
+							mnum--
+						}
+					loop
+				}
+				foreach minfonow
+					minfo.mcnt.(minfonow.0).cnt=minfonow.cnt
+				loop
+				foreach minfonowstr
+					minfostr.mcnt.(minfonow.0).cnt=minfonowstr.cnt
+				loop
+			loop
+			if ((dircache = 1) && (dirtype = 0)) {
+				vsave_start
+				vsave_put lastUpdated
+				vsave_put dirHash
+				vsave_end dir_default+"\\cache\\songs\\"+dir+"_abc.cacheinfo"
+				vsave_start
+				vsave_put mnum
+				vsave_put minfo
+				vsave_put minfostr
+				vsave_end dir_default+"\\cache\\songs\\"+dir+"_abc.cache"
+			}
+		}
+	}else{
+		dirHash=""
+		nowTime = ""+gettime(0)+"/"+gettime(1)+"/"+gettime(3)+" "+gettime(4)+":"+gettime(5)+":"+gettime(6)
+		lastUpdated = nowTime
+		f = 1
+		if (dirtype=0) {
+			exist dir_default+"\\cache\\songs\\"+dir+"_lv.cacheinfo"
+			if (strsize >= 0) {
+				vload dir_default+"\\cache\\songs\\"+dir+"_lv.cacheinfo"
+				dirHashp=dirHash
+				f = KSHLib_IsDirectoryUpdated(dir_default+"\\songs\\"+dir, lastUpdated, dirHash)
+				exist dir_default+"\\cache\\songs\\"+dir+"_lv.cache"
+				if (strsize = -1) {
+					f = 1
+				}
+				if (f = 0) {
+					vload dir_default+"\\cache\\songs\\"+dir+"_lv.cache"
+				}
+			} else {
+				_ = KSHLib_IsDirectoryUpdated(dir_default+"\\songs\\"+dir, lastUpdated, dirHash)
+			}
+		}
+		if (f) {
+			sdim mlist,384,SONG_MAX
+			dim mlistdif,SONG_MAX
+			dim levcnt,20
+			dim levnum,20
+			repeat 20
+				levcnt.cnt=mnum
+				mlist.mnum="*Lv"+(cnt+1)
+				mnum++
+			loop
+			notesel filelist
+			sdim fnamesort,64,notemax
+			repeat notemax
+				notesel filelist
+				noteget fname,cnt
+				split fname,"\\",sndirstat
+				fnamesort.cnt=strlowerf(sndirstat.(max(stat-2,0)))
+			loop
+			sortstr fnamesort,0
+			repeat notemax
+				cnt2=cnt
+				stat1=0
+				sortget stat1,cnt
+				notesel filelist
+				noteget fname,stat1
+				split fname,"\\",sndirstat
+				stat1=stat
+				if(sndirstat.(max(stat1-5,0))="songs"){
+					dir=sndirstat.(max(stat1-4,0))
+					sndir=sndirstat.(max(stat1-3,0))+"\\"+sndirstat.(max(stat1-2,0))
+				}else{
+					dir=sndirstat.(max(stat1-3,0))
+					sndir=sndirstat.(max(stat1-2,0))
+				}
+				fname2=sndirstat.(max(stat1-1,0))
+				if(fname=""):continue
+				notesel buf
+				noteload fname,400
+				if(instr(buf,0,"\n--\n")=-1):noteload fname
+				isutf8=0
+				if (lpeek(buf, 0) & 0x00FFFFFF) == 0xBFBBEF{
+					isutf8=1
+					DeleteUTF8BOM buf
+				}
+				csonglevel=1
+				csongdifficulty=0
+				f=0
+				repeat notemax
+					noteget stat1,cnt
+					if(strmid(stat1,0,2)="--"):break
+					if(headcmp(stat1,6,"level=")){
+						csonglevel=max(int(strmid(stat1,6,2)),1)
+						f++
+					}
+					if(headcmp(stat1,11,"difficulty=")){
+						stat2=strmid(stat1,11,16)
+						if(stat2="light"){
+							csongdifficulty=0
+						}else:if(stat2="challenge"){
+							csongdifficulty=1
+						}else:if(stat2="extended"){
+							csongdifficulty=2
+						}else:csongdifficulty=3
+						f++
+					}
+					if(f>=2):break
+				loop
+				levnum.(csonglevel-1)++
+				// レベル見出しの位置から追加位置を確定
+				if(csonglevel=20){
+					mcnt=mnum
+				}else{
+					mcnt=max(levcnt.csonglevel,0)
+					for i,csonglevel,20
+						levcnt.i++
+					next
+					for i,mnum-1,mcnt-1,-1
+						mlist.(i+1)=mlist.i
+						mlistdif.(i+1)=mlistdif.i
+					next
+				}
+				mlist.mcnt=dir+"\\"+sndir+"\\"+fname2
+				mlistdif.mcnt=csongdifficulty
+				mnum++
+			loop
+			stat1=0
+			repeat 20
+				if(levnum.cnt=0){
+					ardel mlist,mnum,levcnt.cnt
+					ardel mlistdif,mnum,levcnt.cnt
+					repeat 20-cnt,cnt
+						levcnt.cnt--
+					loop
+					levcnt.cnt=-1
+					mnum--
+				}
+			loop
+			chdir dir_default+"\\songs\\"
+			repeat mnum
+				if(strmid(mlist.cnt,0,3)="*Lv"){
+					minfo.cnt.0.0=-3
+					minfo.cnt.1.0=int(strmid(mlist.cnt,3,2))-1
+					minfo.cnt.2.0=0  // レベル項目とサブフォルダ項目の区別
+					minfostr.cnt.0.0=strmid(mlist.cnt,1,4)
+				}else:if(strmid(mlist.cnt,0,1)="*"){
+					minfo.cnt.0.0=-2
+					minfostr.cnt.0.0=strmid(mlist.cnt,1,384-1)
+				}else:if(mlist.cnt!=""){
+					sdim dbuf,1,1
+					split mlist.cnt,"\\",dbuf
+					dif=mlistdif.cnt
+					if(length(dbuf)=4){
+						minfostr.cnt.dif.5=dbuf.3
+					}else{
+						minfostr.cnt.dif.5=dbuf.2
+					}
+	
+					if(length(dbuf)=4){
+						minfostr.cnt.dif.0=dbuf.0+"\\"+dbuf.1+"\\"+dbuf.2
+					}else{
+						minfostr.cnt.dif.0=dbuf.0+"\\"+dbuf.1
+					}
+	
+					/*pChart = KSHLib_OpenChartFile(dir_default+"\\songs\\"+mlist.cnt)
+					prefix = ""
+					if (KSHLib_IsChartUTF8(pChart)) {
+						prefix = bom
+					}
+	#define minfonow minfo.cnt.dif
+	#define minfonowstr minfostr.cnt.dif
+					minfonowstr.8 = prefix + KSHLib_GetChartMetaDataValue(pChart, "title", "")
+					minfonowstr.10 = KSHLib_GetChartMetaDataValue(pChart, "title_img", "") : _sjis_ minfonowstr.10
+					minfonowstr.1 = prefix + KSHLib_GetChartMetaDataValue(pChart, "artist", "")
+					minfonowstr.11 = KSHLib_GetChartMetaDataValue(pChart, "artist_img", "") : _sjis_ minfonowstr.11
+					minfonowstr.2 = prefix + KSHLib_GetChartMetaDataValue(pChart, "effect", "")
+					minfonowstr.3 = KSHLib_GetChartMetaDataValue(pChart, "jacket", "") : _sjis_ minfonowstr.3
+					if(instr(minfonowstr.3,0,".")=-1){
+						if(instr(minfonowstr.0,instr(minfonowstr.0,0,"\\")+1,"\\")>=0){
+							minfonowstr.3="..\\..\\..\\..\\imgs\\jacket\\"+minfonowstr.3+".jpg"
+						}else:minfonowstr.3="..\\..\\..\\imgs\\jacket\\"+minfonowstr.3+".jpg"
+					}
+					minfonowstr.4 = prefix + KSHLib_GetChartMetaDataValue(pChart, "illustrator", "")
+					minfonowstr.6 = prefix + KSHLib_GetChartMetaDataValue(pChart, "information", "")
+					
+					stat2 = KSHLib_GetChartMetaDataValue(pChart, "m", "") : _sjis_ stat2
+					split stat2,";",csongstat
+					minfonowstr.7=csongstat.0
+					
+					minfonow.4 = int(KSHLib_GetChartMetaDataValue(pChart, "mvol", "100"))
+					csongver = KSHLib_GetChartMetaDataValue(pChart, "ver", "")
+					minfonowstr.9 = KSHLib_GetChartMetaDataValue(pChart, "t", "")
+					minfonowstr.12 = KSHLib_GetChartMetaDataValue(pChart, "icon", "") : _sjis_ minfonowstr.12
+	
+					stat2 = KSHLib_GetChartMetaDataValue(pChart, "difficulty", "")
+					if(stat2="light"){
+						minfonow.0=0
+					}else:if(stat2="challenge"){
+						minfonow.0=1
+					}else:if(stat2="extended"){
+						minfonow.0=2
+					}else:minfonow.0=3
+		
+					minfonow.1 = max(int(KSHLib_GetChartMetaDataValue(pChart, "level", "1")), 1)
+					minfonow.2 = int(KSHLib_GetChartMetaDataValue(pChart, "po", "0"))
+					minfonow.3 = int(KSHLib_GetChartMetaDataValue(pChart, "plength", "0"))
+	#undef minfonow
+	#undef minfonowstr
+	
+					KSHLib_CloseChartFile pChart*/
+	
+					/**/
+					notesel buf
+					noteload dir_default+"\\songs\\"+mlist.cnt
+					isutf8=0
+					if (lpeek(buf, 0) & 0x00FFFFFF) == 0xBFBBEF{
+						isutf8=1
+						DeleteUTF8BOM buf
+					}
+					if(length(dbuf)=4){
+						minfostr.cnt.dif.0=dbuf.0+"\\"+dbuf.1+"\\"+dbuf.2
+					}else{
+						minfostr.cnt.dif.0=dbuf.0+"\\"+dbuf.1
+					}
+					minfo.cnt.dif.4=100
+					cnt3=cnt
+					csongver=""
+					repeat notemax
+						noteget stat1,cnt
+						if(strmid(stat1,0,2)="--"):break
+						if(headcmp(stat1,6,"title=")){
+							minfostr.cnt3.dif.8=strmid(stat1,6,128)
+							if(isutf8=1):minfostr.cnt3.dif.8=bom+minfostr.cnt3.dif.8
+						}else:if(headcmp(stat1,10,"title_img=")){
+							minfostr.cnt3.dif.10=strmid(stat1,10,128)
+							_sjis_ minfostr.cnt3.dif.10
+						}else:if(headcmp(stat1,7,"artist=")){
+							minfostr.cnt3.dif.1=strmid(stat1,7,128)
+							if(isutf8=1):minfostr.cnt3.dif.1=bom+minfostr.cnt3.dif.1
+						}else:if(headcmp(stat1,11,"artist_img=")){
+							minfostr.cnt3.dif.11=strmid(stat1,11,128)
+							_sjis_ minfostr.cnt3.dif.11
+						}else:if(headcmp(stat1,7,"effect=")){
+							minfostr.cnt3.dif.2=strmid(stat1,7,128)
+							if(isutf8=1):minfostr.cnt3.dif.2=bom+minfostr.cnt3.dif.2
+						}else:if(headcmp(stat1,7,"jacket=")){
+							minfostr.cnt3.dif.3=strmid(stat1,7,128)
+							_sjis_ minfostr.cnt3.dif.3
+							if(instr(minfostr.cnt3.dif.3,0,".")=-1){
+								if(instr(minfostr.cnt3.dif.0,instr(minfostr.cnt3.dif.0,0,"\\")+1,"\\")>=0){
+									minfostr.cnt3.dif.3="..\\..\\..\\..\\imgs\\jacket\\"+minfostr.cnt3.dif.3+".jpg"
+								}else:minfostr.cnt3.dif.3="..\\..\\..\\imgs\\jacket\\"+minfostr.cnt3.dif.3+".jpg"
+							}
+						}else:if(headcmp(stat1,12,"illustrator=")){
+							minfostr.cnt3.dif.4=strmid(stat1,12,128)
+							if(isutf8=1):minfostr.cnt3.dif.4=bom+minfostr.cnt3.dif.4
+						}else:if(headcmp(stat1,12,"information=")){// ※minfonowstr.5はファイル名
+							minfostr.cnt3.dif.6=strmid(stat1,12,128)
+							if(isutf8=1):minfostr.cnt3.dif.6=bom+minfostr.cnt3.dif.6
+						}else:if(headcmp(stat1,2,"m=")){
+							stat2=strmid(stat1,2,1024)
+							_sjis_ stat2
+							split stat2,";",csongstat
+							minfostr.cnt3.dif.7=csongstat.0
+						}else:if(headcmp(stat1,5,"mvol=")){
+							minfo.cnt3.dif.4=int(strmid(stat1,5,3))
+						}else:if(headcmp(stat1,4,"ver=")){
+							csongver=strmid(stat1,4,128)
+						}else:if(headcmp(stat1,2,"t=")){
+							minfostr.cnt3.dif.9=strmid(stat1,2,128)
+						}else:if(headcmp(stat1,5,"icon=")){
+							minfostr.cnt3.dif.12=strmid(stat1,5,128)
+							_sjis_ minfostr.cnt3.dif.12
+							if(instr(minfostr.cnt3.dif.12,0,".")=-1){
+								if(instr(minfostr.cnt3.dif.0,instr(minfostr.cnt3.dif.0,0,"\\")+1,"\\")>=0){
+									minfostr.cnt3.dif.12="..\\..\\..\\..\\imgs\\icon\\"+minfostr.cnt3.dif.12+".png"
+								}else:minfostr.cnt3.dif.12="..\\..\\..\\imgs\\icon\\"+minfostr.cnt3.dif.12+".png"
+							}
+							continue
+						}else:if(headcmp(stat1,11,"difficulty=")){
+							stat2=strmid(stat1,11,16)
+							if(stat2="light"){
+								minfo.cnt3.dif.0=0
+							}else:if(stat2="challenge"){
+								minfo.cnt3.dif.0=1
+							}else:if(stat2="extended"){
+								minfo.cnt3.dif.0=2
+							}else:minfo.cnt3.dif.0=3
+						}else:if(headcmp(stat1,6,"level=")){
+							minfo.cnt3.dif.1=max(int(strmid(stat1,6,2)),1)
+						}else:if(headcmp(stat1,3,"po=")){
+							minfo.cnt3.dif.2=int(strmid(stat1,3,64))
+						}else:if(headcmp(stat1,8,"plength=")){
+							minfo.cnt3.dif.3=int(strmid(stat1,8,64))
+						}
+					loop
+					/**/
+					if(csongver=""){
+						minfo.cnt3.dif.4=minfo.cnt3.dif.4*6/10
+					}
+					if(vfoldername=1){
+						minfostr.cnt3.dif.8+="("+utf8enc(strmid(minfostr.cnt3.dif.8,instr(minfostr.cnt3.dif.8,0,"\\")+1,strlen(minfostr.cnt3.dif.8)-instr(minfostr.cnt3.dif.8,0,"\\")-1))+")"
+					}
+				}
+			loop
+			if ((dircache = 1) && (dirtype = 0)) {
+				vsave_start
+				vsave_put lastUpdated
+				vsave_put dirHash
+				vsave_end dir_default+"\\cache\\songs\\"+dir+"_lv.cacheinfo"
+				vsave_start
+				vsave_put mnum
+				vsave_put minfo
+				vsave_put minfostr
+				vsave_put levcnt
+				vsave_put levnum
+				vsave_end dir_default+"\\cache\\songs\\"+dir+"_lv.cache"
+			}
+		}
+	}
+	sdim mlist,1
+	if(valldir=1){
+		footerdirnum=0
+		if(dir2=".\\"){
+			chdir dir_default+"\\courses"
+			dirlist filelistkco_courses,"*.kco",1
+			notesel filelistkco_courses
+			if(notemax>0){
+				minfo.mnum.0.0=-8
+				minfostr.mnum.0.0="Courses"
+				mnum++
+				footerdirnum++
+			}
+		}
+		chdir dir_default+"\\songs"
+		dirlist favlist,"*.fav",1
+		notesel favlist
+		stat1=0
+		repeat notemax
+			noteget fname,cnt-stat1
+			exist dir_default+"\\songs\\"+fname
+			if(strsize<=0){
+				notedel cnt-stat1
+				stat1++
+			}
+		loop
+		favlist2=strlowerf(favlist)
+		if(favlist2!=""):sortnote favlist2,0
+		notesel favlist
+		stat2_2=notemax
+		stat3=0
+		dim sortlist,notemax
+		repeat notemax
+			sortget stat3,cnt
+			sortlist.cnt=stat3
+			noteget fname,stat3
+			if(dir2="?"+strmid(fname,0,strlen(fname)-4)):stat2_2=cnt
+		loop
+		if(dir2=".\\"):stat2_2=0
+		if(dir2="..\\courses"):stat2_2=0
+		repeat max(notemax-stat2_2-(strmid(dir2,0,1)="?"),0),stat2_2+(strmid(dir2,0,1)="?")
+			noteget fname,sortlist.cnt
+			minfo.mnum.0.0=-6
+			minfostr.mnum.0.0=strmid(fname,0,strlen(fname)-4)
+			footerdirnum++
+			mnum++
+		loop
+		chdir dir_default+"\\songs"
+		dirlist filelistdir,"*",5
+		notesel filelistdir
+		filelistdir3=strlowerf(filelistdir)
+		stat2=0
+		if(filelistdir3!=""):sortnote filelistdir3,0
+		repeat notemax
+			stat3=0
+			sortget stat3,cnt
+			notesel filelistdir
+			noteget stat1,stat3
+			if(stat1=dir):stat2=cnt:break
+		loop
+		if(dirtype!=0):stat2=0
+		repeat max(notemax-stat2-(dirtype=0),0),stat2+(dirtype=0)
+			stat3=0
+			sortget stat3,cnt
+			notesel filelistdir
+			noteget stat1,stat3
+			if(stat1=""):continue
+			minfo.mnum.0.0=-1
+			minfostr.mnum.0.0=stat1
+			mnum++
+			footerdirnum++
+		loop
+		if((dir2!="..\\courses")&(dir2!=".\\")){
+			if((filelistdir2_stat>1)&(hidealldir=0)){
+				notesel filelistdir
+				minfo.mnum.0.0=-4
+				minfostr.mnum.0.0="All"
+				mnum++
+				footerdirnum++
+			}
+			chdir dir_default+"\\courses"
+			dirlist filelistkco_courses,"*.kco",1
+			notesel filelistkco_courses
+			if(notemax>0){
+				minfo.mnum.0.0=-8
+				minfostr.mnum.0.0="Courses"
+				mnum++
+				footerdirnum++
+			}
+		}
+		repeat stat2_2
+			stat3=0
+			notesel favlist
+			noteget fname,sortlist.cnt
+			if(fname=""):continue
+			minfo.mnum.0.0=-6
+			minfostr.mnum.0.0=strmid(fname,0,strlen(fname)-4)
+			mnum++
+			footerdirnum++
+		loop
+		repeat stat2
+			stat3=0
+			sortget stat3,cnt
+			notesel filelistdir
+			noteget stat1,stat3
+			if(stat1=""):continue
+			minfo.mnum.0.0=-1
+			minfostr.mnum.0.0=stat1
+			mnum++
+			footerdirnum++
+		loop
+		if((dir2="..\\courses")&(hidealldir=0)){
+			notesel filelistdir
+			if(notemax>1){
+				minfo.mnum.0.0=-4
+				minfostr.mnum.0.0="All"
+				mnum++
+				footerdirnum++
+			}
+		}
+	}
+	chdir dir_curp
+	if(dir2=".\\"):dir=".\\"
+	if(strmid(dir2,0,1)="?"):dir=dir2
+	buf=""
+	return
+
+*refreshjacket
+	alCreateImage 3,512*450*scrsize_h/480/1532,512*450*scrsize_h/480/1532
+	alDeleteImage 35
+	alCreateImageByFile 35,dir_default+"\\songs\\"+minfostr.selnow.levm.0+"\\"+minfostr.selnow.levm.3
+	alStretchImageToImage 35,3,0,0,alGetWidth(),alGetHeight(),0,0,512*450*scrsize_h/480/1532,512*450*scrsize_h/480/1532
+	// アイコン
+	alCreateImage 101+4,getsize(128),getsize(64)
+	alDeleteImage 35
+	alCreateImageByFile 35,dir_default+"\\songs\\"+minfostr.selnow.levm.0+"\\"+minfostr.selnow.levm.12
+	alStretchImageToImage 35,101+4,0,0,alGetWidth(),alGetHeight(),0,0,getsize(128),getsize(64)
+	repeat 4
+		j=selnow-4+cnt
+		while (j<0)|(j>=mnum)
+			if(j<0){
+				j+=mnum
+			}else{
+				j-=mnum
+			}
+		wend
+		if(minfostr.j.levm.0!=""){
+			levmm=levm
+		}else{
+			if(levm=3){
+				if(minfostr.j.2.0!=""){
+					levmm=2
+				}else:if(minfostr.j.1.0!=""){
+					levmm=1
+				}else{
+					levmm=0
+				}
+			}else:if(levm=2){
+				if(minfostr.j.1.0!=""){
+					levmm=1
+				}else:if(minfostr.j.3.0!=""){
+					levmm=3
+				}else{
+					levmm=0
+				}
+			}else:if(levm=1){
+				if(minfostr.j.0.0!=""){
+					levmm=0
+				}else:if(minfostr.j.2.0!=""){
+					levmm=2
+				}else{
+					levmm=3
+				}
+			}else{
+				if(minfostr.j.1.0!=""){
+					levmm=1
+				}else:if(minfostr.j.2.0!=""){
+					levmm=2
+				}else{
+					levmm=3
+				}
+			}
+		}
+		if(minfostr.j.levmm.3=""){
+			alCreateImage 14+cnt,422*450*scrsize_h/480/1532,422*450*scrsize_h/480/1532
+		}else{
+			alCreateImage 14+cnt,422*450*scrsize_h/480/1532,422*450*scrsize_h/480/1532
+			alDeleteImage 35
+			alCreateImageByFile 35,dir_default+"\\songs\\"+minfostr.j.levmm.0+"\\"+minfostr.j.levmm.3
+			alStretchImageToImage 35,14+cnt,0,0,alGetWidth(),alGetHeight(),0,0,422*450*scrsize_h/480/1532,422*450*scrsize_h/480/1532
+		}
+		// アイコン
+		alCreateImage 101+cnt,getsize(48),getsize(24)
+		alDeleteImage 35
+		alCreateImageByFile 35,dir_default+"\\songs\\"+minfostr.j.levmm.0+"\\"+minfostr.j.levmm.12
+		alStretchImageToImage 35,101+cnt,0,0,alGetWidth(),alGetHeight(),0,0,getsize(48),getsize(24)
+	loop
+	repeat 3
+		j=selnow+1+cnt
+		while (j<0)|(j>=mnum)
+			if(j<0){
+				j+=mnum
+			}else{
+				j-=mnum
+			}
+		wend
+		if(minfostr.j.levm.0!=""){
+			levmm=levm
+		}else{
+			if(levm=3){
+				if(minfostr.j.2.0!=""){
+					levmm=2
+				}else:if(minfostr.j.1.0!=""){
+					levmm=1
+				}else{
+					levmm=0
+				}
+			}else:if(levm=2){
+				if(minfostr.j.1.0!=""){
+					levmm=1
+				}else:if(minfostr.j.3.0!=""){
+					levmm=3
+				}else{
+					levmm=0
+				}
+			}else:if(levm=1){
+				if(minfostr.j.0.0!=""){
+					levmm=0
+				}else:if(minfostr.j.2.0!=""){
+					levmm=2
+				}else{
+					levmm=3
+				}
+			}else{
+				if(minfostr.j.1.0!=""){
+					levmm=1
+				}else:if(minfostr.j.2.0!=""){
+					levmm=2
+				}else{
+					levmm=3
+				}
+			}
+		}
+		if(minfostr.j.levmm.3=""){
+			alCreateImage 18+cnt,422*450*scrsize_h/480/1532,422*450*scrsize_h/480/1532
+		}else{
+			alCreateImage 18+cnt,422*450*scrsize_h/480/1532,422*450*scrsize_h/480/1532
+			alDeleteImage 35
+			alCreateImageByFile 35,dir_default+"\\songs\\"+minfostr.j.levmm.0+"\\"+minfostr.j.levmm.3
+			alStretchImageToImage 35,18+cnt,0,0,alGetWidth(),alGetHeight(),0,0,422*450*scrsize_h/480/1532,422*450*scrsize_h/480/1532
+		}
+		// アイコン
+		alCreateImage 106+cnt,getsize(48),getsize(24)
+		alDeleteImage 35
+		alCreateImageByFile 35,dir_default+"\\songs\\"+minfostr.j.levmm.0+"\\"+minfostr.j.levmm.12
+		alStretchImageToImage 35,106+cnt,0,0,alGetWidth(),alGetHeight(),0,0,getsize(48),getsize(24)
+	loop
+	levmp=levm
+	return
+
+*refreshjacketup
+	if((levmp!=levm)&(minfo.selnow.levm.0>=0)){
+		gosub *refreshjacket
+		return
+	}
+	repeat 3
+		alSelectImage 16-cnt
+		alCreateImage 17-cnt,alGetWidth(),alGetHeight()
+		alCopyImageToImage 16-cnt,17-cnt,0,0
+		// アイコン
+		alSelectImage 103-cnt
+		alCreateImage 104-cnt,alGetWidth(),alGetHeight()
+		alCopyImageToImage 103-cnt,104-cnt,0,0
+	loop
+	repeat 2
+		alSelectImage 19-cnt
+		alCreateImage 20-cnt,alGetWidth(),alGetHeight()
+		alCopyImageToImage 19-cnt,20-cnt,0,0
+		// アイコン
+		alSelectImage 107-cnt
+		alCreateImage 108-cnt,alGetWidth(),alGetHeight()
+		alCopyImageToImage 107-cnt,108-cnt,0,0
+	loop
+	alCreateImage 3,512*450*scrsize_h/480/1532,512*450*scrsize_h/480/1532
+	alDeleteImage 35
+	alCreateImageByFile 35,dir_default+"\\songs\\"+minfostr.selnow.levm.0+"\\"+minfostr.selnow.levm.3
+	alStretchImageToImage 35,3,0,0,alGetWidth(),alGetHeight(),0,0,512*450*scrsize_h/480/1532,512*450*scrsize_h/480/1532
+	// アイコン
+	alCreateImage 101+4,getsize(128),getsize(64)
+	alDeleteImage 35
+	alCreateImageByFile 35,dir_default+"\\songs\\"+minfostr.selnow.levm.0+"\\"+minfostr.selnow.levm.12
+	alStretchImageToImage 35,101+4,0,0,alGetWidth(),alGetHeight(),0,0,getsize(128),getsize(64)
+	j=selnow+1
+	repeat 2
+		while (j<0)|(j>=mnum)
+			if(j<0){
+				j+=mnum
+			}else{
+				j-=mnum
+			}
+		wend
+		if(minfostr.j.levm.0!=""){
+			levmm=levm
+		}else{
+			if(levm=3){
+				if(minfostr.j.2.0!=""){
+					levmm=2
+				}else:if(minfostr.j.1.0!=""){
+					levmm=1
+				}else{
+					levmm=0
+				}
+			}else:if(levm=2){
+				if(minfostr.j.1.0!=""){
+					levmm=1
+				}else:if(minfostr.j.3.0!=""){
+					levmm=3
+				}else{
+					levmm=0
+				}
+			}else:if(levm=1){
+				if(minfostr.j.0.0!=""){
+					levmm=0
+				}else:if(minfostr.j.2.0!=""){
+					levmm=2
+				}else{
+					levmm=3
+				}
+			}else{
+				if(minfostr.j.1.0!=""){
+					levmm=1
+				}else:if(minfostr.j.2.0!=""){
+					levmm=2
+				}else{
+					levmm=3
+				}
+			}
+		}
+		if(minfostr.j.levmm.3=""){
+			alCreateImage 18-cnt*4,422*450*scrsize_h/480/1532,422*450*scrsize_h/480/1532
+		}else{
+			alCreateImage 18-cnt*4,422*450*scrsize_h/480/1532,422*450*scrsize_h/480/1532
+			alDeleteImage 35
+			alCreateImageByFile 35,dir_default+"\\songs\\"+minfostr.j.levmm.0+"\\"+minfostr.j.levmm.3
+			alStretchImageToImage 35,18-cnt*4,0,0,alGetWidth(),alGetHeight(),0,0,422*450*scrsize_h/480/1532,422*450*scrsize_h/480/1532
+		}
+		// アイコン
+		alCreateImage 106-cnt*5,getsize(48),getsize(24)
+		alDeleteImage 35
+		alCreateImageByFile 35,dir_default+"\\songs\\"+minfostr.j.levmm.0+"\\"+minfostr.j.levmm.12
+		alStretchImageToImage 35,106-cnt*5,0,0,alGetWidth(),alGetHeight(),0,0,getsize(48),getsize(24)
+		j=selnow-4
+	loop
+	levmp=levm
+	return
+
+*refreshjacketdown
+	if((levmp!=levm)&(minfo.selnow.levm.0>=0)){
+		gosub *refreshjacket
+		return
+	}
+	repeat 3
+		alSelectImage 15+cnt
+		alCreateImage 14+cnt,alGetWidth(),alGetHeight()
+		alCopyImageToImage 15+cnt,14+cnt,0,0
+		// アイコン
+		alSelectImage 102+cnt
+		alCreateImage 101+cnt,alGetWidth(),alGetHeight()
+		alCopyImageToImage 102+cnt,101+cnt,0,0
+	loop
+	repeat 2
+		alSelectImage 19+cnt
+		alCreateImage 18+cnt,alGetWidth(),alGetHeight()
+		alCopyImageToImage 19+cnt,18+cnt,0,0
+		// アイコン
+		alSelectImage 107+cnt
+		alCreateImage 106+cnt,alGetWidth(),alGetHeight()
+		alCopyImageToImage 107+cnt,106+cnt,0,0
+	loop
+	alCreateImage 3,512*450*scrsize_h/480/1532,512*450*scrsize_h/480/1532
+	alDeleteImage 35
+	alCreateImageByFile 35,dir_default+"\\songs\\"+minfostr.selnow.levm.0+"\\"+minfostr.selnow.levm.3
+	alStretchImageToImage 35,3,0,0,alGetWidth(),alGetHeight(),0,0,512*450*scrsize_h/480/1532,512*450*scrsize_h/480/1532
+	// アイコン
+	alCreateImage 101+4,getsize(128),getsize(64)
+	alDeleteImage 35
+	alCreateImageByFile 35,dir_default+"\\songs\\"+minfostr.selnow.levm.0+"\\"+minfostr.selnow.levm.12
+	alStretchImageToImage 35,101+4,0,0,alGetWidth(),alGetHeight(),0,0,getsize(128),getsize(64)
+	j=selnow-1
+	repeat 2
+		while (j<0)|(j>=mnum)
+			if(j<0){
+				j+=mnum
+			}else{
+				j-=mnum
+			}
+		wend
+		if(minfostr.j.levm.0!=""){
+			levmm=levm
+		}else{
+			if(levm=3){
+				if(minfostr.j.2.0!=""){
+					levmm=2
+				}else:if(minfostr.j.1.0!=""){
+					levmm=1
+				}else{
+					levmm=0
+				}
+			}else:if(levm=2){
+				if(minfostr.j.1.0!=""){
+					levmm=1
+				}else:if(minfostr.j.3.0!=""){
+					levmm=3
+				}else{
+					levmm=0
+				}
+			}else:if(levm=1){
+				if(minfostr.j.0.0!=""){
+					levmm=0
+				}else:if(minfostr.j.2.0!=""){
+					levmm=2
+				}else{
+					levmm=3
+				}
+			}else{
+				if(minfostr.j.1.0!=""){
+					levmm=1
+				}else:if(minfostr.j.2.0!=""){
+					levmm=2
+				}else{
+					levmm=3
+				}
+			}
+		}
+		if(minfostr.j.levmm.3=""){
+			alCreateImage 17+cnt*3,422*450*scrsize_h/480/1532,422*450*scrsize_h/480/1532
+		}else{
+			alCreateImage 17+cnt*3,422*450*scrsize_h/480/1532,422*450*scrsize_h/480/1532
+			alDeleteImage 35
+			alCreateImageByFile 35,dir_default+"\\songs\\"+minfostr.j.levmm.0+"\\"+minfostr.j.levmm.3
+			alStretchImageToImage 35,17+cnt*3,0,0,alGetWidth(),alGetHeight(),0,0,422*450*scrsize_h/480/1532,422*450*scrsize_h/480/1532
+		}
+		// アイコン
+		alCreateImage 104+cnt*4,getsize(48),getsize(24)
+		alDeleteImage 35
+		alCreateImageByFile 35,dir_default+"\\songs\\"+minfostr.j.levmm.0+"\\"+minfostr.j.levmm.12
+		alStretchImageToImage 35,104+cnt*4,0,0,alGetWidth(),alGetHeight(),0,0,getsize(48),getsize(24)
+		j=selnow+3
+	loop
+	levmp=levm
+	return
+
+*refreshsonginfo
+	color 255,255,255
+	cnt2=0
+	j=selnow
+	levmn=levnow
+	if(minfostr.j.levmn.0=""){
+		if(levmn=3){
+			if(minfostr.j.2.0!=""){
+				levmn=2
+			}else:if(minfostr.j.1.0!=""){
+				levmn=1
+			}else{
+				levmn=0
+			}
+		}else:if(levmn=2){
+			if(minfostr.j.1.0!=""){
+				levmn=1
+			}else:if(minfostr.j.3.0!=""){
+				levmn=3
+			}else{
+				levmn=0
+			}
+		}else:if(levmn=1){
+			if(minfostr.j.0.0!=""){
+				levmn=0
+			}else:if(minfostr.j.2.0!=""){
+				levmn=2
+			}else{
+				levmn=3
+			}
+		}else{
+			if(minfostr.j.1.0!=""){
+				levmn=1
+			}else:if(minfostr.j.2.0!=""){
+				levmn=2
+			}else{
+				levmn=3
+			}
+		}
+	}
+	for i,selnow-4,selnow+4,1
+		if(i<selnow){
+			j=i
+		}else{
+			j=selnow+3-(i-selnow)
+			cnt2=7-(i-selnow)
+		}
+		while (j<0)|(j>=mnum)
+			if(j<0){
+				j+=mnum
+			}else{
+				j-=mnum
+			}
+		wend
+		levmn2=levnow
+		if(minfostr.j.levmn2.0=""){
+			if(levmn2=3){
+				if(minfostr.j.2.0!=""){
+					levmn2=2
+				}else:if(minfostr.j.1.0!=""){
+					levmn2=1
+				}else{
+					levmn2=0
+				}
+			}else:if(levmn2=2){
+				if(minfostr.j.1.0!=""){
+					levmn2=1
+				}else:if(minfostr.j.3.0!=""){
+					levmn2=3
+				}else{
+					levmn2=0
+				}
+			}else:if(levmn2=1){
+				if(minfostr.j.0.0!=""){
+					levmn2=0
+				}else:if(minfostr.j.2.0!=""){
+					levmn2=2
+				}else{
+					levmn2=3
+				}
+			}else{
+				if(minfostr.j.1.0!=""){
+					levmn2=1
+				}else:if(minfostr.j.2.0!=""){
+					levmn2=2
+				}else{
+					levmn2=3
+				}
+			}
+		}
+		if(cnt2<4){
+			if(minfo.j.0.0<0){
+				alCopyImageToImage 29*(minfo.j.0.0!=-3)+92*(minfo.j.0.0=-3)*(minfo.j.2.0=0)+IMG_MSEL_SUB1*(minfo.j.0.0=-3)*(minfo.j.2.0=1),21+cnt2-(cnt2>4)
+				alSelectImage 21+cnt2-(cnt2>4)
+				alColor 255,255,255
+				alFont lang.0.0,18
+				alDrawText_CalcRect_ tsize,minfostr.j.levmn2.0
+				if(tsize.2/9>30){
+					alFont lang.0.0,getsize(24)
+				}else{
+					alFont lang.0.0,getsize(26)
+				}
+				if(minfo.j.0.0=-1){
+					stat1="     "+minfostr.j.0.0+"   >>"
+				}else:if(minfo.j.0.0=-2){
+					stat1="<<   "+minfostr.j.0.0+"     "
+				}else:if(minfo.j.0.0=-4){
+					stat1="     "+minfostr.j.0.0+"   >>"
+				}else:if(minfo.j.0.0=-5){
+					stat1="<<   "+minfostr.j.0.0+"     "
+				}else:if(minfo.j.0.0=-6){
+					stat1="     "+minfostr.j.0.0+"   >>"
+				}else:if(minfo.j.0.0=-7){
+					stat1="<<   "+minfostr.j.0.0+"     "
+				}else:if(minfo.j.0.0=-8){
+					stat1="     "+minfostr.j.0.0+"   >>"
+				}else:if(minfo.j.0.0=-9){
+					stat1="<<   "+minfostr.j.0.0+"     "
+				}else{
+					stat1=minfostr.j.0.0
+				}
+				alDrawText stat1, 16*450*scrsize_h/480/1532, 73*450*scrsize_h/480/1532, 1600*450*scrsize_h/480/1532, 100*450*scrsize_h/480/1532, 1, 1
+			}else:if(minfo.j.0.0=4){
+				alCopyImageToImage 150+(cnt2>4),21+cnt2-(cnt2>4)
+				alSelectImage 21+cnt2-(cnt2>4)
+				alColor 255,255,255
+				if(sorttype=1):levmnstat=levmn:levmn=levmn2
+				if(minfostr.j.levmn.0=""){
+					stat0=minfostr.j.levmn2.0
+					stat1=minfostr.j.levmn2.8
+					stat2=minfostr.j.levmn2.1
+					stat3=minfostr.j.levmn2.3
+					stat4=minfostr.j.levmn2.10
+					stat5=minfostr.j.levmn2.11
+				}else{
+					stat0=minfostr.j.levmn.0
+					stat1=minfostr.j.levmn.8
+					stat2=minfostr.j.levmn.1
+					stat3=minfostr.j.levmn.3
+					stat4=minfostr.j.levmn.10
+					stat5=minfostr.j.levmn.11
+				}
+				if(stat4=""){
+					alFont lang.0.0,18
+					alDrawText_CalcRect_ tsize,stat1
+					if(tsize.2/9>50){
+						alFont lang.0.0,getsize(11),1
+					}else:if(tsize.2/9>40){
+						alFont lang.0.0,getsize(12),1
+					}else:if(tsize.2/9>34){
+						alFont lang.0.0,getsize(13),1
+					}else:if(tsize.2/9>26){
+						alFont lang.0.0,getsize(15),1
+					}else{
+						alFont lang.0.0,getsize(17),1
+					}
+					alDrawText stat1, 16*450*scrsize_h/480/1532, 10*450*scrsize_h/480/1532, 1604*450*scrsize_h/480/1532, 110*450*scrsize_h/480/1532, 1, 1
+				}else{
+					alCreateImageByFile 85,dir_default+"\\songs\\"+stat0+"\\"+stat4
+					alCopyModeColorMatrix colmatrix
+					alSelectImage 85
+					alStretchImageToImage 85,21+cnt2-(cnt2>4),0,0,alGetWidth(),alGetHeight(),(16+575)*450*scrsize_h/480/1532-alGetWidth()*(70*450*scrsize_h/480/1532)/alGetHeight()/2, 30*450*scrsize_h/480/1532, alGetWidth()*(70*450*scrsize_h/480/1532)/alGetHeight(), 70*450*scrsize_h/480/1532
+					alSelectImage 21+cnt2-(cnt2>4)
+					alResetCopyMode
+				}
+				if((minfostr.j.levmn.0!="")&(md.cnt2>=0)){
+					alCopyImageToImage 8,21+cnt2-(cnt2>4),144*450*scrsize_h/480/1532,139*450*scrsize_h/480/1532,188*450*scrsize_h/480/1532,78*450*scrsize_h/480/1532,0,78*450*scrsize_h/480/1532*md.cnt2
+				}
+				stat3=0
+				repeat 3
+					stat1=pc.cnt2\(powf(10,3-cnt))/powf(10,2-cnt)
+					if((stat1!=0)|(stat3=1)|(cnt=2)):alStretchImageToImage 10,21+cnt2-(cnt2>4),0,120*450*scrsize_h/480/1532*stat1,136*450*scrsize_h/480/1532,120*450*scrsize_h/480/1532,(144+188+50)*450*scrsize_h/480/1532+getsize(11)*cnt,(372-212)*450*scrsize_h/480/1532,getsize(10),getsize(11)
+					if(stat1!=0):stat3=1
+				loop
+				if(sorttype=1):levmn=levmnstat
+			}else{
+				alCopyImageToImage 11,21+cnt2-(cnt2>4)
+				alSelectImage 21+cnt2-(cnt2>4)
+				alColor 255,255,255
+				if(sorttype=1):levmnstat=levmn:levmn=levmn2
+				if(minfostr.j.levmn.0=""){
+					stat0=minfostr.j.levmn2.0
+					stat1=minfostr.j.levmn2.8
+					stat2=minfostr.j.levmn2.1
+					stat3=minfostr.j.levmn2.3
+					stat4=minfostr.j.levmn2.10
+					stat5=minfostr.j.levmn2.11
+				}else{
+					stat0=minfostr.j.levmn.0
+					stat1=minfostr.j.levmn.8
+					stat2=minfostr.j.levmn.1
+					stat3=minfostr.j.levmn.3
+					stat4=minfostr.j.levmn.10
+					stat5=minfostr.j.levmn.11
+				}
+				if(stat4=""){
+					alFont lang.0.0,18
+					alDrawText_CalcRect_ tsize,stat1
+					if(tsize.2/9>50){
+						alFont lang.0.0,getsize(11),1
+					}else:if(tsize.2/9>40){
+						alFont lang.0.0,getsize(12),1
+					}else:if(tsize.2/9>34){
+						alFont lang.0.0,getsize(13),1
+					}else:if(tsize.2/9>26){
+						alFont lang.0.0,getsize(15),1
+					}else{
+						alFont lang.0.0,getsize(17),1
+					}
+					alDrawText stat1, 16*450*scrsize_h/480/1532, 10*450*scrsize_h/480/1532, 1150*450*scrsize_h/480/1532, 110*450*scrsize_h/480/1532, 1, 1
+				}else{
+					alCreateImageByFile 85,dir_default+"\\songs\\"+stat0+"\\"+stat4
+					alCopyModeColorMatrix colmatrix
+					alSelectImage 85
+					alStretchImageToImage 85,21+cnt2-(cnt2>4),0,0,alGetWidth(),alGetHeight(),(16+575)*450*scrsize_h/480/1532-alGetWidth()*(70*450*scrsize_h/480/1532)/alGetHeight()/2, 30*450*scrsize_h/480/1532, alGetWidth()*(70*450*scrsize_h/480/1532)/alGetHeight(), 70*450*scrsize_h/480/1532
+					alSelectImage 21+cnt2-(cnt2>4)
+					alResetCopyMode
+				}
+				if(stat5=""){
+					alFont lang.0.0,getsize(15)
+					alDrawText stat2, 464*450*scrsize_h/480/1532, 98*450*scrsize_h/480/1532, 705*450*scrsize_h/480/1532, 142*450*scrsize_h/480/1532, 1, 1
+				}else{
+					alCreateImageByFile 85,dir_default+"\\songs\\"+stat0+"\\"+stat5
+					alCopyModeColorMatrix colmatrix
+					alSelectImage 85
+					alStretchImageToImage 85,21+cnt2-(cnt2>4),0,0,alGetWidth(),alGetHeight(),(464+352)*450*scrsize_h/480/1532-alGetWidth()*(64*450*scrsize_h/480/1532)/alGetHeight()/2, (98+35+4)*450*scrsize_h/480/1532, alGetWidth()*(64*450*scrsize_h/480/1532)/alGetHeight(), 64*450*scrsize_h/480/1532
+					alSelectImage 21+cnt2-(cnt2>4)
+					alResetCopyMode
+				}
+				if(stat3!=""){
+					alSelectImage 14+cnt2
+					alCopyImageToImage 14+cnt2,21+cnt2-(cnt2>4),1198*450*scrsize_h/480/1532,18*450*scrsize_h/480/1532,alGetWidth(),alGetHeight(),0,0
+				}
+				if((minfostr.j.levmn.0!="")&(minfo.j.0.1>=0)&(minfo.j.levmn.1>0)){
+					stat1=minfo.j.levmn.1-1
+					if(stat1>19):stat1=19
+					if(stat1<0):stat1=0
+					alCopyImageToImage 58,21+cnt2-(cnt2>4),56*450*scrsize_h/480/1532,143*450*scrsize_h/480/1532,75*450*scrsize_h/480/1532,60*450*scrsize_h/480/1532,0,60*450*scrsize_h/480/1532*stat1
+				}
+				if((minfostr.j.levmn.0!="")&(md.cnt2>=0)){
+					alCopyImageToImage 8,21+cnt2-(cnt2>4),144*450*scrsize_h/480/1532,139*450*scrsize_h/480/1532,188*450*scrsize_h/480/1532,78*450*scrsize_h/480/1532,0,78*450*scrsize_h/480/1532*md.cnt2
+				}
+				alCopyImageToImage 7,21+cnt2-(cnt2>4),370*450*scrsize_h/480/1532,150*450*scrsize_h/480/1532,64*450*scrsize_h/480/1532,64*450*scrsize_h/480/1532,0,64*450*scrsize_h/480/1532*(gr.cnt2+1)
+				if(sorttype=1):levmn=levmnstat
+			}
+		}else:if(cnt2>4){
+			if(minfo.j.0.0<0){
+				alCopyImageToImage 30*(minfo.j.0.0!=-3)+93*(minfo.j.0.0=-3)*(minfo.j.2.0=0)+IMG_MSEL_SUB2*(minfo.j.0.0=-3)*(minfo.j.2.0=1),21+cnt2-(cnt2>4)
+				alSelectImage 21+cnt2-(cnt2>4)
+				alColor 255,255,255
+				alFont lang.0.0,18
+				alDrawText_CalcRect_ tsize,minfostr.j.levmn2.0
+				if(tsize.2/9>30){
+					alFont lang.0.0,getsize(24)
+				}else{
+					alFont lang.0.0,getsize(26)
+				}
+				if(minfo.j.0.0=-1){
+					stat1="     "+minfostr.j.0.0+"   >>"
+				}else:if(minfo.j.0.0=-2){
+					stat1="<<   "+minfostr.j.0.0+"     "
+				}else:if(minfo.j.0.0=-4){
+					stat1="     "+minfostr.j.0.0+"   >>"
+				}else:if(minfo.j.0.0=-5){
+					stat1="<<   "+minfostr.j.0.0+"     "
+				}else:if(minfo.j.0.0=-6){
+					stat1="     "+minfostr.j.0.0+"   >>"
+				}else:if(minfo.j.0.0=-7){
+					stat1="<<   "+minfostr.j.0.0+"     "
+				}else:if(minfo.j.0.0=-8){
+					stat1="     "+minfostr.j.0.0+"   >>"
+				}else:if(minfo.j.0.0=-9){
+					stat1="<<   "+minfostr.j.0.0+"     "
+				}else{
+					stat1=minfostr.j.0.0
+				}
+				alDrawText stat1, 16*450*scrsize_h/480/1532, 304*450*scrsize_h/480/1532, 1600*450*scrsize_h/480/1532, 100*450*scrsize_h/480/1532, 1, 1
+			}else:if(minfo.j.0.0=4){
+				alCopyImageToImage 150+(cnt2>4),21+cnt2-(cnt2>4)
+				alSelectImage 21+cnt2-(cnt2>4)
+				alColor 255,255,255
+				if(sorttype=1):levmnstat=levmn:levmn=levmn2
+				if(minfostr.j.levmn.0=""){
+					stat0=minfostr.j.levmn2.0
+					stat1=minfostr.j.levmn2.8
+					stat2=minfostr.j.levmn2.1
+					stat3=minfostr.j.levmn2.3
+					stat4=minfostr.j.levmn2.10
+					stat5=minfostr.j.levmn2.11
+				}else{
+					stat0=minfostr.j.levmn.0
+					stat1=minfostr.j.levmn.8
+					stat2=minfostr.j.levmn.1
+					stat3=minfostr.j.levmn.3
+					stat4=minfostr.j.levmn.10
+					stat5=minfostr.j.levmn.11
+				}
+				if(stat4=""){
+					alFont lang.0.0,18
+					alDrawText_CalcRect_ tsize,stat1
+					if(tsize.2/9>50){
+						alFont lang.0.0,getsize(11),1
+					}else:if(tsize.2/9>40){
+						alFont lang.0.0,getsize(12),1
+					}else:if(tsize.2/9>34){
+						alFont lang.0.0,getsize(13),1
+					}else:if(tsize.2/9>26){
+						alFont lang.0.0,getsize(15),1
+					}else{
+						alFont lang.0.0,getsize(17),1
+					}
+					alDrawText stat1, 16*450*scrsize_h/480/1532, 222*450*scrsize_h/480/1532, 1604*450*scrsize_h/480/1532, 110*450*scrsize_h/480/1532, 1, 1
+				}else{
+					alCreateImageByFile 85,dir_default+"\\songs\\"+stat0+"\\"+stat4
+					alCopyModeColorMatrix colmatrix
+					alSelectImage 85
+					alStretchImageToImage 85,21+cnt2-(cnt2>4),0,0,alGetWidth(),alGetHeight(),(16+575)*450*scrsize_h/480/1532-alGetWidth()*(70*450*scrsize_h/480/1532)/alGetHeight()/2, 242*450*scrsize_h/480/1532, alGetWidth()*(70*450*scrsize_h/480/1532)/alGetHeight(), 70*450*scrsize_h/480/1532
+					alSelectImage 21+cnt2-(cnt2>4)
+					alResetCopyMode
+				}
+				if((minfostr.j.levmn.0!="")&(md.cnt2>=0)){
+					alCopyImageToImage 8,21+cnt2-(cnt2>4),144*450*scrsize_h/480/1532,351*450*scrsize_h/480/1532,188*450*scrsize_h/480/1532,78*450*scrsize_h/480/1532,0,78*450*scrsize_h/480/1532*md.cnt2
+				}
+				stat3=0
+				repeat 3
+					stat1=pc.cnt2\(powf(10,3-cnt))/powf(10,2-cnt)
+					if((stat1!=0)|(stat3=1)|(cnt=2)):alStretchImageToImage 10,21+cnt2-(cnt2>4),0,120*450*scrsize_h/480/1532*stat1,136*450*scrsize_h/480/1532,120*450*scrsize_h/480/1532,(144+188+50)*450*scrsize_h/480/1532+getsize(11)*cnt,372*450*scrsize_h/480/1532,getsize(10),getsize(11)
+					if(stat1!=0):stat3=1
+				loop
+				if(sorttype=1):levmn=levmnstat
+			}else{
+				alCopyImageToImage 12,21+cnt2-(cnt2>4)
+				alSelectImage 21+cnt2-(cnt2>4)
+				alColor 255,255,255
+				if(sorttype=1):levmnstat=levmn:levmn=levmn2
+				if(minfostr.j.levmn.0=""){
+					stat0=minfostr.j.levmn2.0
+					stat1=minfostr.j.levmn2.8
+					stat2=minfostr.j.levmn2.1
+					stat3=minfostr.j.levmn2.3
+					stat4=minfostr.j.levmn2.10
+					stat5=minfostr.j.levmn2.11
+				}else{
+					stat0=minfostr.j.levmn.0
+					stat1=minfostr.j.levmn.8
+					stat2=minfostr.j.levmn.1
+					stat3=minfostr.j.levmn.3
+					stat4=minfostr.j.levmn.10
+					stat5=minfostr.j.levmn.11
+				}
+				if(stat4=""){
+					alFont lang.0.0,18
+					alDrawText_CalcRect_ tsize,stat1
+					if(tsize.2/9>50){
+						alFont lang.0.0,getsize(11),1
+					}else:if(tsize.2/9>40){
+						alFont lang.0.0,getsize(12),1
+					}else:if(tsize.2/9>34){
+						alFont lang.0.0,getsize(13),1
+					}else:if(tsize.2/9>26){
+						alFont lang.0.0,getsize(15),1
+					}else{
+						alFont lang.0.0,getsize(17),1
+					}
+					alDrawText stat1, 16*450*scrsize_h/480/1532, 222*450*scrsize_h/480/1532, 1150*450*scrsize_h/480/1532, 110*450*scrsize_h/480/1532, 1, 1
+				}else{
+					alCreateImageByFile 85,dir_default+"\\songs\\"+stat0+"\\"+stat4
+					alCopyModeColorMatrix colmatrix
+					alSelectImage 85
+					alStretchImageToImage 85,21+cnt2-(cnt2>4),0,0,alGetWidth(),alGetHeight(),(16+575)*450*scrsize_h/480/1532-alGetWidth()*(70*450*scrsize_h/480/1532)/alGetHeight()/2, 242*450*scrsize_h/480/1532, alGetWidth()*(70*450*scrsize_h/480/1532)/alGetHeight(), 70*450*scrsize_h/480/1532
+					alSelectImage 21+cnt2-(cnt2>4)
+					alResetCopyMode
+				}
+				if(stat5=""){
+					alFont lang.0.0,getsize(15)
+					alDrawText stat2, 464*450*scrsize_h/480/1532, 310*450*scrsize_h/480/1532, 705*450*scrsize_h/480/1532, 142*450*scrsize_h/480/1532, 1, 1
+				}else{
+					alCreateImageByFile 85,dir_default+"\\songs\\"+stat0+"\\"+stat5
+					alCopyModeColorMatrix colmatrix
+					alSelectImage 85
+					alStretchImageToImage 85,21+cnt2-(cnt2>4),0,0,alGetWidth(),alGetHeight(),(464+352)*450*scrsize_h/480/1532-alGetWidth()*(64*450*scrsize_h/480/1532)/alGetHeight()/2, (310+35+4)*450*scrsize_h/480/1532, alGetWidth()*(64*450*scrsize_h/480/1532)/alGetHeight(), 64*450*scrsize_h/480/1532
+					alSelectImage 21+cnt2-(cnt2>4)
+					alResetCopyMode
+				}
+				if(stat3!=""){
+					alSelectImage 13+cnt2
+					alCopyImageToImage 13+cnt2,21+cnt2-(cnt2>4),1198*450*scrsize_h/480/1532,18*450*scrsize_h/480/1532,alGetWidth(),alGetHeight(),0,0
+				}
+				if((minfostr.j.levmn.0!="")&(minfo.j.0.1>=0)&(minfo.j.levmn.1>0)){
+					stat1=minfo.j.levmn.1-1
+					if(stat1>19):stat1=19
+					if(stat1<0):stat1=0
+					alCopyImageToImage 58,21+cnt2-(cnt2>4),56*450*scrsize_h/480/1532,360*450*scrsize_h/480/1532,75*450*scrsize_h/480/1532,60*450*scrsize_h/480/1532,0,60*450*scrsize_h/480/1532*stat1
+				}
+				if((minfostr.j.levmn.0!="")&(md.cnt2>=0)){
+					alCopyImageToImage 8,21+cnt2-(cnt2>4),144*450*scrsize_h/480/1532,351*450*scrsize_h/480/1532,188*450*scrsize_h/480/1532,78*450*scrsize_h/480/1532,0,78*450*scrsize_h/480/1532*md.cnt2
+				}
+				alCopyImageToImage 7,21+cnt2-(cnt2>4),370*450*scrsize_h/480/1532,362*450*scrsize_h/480/1532,64*450*scrsize_h/480/1532,64*450*scrsize_h/480/1532,0,64*450*scrsize_h/480/1532*(gr.cnt2+1)
+				if(sorttype=1):levmn=levmnstat
+			}
+		}
+		cnt2++
+	next
+	cnt2=4
+	j=selnow
+	if(minfo.j.0.0<0){
+		alDeleteImage 2
+		alCreateImage 2,getsize(450),getsize(222)
+		alCopyImageToImage 28*(minfo.j.0.0!=-3)+91*(minfo.j.0.0=-3)*(minfo.j.2.0=0)+IMG_MSEL_SUB0*(minfo.j.0.0=-3)*(minfo.j.2.0=1),2
+		alSelectImage 2
+		alColor 255,255,255
+		alFont lang.0.0,getsize(28)
+		if(minfo.j.0.0=-1){
+			stat1=">>   "+minfostr.j.0.0+"   >>"
+		}else:if(minfo.j.0.0=-2){
+			stat1="<<   "+minfostr.j.0.0+"   <<"
+		}else:if(minfo.j.0.0=-4){
+			stat1=">>   "+minfostr.j.0.0+"   >>"
+		}else:if(minfo.j.0.0=-5){
+			stat1="<<   "+minfostr.j.0.0+"   <<"
+		}else:if(minfo.j.0.0=-6){
+			stat1=">>   "+minfostr.j.0.0+"   >>"
+		}else:if(minfo.j.0.0=-7){
+			stat1="<<   "+minfostr.j.0.0+"   <<"
+		}else:if(minfo.j.0.0=-8){
+			stat1=">>   "+minfostr.j.0.0+"   >>"
+		}else:if(minfo.j.0.0=-9){
+			stat1="<<   "+minfostr.j.0.0+"   <<"
+		}else{
+			stat1=minfostr.j.0.0
+		}
+		alDrawText stat1, 16*450*scrsize_h/480/1532, 272*450*scrsize_h/480/1532, 1500*450*scrsize_h/480/1532, 200*450*scrsize_h/480/1532, 1, 1
+	}else:if(minfo.j.0.0=4){
+		// コースモード
+		alDeleteImage 2
+		alCreateImage 2,getsize(450),getsize(222)
+		alCopyImageToImage 149,2
+		alSelectImage 2
+		alColor 255,255,255
+		if(minfostr.j.0.10=""){
+			alFont lang.0.0,18
+			alDrawText_CalcRect_ tsize,minfostr.j.0.8
+			if(tsize.2/9>50){
+				alFont lang.0.0,getsize(11),1
+			}else:if(tsize.2/9>40){
+				alFont lang.0.0,getsize(12),1
+			}else:if(tsize.2/9>34){
+				alFont lang.0.0,getsize(13),1
+			}else:if(tsize.2/9>26){
+				alFont lang.0.0,getsize(15),1
+			}else{
+				alFont lang.0.0,getsize(17),1
+			}
+			alDrawText minfostr.j.0.8, 16*450*scrsize_h/480/1532, 10*450*scrsize_h/480/1532, 1510*450*scrsize_h/480/1532, (110+70)*450*scrsize_h/480/1532, 1, 1
+		}else{
+			alCreateImageByFile 85,dir_default+"\\songs\\"+minfostr.j.0.0+"\\"+minfostr.j.0.10
+			alCopyModeColorMatrix colmatrix
+			alSelectImage 85
+			alStretchImageToImage 85,2,0,0,alGetWidth(),alGetHeight(),(16+474)*450*scrsize_h/480/1532-alGetWidth()*(70*450*scrsize_h/480/1532)/alGetHeight()/2, (29+70/2)*450*scrsize_h/480/1532, alGetWidth()*(70*450*scrsize_h/480/1532)/alGetHeight(), 70*450*scrsize_h/480/1532
+			alSelectImage 2
+			alResetCopyMode
+		}
+		alFont lang.0.0,getsize(9)
+		alDrawText minfostr.j.0.6, 984*450*scrsize_h/480/1532, 644*450*scrsize_h/480/1532, 500*450*scrsize_h/480/1532, 74*450*scrsize_h/480/1532, 0, 1
+		if((md.cnt2>=0)){
+			alCopyImageToImage 8,2,84*450*scrsize_h/480/1532,652*450*scrsize_h/480/1532,188*450*scrsize_h/480/1532,78*450*scrsize_h/480/1532,0,78*450*scrsize_h/480/1532*md.cnt2
+		}
+		stat3=0
+		repeat 3
+			stat1=pc.4\(powf(10,3-cnt))/powf(10,2-cnt)
+			if((stat1!=0)|(stat3=1)|(cnt=2)):alStretchImageToImage 10,2,0,120*450*scrsize_h/480/1532*stat1,136*450*scrsize_h/480/1532,120*450*scrsize_h/480/1532,158*450*2*scrsize_h/480/1532+getsize(11)*cnt,334*450*2*scrsize_h/480/1532,getsize(10),getsize(11)
+			if(stat1!=0):stat3=1
+		loop
+		is_course_utf8=0
+		buf=""
+		buf2=""
+		exist dir_default+"\\songs\\"+minfostr.j.0.0+"\\"+minfostr.j.0.5
+		if(strsize>0){
+			notesel buf
+			noteload dir_default+"\\songs\\"+minfostr.j.0.0+"\\"+minfostr.j.0.5
+			if (lpeek(buf, 0) & 0x00FFFFFF) == 0xBFBBEF{
+				is_course_utf8=1
+				DeleteUTF8BOM buf
+			}
+			stat3=0
+			repeat notemax
+				noteget stat1,cnt
+				if(stat1="--"):f=1
+				if((strmid(stat1,0,1)="[")&(strmid(stat1,strlen(stat1)-1,1)="]")&(f=1)){
+					stat3++
+				}
+			loop
+		}
+		alCreateImage IMG_MSEL_COURSETEMP,1440*450*scrsize_h/480/1532,96*450*scrsize_h/480/1532+(96-10)*450*scrsize_h/480/1532*(stat3-1)
+		alSelectImage IMG_MSEL_COURSETEMP
+		alFont lang.0.0,getsize(12)
+		stat3=0
+		f=0
+		repeat notemax
+			notesel buf
+			noteget stat1,cnt
+			if(stat1="--"):f=1
+			if((strmid(stat1,0,1)="[")&(strmid(stat1,-1,1)="]")&(f=1)){
+				alCopyImageToImage 152,IMG_MSEL_COURSETEMP,0,(96-10)*450*scrsize_h/480/1532*stat3
+				stat2=strmid(stat1,1,strlen(stat1)-2)
+				course_sjis_ stat2
+				exist dir_default+"\\songs\\"+stat2
+				if(strsize>0){
+					_fname=dir_default+"\\songs\\"+stat2
+				}else{
+					exist dir_default+"\\songs\\"+minfostr.j.0.0+"\\"+strmid(stat2,instr(stat2,0,"/")+1,strlen(stat2)-instr(stat2,0,"/"))
+					if(strsize>0){
+						_fname=dir_default+"\\songs\\"+minfostr.j.0.0+"\\"+strmid(stat2,instr(stat2,0,"/")+1,strlen(stat2)-instr(stat2,0,"/"))
+					}
+				}
+				if((strsize>0)&(strmid(stat2,0,1)!=".")&(instr(stat2,0,"./")+instr(stat2,0,".\\")=-2)){
+					buf2=""
+					notesel buf2
+					noteload _fname
+					isutf8=0
+					if (lpeek(buf2, 0) & 0x00FFFFFF) == 0xBFBBEF{
+						isutf8=1
+						DeleteUTF8BOM buf2
+					}
+					repeat notemax
+						noteget stat1,cnt
+						if(strmid(stat1,0,2)="--"):break
+						if(headcmp(stat1,6,"title=")){
+							course_songtitle=strmid(stat1,6,128)
+							if(isutf8=0):course_songtitle=utf8enc(course_songtitle)
+						}else:if(headcmp(stat1,7,"artist=")){
+							course_songartist=strmid(stat1,7,128)
+							if(isutf8=0):course_songartist=utf8enc(course_songartist)
+						}else:if(headcmp(stat1,11,"difficulty=")){
+							stat2_=strmid(stat1,11,16)
+							if(stat2_="light"){
+								course_songdifficulty=0
+							}else:if(stat2_="challenge"){
+								course_songdifficulty=1
+							}else:if(stat2_="extended"){
+								course_songdifficulty=2
+							}else:course_songdifficulty=3
+						}else:if(headcmp(stat1,6,"level=")){
+							course_songlevel=max(int(strmid(stat1,6,2)),1)
+						}else:if(headcmp(stat1,7,"jacket=")){
+							course_songjacket=strmid(stat1,7,128)
+							_sjis_ course_songjacket
+							if(instr(course_songjacket,0,".")=-1){
+								course_songjacket=dir_default+"\\imgs\\jacket\\"+course_songjacket+".jpg"
+							}else:course_songjacket=getpath(_fname,32)+course_songjacket
+						}else:if(headcmp(stat1,10,"title_img=")){
+							course_songtitle_img=strmid(stat1,10,128)
+							_sjis_ course_songtitle_img
+						}else:if(headcmp(stat1,10,"artist_img=")){
+							course_songartist_img=strmid(stat1,11,128)
+							_sjis_ course_songartist_img
+						}/*else:if(headcmp(stat1,12,"information=")){// ※minfonowstr.5はファイル名
+							minfonowstr.6=strmid(stat1,12,128)
+							if(isutf8=1):minfonowstr.6=bom+minfonowstr.6
+						}*/
+					loop
+					stat4=""
+					alSelectImage IMG_MSEL_COURSETEMP
+					alColor 255,255,255
+					//if(course_songtitle_img=""){
+						alFont lang.0.0,18
+						alDrawText_CalcRect_ tsize,bom+course_songtitle
+						if(tsize.2/9>40){
+							alFont lang.0.0,getsize(10)
+						}else:if(tsize.2/9>30){
+							alFont lang.0.0,getsize(11)
+						}else{
+							alFont lang.0.0,getsize(13)
+						}
+						alDrawText bom+course_songtitle,76*450*scrsize_h/480/1532,(96-10)*450*scrsize_h/480/1532*stat3,(856-76)*450*scrsize_h/480/1532,96*450*scrsize_h/480/1532,1,1
+					/*}else{
+						alCreateImageByFile 85,getpath(dir_default+"\\songs\\"+minfostr.j.0.0+"\\"+stat2,32)+course_songtitle_img
+						alCopyModeColorMatrix colmatrix
+						alSelectImage 85
+						//↓未調整
+						alStretchImageToImage 85,2,0,0,alGetWidth(),alGetHeight(),(16+474)*450*scrsize_h/480/1532-alGetWidth()*(70*450*scrsize_h/480/1532)/alGetHeight()/2, (29+70/2)*450*scrsize_h/480/1532, alGetWidth()*(70*450*scrsize_h/480/1532)/alGetHeight(), 70*450*scrsize_h/480/1532
+						alSelectImage 2
+						alResetCopyMode
+					}*/
+					//if(course_songartist_img=""){
+						alFont lang.0.0,18
+						alDrawText_CalcRect_ tsize,bom+course_songartist
+						if(tsize.2/9>32){
+							alFont lang.0.0,getsize(10)
+						}else:if(tsize.2/9>25){
+							alFont lang.0.0,getsize(11)
+						}else{
+							alFont lang.0.0,getsize(13)
+						}
+						alDrawText bom+course_songartist,864*450*scrsize_h/480/1532,(96-10)*450*scrsize_h/480/1532*stat3,480*450*scrsize_h/480/1532,96*450*scrsize_h/480/1532,1,1
+					/*}else{
+						alCreateImageByFile 85,getpath(dir_default+"\\songs\\"+minfostr.j.0.0+"\\"+stat2,32)+course_songartist_img
+						alCopyModeColorMatrix colmatrix
+						alSelectImage 85
+						//↓未調整
+						alStretchImageToImage 85,2,0,0,alGetWidth(),alGetHeight(),(16+474)*450*scrsize_h/480/1532-alGetWidth()*(70*450*scrsize_h/480/1532)/alGetHeight()/2, (29+70/2)*450*scrsize_h/480/1532, alGetWidth()*(70*450*scrsize_h/480/1532)/alGetHeight(), 70*450*scrsize_h/480/1532
+						alSelectImage 2
+						alResetCopyMode
+					}*/
+					alSelectImage 4
+					alStretchImageToImage 4,IMG_MSEL_COURSETEMP,alGetWidth()/4*course_songdifficulty,alGetHeight()/2,alGetWidth()/4,alGetHeight()/2,(1440-90)*450*scrsize_h/480/1532,(96-10)*450*scrsize_h/480/1532*stat3+4*450*scrsize_h/480/1532,86*450*scrsize_h/480/1532,86*450*scrsize_h/480/1532
+					alStretchImageToImage 5,IMG_MSEL_COURSETEMP,0,120*450*scrsize_h/480/1532*(course_songlevel-1),150*450*scrsize_h/480/1532,120*450*scrsize_h/480/1532,(1440-76)*450*scrsize_h/480/1532,(96-10)*450*scrsize_h/480/1532*stat3+18*450*scrsize_h/480/1532,57*450*scrsize_h/480/1532,45*450*scrsize_h/480/1532
+					alCreateImageByFile 35,course_songjacket
+					if(stat!=-1){
+						alStretchImageToImage 35,IMG_MSEL_COURSETEMP,0,0,alGetWidth(),alGetHeight(),0,96*450*scrsize_h/480/1532+(96-10)*450*scrsize_h/480/1532*(stat3-1),76*450*scrsize_h/480/1532,76*450*scrsize_h/480/1532
+					}
+				}else{
+					alSelectImage IMG_MSEL_COURSETEMP
+					alColor 255,255,255
+					alFont lang.0.0,getsize(13)
+					alDrawText lang.2.10/*"---"*/,76*450*scrsize_h/480/1532,(96-10)*450*scrsize_h/480/1532*stat3,(856-76)*450*scrsize_h/480/1532,96*450*scrsize_h/480/1532,1,1
+				}
+				stat3++
+			}
+		loop
+		alSelectImage 2
+		//alDrawText stat3, 984*450*scrsize_h/480/1532, 40*450*scrsize_h/480/1532, 512*450*scrsize_h/480/1532, 512*450*scrsize_h/480/1532, 1, 1
+	}else{
+		if(minfostr.j.levmn.0=""){
+			if(levmn=3){
+				if(minfostr.j.2.0!=""){
+					levmn=2
+				}else:if(minfostr.j.1.0!=""){
+					levmn=1
+				}else{
+					levmn=0
+				}
+			}else:if(levmn=2){
+				if(minfostr.j.1.0!=""){
+					levmn=1
+				}else:if(minfostr.j.3.0!=""){
+					levmn=3
+				}else{
+					levmn=0
+				}
+			}else:if(levmn=1){
+				if(minfostr.j.0.0!=""){
+					levmn=0
+				}else:if(minfostr.j.2.0!=""){
+					levmn=2
+				}else{
+					levmn=3
+				}
+			}else{
+				if(minfostr.j.1.0!=""){
+					levmn=1
+				}else:if(minfostr.j.2.0!=""){
+					levmn=2
+				}else{
+					levmn=3
+				}
+			}
+		}
+		alDeleteImage 2
+		alCreateImage 2,getsize(450),getsize(222)
+		alCopyImageToImage 1,2
+		alSelectImage 2
+		alColor 255,255,255
+		if(minfostr.j.levmn.10=""){
+			alFont lang.0.0,18
+			alDrawText_CalcRect_ tsize,minfostr.j.levmn.8
+			if(tsize.2/9>50){
+				alFont lang.0.0,getsize(11),1
+			}else:if(tsize.2/9>40){
+				alFont lang.0.0,getsize(12),1
+			}else:if(tsize.2/9>34){
+				alFont lang.0.0,getsize(13),1
+			}else:if(tsize.2/9>26){
+				alFont lang.0.0,getsize(15),1
+			}else{
+				alFont lang.0.0,getsize(17),1
+			}
+			alDrawText minfostr.j.levmn.8, 16*450*scrsize_h/480/1532, 10*450*scrsize_h/480/1532, 956*450*scrsize_h/480/1532, 110*450*scrsize_h/480/1532, 1, 1
+		}else{
+			alCreateImageByFile 85,dir_default+"\\songs\\"+minfostr.j.levmn.0+"\\"+minfostr.j.levmn.10
+			alCopyModeColorMatrix colmatrix
+			alSelectImage 85
+			alStretchImageToImage 85,2,0,0,alGetWidth(),alGetHeight(),(16+474)*450*scrsize_h/480/1532-alGetWidth()*(70*450*scrsize_h/480/1532)/alGetHeight()/2, 29*450*scrsize_h/480/1532, alGetWidth()*(70*450*scrsize_h/480/1532)/alGetHeight(), 70*450*scrsize_h/480/1532
+			alSelectImage 2
+			alResetCopyMode
+		}
+		if(minfostr.j.levmn.11=""){
+			alFont lang.0.0,getsize(14)
+			alDrawText minfostr.j.levmn.1, 16*450*scrsize_h/480/1532, 95*450*scrsize_h/480/1532, 956*450*scrsize_h/480/1532, 75*450*scrsize_h/480/1532, 1, 1
+		}else{
+			alCreateImageByFile 85,dir_default+"\\songs\\"+minfostr.j.levmn.0+"\\"+minfostr.j.levmn.11
+			alCopyModeColorMatrix colmatrix
+			alSelectImage 85
+			alStretchImageToImage 85,2,0,0,alGetWidth(),alGetHeight(),(16+290+188)*450*scrsize_h/480/1532-alGetWidth()*(68*450*scrsize_h/480/1532)/alGetHeight()/2, 98*450*scrsize_h/480/1532, alGetWidth()*(68*450*scrsize_h/480/1532)/alGetHeight(), 68*450*scrsize_h/480/1532
+			alSelectImage 2
+			alResetCopyMode
+		}
+		alFont lang.0.0,getsize(11)
+		alDrawText minfostr.j.levmn.2, 310*450*scrsize_h/480/1532, 587*450*scrsize_h/480/1532, 646*450*scrsize_h/480/1532, 51*450*scrsize_h/480/1532, 0, 1
+		alFont lang.0.0,getsize(9)
+		alDrawText minfostr.j.levmn.6, 984*450*scrsize_h/480/1532, 644*450*scrsize_h/480/1532, 500*450*scrsize_h/480/1532, 74*450*scrsize_h/480/1532, 0, 1
+		// イラストレーター名表示
+		alColor 0,0,0
+		alFont lang.0.0,18
+		alDrawText_CalcRect_ tsize,minfostr.j.levmn.4
+		if(tsize.2/9>21){
+			alFont lang.0.0,getsize(6),1
+		}else:if(tsize.2/9>17){
+			alFont lang.0.0,getsize(7),1
+		}else:if(tsize.2/9>15){
+			alFont lang.0.0,getsize(8),1
+		}else:if(tsize.2/9>13){
+			alFont lang.0.0,getsize(9),1
+		}else:if(tsize.2/9>11){
+			alFont lang.0.0,getsize(10),1
+		}else{
+			alFont lang.0.0,getsize(11),1
+		}
+		alDrawText minfostr.j.levmn.4, 1256*450*scrsize_h/480/1532, 580*450*scrsize_h/480/1532, 241*450*scrsize_h/480/1532, 43*450*scrsize_h/480/1532, 0, 1
+		if((minfostr.j.levmn.3!="")&(minfostr.j.levmn.3!=".jpg")){
+			alSelectImage 3
+			alCopyImageToImage 3,2,982*450*scrsize_h/480/1532,42*450*scrsize_h/480/1532,alGetWidth(),alGetHeight(),0,0
+		}
+		repeat 4
+			if(minfostr.j.cnt.0!=""){
+				alSelectImage 4
+				alCopyImageToImage 4,2,(50+236*cnt)*450*scrsize_h/480/1532,324*450*scrsize_h/480/1532,alGetWidth()/4,alGetHeight()/2,alGetWidth()/4*cnt,alGetHeight()/2
+				stat1=minfo.j.cnt.1-1
+				if(stat1>19):stat1=19
+				if(stat1<0):stat1=0
+				alCopyImageToImage 5,2,(86+236*cnt)*450*scrsize_h/480/1532,358*450*scrsize_h/480/1532,150*450*scrsize_h/480/1532,120*450*scrsize_h/480/1532,0,120*450*scrsize_h/480/1532*stat1
+			}else{
+				alSelectImage 4
+				alCopyImageToImage 4,2,(50+236*cnt)*450*scrsize_h/480/1532,324*450*scrsize_h/480/1532,alGetWidth()/4,alGetHeight()/2,alGetWidth()/4*cnt,0
+			}
+		loop
+		if((md.cnt2>=0)){
+			alCopyImageToImage 8,2,84*450*scrsize_h/480/1532,652*450*scrsize_h/480/1532,188*450*scrsize_h/480/1532,78*450*scrsize_h/480/1532,0,78*450*scrsize_h/480/1532*md.cnt2
+		}
+		alCopyImageToImage 7,2,round(double(670)*450*scrsize_h/480/1532),654*450*scrsize_h/480/1532,64*450*scrsize_h/480/1532,64*450*scrsize_h/480/1532,0,64*450*scrsize_h/480/1532*(gr.cnt2+1)
+		if(sc.cnt2=-1){
+			stat1="00000000"
+		}else{
+			stat1=str(sc.cnt2)
+			stat2=""
+			repeat 8-strlen(stat1)
+				stat2+="0"
+			loop
+			stat1=stat2+stat1
+		}
+		repeat 8
+			alStretchImageToImage 10,2,0,120*450*scrsize_h/480/1532*int(strmid(stat1,cnt,1)),136*450*scrsize_h/480/1532,120*450*scrsize_h/480/1532,321*450*scrsize_h/480/1532+37*450*scrsize_h/480/1532*cnt,685*450*scrsize_h/480/1532,34*450*scrsize_h/480/1532,30*450*scrsize_h/480/1532
+		loop
+		stat3=0
+		repeat 3
+			stat1=pc.4\(powf(10,3-cnt))/powf(10,2-cnt)
+			if((stat1!=0)|(stat3=1)|(cnt=2)):alStretchImageToImage 10,2,0,120*450*scrsize_h/480/1532*stat1,136*450*scrsize_h/480/1532,120*450*scrsize_h/480/1532,388*450*2*scrsize_h/480/1532+getsize(11)*cnt,334*450*2*scrsize_h/480/1532,getsize(10),getsize(11)
+			if(stat1!=0):stat3=1
+		loop
+		// BPM表示
+		stat1=minfostr.j.levmn.9
+		stat2=0
+		repeat strlen(stat1)
+			if(strmid(stat1,cnt,1)="."):stat2-=30*450*scrsize_h/480/1532
+		loop
+		alCreateImage 64,48*450*scrsize_h/480/1532*strlen(stat1)+stat2,41*450*scrsize_h/480/1532
+		stat2=0
+		repeat strlen(stat1)
+			if(strmid(minfostr.j.levmn.9,cnt,1)="."):stat2-=30*450*scrsize_h/480/1532
+			alCopyImageToImage 9,64,48*450*scrsize_h/480/1532*cnt+stat2,0,45*450*scrsize_h/480/1532,41*450*scrsize_h/480/1532,0,41*450*scrsize_h/480/1532*(int(strmid(stat1,cnt,1))+(strmid(stat1,cnt,1)=".")*10+(strmid(stat1,cnt,1)="-")*11)
+		loop
+		if(48*450*scrsize_h/480/1532*strlen(stat1)+stat2<=48*450*scrsize_h/480/1532*5){
+			alCopyImageToImage 64,2,704*450*scrsize_h/480/1532,205*450*scrsize_h/480/1532,48*450*scrsize_h/480/1532*strlen(stat1)+stat2,41*450*scrsize_h/480/1532,0,0
+		}else{
+			alStretchImageToImage 64,2,0,0,48*450*scrsize_h/480/1532*strlen(stat1)+stat2,41*450*scrsize_h/480/1532,704*450*scrsize_h/480/1532,205*450*scrsize_h/480/1532,48*450*scrsize_h/480/1532*5,41*450*scrsize_h/480/1532
+		}
+	}
+	repeat 8
+		alDeleteImage 110+cnt
+		alCreateImage 110+cnt,1632*3/5*450*scrsize_h/480/1532,456*3/5*450*scrsize_h/480/1532
+		alStretchImageToImage 21+cnt,110+cnt,0,0,1632*450*scrsize_h/480/1532,456*450*scrsize_h/480/1532,0,0,1632*3/5*450*scrsize_h/480/1532,456*3/5*450*scrsize_h/480/1532
+	loop
+	return
+
+*reloadscore
+	dim mscore,SONG_MAX,4,9
+	stat2_0="normal"
+	if(effratetype=1):stat2_0="hard"
+	if(effratetype=-1):stat2_0="easy"
+	stat2_2="normal"
+	stat2_1="normal"
+	if(turn=1):stat2_1="mirror"
+	if(turn=2):stat2_1="random"
+	if(turn=3):stat2_1="s-random"
+	if(turn=4):stat2_1="h-random"
+	stat3_0="on"
+	if(shortmode=1):stat3_0="off"
+	if(shortmode=2):stat3_0="auto"
+	if(shortmode=3):stat3_0="hide"
+	stat3="on"
+	if(longmode=1):stat3="off"
+	if(longmode=2):stat3="auto"
+	if(longmode=3):stat3="hide"
+	stat4="on"
+	if(analogmode=1):stat4="off"
+	if(analogmode=2):stat4="auto"
+	if(analogmode=3):stat4="hide"
+	stat5="easy,"+stat2_1+","+stat2_2+","+stat3_0+","+stat3+","+stat4
+	stat6="normal,"+stat2_1+","+stat2_2+","+stat3_0+","+stat3+","+stat4
+	stat7="hard,"+stat2_1+","+stat2_2+","+stat3_0+","+stat3+","+stat4
+	stat8=stat2_0+","+stat2_1+","+stat2_2+","+stat3_0+","+stat3+","+stat4
+	//chdir "../score/"+players.cplayer
+	repeat mnum
+		cnt2=cnt
+		repeat 4
+			mscore.cnt2.cnt.0=-1
+			mscore.cnt2.cnt.2=-1
+		loop
+	loop
+	repeat mnum
+		cnt2=cnt
+		repeat 4
+			cnt3=cnt
+			easy=-1
+			normal=-1
+			hard=-1
+			normalscore=0
+			hardscore=0
+			normalgrade=-1
+			hardgrade=-1
+			if(minfostr.cnt2.cnt.5!=""){
+				if(minfo.cnt2.0.0=4){
+					if(dir="..\\courses"){
+						_fname=dir_default+"\\courses\\score\\"+players.cplayer+"\\"+strmid(minfostr.cnt2.cnt.5,0,strlen(minfostr.cnt2.cnt.5)-4)+".ksc"
+					}else{
+						_fname=dir_default+"\\courses\\score\\"+players.cplayer+"\\"+minfostr.cnt2.cnt.0+"\\"+strmid(minfostr.cnt2.cnt.5,0,strlen(minfostr.cnt2.cnt.5)-4)+".ksc"
+					}
+				}else{
+					_fname=dir_default+"\\score\\"+players.cplayer+"\\"+minfostr.cnt2.cnt.0+"\\"+strmid(minfostr.cnt2.cnt.5,0,strlen(minfostr.cnt2.cnt.5)-4)+".ksc"
+				}
+				exist _fname
+				if(strsize>0){
+					notesel stat1_
+					noteload _fname
+					repeat notemax
+						noteget stat1,cnt
+						split stat1,"=",scorestat
+						if((scorestat.0=stat8)&(length(scorestat)>=2)){
+							sdim scorestat2,16,9
+							split scorestat.1,",",scorestat2
+							repeat 9
+								mscore.cnt2.cnt3.cnt=0
+								if(length(scorestat2)>=cnt+1){
+									mscore.cnt2.cnt3.cnt=int(scorestat2.cnt)
+								}
+							loop
+							mscore.cnt2.cnt3.5=max(mscore.cnt2.cnt3.5,1)
+							if(mscore.cnt2.cnt3.1>=1):mscore.cnt2.cnt3.6=max(mscore.cnt2.cnt3.6,1)
+							if(mscore.cnt2.cnt3.1>=2):mscore.cnt2.cnt3.7=max(mscore.cnt2.cnt3.7,1)
+							if(mscore.cnt2.cnt3.1>=3):mscore.cnt2.cnt3.8=max(mscore.cnt2.cnt3.8,1)
+						}
+						if((scorestat.0=stat5)&(length(scorestat)>=2)){
+							split scorestat.1,",",scorestat2
+							easy=int(scorestat2.1)
+						}
+						if((scorestat.0=stat6)&(length(scorestat)>=2)){
+							split scorestat.1,",",scorestat2
+							normal=int(scorestat2.1)
+							normalscore=int(scorestat2.0)
+							normalgrade=int(scorestat2.2)
+						}
+						if((scorestat.0=stat7)&(length(scorestat)>=2)){
+							split scorestat.1,",",scorestat2
+							hard=int(scorestat2.1)
+							hardscore=int(scorestat2.0)
+							hardgrade=int(scorestat2.2)
+						}
+					loop
+				}
+			}
+			if(easy>=1):mscore.cnt2.cnt3.1=1
+			if(easy>=2):mscore.cnt2.cnt3.1=2
+			if(easy>=3):mscore.cnt2.cnt3.1=3
+			if((easy<=1)|(effratetype!=-1)){
+				if(normal>=1):mscore.cnt2.cnt3.1=4
+				if(hard>=1):mscore.cnt2.cnt3.1=5
+			}
+			if((easy<=2)|(effratetype!=-1)){
+				if(normal>=2):mscore.cnt2.cnt3.1=6
+				if(hard>=2):mscore.cnt2.cnt3.1=6
+			}
+			if(normal>=3):mscore.cnt2.cnt3.1=7
+			if(hard>=3):mscore.cnt2.cnt3.1=7
+			if(effratetype!=-1){
+				mscore.cnt2.cnt3.0=max(normalscore,hardscore)
+				mscore.cnt2.cnt3.2=max(normalgrade,hardgrade)
+			}
+		loop
+	loop
+	return
+
+*refreshscore
+	dim sc,8
+	dim gr,8
+	dim md,8
+	dim pc,8
+	repeat 8
+		j=selnow-4+cnt
+		while (j<0)|(j>=mnum)
+			if(j<0){
+				j+=mnum
+			}else{
+				j-=mnum
+			}
+		wend
+		if(sorttype=0){
+			levn=levm
+		}else{
+			levstat=levm
+			if(minfostr.j.levm.5=""){
+				repeat 4
+					if(minfostr.j.cnt.5!=""):levstat=cnt
+				loop
+			}
+			levn=levstat
+		}
+		sc.cnt=mscore.j.levn.0
+		md.cnt=mscore.j.levn.1
+		gr.cnt=mscore.j.levn.2
+		pc.cnt=mscore.j.levn.3
+	loop
+	return
+
+#defcfunc yure3 double yureval,double yuremax,int yuretimes
+	if((yureval>yuremax)|(yureval<0)):return 0.0
+	return cos((M_PI/2+M_PI*(yuretimes-1))*yureval/yuremax)

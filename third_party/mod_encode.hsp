@@ -1,0 +1,39 @@
+#module
+#uselib "kernel32"
+#cfunc MultiByteToWideChar "MultiByteToWideChar" int, int, sptr, int, sptr, int
+#cfunc WideCharToMultiByte "WideCharToMultiByte" int, int, sptr, int, sptr, int, sptr, sptr
+#const NULL 0
+#define CP_ACP 0
+#define CP_UTF8 65001
+#define CP_UTF16 65002
+#deffunc UTF16toUTF8 var utf16, var utf8
+	size = WideCharToMultiByte(CP_UTF8, 0, varptr(utf16), -1, 0, 0, 0, 0)
+	sdim utf8, size*2
+	return WideCharToMultiByte(CP_UTF8, 0, varptr(utf16), -1, varptr(utf8), size, 0, 0)
+//UTF-8‚É•ÏŠ·
+#defcfunc utf8enc str p1
+	pSource = p1
+	//SJIS -> Unicode
+	nSize = MultiByteToWideChar(CP_ACP, 0, varptr(pSource), -1, NULL, 0)
+	sdim buf16, nSize * 2 + 2
+	a = MultiByteToWideChar(CP_ACP, 0, varptr(pSource), -1, varptr(buf16), nSize)
+	//Unicode -> SJIS
+	nSize = WideCharToMultiByte(CP_UTF8, 0, varptr(buf16), -1, NULL, 0, NULL, NULL)
+	sdim buf08, nSize * 2
+	a = WideCharToMultiByte(CP_UTF8, 0, varptr(buf16), -1, varptr(buf08), nSize, NULL, NULL)
+	return buf08
+
+//Shift-JIS‚É•ÏŠ·
+#defcfunc sjisenc str p1
+	pSource = p1
+	//UTF-8 -> Unicode
+	nSize = MultiByteToWideChar(CP_UTF8, 0, varptr(pSource), -1, NULL, 0)
+	sdim buf16, nSize * 2 + 2
+	a = MultiByteToWideChar(CP_UTF8, 0, varptr(pSource), -1, varptr(buf16), nSize)
+	//Unicode -> SJIS
+	nSize = WideCharToMultiByte(CP_ACP, 0, varptr(buf16), -1, NULL, 0, NULL, NULL)
+	sdim bufSJIS, nSize * 2
+	a = WideCharToMultiByte(CP_ACP, 0, varptr(buf16), -1, varptr(bufSJIS), nSize, NULL, NULL)
+	return bufSJIS
+
+#global

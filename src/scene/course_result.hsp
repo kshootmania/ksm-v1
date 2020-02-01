@@ -1,0 +1,644 @@
+#deffunc on_update_course_result
+	keshuoff=0
+	timestatestart=d3timer()
+	stat_h=128*450*2*scrsize_h/480/1532+4*(courselistnum>=4)*450*2*scrsize_h/480/1532+36*(courselistnum<4)*450*2*scrsize_h/480/1532
+	if((auto=1)|(adjmode=1)){
+		refreshsonglistoff=1
+		//vload_start dir_default+"\\cache\\cache.tmp"
+		//vload_get minfo
+		//vload_get minfostr
+		//vload_end
+		state=st_select
+		gsel 0
+		gmode 0
+		color 255,255,255
+		pos 0,0
+		gcopy 29,0,0,scrsize_w,scrsize_h
+		//font lang.0.1,getsize(18)
+		//pos scrsize_w-80*scrsize_w/480,getsize(456)
+		//mes lang.2.0//"LOADING..."
+		alCopyImageToScreen IMG_LOADING,0,scrsize_w-getsize(208),getsize(442)
+		redraw 1
+	}else{
+		dir_tmp=dir_cur
+		alSelectImage 3
+		alCreateImage 109,alGetWidth(),alGetHeight()
+		alCopyImageToImage 3,109
+		chdir dir_default+"\\imgs"
+		alDeleteImage 3
+		alCreateImageByFile 3,"result.png"
+		alCreateImage 31,556*450*2*scrsize_h/480/1532,700*450*2*scrsize_h/480/1532
+		alStretchImageToImage 3,31,0,0,556,700,0,0,556*450*2*scrsize_h/480/1532,700*450*2*scrsize_h/480/1532
+		alDeleteImage 3
+		alCreateImage 32,556*450*2*scrsize_h/480/1532,700*450*2*scrsize_h/480/1532 // 作業用
+		alCreateImageByFile 3,"result_grade.png"
+		alCreateImage 33,100*450*2*scrsize_h/480/1532,100*450*2*scrsize_h/480/1532*7
+		alStretchImageToImage 3,33,0,0,100,100*7,0,0,100*450*2*scrsize_h/480/1532,100*450*2*scrsize_h/480/1532*7
+		alDeleteImage 3
+		// Image35は作業用
+		alCreateImageByFile 3,"courseresult_newrecord.png"
+		alCreateImage IMG_CRESULT_NEWRECORD,320*450*2*scrsize_h/480/1532,90*450*2*scrsize_h/480/1532
+		alStretchImageToImage 3,IMG_CRESULT_NEWRECORD,0,0,320,90,0,0,320*450*2*scrsize_h/480/1532,90*450*2*scrsize_h/480/1532
+		alDeleteImage 3
+		alCreateImageByFile 3,"result_top.png"
+		alCreateImage 39,600*450*2*scrsize_h/480/1532,50*450*2*scrsize_h/480/1532*20
+		alStretchImageToImage 3,39,0,0,600,50*20,0,0,600*450*2*scrsize_h/480/1532,50*450*2*scrsize_h/480/1532*20
+		alDeleteImage 3
+		// Image37は作業用(ハイスコア更新画面用)
+		// Image64は作業用(BPM表示用)
+		alCreateImageByFile 3,"result_unlocked.png"
+		alCreateImage 95,getsize(300),getsize(169)
+		alStretchImageToImage 3,95,0,0,600,338,0,0,getsize(300),getsize(169)
+		alDeleteImage 3
+		alCreateImageByFile 3,"courseresult_info.png"
+		alCreateImage IMG_CRESULT_INFO,800*450*2*scrsize_h/480/1532,780*450*2*scrsize_h/480/1532
+		alStretchImageToImage 3,IMG_CRESULT_INFO,0,0,800,780,0,0,800*450*2*scrsize_h/480/1532,780*450*2*scrsize_h/480/1532
+		alDeleteImage 3
+		alCreateImageByFile 3,"courseresult_item.png"
+		alCreateImage IMG_CRESULT_ITEM,720*450*2*scrsize_h/480/1532,128*450*2*scrsize_h/480/1532
+		alStretchImageToImage 3,IMG_CRESULT_ITEM,0,0,720,128,0,0,720*450*2*scrsize_h/480/1532,128*450*2*scrsize_h/480/1532
+		alDeleteImage 3
+		alCreateImageByFile 3,"courseresult_arrow.png"
+		alCreateImage IMG_CRESULT_ARROW,720*450*2*scrsize_h/480/1532,24*450*2*scrsize_h/480/1532*2
+		alStretchImageToImage 3,IMG_CRESULT_ARROW,0,0,720,24*2,0,0,720*450*2*scrsize_h/480/1532,24*450*2*scrsize_h/480/1532*2
+		alDeleteImage 3
+		alCreateImage IMG_CRESULT_LISTBUF,720*450*2*scrsize_h/480/1532,stat_h*courselistnum-12*450*2*scrsize_h/480/1532
+		alCreateImageByFile 3,"courseresult_gauge.png"
+		alCreateImage IMG_CRESULT_GAUGE,540*450*2*scrsize_h/480/1532,36*450*2*scrsize_h/480/1532*6
+		alStretchImageToImage 3,IMG_CRESULT_GAUGE,0,0,540,36*6,0,0,540*450*2*scrsize_h/480/1532,36*450*2*scrsize_h/480/1532*6
+		alDeleteImage 3
+		alCreateImage IMG_CRESULT_LISTBUF,720*450*2*scrsize_h/480/1532,stat_h*courselistnum-2*(courselistnum>=4)*450*2*scrsize_h/480/1532-36*(courselistnum<4)*450*2*scrsize_h/480/1532
+		repeat courselistnum
+			alCopyImageToImage IMG_CRESULT_ITEM,IMG_CRESULT_LISTBUF,0,stat_h*cnt
+			notesel courselist
+			noteget stat2,cnt
+			exist dir_default+"\\songs\\"+stat2
+			if(strsize>0){
+				_fname=dir_default+"\\songs\\"+stat2
+			}else{
+				exist dir_default+"\\songs\\"+minfostr.j.0.0+"\\"+strmid(stat2,instr(stat2,0,"/")+1,strlen(stat2)-instr(stat2,0,"/"))
+				if(strsize>0){
+					_fname=dir_default+"\\songs\\"+minfostr.j.0.0+"\\"+strmid(stat2,instr(stat2,0,"/")+1,strlen(stat2)-instr(stat2,0,"/"))
+				}
+			}
+			if(strsize>0){
+				notesel buf2
+				noteload _fname
+				isutf8=0
+				if (lpeek(buf2, 0) & 0x00FFFFFF) == 0xBFBBEF{
+					isutf8=1
+					DeleteUTF8BOM buf2
+				}
+				repeat notemax
+					noteget stat1,cnt
+					if(strmid(stat1,0,2)="--"):break
+					if(headcmp(stat1,6,"title=")){
+						course_songtitle=strmid(stat1,6,128)
+						if(isutf8=0):course_songtitle=utf8enc(course_songtitle)
+					}else:if(headcmp(stat1,7,"artist=")){
+						course_songartist=strmid(stat1,7,128)
+						if(isutf8=0):course_songartist=utf8enc(course_songartist)
+					}else:if(headcmp(stat1,11,"difficulty=")){
+						stat2_=strmid(stat1,11,16)
+						if(stat2_="light"){
+							course_songdifficulty=0
+						}else:if(stat2_="challenge"){
+							course_songdifficulty=1
+						}else:if(stat2_="extended"){
+							course_songdifficulty=2
+						}else:course_songdifficulty=3
+					}else:if(headcmp(stat1,6,"level=")){
+						course_songlevel=max(int(strmid(stat1,6,2)),1)
+					}else:if(headcmp(stat1,7,"jacket=")){
+						course_songjacket=strmid(stat1,7,128)
+						_sjis_ course_songjacket
+						if(instr(course_songjacket,0,".")=-1){
+							course_songjacket=dir_default+"\\imgs\\jacket\\"+course_songjacket+".jpg"
+						}else:course_songjacket=getpath(_fname,32)+course_songjacket
+					}/*else:if(headcmp(stat1,10,"title_img=")){
+						minfonowstr.10=strmid(stat1,10,128)
+						_sjis_ minfonowstr.10
+					}else:if(headcmp(stat1,12,"information=")){// ※minfonowstr.5はファイル名
+						minfonowstr.6=strmid(stat1,12,128)
+						if(isutf8=1):minfonowstr.6=bom+minfonowstr.6
+					}*/
+				loop
+				stat4=""
+				alSelectImage IMG_CRESULT_LISTBUF
+				alColor 255,255,255
+				//if(course_songtitle_img=""){
+					alFont lang.0.0,18
+					alDrawText_CalcRect_ tsize,bom+course_songtitle
+					if(tsize.2/9>50){
+						alFont lang.0.0,getsize(11),1
+					}else{
+						alFont lang.0.0,getsize(13),1
+					}
+					alDrawText bom+course_songtitle,128*450*2*scrsize_h/480/1532,stat_h*cnt,468*450*2*scrsize_h/480/1532,39*450*2*scrsize_h/480/1532,1,1
+				/*}else{
+					alCreateImageByFile 85,getpath(dir_default+"\\songs\\"+minfostr.j.0.0+"\\"+stat2,32)+course_songtitle_img
+					alCopyModeColorMatrix colmatrix
+					alSelectImage 85
+					//↓未調整
+					alStretchImageToImage 85,2,0,0,alGetWidth(),alGetHeight(),(16+474)*450*scrsize_h/480/1532-alGetWidth()*(70*450*scrsize_h/480/1532)/alGetHeight()/2, (29+70/2)*450*scrsize_h/480/1532, alGetWidth()*(70*450*scrsize_h/480/1532)/alGetHeight(), 70*450*scrsize_h/480/1532
+					alSelectImage 2
+					alResetCopyMode
+				}*/
+				//if(course_songartist_img=""){
+					alFont lang.0.0,18
+					alDrawText_CalcRect_ tsize,bom+course_songartist
+					if(tsize.2/9>50){
+						alFont lang.0.0,getsize(11)
+					}else{
+						alFont lang.0.0,getsize(13)
+					}
+					alDrawText bom+course_songartist,128*450*2*scrsize_h/480/1532,stat_h*cnt+39*450*2*scrsize_h/480/1532,468*450*2*scrsize_h/480/1532,34*450*2*scrsize_h/480/1532,1,1
+				/*}else{
+					alCreateImageByFile 85,getpath(dir_default+"\\songs\\"+minfostr.j.0.0+"\\"+stat2,32)+course_songartist_img
+					alCopyModeColorMatrix colmatrix
+					alSelectImage 85
+					//↓未調整
+					alStretchImageToImage 85,2,0,0,alGetWidth(),alGetHeight(),(16+474)*450*scrsize_h/480/1532-alGetWidth()*(70*450*scrsize_h/480/1532)/alGetHeight()/2, (29+70/2)*450*scrsize_h/480/1532, alGetWidth()*(70*450*scrsize_h/480/1532)/alGetHeight(), 70*450*scrsize_h/480/1532
+					alSelectImage 2
+					alResetCopyMode
+				}*/
+				//alSelectImage 4
+				//alStretchImageToImage 4,IMG_MSEL_COURSETEMP,alGetWidth()/4*course_songdifficulty,alGetHeight()/2,alGetWidth()/4,alGetHeight()/2,(1440-90)*450*scrsize_h/480/1532,(96-10)*450*scrsize_h/480/1532*stat3+4*450*scrsize_h/480/1532,86*450*scrsize_h/480/1532,86*450*scrsize_h/480/1532
+				//alStretchImageToImage 5,IMG_MSEL_COURSETEMP,0,120*450*scrsize_h/480/1532*(course_songlevel-1),150*450*scrsize_h/480/1532,120*450*scrsize_h/480/1532,(1440-76)*450*scrsize_h/480/1532,(96-10)*450*scrsize_h/480/1532*stat3+18*450*scrsize_h/480/1532,57*450*scrsize_h/480/1532,45*450*scrsize_h/480/1532
+				cnt2=cnt
+				alCreateImageByFile 35,course_songjacket
+				if(stat!=-1){
+					alStretchImageToImage 35,IMG_CRESULT_LISTBUF,0,0,alGetWidth(),alGetHeight(),5*450*2*scrsize_h/480/1532,stat_h*cnt+5*450*2*scrsize_h/480/1532,118*450*2*scrsize_h/480/1532,118*450*2*scrsize_h/480/1532
+				}
+				// 難易度の表示
+				alStretchImageToImage IMG_RESULT_DIFFICULTY,IMG_CRESULT_LISTBUF,0,getsize(12)*course_songdifficulty,getsize(48),getsize(12),144*450*2*scrsize_h/480/1532,stat_h*cnt+86*450*2*scrsize_h/480/1532,80*450*2*scrsize_h/480/1532,20*450*2*scrsize_h/480/1532
+				// レベルの表示
+				if(course_songlevel>=10){
+					alStretchImageToImage 10,IMG_CRESULT_LISTBUF,0,120*450*scrsize_h/480/1532*(course_songlevel/10),136*450*scrsize_h/480/1532,120*450*scrsize_h/480/1532,258*450*2*scrsize_h/480/1532,stat_h*cnt+88*450*2*scrsize_h/480/1532,18*450*2*scrsize_h/480/1532,16*450*2*scrsize_h/480/1532
+				}
+				alStretchImageToImage 10,IMG_CRESULT_LISTBUF,0,120*450*scrsize_h/480/1532*(course_songlevel\10),136*450*scrsize_h/480/1532,120*450*scrsize_h/480/1532,258*450*2*scrsize_h/480/1532+18*450*2*scrsize_h/480/1532,stat_h*cnt+88*450*2*scrsize_h/480/1532,18*450*2*scrsize_h/480/1532,16*450*2*scrsize_h/480/1532
+				// スコアの表示
+				stat1=str(course_sc.cnt)
+				stat2=""
+				repeat 8-strlen(stat1)
+					stat2+="0"
+				loop
+				stat2+=stat1
+				repeat 8
+					stat1=int(strmid(stat2,cnt,1))
+					alStretchImageToImage 10,IMG_CRESULT_LISTBUF,0,120*450*scrsize_h/480/1532*stat1,136*450*scrsize_h/480/1532,120*450*scrsize_h/480/1532,326*450*2*scrsize_h/480/1532+22*450*2*scrsize_h/480/1532*cnt,stat_h*cnt2+96*450*2*scrsize_h/480/1532,18*450*2*scrsize_h/480/1532,16*450*2*scrsize_h/480/1532
+				loop
+				// GRADEの表示
+				alStretchImageToImage 7,IMG_CRESULT_LISTBUF,0,64*450*scrsize_h/480/1532*(course_gr.cnt+1),64*450*scrsize_h/480/1532,64*450*scrsize_h/480/1532,538*450*2*scrsize_h/480/1532,stat_h*cnt+80*450*2*scrsize_h/480/1532,32*450*2*scrsize_h/480/1532,32*450*2*scrsize_h/480/1532
+				// クリアメダルの表示
+				if(course_md.cnt=1){
+					if(effratetype=-1):course_md.cnt=1
+					if(effratetype=0):course_md.cnt=4
+					if(effratetype=1):course_md.cnt=5
+				}else:if(course_md.cnt=2){
+					if(effratetype=-1){
+						course_md.cnt=2
+					}else:course_md.cnt=6
+				}else:if(course_md.cnt=3){
+					if(effratetype=-1){
+						course_md.cnt=3
+					}else:course_md.cnt=7
+				}
+				alStretchImageToImage IMG_MSEL_MEDAL_LARGE,IMG_CRESULT_LISTBUF,0,78*course_md.cnt,188,78,596*450*2*scrsize_h/480/1532,stat_h*cnt+73*450*2*scrsize_h/480/1532,110*450*2*scrsize_h/480/1532,45*450*2*scrsize_h/480/1532
+			}
+		loop
+		chdir dir_tmp
+		repeat
+			redraw 0
+			t=d3timer()
+			gsel 0
+			gmode 0
+			color 0,0,0
+			pos 0,0
+			boxf
+			redraw 1
+			if(t-timestatestart>200):break
+			gosub *volactive
+			await 7
+		loop
+		alCreateImage 32,556*450*2*scrsize_h/480/1532,700*450*2*scrsize_h/480/1532
+		alCopyImageToImage 31,32
+		// コース名の表示
+		alSelectImage IMG_CRESULT_INFO
+		alColor 255,255,255
+		//if(minfostr.j.levmn.10=""){
+			alFont lang.0.0,18
+			alDrawText_CalcRect_ tsize,ccoursetitle
+			alFont lang.0.0,getsize(16)
+			alDrawText ccoursetitle, 0, 0, 800*450*2*scrsize_h/480/1532, 72*450*2*scrsize_h/480/1532, 1, 1
+		/*}else{
+			alCreateImageByFile 85,dir_default+"\\songs\\"+csongpath+"\\"+minfostr.j.levmn.10
+			alCopyModeColorMatrix colmatrix
+			alSelectImage 85
+			alStretchImageToImage 85,32,0,0,alGetWidth(),alGetHeight(),(132+125+340)*450*scrsize_h/480/1532-alGetWidth()*(66*450*scrsize_h/480/1532)/alGetHeight()/2, (26+35)*450*scrsize_h/480/1532, alGetWidth()*(66*450*scrsize_h/480/1532)/alGetHeight(), 66*450*scrsize_h/480/1532
+			alSelectImage 32
+			alResetCopyMode
+		}*/
+		// トータルスコア計算
+		coursetotalscore/=courselistnum
+		// パーセンテージ計算
+		if((gauge/1000<=0)|(tochu=1)){
+			gpercent=int((double(coursenow-1)/courselistnum+double(mendt)/t_finalnote/courselistnum*(tochu=1))*100.0f)
+		}else{
+			gpercent=100+max(coursetotalscore-9000000,0)/10000
+		}
+		stat5=0
+		stat6=0
+		if((gauge/1000)>0){
+			stat6=1
+		}
+		if(courseerrorn=0){
+			stat6=2
+		}
+		if(coursetotalscore=10000000){
+			stat6=3
+		}
+		if(tochu=1){
+			stat6=0
+		}
+		diff=0
+		if((auto=0)&(adjmode=0)&(iscmdline=0)){
+			buf=""
+			stat2="normal"
+			stat2_2="normal"
+			if(effratetype=1):stat2="hard"
+			if(effratetype=-1):stat2="easy"
+			stat2_1="normal"
+			if(turn=1):stat2_1="mirror"
+			if(turn=2):stat2_1="random"
+			if(turn=3):stat2_1="s-random"
+			if(turn=4):stat2_1="h-random"
+			stat3_0="on"
+			if(shortmode=1):stat3_0="off"
+			if(shortmode=2):stat3_0="auto"
+			if(shortmode=3):stat3_0="hide"
+			stat3="on"
+			if(longmode=1):stat3="off"
+			if(longmode=2):stat3="auto"
+			if(longmode=3):stat3="hide"
+			stat4="on"
+			if(analogmode=1):stat4="off"
+			if(analogmode=2):stat4="auto"
+			if(analogmode=3):stat4="hide"
+			stat5_=stat2+","+stat2_1+","+stat2_2+","+stat3_0+","+stat3+","+stat4
+			stat5_2=",,,,,"
+			if(effratetype=1):stat5_2="normal"+","+stat2_1+","+stat2_2+","+stat3_0+","+stat3+","+stat4
+			if(effratetype=0):stat5_2="hard"+","+stat2_1+","+stat2_2+","+stat3_0+","+stat3+","+stat4
+			if(dir="..\\courses"){
+				_fname=dir_default+"\\courses\\score\\"+players.cplayer+"\\"+getpath(ccoursefile,9)+".ksc"
+			}else{
+				_fname=dir_default+"\\courses\\score\\"+players.cplayer+"\\"+dir+"\\"+getpath(ccoursefile,9)+".ksc"
+			}
+			gpercentp=0
+			exist _fname
+			f=1
+			if(strsize>0){
+				notesel stat1_2
+				noteload _fname
+				cnt3=cnt
+				repeat notemax
+					noteget stat1,cnt
+					split stat1,"=",scorestat
+					scorestat.1+=",,,,,,,,"
+					if(scorestat.0=stat5_){
+						sdim scorestat2,16,9
+						split scorestat.1,",",scorestat2
+						gpercentp=int(scorestat2.3)
+						if(int(scorestat2.0)<coursetotalscore){
+							scorestat2.0=""+coursetotalscore
+						}
+						playcount=1
+						clearcount=(int(scorestat2.1)>=1)
+						fullcombocount=(int(scorestat2.1)>=2)
+						perfectcount=(int(scorestat2.1)>=3)
+						if(int(scorestat2.1)<stat6){
+							scorestat2.1=""+stat6  // クリア状況
+						}
+						scorestat2.2=""  // grade
+						if((int(scorestat2.3)<gpercent)){
+							scorestat2.3=""+gpercent
+						}
+						scorestat2.4=""  // chainmax
+						if(length(scorestat2)>=6):playcount=max(int(scorestat2.5),playcount)
+						playcount++
+						if(length(scorestat2)>=7):clearcount=max(int(scorestat2.6),clearcount)
+						if(stat6>=1):clearcount++
+						if(length(scorestat2)>=8):fullcombocount=max(int(scorestat2.7),fullcombocount)
+						if(stat6>=2):fullcombocount++
+						if(length(scorestat2)>=9):perfectcount=max(int(scorestat2.8),perfectcount)
+						if(stat6>=3):perfectcount++
+						buf+=stat5_+"="+scorestat2.0+","+scorestat2.1+","+scorestat2.2+","+scorestat2.3+","+scorestat2.4+","+playcount+","+clearcount+","+fullcombocount+","+perfectcount+"\n"
+						f=0
+					}else:if(scorestat.0=stat5_2){
+						sdim scorestat2,16,9
+						split scorestat.1,",",scorestat2
+						buf+=stat1+"\n"
+					}else:buf+=stat1+"\n"
+				loop
+				if(gpercent>gpercentp){
+					diff=gpercent-gpercentp
+				}else:diff=0
+			}else:diff=gpercent
+			if(f=1){
+				buf+=stat5_+"="+coursetotalscore+","+stat6+","+0/*stat1_*/+","+gpercent+","+chainmax+",1,"+(stat6>=1)+","+(stat6>=2)+","+(stat6>=3)+"\n"
+			}
+			dir_stat1=dir_cur
+			chdir dir_default+"\\courses\\score"
+			dirlist stat1,"*",5
+			notesel stat1
+			f=1
+			repeat notemax
+				noteget stat2,cnt
+				if(stat2=players.cplayer){
+					f=0
+					break
+				}
+			loop
+			if(f=1):mkdir players.cplayer
+			chdir dir_default+"\\courses\\score\\"+players.cplayer
+			if(dir!="..\\courses"){
+				dirlist filelistdir,dir,5
+				if(stat=0):mkdir dir
+			}
+			notesel buf
+			notesave _fname
+			chdir dir_stat1
+		}
+		timestatestart=d3timer()
+		diffstartt=timestatestart
+		// ハイスコア更新の通知
+		if(diff>0){
+			alCreateImage 37,320*450*2*scrsize_h/480/1532,90*450*2*scrsize_h/480/1532
+			alCopyImageToImage IMG_CRESULT_NEWRECORD,37
+			stat1=str(gpercentp)
+			stat2=""
+			repeat 3-strlen(stat1)
+				stat2+="*"
+			loop
+			stat2+=stat1
+			repeat 3
+				if(strmid(stat2,cnt,1)="*"):continue
+				stat1=int(strmid(stat2,cnt,1))
+				alStretchImageToImage 10,37,0,120*450*scrsize_h/480/1532*stat1,136*450*scrsize_h/480/1532,120*450*scrsize_h/480/1532,28*450*2*scrsize_h/480/1532+28*450*2*scrsize_h/480/1532*cnt,44*450*2*scrsize_h/480/1532,25*450*2*scrsize_h/480/1532,24*450*2*scrsize_h/480/1532
+			loop
+			stat1=str(gpercent)
+			stat2=""
+			repeat 3-strlen(stat1)
+				stat2+="*"
+			loop
+			stat2+=stat1
+			repeat 3
+				if(strmid(stat2,cnt,1)="*"):continue
+				stat1=int(strmid(stat2,cnt,1))
+				alStretchImageToImage 10,37,0,120*450*scrsize_h/480/1532*stat1,136*450*scrsize_h/480/1532,120*450*scrsize_h/480/1532,192*450*2*scrsize_h/480/1532+28*450*2*scrsize_h/480/1532*cnt,44*450*2*scrsize_h/480/1532,25*450*2*scrsize_h/480/1532,24*450*2*scrsize_h/480/1532
+			loop
+		}
+		diffendt=timestatestart+3000+2000*(completedlist!="")
+		stat12p=1
+		BASS_ChannelSetPosition_ms courseresultbgmid,0
+		BASS_ChannelSetAttribute courseresultbgmid,2,double(mastervol)/100
+		BASS_ChannelPlay courseresultbgmid
+		scrollposnow=0
+		scrollt=timestatestart
+		up_keyp=0
+		down_keyp=0
+		// Twitter連携
+		click_keyp=1
+		tweet_keyp=1
+		tweetfl=0
+		if(is_course_utf8=1){
+			_csongtitle=strmid(ccoursetitle,3,256)
+		}else{
+			_csongtitle=utf8enc(ccoursetitle)
+		}
+		if(stat6=0){
+			if(effratetype=0){
+				stat1="FAILED..."
+			}else:if(effratetype=1){
+				stat1="HARD FAILED..."
+			}else:if(effratetype=-1){
+				stat1="EASY FAILED..."
+			}
+		}else:if(stat6=1){
+			if(effratetype=0){
+				stat1="CLEARED!"
+			}else:if(effratetype=1){
+				stat1="HARD CLEAR!"
+			}else:if(effratetype=-1){
+				stat1="EASY CLEAR!"
+			}
+		}else:if(stat6=2){
+			if(effratetype=-1){
+				stat1="EASY FULL COMBO!"
+			}else{
+				stat1="FULL COMBO!"
+			}
+		}else:if(stat6=3){
+			if(effratetype=-1){
+				stat1="EASY PERFECT!"
+			}else{
+				stat1="PERFECT!"
+			}
+		}
+		if(shortmode+longmode+analogmode>0){
+			stat1="ASSIST "+stat1
+		}
+		_tweet_text=_csongtitle+"\n"+stat1+" (ACHIEVEMENT RATE: "+gpercent+"%)\n#kshootmania\n"
+		sdim tweet_text,140*3
+		tweet_text=_tweet_text
+		tweet_notifyt=-50000
+		tweet_notifytype=0
+		repeat
+			redraw 0
+			gosub *getjoystat
+			t=d3timer()
+			gsel 0
+			gmode 0
+			color 0,0,0
+			pos 0,0
+			gcopy 29,0,0,scrsize_w,scrsize_h
+			mxy=ginfo_mx,ginfo_my
+			ScreenToClient hwnd, varptr(mxy)
+			if(t-timestatestart>=768){
+				getkey tweet_key,122 // F11
+				tweet_key=tweet_key|getjoykeystat(13)
+			}else:tweet_key=0
+			getkey click_key,1
+			if((t-timestatestart>=768)&(mxy.0<scrsize_w)&(mousex>scrsize_w-getsize(90))&(mxy.1>=0)&(mousey<getsize(24))&(tweetfl=0)&(click_key=1)&(click_keyp=0)&(ginfo2()=0)){
+				tweet_key=1
+			}
+			click_keyp=click_key
+			if((tweet_key=1)&(tweet_keyp=0)&(tweetfl=0)){
+				diffstartt=t-1000
+				diffendt=max(diffendt,t+5000)
+				tweetfl=1
+			}else:tweet_key=0
+			getkey stat1,13
+			stat1=stat1|getjoykeystat(11)
+			stat2=getesckey()
+			if(((stat1=1)|(stat2=1))&(ginfo2()=0)&(stat12p=0)){
+				if((diff>0)&(t<diffendt)){
+					diffendt=t
+				}else{
+					BASS_ChannelSlideAttribute courseresultbgmid,2,0.0,100
+					refreshsonglistoff=1
+					//vload_start dir_default+"\\cache\\cache.tmp"
+					//vload_get minfo
+					//vload_get minfostr
+					//vload_end
+					state=st_select
+					gsel 0
+					//color 255,255,255
+					//font lang.0.1,getsize(18)
+					//pos scrsize_w-80*scrsize_w/480,getsize(456)
+					//mes lang.2.0//"LOADING..."
+					alCopyImageToScreen IMG_LOADING,0,scrsize_w-getsize(208),getsize(442)
+					redraw 1
+					break
+				}
+			}
+			stat1=stat1|getjoykeystat(11)
+			stat12p=((stat1=1)|(stat2=1))
+			getkey up_key,38
+			getkey stat2,key.2
+			getkey stat2_,key2.2
+			up_key=up_key|stat2|stat2_|getjoykeystat(2)
+			if((up_key=1)&(ginfo2()=0)&(up_keyp=0)){
+				if(scrollposnow>0){
+					scrollt=t
+					scrollposnow-=stat_h*4+2*(courselistnum>=4)*450*2*scrsize_h/480/1532+36*(courselistnum<4)*450*2*scrsize_h/480/1532-1
+					scrollposnow=max(0,scrollposnow)
+				}
+			}
+			getkey down_key,40
+			getkey stat2,key.1
+			getkey stat2_,key2.1
+			down_key=down_key|stat2|stat2_|getjoykeystat(1)
+			if((down_key=1)&(ginfo2()=0)&(down_keyp=0)){
+				if(scrollposnow<stat_h*(courselistnum-4)-2*(courselistnum>=4)*450*2*scrsize_h/480/1532-36*(courselistnum<4)*450*2*scrsize_h/480/1532){
+					scrollt=t
+					scrollposnow+=stat_h*4+2*(courselistnum>=4)*450*2*scrsize_h/480/1532+36*(courselistnum<4)*450*2*scrsize_h/480/1532-1
+				}
+			}
+			up_keyp=up_key
+			down_keyp=down_key
+			stat1=stat6
+			if(effratetype=-1):stat1+=8
+			if((effratetype=1)&(stat1<2)):stat1+=16
+			if(shortmode+longmode+analogmode>0){
+				stat1+=2+2*(stat1<16)
+			}
+			alCopyImageToScreen 39,0,scrsize_w/2-600*450*2*scrsize_h/480/1532/2,getsize(5),600*450*2*scrsize_h/480/1532,50*450*2*scrsize_h/480/1532,0,50*450*2*scrsize_h/480/1532*stat1
+			//alCopyImageToScreen 32,0,getsize(140)+(scrsize_w-getsize(640))/2,getsize(60)
+			if((effratetype<=0)&(iscourse=0)){
+				stat1=100*gauge/gaugemax
+			}else{
+				if(gauge>=0){
+					stat1=gauge/1000
+				}else{
+					stat1=0
+				}
+			}
+			alResetCopyMode
+			alCopyImageToScreen IMG_CRESULT_INFO,0,scrsize_w/2-800*450*2*scrsize_h/480/1532/2,getsize(40)
+			if(courselistnum>=4){
+				if(scrollposnow>0){
+					alCopyImageToScreen IMG_CRESULT_ARROW,0,scrsize_w/2-720*450*2*scrsize_h/480/1532/2,getsize(126),720*450*2*scrsize_h/480/1532,24*450*2*scrsize_h/480/1532,0,0
+				}
+				if(scrollposnow<stat_h*(courselistnum-4)-2*(courselistnum>=4)*450*2*scrsize_h/480/1532-36*(courselistnum<4)*450*2*scrsize_h/480/1532-1){
+					alCopyImageToScreen IMG_CRESULT_ARROW,0,scrsize_w/2-720*450*2*scrsize_h/480/1532/2,getsize(452),720*450*2*scrsize_h/480/1532,24*450*2*scrsize_h/480/1532,0,24*450*2*scrsize_h/480/1532
+				}
+				if(t-scrollt<200){
+					alCopyModeAlpha 1.0*double(t-scrollt)/200
+				}else:alCopyModeAlpha 1.0
+				alCopyImageToScreen IMG_CRESULT_LISTBUF,0,scrsize_w/2-720*450*2*scrsize_h/480/1532/2,getsize(144),720*450*2*scrsize_h/480/1532,stat_h*4,0,scrollposnow
+			}else{
+				if(t-scrollt<200){
+					alCopyModeAlpha 1.0*double(t-scrollt)/200
+				}else:alCopyModeAlpha 1.0
+				alCopyImageToScreen IMG_CRESULT_LISTBUF,0,scrsize_w/2-720*450*2*scrsize_h/480/1532/2,getsize(130)+(stat_h*4-stat_h*courselistnum-12*(1+2*(courselistnum<4))*450*2*scrsize_h/480/1532)/2,720*450*2*scrsize_h/480/1532,stat_h*courselistnum-12*(1+2*(courselistnum<4))*450*2*scrsize_h/480/1532,0,scrollposnow
+			}
+			alCopyModeAlpha 1.0
+			alCopyImageToScreen IMG_CRESULT_GAUGE,0,scrsize_w/2-800*450*2*scrsize_h/480/1532/2+62*450*2*scrsize_h/480/1532,getsize(40)+91*450*2*scrsize_h/480/1532,540*450*2*scrsize_h/480/1532*min(gpercent,100)/100,36*450*2*scrsize_h/480/1532,0,36*450*2*scrsize_h/480/1532*(effratetype2*2+2+((gauge/1000)>0))
+			stat3=0
+			repeat 3
+				stat1=gpercent\(powf(10,3-cnt))/powf(10,2-cnt)
+				if((stat1!=0)|(stat3=1)|(cnt=2)):alStretchImageToScreen 10,0,0,120*450*scrsize_h/480/1532*stat1,136*450*scrsize_h/480/1532,120*450*scrsize_h/480/1532,scrsize_w/2-800*450*2*scrsize_h/480/1532/2+636*450*2*scrsize_h/480/1532+50*450*2*scrsize_h/480/1532/2*cnt,getsize(40)+98*450*2*scrsize_h/480/1532,45*450*2*scrsize_h/480/1532/2,48*450*2*scrsize_h/480/1532/2
+				if(stat1!=0):stat3=1
+			loop
+			stat3=""
+			if((mxy.0<scrsize_w)&(mousex>scrsize_w-getsize(90))&(mxy.1>=0)&(mousey<getsize(24))&(tweetfl=0)&(stat12p=0)){
+				alCopyImageToScreen IMG_RESULT_TWEETBTN,0,scrsize_w-getsize(90),0,getsize(90),getsize(24)
+			}
+			if(tweet_notifyt+1200>t){
+				alCopyModeAlpha 1.0-double(max(t-tweet_notifyt,800)-800)/400
+				alCopyImageToScreen IMG_RESULT_TWEETBTN,0,scrsize_w-getsize(90),0,getsize(90),getsize(24),0,getsize(24)*tweet_notifytype
+				alCopyModeAlpha 1.0
+			}
+			if((diff>0)&(t-diffstartt>350)){
+				if((t>diffendt)&(t<=diffendt+150)){
+					if(t-diffstartt-350<=150){
+						alCopyModeAlpha 1.0-double(t-diffendt)/150*double(t-diffstartt-350)/150
+					}else{
+						alCopyModeAlpha 1.0-double(t-diffendt)/150
+					}
+				}else:if(t>diffendt+150){
+					alCopyModeAlpha 0.0
+				}else:if(t-diffstartt-350<=150){
+					alCopyModeAlpha 1.0*double(t-diffstartt-350)/150
+				}
+				alCopyImageToScreen 37,0,scrsize_w/2-320*450*2*scrsize_h/480/1532/2,scrsize_h/2-90*450*2*scrsize_h/480/1532/2-getsize(20),320*450*2*scrsize_h/480/1532,90*450*2*scrsize_h/480/1532,0,0
+				alCopyModeAlpha 1.0
+			}
+			getkey stat1,key.4
+			getkey stat2,key2.4
+			fxl_key=stat1|stat2|getjoykeystat(4)
+			getkey stat1,key.5
+			getkey stat2,key2.5
+			fxr_key=stat1|stat2|getjoykeystat(5)
+			if(fxl_key+fxr_key=2){
+				if(t>diffendt+150):diffstartt=t
+				diffendt=max(t+3000,diffendt)
+			}/*
+			stat3=""
+			if(tweet_key=1){
+				//if(stat3!=""):stat3+="\n"
+				_atitle=atitle
+				strrep _atitle," -ADVANCED KEY SHOOTING GAME-",""
+				stat3+=_atitle
+				stat3+="\n"+siteurl
+			}
+			notesel stat3
+			pos 9*scrsize_h/480+(scrsize_w-getsize(640))/2,scrsize_h-getsize(12)*notemax
+			color 128,192,96
+			font "MS Gothic",getsize(12)
+			mes stat3*/
+			if(t-timestatestart<768){
+				color 255,255,255
+				gmode 3,,,256-256*(t-timestatestart)/768
+				gsquare -1,sx_a,sy_a
+			}
+			redraw 1
+			if(tweet_key=1){
+				// Note: ソースコード公開用につき削除
+				dialog "This version does not support linking with Twitter."
+			}
+			await 7
+			gosub *volactive
+			while (ginfo2()!=0)
+				await 100
+			wend
+			tweet_keyp=tweet_key
+		loop
+		dim bufdel,1
+		bufdel=31,32,33,36,39,95
+		foreach bufdel
+			alDeleteImage bufdel.cnt
+		loop
+	}
+	return

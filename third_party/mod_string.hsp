@@ -1,0 +1,217 @@
+#module
+ 
+;文字列操作追加命令セット
+ 
+;文字コード判定関数
+;	MbsbType( p1, p2)
+;		Shift-JISの２バイト文字かを判定します。
+;		p1 : 内容をチェックする文字列変数
+;		p2 : バッファのインデックス（Byte単位）
+;
+;	次の値を返します。
+;		0:シングルバイト（１バイト文字）
+;		1:マルチバイトの先行バイト（２バイト文字の１バイト目）
+;		2:マルチバイト文字の後続バイト（２バイト文字の２バイト目）
+;
+;	msvcrt.dllの_mbsbtype関数と同等の動作をします。
+;---
+;	MbsbTypeByte( p1 )
+;		Shift-JISのマルチバイトの先行バイトかどうか判定します。
+;		p1 : peekで取得した値を入れる。
+;		返り値：
+;			0:シングルバイトまたはマルチバイトの後続バイト
+;			1:マルチバイトの先行バイトまたはマルチバイトの後続バイト
+#defcfunc MbsbTypeByte int byt
+    return ((byt>=0x81)&(byt<=0x9f) )|( (byt>=0xe0)&(byt<=0xfc))
+ 
+#defcfunc MbsbType var p1, int p2
+    bcnt = p2
+    repeat p2
+        if MbsbTypeByte(peek(p1, p2-cnt-1)) = 0 : bcnt = cnt : break
+    loop
+    if bcnt\2 {
+        ;マルチバイトの後続バイト
+        return 2
+    } else {
+        ;マルチバイトの先行バイトかシングルバイト
+        return MbsbTypeByte(peek(p1, p2))
+    }
+ 
+ 
+ 
+;文字列の挿入関数
+;	StrInsert pstr, pstrin, in
+;	pstrのバッファのインデックスinバイトにpstrinを挿入します。
+;	挿入位置が２バイト文字の途中だったら２バイト文字の手前に挿入します。
+#defcfunc StrInsert var pstr, var pstrin, int in
+    if in<0 : ina = 0 : else : ina = in
+    ;挿入位置が２バイト文字の後続バイトだったときの処理
+    if MbsbType(pstr,ina)>1 : ina--
+    return strmid(pstr, 0, ina) + pstrin + strmid(pstr, ina, strlen(pstr)-ina)
+ 
+ 
+;文字列の一部を削除する
+;	StrDel(strp1, delp, delnum)
+;		strp1	: 文字列変数
+;		delp	: 削除始めのインデックス
+;		delnum	: 削除する文字数
+;	返り値：削除したあとの文字列
+#defcfunc StrDel var strp1, int delp, int delnum
+    return strmid(strp1, 0, delp) + strmid(strp1, delp+delnum, strlen(strp1)-(pd1+pd2))
+ 
+#global
+ 
+ 
+#module
+ 
+;禁則文字の登録（２バイト文字のみ）
+;	SetKinsoku p1, p2
+;	禁則処理の対象になる文字を登録します。分離禁則は未対応。
+;		p1 : 行頭禁則文字
+;		p2 : 行末禁則文字
+#deffunc SetKinsoku var p1, var p2
+    kinsoku(0) = p1        ;行頭禁止(1)
+    kinsoku(1) = p2        ;行末禁止(2)
+    return
+ 
+;禁則処理適用文字かチェックする関数
+;	CkKinsoku( p1 )
+;		p1 : wpeekで読み出した値
+;
+;	次の値を返します。
+;		0:対象文字以外
+;		1:行頭禁止
+;		2:行末禁止
+;	禁則文字の登録はSetKinsokuで行ないます。
+#defcfunc CkKinsoku int p1
+    fkins = 0
+    repeat 2
+        kinsoku_i = cnt
+        repeat strlen(kinsoku(kinsoku_i)) / 2
+            if p1 = wpeek(kinsoku(kinsoku_i), cnt*2) : fkins = kinsoku_i+1    //禁則処理適用をonにする。
+        loop
+    loop
+    return fkins
+ 
+ 
+;自動改行命令
+;	CoAutoLF txt, buf, nlnum, swkin
+;
+;	txt : 変換元の文字列変数
+;	buf : 変換後の文字列を出力する変数
+;	      nlnumが0以下だと文字列を返しません。
+;	nlnum : 改行手前位置（バイト）
+;	swkin : 0で禁則処理をする。1で禁則処理off。
+;
+;	stat : 普段は0ですが、nlnumに0以下の価を入れると1を返します。
+#deffunc CoAutoLF var txt, var buf, int nlnum, int swkin
+    if nlnum <= 0 : buf = "" : return 1    ;1より小さい価を入れるとエラーと認識する。
+ 
+    pet   = -1    ;全体改行ポイント（バイト単位アドレス）文章はじめを0
+    plet  = -1    ;行内改行ポイント（バイト単位アドレス）行頭を0
+    pwt  = 0    ;全体書き込みポイント（現在の位置）（最後に次の位置へシフトしておく）
+    plwt = 0    ;行内書き込みポイント（現在の位置）（最後に次の位置へシフトしておく）
+    ;常に改行挿入候補を入れていき、文章の長さが一定幅を超えたら改行を挿入する。
+    fkins2 = 0    ;行末禁止フラグ
+ 
+    repeat strlen(txt)
+        byte(0) =  peek(txt,cnt)    ;１バイト取り出す
+        byte(1) = wpeek(txt,cnt)    ;２バイト取り出す
+        stcha = MbsbType(txt,cnt)        ;全角か半角か判定する。
+ 
+        ;改行位置指定	- アルファベットの禁則処理
+        if cnt>0 {
+            if (stcha = 0)&(fkins2 = 0) {
+                ;１バイト文字で行末禁止フラグが立ってないとき
+                if (peek(txt,cnt-1)=32) | (MbsbType(txt,cnt-1)=2) {
+                    ;１バイト前が半角スペースか２バイト文字２バイト目
+                    pet = pwt : plet = plwt
+                }
+            }
+        }
+ 
+ 
+        ;---２バイト文字処理ここから
+        if stcha!0 {
+            ;禁則処理
+            fkins = 0    //２バイト文字の禁則処理用フラグ
+            if (swkin = 0)&(stcha) {
+                fkins = CkKinsoku(byte(1))    ;どのタイプの禁則処理文字かチェック
+            }
+ 
+            ;行末禁止	「
+            if fkins = 2 {
+                pet = pwt : plet = plwt
+                fkins2 = 1    ;行末禁止フラグ
+            }
+ 
+            ;行頭禁止	」
+;			if (fkins = 1) {	}	;改行候補を入れない
+ 
+            ;禁則対象外
+            if fkins = 0 {
+                if (fkins2=0) {
+                    pet = pwt : plet = plwt
+                }
+            }
+        }
+        ;行頭禁止用フラグ管理
+        if fkins2 >= 2 : fkins2 = 0
+        if fkins2 ! 0 : fkins2++
+        ;---２バイト文字処理ここまで
+ 
+ 
+        ;改行の位置（禁則モードoff）
+        if (swkin!0) {
+            pet = pwt
+            plet = plwt
+        }
+ 
+ 
+        ;１文字コピー
+        pwt2 = pwt
+        f2byte = 0    ;２バイト文字ループフラグ
+        if stcha {
+            wpoke buf, pwt, byte(stcha>0)    ;２バイト文字のとき
+            plwt+=2 : pwt+=2
+            f2byte = 1
+        } else {
+            poke buf, pwt, byte(stcha)    ;１バイト文字のとき
+            plwt++ : pwt++
+        }
+ 
+        ;もともと改行だった場合
+        if ( byte(0)=13)|( byte(0)=10 ) : plwt = 0 : pet = -1 : plet = -1
+ 
+ 
+        ;改行候補位置に改行を挿入する
+        if ((nlnum+1)<=plwt) & (pet!-1) & ((byte(0)!32)|(swkin!0)) {
+            yn = "\n"
+            buf = StrInsert(buf, yn, pet)
+            plwt = plwt-plet : pwt+=2
+            pet = -1 : plet = -1
+ 
+            ;改行位置が半角スペースだったら半角スペースは消しておく
+            if (swkin = 0)&(pwt2 > 0) {
+                if peek(buf, pwt2-1) = 32 {
+                    buf = StrDel(buf, pwt2-1, 1)
+                    pwt--
+                }
+            }
+        }
+ 
+        if f2byte : continue cnt+2
+    loop
+    poke buf, pwt, 0    ;終了コード
+ 
+return 0
+ 
+;---------------------------
+ 
+ 
+#global
+
+
+kinsoku0 = "、。，．’”）〕］｝〉》」』】・：；？！ヽヾゝゞ〃々ー―～…‥っゃゅょッャュョぁぃぅぇぉァィゥェォ"    //行頭禁止(1)
+kinsoku1 = "‘“（〔［｛〈《「『【"    ;行末禁止(2)
+SetKinsoku kinsoku0, kinsoku1    ;禁則文字の登録

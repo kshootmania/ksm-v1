@@ -1,0 +1,2815 @@
+// 次回 buffer…187
+//      Image …172(122~139はアイコン)
+
+//#runtime "hsp3mt"
+//#packopt runtime "hsp3mt.hrt"
+//#cmpopt ppout 1
+
+#packopt name "kshootmania"
+
+#define st_standby		0
+#define st_plsel		1
+#define st_pass			2
+#define st_select		3
+#define st_playing_		4
+#define st_playing		5
+#define st_result		6
+#define st_courseresult	7
+#define st_option		8
+#define st_gate			9
+#define mode_on			0
+#define mode_off		1
+#define mode_auto		2
+#define mode_hide		3
+#define SONG_MAX		8192
+#define SELSLIDER_MAX	4
+#define LEVSLIDER_MAX	8
+#define judgelmax		4
+#define course_sjis_(%1) if(is_course_utf8=1):%1=sjisenc(%1)
+#define _sjis_(%1)		if(isutf8=1):%1=sjisenc(%1)
+#define _utf8_(%1)		if(isutf8=1):%1=bom+%1
+#define effratetype		effratetype2 // ←なぜ?
+#define ra				max(powf(2,lowquality),1)
+#define lanediv			2
+#define vw				256
+#define vw2				304
+#define vh				1024
+#define vh2				936
+#define mdetail_xpos	scrsize_w/2+(-240/2-175)*scrsize_h/480
+#define mdetail_ypos	(102-66/2)*scrsize_h/480
+#define xsh				32
+#define bline_xsh		32
+#define bt_xsh			44
+#define bt_width		42
+#define fx_width		84
+#define vxsh			-750
+#define slshift			0
+#define i3d				0
+#define analograte		106.5
+#define analogxsh		10
+#define errate1			(0.5f*errate2/100)
+#define erxsh1			(155.0f+erxsh2)
+#define erysh1			(88.0f+erysh2)
+#define bpba			10000
+#const  bpba_2			bpba/2
+#const  bpba_4			bpba/4
+#const  bpba_8			bpba/8
+#const  bpba_16			bpba/16
+#const  bpba_32			bpba/32
+#define beat			4
+#define mplayfl			1
+#define romax			14.0
+#define rotatemax		21.0
+#define rotatemax2		28.0
+#define rotime			175.0
+#define rotate0max		1000
+#define ztime			(1+39*(csongver_int<167))
+#define ztilttime		1
+#define ztiltontime		40
+#define ttp2			(ttp+laserdelay0-laserdelay)
+#define laserdelay		((max(min(t-ldelayresett,laserdelay1),0)+40)*(filtertype=0))
+#define sttp			getsttp()
+#define	defx			ginfo_dispx/2
+#define defy			ginfo_dispy/2
+#define siteurl			"https://www.kshootmania.com/"
+#define atitle			"K-Shoot MANIA v1.70beta"
+#define currentver		"168c"
+
+#define FX_RE8		1
+#define FX_RE12		2
+#define FX_RE16		3
+#define FX_RE24		4
+#define FX_RE32		5
+#define FX_GA4		6
+#define FX_GA8		7
+#define FX_GA12		8
+#define FX_GA16		9
+#define FX_GA24		10
+#define FX_GA32		11
+#define FX_FLAN		12
+#define FX_PITC		13
+#define FX_BITC		14
+#define FX_PHAS		15
+#define FX_WO12		16
+#define FX_TSTP		17
+#define FX_EC4		18
+#define FX_SICH		19
+
+#define FXDEF_FXTYPE	0
+#define FXDEF_INT		1
+#define FXDEF_RATE		2
+#define FXDEF_SAMPLE	3
+#define FXDEF_LENGTH	4
+#define FXDEF_SWITCH	5
+#define FXDEF_FREQ		6
+#define FXDEF_FLOAT		7
+#define FXDEF_NEGDB		8
+#define FXDEF_PITCH		9
+#define FXDEF_FILENAME	10
+
+#define FXDEF_FXTYPE_RETR	0
+#define FXDEF_FXTYPE_GATE	1
+#define FXDEF_FXTYPE_FLAN	2
+#define FXDEF_FXTYPE_PITC	3
+#define FXDEF_FXTYPE_PHAS	4
+#define FXDEF_FXTYPE_BITC	5
+#define FXDEF_FXTYPE_WOBB	6
+#define FXDEF_FXTYPE_TSTP	7
+#define FXDEF_FXTYPE_ECHO	8
+#define FXDEF_FXTYPE_SICH	9
+#define FXDEF_FXTYPE_AUDI	10
+
+#define FXDEF_FXTYPEMAX		10
+
+#const  T_MOEX_DELAY			0
+#const  GLOBAL_SOUNDFX_DELAY	0
+
+#define IMG_LOADING						167		// LOADING...
+
+#define IMG_DRAWTXT_TEMP				153		// 文字表示用一時イメージ
+
+#define IMG_MSEL_MEDAL_LARGE			157		// 選曲画面 クリアメダル(大きい画像)
+#define IMG_MSEL_SUB0					161		// 選曲画面 サブフォルダ0
+#define IMG_MSEL_SUB1					162		// 選曲画面 サブフォルダ1(上)
+#define IMG_MSEL_SUB2					163		// 選曲画面 サブフォルダ2(下)
+#define IMG_MSEL_COURSETEMP				164		// 選曲画面 コース楽曲
+
+#define IMG_RESULT_DIFFICULTY			57		// リザルト画面 難易度
+#define IMG_RESULT_TWEETBTN				166		// リザルト画面 ツイートボタン
+
+#define IMG_CRESULT_INFO				158		// コースモードリザルト画面 リザルト上部のコース名・達成率表示
+#define IMG_CRESULT_ITEM				154		// コースモードリザルト画面 各曲の曲名スコアなど一覧の枠画像
+#define IMG_CRESULT_LISTBUF				156		// コースモードリザルト画面 各曲の曲名スコアなど一覧の実際の描画先
+#define IMG_CRESULT_ARROW				159		// コースモードリザルト画面 各曲の曲名スコアなど一覧 スクロール可能矢印
+#define IMG_CRESULT_GAUGE				160		// コースモードリザルト画面 達成率ゲージ
+#define IMG_CRESULT_NEWRECORD			155		// コースモードリザルト画面 ハイスコア更新時の通知
+
+#define IMG_TWEET_TEMP					165		// Twitter画像保存用一時イメージ
+
+#define IMG_IR_SIGNIN					168		// IRログイン選択画面
+#define IMG_IR_SIGNIN_CURSOR			169		// IRログイン選択画面
+#define IMG_IR_POPUP					170		// IRポップアップ背景
+#define IMG_IR_POPUP_TEMP				171		// IRポップアップ一時イメージ
+
+#define BUF_RESULT_TEMP					184		// リザルト画面一時保管用バッファ
+#define BUF_TWEET_DIALOG				183		// Twitter投稿用スクリーン
+
+#define BUF_IR_LOGIN_DIALOG				185		// IRログイン画面用スクリーン
+
+#define TWITTER_REPEAT_COUNT 20
+
+#define GATE_PATH		""
+#define GATE_GLIST_FNAME	"glist164.lst"
+
+#undef picload
+#module __picload__
+#deffunc local picload_ str filename, int mode
+	exist filename
+	if(strsize=-1){
+		dialog "Cannot open image \""+filename+"\""
+	}
+	picload@hsp filename,mode
+	return
+#define global picload(%1,%2=0) picload_@__picload__ %1,%2
+#global
+
+#uselib "user32"
+#func IsIconic "IsIconic" sptr
+#func ShowWindow "ShowWindow" sptr,sptr
+#func EnableWindow "EnableWindow" int, int
+#func ScreenToClient "ScreenToClient" int, int
+#func f_SetWindowPos "SetWindowPos" int , int , int , int , int , int , int
+#func SetWindowTextW "SetWindowTextW" wptr,wptr
+#func GetWindowTextW "GetWindowTextW" wptr,wptr,wptr
+
+#uselib "kernel32"
+#cfunc c_LoadLibrary "LoadLibraryA" str
+#func  f_FreeLibrary "FreeLibrary" int
+
+#uselib "gdi32"
+#func CreateFontIndirect "CreateFontIndirectA" sptr
+#func DeleteObject "DeleteObject" sptr
+
+#const WS_CHILD		$40000000
+#const WS_VISIBLE		$10000000
+#const WS_BORDER		$800000
+#const WS_TABSTOP		$10000
+#const ES_AUTOHSCROLL	$80
+#const STYLE			WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_AUTOHSCROLL
+#const WM_SETFONT    0x0030
+
+#uselib "msvcrt"
+#func ren "rename" str, str
+
+#include "src/kshlib.as"
+
+#uselib "bass.dll"
+#func BASS_Init "BASS_Init" int, int, int, int, int
+#cfunc BASS_GetVersion "BASS_GetVersion"
+#func BASS_GetCPU "BASS_GetCPU"
+#func BASS_Pause "BASS_Pause"
+#func BASS_Start "BASS_Start"
+#cfunc BASS_GetVolume "BASS_GetVolume"
+#func BASS_SetVolume "BASS_SetVolume" int
+#func BASS_Free onexit "BASS_Free"
+
+#cfunc BASS_StreamCreateFile "BASS_StreamCreateFile" int, sptr, int, int, int, int, int
+#cfunc BASS_StreamCreateURL "BASS_StreamCreateURL" sptr, int, int, int, int, int
+#func BASS_StreamFree "BASS_StreamFree" int
+
+#cfunc BASS_SampleLoad "BASS_SampleLoad" int, sptr, int, int, int, int, int
+#cfunc BASS_SampleGetChannel "BASS_SampleGetChannel" int, int
+#func BASS_SampleStop "BASS_SampleStop" int
+#func BASS_SampleFree "BASS_SampleFree" int
+
+#func BASS_ChannelPlay "BASS_ChannelPlay" int, int
+#func BASS_ChannelPause "BASS_ChannelPause" int
+#func BASS_ChannelStop "BASS_ChannelStop" int
+#func BASS_ChannelSetAttributes "BASS_ChannelSetAttributes" int, int, int, int
+#func BASS_ChannelIsActive "BASS_ChannelIsActive" int
+#func BASS_ChannelSetAttribute "BASS_ChannelSetAttribute" int, int, float
+#func BASS_ChannelSlideAttribute "BASS_ChannelSlideAttribute" int, int, float, int
+#cfunc BASS_ErrorGetCode "BASS_ErrorGetCode"
+#func BASS_ChannelSetLink "BASS_ChannelSetLink" int,int
+#func BASS_ChannelSetSync "BASS_ChannelSetSync" int,int
+
+#func BASS_SetConfig "BASS_SetConfig" int,int
+
+#cfunc BASS_ChannelSetFX "BASS_ChannelSetFX" int,int,int
+#func BASS_ChannelRemoveFX "BASS_ChannelRemoveFX" int,int
+#func BASS_FXReset "BASS_FXReset" int
+#func BASS_FXSetParameters "BASS_FXSetParameters" int,var
+
+#func BASS_Update "BASS_Update" int
+#func BASS_ChannelUpdate "BASS_ChannelUpdate" int,int
+
+#uselib "bassconv.dll"
+#cfunc BASS_ChannelGetLength_ms "BASS_ChannelGetLength_ms" int
+#func BASS_ChannelSetPosition_ms "BASS_ChannelSetPosition_ms" int, int
+#cfunc BASS_ChannelGetPosition_ms "BASS_ChannelGetPosition_ms" int
+
+#define BASS_SAMPLE_LOOP 4
+
+#uselib "bass_fx.dll"
+#cfunc BASS_FX_GetVersion "BASS_FX_GetVersion"
+
+#uselib "bass_vst.dll"
+#cfunc BASS_VST_ChannelSetDSP "BASS_VST_ChannelSetDSP" int,sptr,int,int
+#func BASS_VST_SetParam "BASS_VST_SetParam" int,int,float
+
+#uselib "kernel32"
+#define GetTempPath GetTempPathA
+#func GetTempPathA "GetTempPathA" sptr,sptr
+#define GetLongPathName GetLongPathNameA
+#func GetLongPathNameA "GetLongPathNameA" sptr,sptr,sptr
+#define DeleteFile DeleteFileA
+#func DeleteFileA "DeleteFileA" sptr
+#define RemoveDirectory RemoveDirectoryA
+#func RemoveDirectoryA "RemoveDirectoryA" sptr
+#define MoveFile MoveFileA
+#func MoveFileA "MoveFileA" sptr,sptr
+
+#include "d3m.hsp"
+#include "hgimg3.as"
+#include "hspinet.as"
+#include "hspmath.as"
+#include "hspda.as"
+#include "mod_regexp.as"
+//#include "kernel32.as"
+#include "mod_joystick.as"
+#include "third_party/mod_encode.hsp"
+#include "third_party/mod_csv.hsp"
+#include "third_party/mod_d3d9vsync.hsp"
+#include "third_party/mod_hgcapture2.hsp"
+#include "third_party/mod_strlu.as"
+#include "third_party/gm_crlf.hsp"
+#include "third_party/rc4_crypt.hsp"
+#include "third_party/FileInfoModule.hsp"
+#include "third_party/a2d.hsp"
+#include "third_party/jstick.as"
+#include "third_party/alib_hash.as"
+
+#define ctype se_ids(%1) HashElem( se_ids, %1 )
+HashInitInt se_ids
+
+#include "encode.as"
+#include "third_party/TsubuyakiSoup_mod.hsp"
+
+#include "src/ir.hsp"
+
+hosts="" // Note: ソースコード公開用に削除
+
+#define CONSUMER_KEY    "" // Note: ソースコード公開用に削除
+
+#define ksm_id ksm_id@ksm_ir
+
+difficulty_labels="light", "challenge", "extended", "infinite"
+
+exist_msftedit=0
+exist dir_sys+"\\Msftedit.dll"
+if(strsize>0){
+	pLib = c_LoadLibrary( "Msftedit.dll" )
+	exist_msftedit=1
+}
+
+title atitle
+
+oncmd gosub *alt, 0x0105
+
+state=0
+stateinit=1
+timestart=d3timer()
+
+confkey=-1
+
+dir_default=dir_cur
+
+ddim dstat,1
+ddim ct,1
+dim stickstat,2
+
+dim windowsize,2
+dim fullscrsize,2
+windowsize=640,480
+fullscrsize=1280,720
+
+disp_x=ginfo_dispx
+disp_y=ginfo_dispy
+
+dim zoomtarget,8
+dim zoomtype,8
+zoomtarget= 1,42,47, 9,44,43,15,34,186
+zoomtype  = 1, 1, 0, 0, 0, 0, 0, 0,  0
+
+dim sx1,4
+dim sy1,4
+dim sx2,4
+dim sy2,4
+dim sx,4
+dim sy,4
+
+ddim sr,1
+ddim lr,1
+ddim slr,1
+lr=double(vh2-14*vh2/vh)*13/20
+sr=double(14*vh2/vh)*13/20
+slr=double(vh2)*13/20
+
+sdim _strmid_buf,512
+sdim _headcmpstr,64
+
+sdim bom,4
+poke bom,0,0xEF
+poke bom,1,0xBB
+poke bom,2,0xBF
+poke bom,3,0x00
+
+dim str_lr,2
+str_lr.0="l"
+str_lr.1="r"
+
+dim fx_div,20
+fx_div.FX_RE8=8
+fx_div.FX_RE12=12
+fx_div.FX_RE16=16
+fx_div.FX_RE24=24
+fx_div.FX_RE32=32
+fx_div.FX_GA4=4
+fx_div.FX_GA8=8
+fx_div.FX_GA12=12
+fx_div.FX_GA16=16
+fx_div.FX_GA24=24
+fx_div.FX_GA32=32
+fx_div.FX_WO12=12
+
+dim fxdef_prmnum,FXDEF_FXTYPEMAX+1
+sdim fxdef_name,16,10,FXDEF_FXTYPEMAX+1
+dim fxdef_type,10,FXDEF_FXTYPEMAX+1
+ddim fxdef_default,10,FXDEF_FXTYPEMAX+1
+ddim fxdef_enable,10,FXDEF_FXTYPEMAX+1
+dim fxdef_prmno,10,FXDEF_FXTYPEMAX+1
+ddim fxdef_prmmax,10,FXDEF_FXTYPEMAX+1
+ddim fxdef_max,10,FXDEF_FXTYPEMAX+1
+sdim fxdef_dllname,16,FXDEF_FXTYPEMAX+1
+dim fxdef_priority,FXDEF_FXTYPEMAX+1
+dim fxdef_linkprm,FXDEF_FXTYPEMAX+1
+
+fxdef_prmnum.FXDEF_FXTYPE_RETR    = 5
+fxdef_name.0.FXDEF_FXTYPE_RETR    = "Retrigger",		"updatePeriod",	"waveLength",	"mix",			"rate",			"updateTrigger"
+fxdef_type.0.FXDEF_FXTYPE_RETR    = FXDEF_FXTYPE,		FXDEF_LENGTH,	FXDEF_LENGTH,	FXDEF_RATE,		FXDEF_RATE,		FXDEF_SWITCH
+fxdef_default.0.FXDEF_FXTYPE_RETR = 0.0f,				0.50f,			0.00f,			0.00f,			0.70f,			0.00f
+fxdef_enable.0.FXDEF_FXTYPE_RETR  = 0.0f,				0.50f,			0.00f,			1.00f,			0.70f,			0.00f
+fxdef_prmno.0.FXDEF_FXTYPE_RETR   = -1,					-1,				1,				5,				2,				19
+fxdef_prmmax.0.FXDEF_FXTYPE_RETR  = 0.0f,				0.00f,			0.00f,			1.00f,			1.00f,			1.00f
+fxdef_max.0.FXDEF_FXTYPE_RETR     = 0.0f,				0.00f,			0.00f,			1.00f,			1.00f,			-1.00f
+fxdef_dllname.FXDEF_FXTYPE_RETR   = "regawo.dll"
+fxdef_priority.FXDEF_FXTYPE_RETR  = 25
+fxdef_linkprm.FXDEF_FXTYPE_RETR   = 2
+
+fxdef_prmnum.FXDEF_FXTYPE_GATE    = 3
+fxdef_name.0.FXDEF_FXTYPE_GATE    = "Gate",				"waveLength",	"mix",			"rate"
+fxdef_type.0.FXDEF_FXTYPE_GATE    = FXDEF_FXTYPE,		FXDEF_LENGTH,	FXDEF_RATE,		FXDEF_RATE
+fxdef_default.0.FXDEF_FXTYPE_GATE = 0.0f,				0.00f,			0.00f,			0.50f
+fxdef_enable.0.FXDEF_FXTYPE_GATE  = 0.0f,				0.00f,			0.90f,			0.50f
+fxdef_prmno.0.FXDEF_FXTYPE_GATE   = -1,					6,				8,				7
+fxdef_prmmax.0.FXDEF_FXTYPE_GATE  = 0.0f,				0.00f,			1.00f,			1.00f
+fxdef_max.0.FXDEF_FXTYPE_GATE     = 0.0f,				0.00f,			1.00f,			1.00f
+fxdef_dllname.FXDEF_FXTYPE_GATE   = "regawo.dll"
+fxdef_priority.FXDEF_FXTYPE_GATE  = 17
+fxdef_linkprm.FXDEF_FXTYPE_GATE   = 1
+
+fxdef_prmnum.FXDEF_FXTYPE_FLAN    = 7
+fxdef_name.0.FXDEF_FXTYPE_FLAN    = "Flanger",			"period",		"delay",		"depth",		"feedback",		"stereoWidth",	"volume",	"mix"
+fxdef_type.0.FXDEF_FXTYPE_FLAN    = FXDEF_FXTYPE,		FXDEF_LENGTH,	FXDEF_SAMPLE,	FXDEF_SAMPLE,	FXDEF_RATE,		FXDEF_RATE,		FXDEF_RATE,	FXDEF_RATE
+fxdef_default.0.FXDEF_FXTYPE_FLAN = 0.0f,				2.00f,			30.0f,			45.0f,			0.50f,			0.00f,			0.75f,		0.00f
+fxdef_enable.0.FXDEF_FXTYPE_FLAN  = 0.0f,				2.00f,			30.0f,			45.0f,			0.50f,			0.00f,			0.75f,		0.80f
+fxdef_prmno.0.FXDEF_FXTYPE_FLAN   = -1,					0,				1,				2,				3,				4,				5,			6
+fxdef_prmmax.0.FXDEF_FXTYPE_FLAN  = 0.0f,				0.00f,			1.00f,			1.00f,			1.00f,			1.00f,			1.00f,		1.00f
+fxdef_max.0.FXDEF_FXTYPE_FLAN     = 0.0f,				0.00f,			44100.0f,		44100.0f,		1.00f,			1.00f,			1.00f,		1.00f
+fxdef_dllname.FXDEF_FXTYPE_FLAN   = "flan.dll"
+fxdef_priority.FXDEF_FXTYPE_FLAN  = 15
+fxdef_linkprm.FXDEF_FXTYPE_FLAN   = -1
+
+fxdef_prmnum.FXDEF_FXTYPE_PITC    = 4
+fxdef_name.0.FXDEF_FXTYPE_PITC    = "PitchShift",		"pitch",		"chunkSize",	"overWrap",		"mix"
+fxdef_type.0.FXDEF_FXTYPE_PITC    = FXDEF_FXTYPE,		FXDEF_PITCH,	FXDEF_SAMPLE,	FXDEF_RATE,		FXDEF_RATE
+fxdef_default.0.FXDEF_FXTYPE_PITC = 0.0f,				0.0f,			700.0f,			0.40f,			0.00f
+fxdef_enable.0.FXDEF_FXTYPE_PITC  = 0.0f,				12.0f,			700.0f,			0.40f,			1.00f
+fxdef_prmno.0.FXDEF_FXTYPE_PITC   = -1,					0,				1,				2,				3
+fxdef_prmmax.0.FXDEF_FXTYPE_PITC  = 0.0f,				0.00f,			1.00f,			1.00f,			1.00f
+fxdef_max.0.FXDEF_FXTYPE_PITC     = 0.0f,				0.00f,			44100.0f,		0.50f,			1.00f
+fxdef_dllname.FXDEF_FXTYPE_PITC   = "pitc.dll"
+fxdef_priority.FXDEF_FXTYPE_PITC  = 20
+fxdef_linkprm.FXDEF_FXTYPE_PITC   = 0
+
+fxdef_prmnum.FXDEF_FXTYPE_PHAS    = 9
+fxdef_name.0.FXDEF_FXTYPE_PHAS    = "Phaser",			"period",		"stage",		"loFreq",		"hiFreq",		"Q",			"stereoWidth",	"mix",		"hiCutGain",	"feedback"
+fxdef_type.0.FXDEF_FXTYPE_PHAS    = FXDEF_FXTYPE,		FXDEF_LENGTH,	FXDEF_INT,		FXDEF_FREQ,		FXDEF_FREQ,		FXDEF_FLOAT,	FXDEF_RATE,		FXDEF_RATE,	FXDEF_NEGDB,	FXDEF_RATE
+fxdef_default.0.FXDEF_FXTYPE_PHAS = 0.0f,				0.50f,			0.0f,			1500.0f,		20000.0f,		0.707f,			0.75f,			0.00f,		8.0f,			0.35f
+fxdef_enable.0.FXDEF_FXTYPE_PHAS  = 0.0f,				0.50f,			6.0f,			1500.0f,		20000.0f,		0.707f,			0.75f,			0.50f,		8.0f,			0.35f
+fxdef_prmno.0.FXDEF_FXTYPE_PHAS   = -1,					0,				1,				2,				3,				4,				6,				8,			7,				5
+fxdef_prmmax.0.FXDEF_FXTYPE_PHAS  = 0.0f,				0.00f,			1.00f,			1.00f,			1.00f,			1.00f,			1.00f,			1.00f,		1.0f,			1.0f
+fxdef_max.0.FXDEF_FXTYPE_PHAS     = 0.0f,				0.00f,			12.0f,			22050.0f,		22050.0f,		50.0f,			1.00f,			1.00f,		20.0f,			1.0f
+fxdef_dllname.FXDEF_FXTYPE_PHAS   = "phas.dll"
+fxdef_priority.FXDEF_FXTYPE_PHAS  = 16
+fxdef_linkprm.FXDEF_FXTYPE_PHAS   = -1
+
+fxdef_prmnum.FXDEF_FXTYPE_BITC    = 2
+fxdef_name.0.FXDEF_FXTYPE_BITC    = "BitCrusher",		"reduction",	"mix"
+fxdef_type.0.FXDEF_FXTYPE_BITC    = FXDEF_FXTYPE,		FXDEF_SAMPLE,	FXDEF_RATE
+fxdef_default.0.FXDEF_FXTYPE_BITC = 0.0f,				0.00f,			0.00f
+fxdef_enable.0.FXDEF_FXTYPE_BITC  = 0.0f,				0.00f,			1.00f
+fxdef_prmno.0.FXDEF_FXTYPE_BITC   = -1,					0,				1
+fxdef_prmmax.0.FXDEF_FXTYPE_BITC  = 0.0f,				0.00f,			1.00f
+fxdef_max.0.FXDEF_FXTYPE_BITC     = 0.0f,				0.00f,			1.00f
+fxdef_dllname.FXDEF_FXTYPE_BITC   = "bitc.dll"
+fxdef_priority.FXDEF_FXTYPE_BITC  = 20
+fxdef_linkprm.FXDEF_FXTYPE_BITC   = 1
+
+fxdef_prmnum.FXDEF_FXTYPE_WOBB    = 5
+fxdef_name.0.FXDEF_FXTYPE_WOBB    = "Wobble",			"waveLength",	"mix",			"loFreq",		"hiFreq",		"Q"
+fxdef_type.0.FXDEF_FXTYPE_WOBB    = FXDEF_FXTYPE,		FXDEF_LENGTH,	FXDEF_RATE,		FXDEF_FREQ,		FXDEF_FREQ,		FXDEF_FLOAT
+fxdef_default.0.FXDEF_FXTYPE_WOBB = 0.0f,				0.00f,			0.00f,			500.0f,			20000.0f,		1.414f
+fxdef_enable.0.FXDEF_FXTYPE_WOBB  = 0.0f,				0.00f,			0.80f,			500.0f,			20000.0f,		1.414f
+fxdef_prmno.0.FXDEF_FXTYPE_WOBB   = -1,					9,				13,				10,				11,				12
+fxdef_prmmax.0.FXDEF_FXTYPE_WOBB  = 0.0f,				0.00f,			1.00f,			1.00f,			1.00f,			1.00f
+fxdef_max.0.FXDEF_FXTYPE_WOBB     = 0.0f,				0.00f,			1.00f,			22050.0f,		22050.0f,		50.0f
+fxdef_dllname.FXDEF_FXTYPE_WOBB   = "regawo.dll"
+fxdef_priority.FXDEF_FXTYPE_WOBB  = 17
+fxdef_linkprm.FXDEF_FXTYPE_WOBB   = 1
+
+fxdef_prmnum.FXDEF_FXTYPE_TSTP    = 3
+fxdef_name.0.FXDEF_FXTYPE_TSTP    = "TapeStop",			"speed",		"trigger",		"mix"
+fxdef_type.0.FXDEF_FXTYPE_TSTP    = FXDEF_FXTYPE,		FXDEF_RATE,		FXDEF_SWITCH,	FXDEF_RATE
+fxdef_default.0.FXDEF_FXTYPE_TSTP = 0.0f,				0.50f,			0.00f,			0.00f
+fxdef_enable.0.FXDEF_FXTYPE_TSTP  = 0.0f,				0.50f,			1.00f,			1.00f
+fxdef_prmno.0.FXDEF_FXTYPE_TSTP   = -1,					1,				0,				2
+fxdef_prmmax.0.FXDEF_FXTYPE_TSTP  = 0.0f,				0.00f,			1.00f,			1.00f
+fxdef_max.0.FXDEF_FXTYPE_TSTP     = 0.0f,				0.00f,			1.00f,			1.00f
+fxdef_dllname.FXDEF_FXTYPE_TSTP   = "tstp.dll"
+fxdef_priority.FXDEF_FXTYPE_TSTP  = 18
+fxdef_linkprm.FXDEF_FXTYPE_TSTP   = 1
+
+fxdef_prmnum.FXDEF_FXTYPE_ECHO    = 5
+fxdef_name.0.FXDEF_FXTYPE_ECHO    = "Echo",				"updatePeriod",	"waveLength",	"mix",			"feedbackLevel",	"updateTrigger"//,	"fadeoutLength"
+fxdef_type.0.FXDEF_FXTYPE_ECHO    = FXDEF_FXTYPE,		FXDEF_LENGTH,	FXDEF_LENGTH,	FXDEF_RATE,		FXDEF_RATE,			FXDEF_SWITCH//,		FXDEF_LENGTH
+fxdef_default.0.FXDEF_FXTYPE_ECHO = 0.0f,				0.00f,			0.00f,			0.00f,			0.60f,				0.00f//,			0.00f
+fxdef_enable.0.FXDEF_FXTYPE_ECHO  = 0.0f,				0.00f,			0.00f,			1.00f,			0.60f,				1.00f//,			0.00f
+fxdef_prmno.0.FXDEF_FXTYPE_ECHO   = -1,					-1,				1,				5,				4,					19//,				3
+fxdef_prmmax.0.FXDEF_FXTYPE_ECHO  = 0.0f,				0.00f,			0.00f,			1.00f,			1.00f,				1.00f//,			0.00f
+fxdef_max.0.FXDEF_FXTYPE_ECHO     = 0.0f,				0.00f,			0.00f,			1.00f,			1.00f,				-1.00f//,			0.00f
+fxdef_dllname.FXDEF_FXTYPE_ECHO   = "regawo.dll"
+fxdef_priority.FXDEF_FXTYPE_ECHO  = 26
+fxdef_linkprm.FXDEF_FXTYPE_ECHO   = 2
+
+fxdef_prmnum.FXDEF_FXTYPE_SICH    = 6
+fxdef_name.0.FXDEF_FXTYPE_SICH    = "SideChain",		"period",		"holdTime",		"attackTime",	"releaseTime",	"ratio",	"delayTime"
+fxdef_type.0.FXDEF_FXTYPE_SICH    = FXDEF_FXTYPE,		FXDEF_LENGTH,	FXDEF_LENGTH,	FXDEF_LENGTH,	FXDEF_LENGTH,	FXDEF_INT,	FXDEF_LENGTH
+fxdef_default.0.FXDEF_FXTYPE_SICH = 0.0f,				0.25f,			-0.050f,		-0.010f,		0.0625f,		1.0f,		0.00f
+fxdef_enable.0.FXDEF_FXTYPE_SICH  = 0.0f,				0.25f,			-0.050f,		-0.010f,		0.0625f,		5.0f,		0.00f
+fxdef_prmno.0.FXDEF_FXTYPE_SICH   = -1,					-1,				1,				3,				4,				5,			2
+fxdef_prmmax.0.FXDEF_FXTYPE_SICH  = 0.0f,				0.00f,			0.00f,			0.00f,			0.00f,			1.00f,		0.00f
+fxdef_max.0.FXDEF_FXTYPE_SICH     = 0.0f,				0.00f,			0.00f,			0.00f,			0.00f,			100.0f,		0.00f
+fxdef_dllname.FXDEF_FXTYPE_SICH   = "sich.dll"
+fxdef_priority.FXDEF_FXTYPE_SICH  = 14
+fxdef_linkprm.FXDEF_FXTYPE_SICH   = -1
+
+fxdef_prmnum.FXDEF_FXTYPE_AUDI    = 1
+fxdef_name.0.FXDEF_FXTYPE_AUDI    = "SwitchAudio",		"fileName"
+fxdef_type.0.FXDEF_FXTYPE_AUDI    = FXDEF_FXTYPE,		FXDEF_FILENAME
+fxdef_default.0.FXDEF_FXTYPE_AUDI = 0.0f,				0.00f
+fxdef_enable.0.FXDEF_FXTYPE_AUDI  = 0.0f,				0.00f
+fxdef_prmno.0.FXDEF_FXTYPE_AUDI   = -1,					-1
+fxdef_prmmax.0.FXDEF_FXTYPE_AUDI  = 0.0f,				0.00f
+fxdef_max.0.FXDEF_FXTYPE_AUDI     = 0.0f,				0.00f
+fxdef_dllname.FXDEF_FXTYPE_AUDI   = ""
+fxdef_priority.FXDEF_FXTYPE_AUDI  = 100
+fxdef_linkprm.FXDEF_FXTYPE_AUDI   = -1
+
+dim pfilter,7
+
+buffer 3
+gsel 0
+
+ddim ct,1
+
+dirp=""
+selp=0
+levnow=0
+judge=0
+hsr=10
+hso=-1
+hsc=-1
+hsm=-1
+hsa=-1
+ddim rhsrate,1
+rhsrate=1.0
+
+autosync=0
+
+adj=1
+adj2=0
+adj3=0
+
+endtype=0
+
+highquality=0
+lowquality=1
+
+assisttick=0
+vmov=1
+analoginput=0
+shortmode=0
+longmode=0
+analogmode=1
+shortmodedef=0
+longmodedef=0
+analogmodedef=0
+effratetype2=0
+turn=0
+bg=1
+coloring=0
+mastervol=100
+
+vtiming=0
+
+globaloffset=0
+judgedelay=0
+analogdelayconf=0//-25
+
+soundfx_delay=0
+
+disableime=3
+
+vfoldername=0
+
+closekey=0
+esc_bt3=1
+sorttype=0
+
+currentver2=""
+
+output=0
+outputpath=""
+outputds=1
+
+valldir=1
+
+hidealldir=0
+
+hidem=0
+
+mx=1
+my=1
+msen=50
+
+analogsw=0
+auto_chokkaku_se=0
+auto_note_se=0
+
+vhstype=1,1,0,0,0
+
+usenumpad=0
+
+vsync=0
+
+clang="Japanese"
+
+dir_stat=dir_cur
+sdim lpBuffer, 512
+GetTempPath 512, varptr(lpBuffer)
+sdim dir_tmp, 512
+GetLongPathName lpBuffer, varptr(dir_tmp), 512
+tmpexist=0
+chdir dir_tmp
+dirlist stat1,"*",5
+notesel stat1
+repeat notemax
+	noteget stat2,cnt
+	if(stat2="kshootmania"):tmpexist=1:break
+loop
+if(tmpexist=0):mkdir "kshootmania"
+chdir ".\\kshootmania"
+dir_tmp2=dir_cur
+
+chdir dir_default
+
+dirlist buf,"score",5
+if(buf=""):mkdir "score"
+
+chdir dir_default+"\\score"
+dirlist buf,"*",5
+if(buf=""){
+	stat1=""
+	notesel stat1
+	mkdir "PLAYER"
+	buf="PLAYER"
+}
+notesel buf
+sdim players,64,notemax
+playersnum=notemax
+repeat notemax
+	noteget stat1,cnt
+	players.cnt=stat1
+loop
+cplayer=0
+
+chdir dir_stat
+
+peffecta=0
+
+exist "config.ini"
+if(strsize<0){
+	stat1=""
+	notesel stat1
+	notesave "config.ini"
+}
+
+bufferlength=200
+updateperiod=100
+
+automute=1
+erxsh2=0
+erysh2=0
+errate2=100
+
+disableadjtimer=0
+
+iscourse=0
+isendbyesckey=0
+
+ACCESS_TOKEN=""
+ACCESS_SECRET1=""
+ACCESS_SECRET2=""
+ACCESS_SECRET3_=""
+sdim ACCESS_SECRET,128
+ACCESS_SECRET=""
+
+ir_selnow=1
+
+proxy_host=""
+proxy_port=8080
+
+notesel confs
+noteload "config.ini"
+split confs,"\n",confstr
+repeat notemax
+	if(headcmp(confstr.cnt,4,"key=")){
+		stat1=strmid(confstr.cnt,4,128)
+		split stat1,",",keystr
+	}
+	if(headcmp(confstr.cnt,5,"key2=")){
+		stat1=strmid(confstr.cnt,5,128)
+		split stat1,",",keystr2
+	}
+	if(headcmp(confstr.cnt,4,"joy=")){
+		stat1=strmid(confstr.cnt,4,128)
+		split stat1,",",joystr
+	}
+	if(headcmp(confstr.cnt,5,"joy2=")){
+		stat1=strmid(confstr.cnt,5,128)
+		split stat1,",",joystr2
+	}
+	if(headcmp(confstr.cnt,12,"hispeedtype=")){
+		stat1=strmid(confstr.cnt,12,128)
+		split stat1,",",vhstypestr
+		dim vhstype,5
+		foreach vhstypestr
+			if(vhstypestr.cnt="x"):vhstype.0=1
+			if(vhstypestr.cnt="C"):vhstype.1=1
+			if(vhstypestr.cnt="m"):vhstype.2=1
+			if(vhstypestr.cnt="a"):vhstype.3=1
+			if(vhstypestr.cnt="O"):vhstype.4=1
+		loop
+	}
+	if(headcmp(confstr.cnt,11,"laserinput=")){
+		analoginput=int(strmid(confstr.cnt,11,1))
+	}
+	if(headcmp(confstr.cnt,8,"hispeed=")){
+		if(strmid(confstr.cnt,8,1)="x"){
+			stat1=strmid(confstr.cnt,9,2)
+			hsr=int(stat1)
+			hso=-1
+			hsc=-1
+			hsm=-1
+			hsa=-1
+		}else:if(strmid(confstr.cnt,8,1)="C"){
+			stat1=strmid(confstr.cnt,9,4)
+			hsr=10
+			hso=-1
+			hsc=int(stat1)
+			hsm=-1
+			hsa=-1
+		}else:if(strmid(confstr.cnt,8,1)="m"){
+			stat1=strmid(confstr.cnt,9,4)
+			hsr=10
+			hso=-1
+			hsc=-1
+			hsm=int(stat1)
+			hsa=-1
+		}else:if(strmid(confstr.cnt,8,1)="a"){
+			stat1=strmid(confstr.cnt,9,4)
+			hsr=10
+			hso=-1
+			hsc=-1
+			hsm=-1
+			hsa=int(stat1)
+		}else{
+			stat1=strmid(confstr.cnt,8,4)
+			hsr=10
+			hso=int(stat1)
+			hsc=-1
+			hsm=-1
+			hsa=-1
+		}
+	}
+	if(headcmp(confstr.cnt,8,"fullscr=")){
+		fullscr=int(strmid(confstr.cnt,8,1))
+	}
+	if(headcmp(confstr.cnt,11,"windowsize=")){
+		stat1=strmid(confstr.cnt,11,64)
+		split stat1,",",windowsizestr
+		windowsize=int(windowsizestr.0),int(windowsizestr.1)
+	}
+	if(headcmp(confstr.cnt,12,"fullscrsize=")){
+		stat1=strmid(confstr.cnt,12,64)
+		split stat1,",",fullscrsizestr
+		fullscrsize=int(fullscrsizestr.0),int(fullscrsizestr.1)
+	}
+	if(headcmp(confstr.cnt,10,"frameskip=")){
+		frameskip=int(strmid(confstr.cnt,10,1))
+	}
+	if(headcmp(confstr.cnt,11,"lowquality=")){
+		lowquality=int(strmid(confstr.cnt,11,1))
+	}
+	if(headcmp(confstr.cnt,11,"assisttick=")){
+		assisttick=int(strmid(confstr.cnt,11,1))
+	}
+	if(headcmp(confstr.cnt,8,"bt_mode=")){
+		shortmode=max(int(strmid(confstr.cnt,10,1)),0)
+		shortmodedef=max(int(strmid(confstr.cnt,10,1)),0)
+	}
+	if(headcmp(confstr.cnt,8,"fx_mode=")){
+		longmode=max(int(strmid(confstr.cnt,9,1)),0)
+		longmodedef=max(int(strmid(confstr.cnt,9,1)),0)
+	}
+	if(headcmp(confstr.cnt,11,"laser_mode=")){
+		analogmode=max(int(strmid(confstr.cnt,11,1)),0)
+		analogmodedef=max(int(strmid(confstr.cnt,11,1)),0)
+	}
+	if(headcmp(confstr.cnt,12,"effratetype=")){
+		effratetype2=int(strmid(confstr.cnt,12,1))
+	}
+	if(headcmp(confstr.cnt,11,"background=")){
+		bg=int(strmid(confstr.cnt,11,1))
+	}
+	if(headcmp(confstr.cnt,16,"backgroundmovie=")){
+		vmov=int(strmid(confstr.cnt,16,1))
+	}
+	if(headcmp(confstr.cnt,11,"viewtiming=")){
+		vtiming=int(strmid(confstr.cnt,11,1))
+	}
+	if(headcmp(confstr.cnt,9,"noteskin=")){
+		stat1=strmid(confstr.cnt,9,16)
+		if((stat1="note")|(stat1="NOTE")){
+			coloring=1
+		}else{
+			coloring=0
+		}
+	}
+	if(headcmp(confstr.cnt,14,"currentplayer=")){
+		stat1=strmid(confstr.cnt,14,64)
+		repeat playersnum
+			if(players.cnt=stat1){
+				cplayer=cnt
+			}
+		loop
+	}
+	if(headcmp(confstr.cnt,7,"output=")){
+		output=int(strmid(confstr.cnt,7,1))
+	}
+	if(headcmp(confstr.cnt,12,"output_path=")){
+		outputpath=strmid(confstr.cnt,12,512)
+	}
+	if(headcmp(confstr.cnt,17,"output_downscale=")){
+		outputds=int(strmid(confstr.cnt,17,2))
+	}
+	if(headcmp(confstr.cnt,11,"disableime=")){
+		disableime=int(strmid(confstr.cnt,11,1))
+	}
+	if(headcmp(confstr.cnt,13,"globaloffset=")){
+		globaloffset=int(strmid(confstr.cnt,13,8))
+	}
+	if(headcmp(confstr.cnt,16,"hidemousecursor=")){
+		hidem=int(strmid(confstr.cnt,16,1))
+	}
+	if(headcmp(confstr.cnt,10,"mastervol=")){
+		mastervol=int(strmid(confstr.cnt,10,3))
+	}
+	if(headcmp(confstr.cnt,17,"mouse_directionx=")){
+		mx=max(int(strmid(confstr.cnt,17,1)),0)
+	}
+	if(headcmp(confstr.cnt,17,"mouse_directiony=")){
+		my=max(int(strmid(confstr.cnt,17,1)),0)
+	}
+	if(headcmp(confstr.cnt,18,"mouse_sensitivity=")){
+		msen=int(strmid(confstr.cnt,18,64))
+	}
+	if(headcmp(confstr.cnt,12,"switchlaser=")){
+		analogsw=int(strmid(confstr.cnt,12,1))
+	}
+	if(headcmp(confstr.cnt,12,"currentlang=")){
+		clang=strmid(confstr.cnt,12,64)
+	}
+	if(headcmp(confstr.cnt,11,"currentdir=")){
+		dirp=strmid(confstr.cnt,11,256)
+		dir_confsave=dirp
+	}
+	if(headcmp(confstr.cnt,12,"currentitem=")){
+		selp=int(strmid(confstr.cnt,12,64))
+		selnow_confsave=selp
+	}
+	if(headcmp(confstr.cnt,13,"currentlevel=")){
+		levnow=int(strmid(confstr.cnt,13,64))
+	}
+	if(headcmp(confstr.cnt,15,"viewfoldername=")){
+		vfoldername=int(strmid(confstr.cnt,15,1))
+	}
+	if(headcmp(confstr.cnt,11,"showalldir=")){
+		valldir=int(strmid(confstr.cnt,11,1))
+	}
+	if(headcmp(confstr.cnt,11,"currentver=")){
+		currentver2=strmid(confstr.cnt,11,64)
+	}
+	if(headcmp(confstr.cnt,9,"closekey=")){
+		closekey=int(strmid(confstr.cnt,9,1))
+	}
+	if(headcmp(confstr.cnt,11,"esckey_bt3=")){
+		esc_bt3=int(strmid(confstr.cnt,11,1))
+	}
+	if(headcmp(confstr.cnt,9,"mselview=")){
+		if(strmid(confstr.cnt,9,16)="level"){
+			sorttype=1
+		}
+	}
+	if(headcmp(confstr.cnt,11,"inputdelay=")){
+		judgedelay=int(strmid(confstr.cnt,11,16))
+	}
+	if(headcmp(confstr.cnt,11,"laserdelay=")){
+		analogdelayconf=int(strmid(confstr.cnt,11,16))
+	}
+	if(headcmp(confstr.cnt,14,"soundfx_delay=")){
+		soundfx_delay=int(strmid(confstr.cnt,14,16))
+	}
+	if(headcmp(confstr.cnt,13,"auto_play_se=")){
+		auto_chokkaku_se=int(strmid(confstr.cnt,13,1))
+		auto_note_se=int(strmid(confstr.cnt,13,1))
+	}
+	if(headcmp(confstr.cnt,10,"usenumpad=")){
+		usenumpad=int(strmid(confstr.cnt,10,1))
+	}
+	if(headcmp(confstr.cnt,14,"automaticmute=")){
+		automute=int(strmid(confstr.cnt,14,1))
+	}
+	if(headcmp(confstr.cnt,6,"vsync=")){
+		vsync=int(strmid(confstr.cnt,6,1))
+	}
+	if(headcmp(confstr.cnt,13,"effrate_zoom=")){
+		errate2=int(strmid(confstr.cnt,13,3))
+	}
+	if(headcmp(confstr.cnt,15,"effrate_shiftx=")){
+		erxsh2=int(strmid(confstr.cnt,15,6))
+	}
+	if(headcmp(confstr.cnt,15,"effrate_shifty=")){
+		erysh2=int(strmid(confstr.cnt,15,6))
+	}
+	// Note: ソースコード公開用にTwitter連携関連のコードを削除
+	if(headcmp(confstr.cnt,13,"hideitem_all=")){
+		hidealldir=int(strmid(confstr.cnt,13,1))
+	}
+	if(headcmp(confstr.cnt,18,"ir_sign_in_cursor=")){
+		ir_selnow=int(strmid(confstr.cnt,18,1))
+	}
+	if(strmid(confstr.cnt,0,17)="#peakingfilter:on"){
+		peffecta=1
+	}
+	if(strmid(confstr.cnt,0,13)="#fxeffects:on"){
+		feffecta=1
+	}
+	if(strmid(confstr.cnt,0,14)="#bufferlength:"){
+		bufferlength=max(int(strmid(confstr.cnt,14,64)),6)
+	}
+	if(strmid(confstr.cnt,0,14)="#updateperiod:"){
+		updateperiod=max(int(strmid(confstr.cnt,14,64)),5)
+	}
+	if(strmid(confstr.cnt,0,20)="#adjusttimer:disable"){
+		disableadjtimer=1
+	}
+	if(strmid(confstr.cnt,0,24)="#bufferfrommemory:enable"){
+		bufferfrommemory=1
+	}
+	if(strmid(confstr.cnt,0,11)="proxy_host="){
+		proxy_host=strmid(confstr.cnt,11,256)
+	}
+	if(strmid(confstr.cnt,0,11)="proxy_port="){
+		proxy_port=int(strmid(confstr.cnt,11,5))
+	}
+loop
+if(outputpath=""):output=0
+
+// Note: ソースコード公開用にTwitter連携関連のコードを削除
+
+noteget buf2,0
+dim key,14
+if(length(keystr)>=11){
+	repeat min(length(keystr),14)
+		key.cnt=int(keystr.cnt)
+	loop
+	repeat 14-min(length(keystr),14),min(length(keystr),14)
+		key.cnt=-1
+		if(cnt=11):key.cnt=13
+		if(cnt=12):key.cnt=27
+		if(cnt=13):key.cnt=122
+	loop
+}else{
+	key=83,68,75,76,29,28,81,87,79,80,32,13,27,122
+}
+dim key2,14
+if(length(keystr2)>=11){
+	repeat min(length(keystr2),14)
+		key2.cnt=int(keystr2.cnt)
+	loop
+	repeat 14-min(length(keystr2),14),min(length(keystr2),14)
+		key2.cnt=-1
+	loop
+}else{
+	key2=72,74,70,71,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1
+}
+key.11=13
+key.12=27
+key.13=122
+dim joykey,2,14
+if(length(joystr)>=11){
+	repeat min(length(joystr),14)
+		joykey.0.cnt=int(joystr.cnt)
+	loop
+	repeat 14-min(length(joystr),14),min(length(joystr),14)
+		joykey.0.cnt=-1
+	loop
+}else{
+	repeat 14
+		joykey.0.cnt=-1
+	loop
+}
+if(length(joystr2)>=11){
+	repeat min(length(joystr2),14)
+		joykey.1.cnt=int(joystr2.cnt)
+	loop
+	repeat 14-min(length(joystr2),14),min(length(joystr2),14)
+		joykey.1.cnt=-1
+	loop
+}else{
+	repeat 14
+		joykey.1.cnt=-1
+	loop
+}
+
+numkey_c=97,98,99,100,101,102,103,104,105
+numkey_k=103,104,105,100,101,102,97,98,99
+
+if(int(strmid(currentver2,0,3))<132){
+	judgedelay=globaloffset
+	globaloffset=0
+}
+
+gosub *refreshlang
+
+//\n---\nMicrosoft Visual C++ 2010 ランタイムがインストールされていません。\n詳しい解決策は、K-Shoot MANIA公式サイト「トラブルシューティング」のページをご覧下さい。\n\nYou need to install Microsoft Visual C++ 2010 Runtime to run this software.\nFor more information, please see \"Troubleshooting\" page of the website.
+exist "msvcr100.dll"
+if(strsize=-1):dialog "Cannot find the file MSVCR100.dll.",1,lang.0.2:end
+exist "kshlib.dll"
+if(strsize=-1):dialog "Cannot find the file kshlib.dll.",1,lang.0.2:end
+if(KSHLib_GetVersion()<1663){
+	dialog "最新版のkshlib.dllをコピーする必要があります。\nMake sure to copy the latest version of kshlib.dll.",1,lang.0.2:end
+}
+KSHLib_Init dir_default
+exist "hspinet.dll"
+if(strsize=-1):dialog "Cannot find the file hspinet.dll.",1,lang.0.2:end
+exist "bass_vst.dll"
+if(strsize=-1):dialog "Cannot find the file bass_vst.dll.",1,lang.0.2:end
+exist "bassconv.dll"
+if(strsize=-1):dialog lang.0.3,1,lang.0.2:end
+exist "bass.dll"
+if(strsize=-1):dialog lang.0.4,1,lang.0.2:end
+BASS_Init -1,44100,0,hwnd
+if(stat!=1):dialog lang.0.5,1,lang.0.2:end
+
+BASS_SetConfig 1,updateperiod
+BASS_SetConfig 0,bufferlength
+BASS_SetConfig 24,2
+
+compparam=tofloat(18.0f),tofloat(-24.0f),tofloat(1000.0f),tofloat(0.01f),tofloat(0.01f),-1
+
+stat1=BASS_FX_GetVersion()
+
+sdim filepath, 512
+
+//dirlist buf,"score",5
+//if(buf=""):mkdir "score"
+
+dirlist buf,"data",5
+if(buf=""):mkdir "data"
+
+dirlist buf,"songs",5
+if(buf=""):mkdir "songs"
+
+chdir dir_default
+dirlist buf,"courses",5
+while (buf="")
+	chdir dir_default
+	mkdir "courses"
+	wait 100
+	dirlist buf,"courses",5
+wend
+chdir dir_default+"\\courses"
+dirlist buf,"score",5
+if(buf=""):mkdir "score"
+
+dirlist buf,"cache",5
+if((currentver!=currentver2)&(buf!="")){
+	gosub *delcache
+}
+	
+chdir dir_default
+dirlist buf,"cache",5
+while (buf="")
+	chdir dir_default
+	mkdir "cache"
+	wait 100
+	dirlist buf,"cache",5
+wend
+chdir dir_default+"\\cache"
+dirlist buf,"gate",5
+if(buf=""):mkdir "gate"
+dirlist buf,"bg",5
+if(buf=""):mkdir "bg"
+chdir "gate"
+dirlist buf,"jacket",5
+if(buf=""):mkdir "jacket"
+chdir dir_default+"\\cache"
+dirlist buf,"songs",5
+if(buf=""):mkdir "songs"
+chdir dir_default
+
+chdir "../"
+
+; 初期化
+netinit
+if(proxy_host!=""):netproxy proxy_host, proxy_port
+// Note: ソースコード公開用に接続関連のコードを削除
+
+font lang.0.0,14
+mref BMSCR, 67
+CreateFontIndirect varptr(BMSCR(49))
+hFont = stat
+
+// Note: ソースコード公開用に接続関連のコードを削除
+
+onexit gosub *exit
+
+ddim colmatrix,20
+colmatrix(MAT_R) = 0.0, 0.0, 0.0, 0.0, 1.0
+colmatrix(MAT_G) = 0.0, 0.0, 0.0, 0.0, 1.0
+colmatrix(MAT_B) = 0.0, 0.0, 0.0, 0.0, 1.0
+colmatrix(MAT_A) = 0.299, 0.587, 0.114, 0.0, 0.0
+
+ddim colmatrix2,20
+colmatrix2(MAT_R) = 0.0, 0.0, 0.0, 0.0, 0.0
+colmatrix2(MAT_G) = 0.0, 0.0, 0.0, 0.0, 0.0
+colmatrix2(MAT_B) = 0.0, 0.0, 0.0, 0.0, 0.0
+colmatrix2(MAT_A) = 0.299, 0.587, 0.114, 0.0, 0.0
+
+chdir dir_default+"\\se"
+tickid=BASS_SampleLoad(0,"tick.wav",0,0,0,40,0)
+tick2id=BASS_SampleLoad(0,"tick2.wav",0,0,0,20,0)
+selmid=BASS_SampleLoad(0,"sel_m.wav",0,0,0,5,0)
+sellid=BASS_SampleLoad(0,"sel_l.wav",0,0,0,5,0)
+seldirid=BASS_SampleLoad(0,"sel_dir.wav",0,0,0,5,0)
+titleselid=BASS_SampleLoad(0,"title_sel.wav",0,0,0,5,0)
+titleenterid=BASS_SampleLoad(0,"title_enter.wav",0,0,0,5,0)
+gateselid=BASS_SampleLoad(0,"gate_sel.wav",0,0,0,5,0)
+gatecheckid=BASS_SampleLoad(0,"gate_check.wav",0,0,0,5,0)
+hardfailedid=BASS_SampleLoad(0,"play_hardfailed.wav",0,0,0,5,0)
+optionbgmid=BASS_StreamCreateFile(0,"option_bgm.ogg",0,0,0,0,BASS_SAMPLE_LOOP)
+gatebgmid=BASS_StreamCreateFile(0,"gate_bgm.ogg",0,0,0,0,BASS_SAMPLE_LOOP)
+resultbgmid=BASS_StreamCreateFile(0,"result_bgm.ogg",0,0,0,0,BASS_SAMPLE_LOOP)
+courseresultbgmid=BASS_StreamCreateFile(0,"courseresult_bgm.ogg",0,0,0,0,BASS_SAMPLE_LOOP)
+selbgmid=BASS_StreamCreateFile(0,"sel_bgm.ogg",0,0,0,0,BASS_SAMPLE_LOOP)
+selenterid=BASS_StreamCreateFile(0,"sel_enter.ogg",0,0,0,0,0)
+dim chokkakuid,5
+chokkakuid.0=BASS_SampleLoad(0,"chokkaku.wav",0,0,0,20,0)
+chokkakuid.1=BASS_SampleLoad(0,"chokkaku_down.wav",0,0,0,20,0)
+chokkakuid.2=BASS_SampleLoad(0,"chokkaku_up.wav",0,0,0,20,0)
+chokkakuid.3=BASS_SampleLoad(0,"chokkaku_swing.wav",0,0,0,20,0)
+chokkakuid.4=BASS_SampleLoad(0,"chokkaku_mute.wav",0,0,0,20,0)
+
+if(fullscr=1){
+	scrsize_w=fullscrsize.0
+	scrsize_h=fullscrsize.1
+	chgdisp 1,scrsize_w,scrsize_h
+	bgscr 0,scrsize_w,scrsize_h,0,0,0
+}else{
+	scrsize_w=windowsize.0
+	scrsize_h=windowsize.1
+	screen 0,scrsize_w,scrsize_h
+}
+
+gosub *refreshgetsize
+
+tex_lane=-1
+tex_lane_s=-1
+tex_judgel=-1
+tex_judgel2x=-1
+mod_lane=-1
+mod_lane_s=-1
+mod_judgel=-1
+
+chdir "../songs"
+
+statep=st_option
+imgrefresh=1
+keshuoff=1
+dim ke,16
+
+if(hidem=1):mouse -1,-1
+
+mpid=-1
+
+await 0
+
+auto=0
+iscmdline=0
+cmdline_from=0
+dir_cmdline2=dir_cmdline
+//dir_cmdline2="C:\\～～.ksh"
+if(dir_cmdline2!=""){
+	iscmdline=1
+	if(instr(dir_cmdline2,0,"-auto")!=-1){
+		auto=1
+		strrep dir_cmdline2,"-auto",""
+	}
+	if(instr(dir_cmdline2,0,"-hard")!=-1){
+		effratetype=1
+		strrep dir_cmdline2,"-hard",""
+	}
+	if(instr(dir_cmdline2,0,"-easy")!=-1){
+		effratetype=-1
+		strrep dir_cmdline2,"-easy",""
+	}
+	repeat strlen(dir_cmdline2)
+		if(strmid(dir_cmdline2,cnt,6)="-from "){
+			cmdline_from=max(int(strmid(dir_cmdline2,cnt+6,256)),0)
+			strrep dir_cmdline2,"-from "+cmdline_from,""
+		}
+	loop
+	dir_cmdline2=strtrim(dir_cmdline2,0,' ')
+	dir_cmdline2=strtrim(dir_cmdline2,0,'"')
+	exist dir_cmdline2
+	if(strsize>=0){
+		cnotesfile=dir_cmdline2
+		hgini
+	}else{
+		dialog lang.2.13/*"指定された譜面ファイルが見つかりません。"*/
+		end
+	}
+}
+
+; mainloop
+repeat
+	switch state
+	case st_standby
+		start_title
+		swbreak
+	case st_select
+		start_select
+		swbreak
+	case st_playing_
+		courselist=""
+		courselistnum=0
+		coursenow=0
+		coursetotalscore=0
+		coursecritical=0
+		coursenear=0
+		courseerrorn=0
+		courseend=0
+		ccoursetitle=""
+		f=0
+		if(iscourse=1){
+			buf=""
+			chdir dir_default+"\\songs\\"+dir
+			ccoursefile=cnotesfile
+			notesel buf
+			noteload cnotesfile
+			if (lpeek(buf, 0) & 0x00FFFFFF) == 0xBFBBEF{
+				is_course_utf8=1
+				DeleteUTF8BOM buf
+			}
+			repeat notemax
+				noteget stat1,cnt
+				if(headcmp(stat1,6,"title=")){
+					ccoursetitle=strmid(stat1,6,128)
+					if(is_course_utf8=1):ccoursetitle=bom+strmid(stat1,6,128)
+				}else:if(stat1="--"){
+					f=1
+				}else:if((f=1)&(strmid(stat1,0,1)="[")&(strmid(stat1,-1,1)="]")){
+					stat1=strmid(stat1,1,strlen(stat1)-2)
+					if(instr(stat1,0,"./")+instr(stat1,0,".\\")>-2){
+						f=4
+						break
+					}
+					course_sjis_ stat1
+					exist dir_default+"\\songs\\"+stat1
+					if(strsize<=0){
+						exist dir_default+"\\songs\\"+minfostr.j.0.0+"\\"+strmid(stat1,instr(stat1,0,"/")+1,strlen(stat1)-instr(stat1,0,"/"))
+						if(strsize<=0){
+							f=4
+							break
+						}
+					}
+					courselist+=stat1+"\n"
+					courselistnum++
+				}else:if((stat1!="")&(f=1)){
+					f=2
+					break
+				}
+			loop
+		}
+		if((f=1)|(iscourse=0)){
+			dim course_sc,courselistnum
+			dim course_md,courselistnum
+			dim course_gr,courselistnum
+			repeat courselistnum
+				course_gr.cnt=-1
+			loop
+			state=st_playing
+		}else:if(f=2){
+			dialog lang.2.12/*"このコースをプレイするには、最新バージョンのK-Shoot MANIAが必要です。"*/
+			refreshsonglistoff=1
+			state=st_select
+		}else:if(f=0){
+			dialog lang.2.13/*"指定された譜面ファイルが見つかりません。"*/
+			refreshsonglistoff=1
+			state=st_select
+		}else{
+			dialog lang.2.11/*"指定された譜面ファイルが見つかりません。"*/
+			refreshsonglistoff=1
+			state=st_select
+		}
+		swbreak
+	case st_playing
+		if((courseend!=1)&(cmdline_from=0)){
+			whiteout 250
+		}
+		BASS_SetConfig 4,10000
+		BASS_SetConfig 5,10000
+		volzerofl=0
+		plfl=0
+		keshuoff=0
+		if(iscourse=1){
+			csongdir=""
+			cnotesfile=".ksh"
+			notesel courselist
+			noteget stat2,coursenow
+			sdim sndirstat,1,1
+			split stat2,"/",sndirstat
+			if(length(sndirstat)>=2){
+				if(instr(stat2,0,"./")+instr(stat2,0,".\\")>-2){
+					dialog lang.2.11/*"指定された譜面ファイルが見つかりません。"*/
+					chdir dir_default+"\\songs"
+					state=st_select
+					continue
+				}
+				exist dir_default+"\\songs\\"+stat2
+				if(strsize>0){
+					if(length(sndirstat)>=4){
+						csongdir=sndirstat.0+"\\"+sndirstat.1+"\\"+sndirstat.2
+					}else{
+						csongdir=sndirstat.0+"\\"+sndirstat.1
+					}
+					cnotesfile=getpath(stat2,8)
+				}else:if(iscmdline=1){
+					dialog lang.2.13/*"指定された譜面ファイルが見つかりません。"*/
+					end
+				}else{
+					exist dir_default+"\\songs\\"+minfostr.j.0.0+"\\"+strmid(stat2,instr(stat2,0,"/")+1,strlen(stat2)-instr(stat2,0,"/"))
+					if(strsize>0){
+						if(length(sndirstat)>=4){
+							csongdir=dir+"\\"+sndirstat.1+"\\"+sndirstat.2
+						}else{
+							csongdir=dir+"\\"+sndirstat.1
+						}
+						cnotesfile=getpath(stat2,8)
+					}
+				}
+			}
+		}
+		gsel 0
+		redraw 0
+		start_play
+		swbreak
+	case st_result
+		on_update_result
+		swbreak
+	case st_courseresult
+		on_update_course_result
+		swbreak
+	case st_option
+		on_update_option
+		swbreak
+	case st_gate
+		on_update_gate
+		swbreak
+	case st_pass
+		gsel 0
+		selnow=standbyselp
+		ddim curpos,1
+		curpos=double(standbyselp)
+		onkey gosub *keshu
+		kp1=1 : kp2=1
+		timestatestart=d3timer()
+		repeat
+			redraw 0
+			gosub *getjoystat
+			timenow=d3timer()-timestatestart
+	
+			// 背景表示
+			gsel 0
+			redraw 0
+			gmode 0
+			pos 0,0
+			gcopy 29,0,0,scrsize_w,scrsize_h
+	
+			alCopyImageToScreen IMG_IR_SIGNIN, 0, scrsize_w / 2 - getsize(480) / 2, scrsize_h / 2 - getsize(320) / 2
+			alCopyModeAlpha 0.3 + 0.7*(sin(double(d3timer())/150)+1.0)/2
+			alCopyImageToScreen IMG_IR_SIGNIN_CURSOR, 0, scrsize_w / 2 - getsize(480) / 2 + getsize(64), scrsize_h / 2 - getsize(320) / 2 + getsize(205) + getsize(46) * ir_selnow
+			alResetCopyMode
+			
+			if((timenow<250)&(timenow>=0)){
+				gsel 0
+				gmode 3,,,(250-timenow)*256/250
+				color 0,0,0
+				gsquare -1,sx_a,sy_a
+			}
+			
+			if(ginfo2()=0){
+				esc_key=getesckey()
+				if((esc_key=1)&(escstatp=0)&(ginfo2()=0)){
+					stateinit=1
+					statep=st_pass
+					state=st_standby
+					standbyselp=0
+					//BASS_ChannelSlideAttribute titlebgmid,2,0.0,100
+					blackout 500
+					redraw 0
+					break
+				}else:escstatp=esc_key
+				getkey stat1,13
+				stat1=stat1|getjoykeystat(11)
+				if((stat1=1)&(esc_key=0)&(ginfo2()=0)){
+					BASS_ChannelSetAttribute titlebgmid,2,double(mastervol)/100
+					BASS_ChannelSlideAttribute titlebgmid,2,0.0,100
+					stat1=BASS_SampleGetChannel(titleenterid,0)
+					BASS_ChannelSetAttribute stat1,2,double(mastervol)/100
+					BASS_ChannelPlay stat1
+					if(ir_selnow=0){
+						ir_login
+					}else{
+						session_id=""
+						ksm_id=0
+					}
+					gsel 0,1
+					blackout 500
+					redraw 0
+					stateinit=1
+					refreshsonglistoff=0
+					state=st_select
+					BASS_StreamFree titlebgmid
+					break
+				}
+				getkey_a stat1,40
+				getkey stat2,key.(7+2*analogsw)
+				getkey stat2_,key2.(7+2*analogsw)
+				stat1=stat1|stat2|stat2_
+				getkey stat2,key.(9-2*analogsw)
+				getkey stat2_,key2.(9-2*analogsw)
+				stat1=stat1|stat2|stat2_|getjoykeystat(7+2*analogsw)|getjoykeystat(9-2*analogsw)
+				getkey stat2,key.1
+				getkey stat2_,key.1
+				stat1=stat1|stat2|stat2_|getjoykeystat(1)
+				if((kp1=0)&(stat1=1)&(ginfo2()=0)){
+					ir_selnow=1
+					stat1=BASS_SampleGetChannel(titleselid,0)
+					BASS_ChannelSetAttribute stat1,2,double(mastervol)/100
+					BASS_ChannelPlay stat1
+					kp1=1
+				}else:if((stat1=0)|(ginfo2()!=0)):kp1=0
+				getkey_a stat1,38
+				getkey stat2,key.(6+2*analogsw)
+				getkey stat2_,key2.(6+2*analogsw)
+				stat1=stat1|stat2|stat2_|getjoykeystat(6+2*analogsw)
+				getkey stat2,key.(8-2*analogsw)
+				getkey stat2_,key2.(8-2*analogsw)
+				stat1=stat1|stat2|stat2_|getjoykeystat(8-2*analogsw)
+				getkey stat2,key.2
+				getkey stat2_,key.2
+				stat1=stat1|stat2|stat2_|getjoykeystat(2)
+				if((kp2=0)&(stat1=1)&(ginfo2()=0)){
+					ir_selnow=0
+					stat1=BASS_SampleGetChannel(titleselid,0)
+					BASS_ChannelSetAttribute stat1,2,double(mastervol)/100
+					BASS_ChannelPlay stat1
+					kp2=1
+				}else:if((stat1=0)|(ginfo2()!=0)):kp2=0
+			}
+			
+			stat1=0
+			getkey stat2,key.4
+			if(stat2=1):stat1=1
+			getkey stat2,key2.4
+			if(stat2=1):stat1=1
+			if(getjoykeystat(4)=1):stat1=1
+			getkey stat2,key.5
+			if(stat2=1):stat1=2
+			getkey stat2,key2.5
+			if(stat2=1):stat1=2
+			if(getjoykeystat(5)=1):stat1=2
+			redraw 1
+			keshuoff=0
+			await 7
+			gosub *volactive
+			if(timenow>600){
+				while (ginfo2()!=0)
+					await 100
+				wend
+			}
+			timenowp=timenow
+		loop
+		swbreak
+	swend
+	if(cnt\(frameskip+1)=0){
+		confkey=-1
+		gsel 0
+		redraw 1
+		await (state!=st_gate)*7
+		gosub *volactive
+		if((state!=st_gate)&((iscourse!=1)&(autodemo=0))){
+			while (ginfo2()!=0)
+				await 100
+			wend
+		}
+		if((analoginput=1)&(state!=st_option)){
+			keshucnt=0:onkey 1
+		}
+	}
+	gsel 0
+	redraw 0
+loop
+end
+
+#include "src/scene/title.hsp"
+#include "src/scene/select.hsp"
+#include "src/scene/play.hsp"
+#include "src/scene/result.hsp"
+#include "src/scene/course_result.hsp"
+#include "src/scene/option.hsp"
+#include "src/scene/gate.hsp"
+
+*refreshlang
+	dir_curp=dir_cur
+	chdir dir_default+"\\lang"
+	dirlist langliststr,"*.txt",1
+	notesel langliststr
+	stat2=0
+	repeat notemax
+		noteget stat1,cnt+stat2
+		if(stat1=""):notedel cnt+stat2:stat2--
+	loop
+	langliststr=replace(langliststr,"\n",";")
+	langliststr=strtrim(langliststr,,';')
+	split langliststr,";",langlist
+	exist clang+".txt"
+	if(strsize=-1){
+		clang="Japanese"
+		exist clang+".txt"
+		if((strsize=-1)&(length(langlist)=0)){
+			dialog "Langauge file does not exist.",0,"Error"
+			end
+		}else{
+			clang=langlist.0
+			exist clang+".txt"
+			if(strsize=-1){
+				dialog "Langauge file does not exist.",0,"Error"
+				end
+			}
+		}
+	}
+	curlang=0
+	foreach langlist
+		if(getpath(langlist.cnt,1)=clang):curlang=cnt
+	loop
+	sdim lang,256,5,96
+	langstr=""
+	notesel langstr
+	noteload clang+".txt"
+	repeat notemax
+		noteget stat1,cnt
+		split stat1,"|",langstat
+		if(length(langstat)<2):continue
+		if(strmid(langstat.0,0,1)="m"){
+			stat2=int(strmid(langstat.0,1,2))
+			stat3=int(strmid(langstat.0,4,3))
+			if((stat2<5)&(stat2>=0)&(stat3<96)&(stat3>=0)){
+				lang.(stat2).(stat3)=replace(langstat.1,"\\\\n","\n")
+			}
+		}
+	loop
+	chdir dir_curp
+	return
+
+*saveconfig
+	confs=""
+	dir_curp=dir_cur
+	dim confex,51
+	repeat length(confstr)
+		if(headcmp(confstr.cnt,4,"key=")):confex.0=1
+		if(headcmp(confstr.cnt,5,"key2=")):confex.1=1
+		if(headcmp(confstr.cnt,8,"fullscr=")):confex.2=1
+		if(headcmp(confstr.cnt,11,"windowsize=")):confex.3=1
+		if(headcmp(confstr.cnt,12,"fullscrsize=")):confex.4=1
+		if(headcmp(confstr.cnt,11,"assisttick=")):confex.5=1
+		if(headcmp(confstr.cnt,12,"highquality=")):confex.6=1
+		if(headcmp(confstr.cnt,11,"lowquality=")):confex.7=1
+		if(headcmp(confstr.cnt,8,"bt_mode=")):confex.8=1
+		if(headcmp(confstr.cnt,8,"fx_mode=")):confex.9=1
+		if(headcmp(confstr.cnt,11,"laser_mode=")):confex.10=1
+		if(headcmp(confstr.cnt,8,"hispeed=")):confex.11=1
+		if(headcmp(confstr.cnt,11,"viewtiming=")):confex.13=1
+		if(headcmp(confstr.cnt,14,"currentplayer=")):confex.14=1
+		if(headcmp(confstr.cnt,11,"background=")):confex.15=1
+		if(headcmp(confstr.cnt,16,"backgroundmovie=")):confex.16=1
+		if(headcmp(confstr.cnt,9,"noteskin=")):confex.17=1
+		if(headcmp(confstr.cnt,11,"laserinput=")):confex.18=1
+		if(headcmp(confstr.cnt,11,"disableime=")):confex.19=1
+		if(headcmp(confstr.cnt,13,"globaloffset=")):confex.20=1
+		if(headcmp(confstr.cnt,9,"synctype=")):confex.21=1
+		if(headcmp(confstr.cnt,9,"syncfreq=")):confex.22=1
+		if(headcmp(confstr.cnt,16,"hidemousecursor=")):confex.23=1
+		if(headcmp(confstr.cnt,10,"mastervol=")):confex.24=1
+		if(headcmp(confstr.cnt,17,"mouse_directionx=")):confex.25=1
+		if(headcmp(confstr.cnt,17,"mouse_directiony=")):confex.26=1
+		if(headcmp(confstr.cnt,18,"mouse_sensitivity=")):confex.27=1
+		if(headcmp(confstr.cnt,12,"switchlaser=")):confex.28=1
+		if(headcmp(confstr.cnt,4,"joy=")):confex.29=1
+		if(headcmp(confstr.cnt,5,"joy2=")):confex.30=1
+		if(headcmp(confstr.cnt,12,"currentlang=")):confex.31=1
+		if(headcmp(confstr.cnt,11,"currentdir=")):confex.32=1
+		if(headcmp(confstr.cnt,12,"currentitem=")):confex.33=1
+		if(headcmp(confstr.cnt,13,"currentlevel=")):confex.34=1
+		if(headcmp(confstr.cnt,11,"showalldir=")):confex.35=1
+		if(headcmp(confstr.cnt,11,"currentver=")):confex.36=1
+		if(headcmp(confstr.cnt,9,"closekey=")):confex.37=1
+		if(headcmp(confstr.cnt,9,"mselview=")):confex.38=1
+		if(headcmp(confstr.cnt,11,"laserdelay=")):confex.39=1
+		if(headcmp(confstr.cnt,10,"usenumpad=")):confex.40=1
+		if(headcmp(confstr.cnt,12,"hispeedtype=")):confex.41=1
+		if(headcmp(confstr.cnt,11,"inputdelay=")):confex.42=1
+		if(headcmp(confstr.cnt,6,"vsync=")):confex.43=1
+		if(headcmp(confstr.cnt,11,"esckey_bt3=")):confex.44=1
+		if(headcmp(confstr.cnt,14,"twitter_token=")):confex.45=1
+		if(headcmp(confstr.cnt,22,"twitter_token_secret1=")):confex.46=1
+		if(headcmp(confstr.cnt,22,"twitter_token_secret2=")):confex.47=1
+		if(headcmp(confstr.cnt,22,"twitter_token_secret3=")):confex.48=1
+		if(headcmp(confstr.cnt,13,"hideitem_all=")):confex.49=1
+		if(headcmp(confstr.cnt,18,"ir_sign_in_cursor=")):confex.50=1
+	loop
+	ex=0
+	cex=-1
+	foreach confex
+		if(confex.cnt=0):ex++
+	loop
+	repeat length(confstr)+ex
+		if(cnt=length(confstr)+ex-1){
+			stat1=""
+		}else{
+			stat1="\n"
+		}
+		if(cnt>=length(confstr)){
+			repeat length(confex)-cex-1,cex+1
+				if(confex.cnt=0):cex=cnt:break
+			loop
+		}
+		if((headcmp(confstr.cnt,4,"key="))|(cex=0)){
+			confs+="key="+key.0+","+key.1+","+key.2+","+key.3+","+key.4+","+key.5+","+key.6+","+key.7+","+key.8+","+key.9+","+key.10+","+key.11+","+key.12+","+key.13+stat1
+		}else:if((headcmp(confstr.cnt,5,"key2="))|(cex=1)){
+			confs+="key2="+key2.0+","+key2.1+","+key2.2+","+key2.3+","+key2.4+","+key2.5+","+key2.6+","+key2.7+","+key2.8+","+key2.9+","+key2.10+","+key2.11+","+key2.12+","+key2.13+stat1
+		}else:if((headcmp(confstr.cnt,8,"fullscr="))|(cex=2)){
+			confs+="fullscr="+fullscr+stat1
+		}else:if((headcmp(confstr.cnt,11,"windowsize="))|(cex=3)){
+			confs+="windowsize="+windowsize.0+","+windowsize.1+stat1
+		}else:if((headcmp(confstr.cnt,12,"fullscrsize="))|(cex=4)){
+			confs+="fullscrsize="+fullscrsize.0+","+fullscrsize.1+stat1
+		}else:if((headcmp(confstr.cnt,11,"assisttick="))|(cex=5)){
+			confs+="assisttick="+assisttick+stat1
+		}else:if((headcmp(confstr.cnt,12,"highquality="))|(cex=6)){
+			confs+="highquality="+highquality+stat1
+		}else:if((headcmp(confstr.cnt,11,"lowquality="))|(cex=7)){
+			confs+="lowquality="+lowquality+stat1
+		}else:if((headcmp(confstr.cnt,8,"bt_mode="))|(cex=8)){
+			confs+="bt_mode="+shortmodedef+stat1
+		}else:if((headcmp(confstr.cnt,8,"fx_mode="))|(cex=9)){
+			confs+="fx_mode="+longmodedef+stat1
+		}else:if((headcmp(confstr.cnt,11,"laser_mode="))|(cex=10)){
+			confs+="laser_mode="+analogmodedef+stat1
+		}else:if((headcmp(confstr.cnt,8,"hispeed="))|(cex=11)){
+			if((hsc=-1)&(hsm=-1)&(hsa=-1)&(hso=-1)){
+				confs+="hispeed=x"+hsr+stat1
+			}else:if(hsc!=-1){
+				confs+="hispeed=C"+hsc+stat1
+			}else:if(hsm!=-1){
+				confs+="hispeed=m"+hsm+stat1
+			}else:if(hsa!=-1){
+				confs+="hispeed=a"+hsa+stat1
+			}else{
+				confs+="hispeed="+hso+stat1
+			}
+		}else:if((headcmp(confstr.cnt,11,"viewtiming="))|(cex=13)){
+			confs+="viewtiming="+vtiming+stat1
+		}else:if((headcmp(confstr.cnt,14,"currentplayer="))|(cex=14)){
+			confs+="currentplayer="+players.cplayer+stat1
+		}else:if((headcmp(confstr.cnt,11,"background="))|(cex=15)){
+			confs+="background="+bg+stat1
+		}else:if((headcmp(confstr.cnt,16,"backgroundmovie="))|(cex=16)){
+			confs+="backgroundmovie="+vmov+stat1
+		}else:if((headcmp(confstr.cnt,9,"noteskin="))|(cex=17)){
+			if(coloring=1){
+				confs+="noteskin=note"+stat1
+			}else{
+				confs+="noteskin=default"+stat1
+			}
+		}else:if((headcmp(confstr.cnt,11,"laserinput="))|(cex=18)){
+			confs+="laserinput="+analoginput+stat1
+		}else:if(headcmp(confstr.cnt,12,"analoginput=")){
+			confs+="laserinput="+analoginput+stat1
+		}else:if((headcmp(confstr.cnt,11,"disableime="))|(cex=19)){
+			confs+="disableime="+disableime+stat1
+		}else:if((headcmp(confstr.cnt,13,"globaloffset="))|(cex=20)){
+			confs+="globaloffset="+globaloffset+stat1
+		}else:if((headcmp(confstr.cnt,9,"synctype="))|(cex=21)){
+			//confs+="synctype="+syncmode+stat1
+		}else:if((headcmp(confstr.cnt,9,"syncfreq="))|(cex=22)){
+			//confs+="syncfreq="+syncfreq+stat1
+		}else:if((headcmp(confstr.cnt,16,"hidemousecursor="))|(cex=23)){
+			confs+="hidemousecursor="+hidem+stat1
+		}else:if((headcmp(confstr.cnt,10,"mastervol="))|(cex=24)){
+			confs+="mastervol="+mastervol+stat1
+		}else:if((headcmp(confstr.cnt,17,"mouse_directionx="))|(cex=25)){
+			confs+="mouse_directionx="+mx+stat1
+		}else:if((headcmp(confstr.cnt,17,"mouse_directiony="))|(cex=26)){
+			confs+="mouse_directiony="+my+stat1
+		}else:if((headcmp(confstr.cnt,18,"mouse_sensitivity="))|(cex=27)){
+			confs+="mouse_sensitivity="+msen+stat1
+		}else:if((headcmp(confstr.cnt,12,"switchlaser="))|(cex=28)){
+			confs+="switchlaser="+analogsw+stat1
+		}else:if((headcmp(confstr.cnt,4,"joy="))|(cex=29)){
+			confs+="joy="+joykey.0.0+","+joykey.0.1+","+joykey.0.2+","+joykey.0.3+","+joykey.0.4+","+joykey.0.5+","+joykey.0.6+","+joykey.0.7+","+joykey.0.8+","+joykey.0.9+","+joykey.0.10+","+joykey.0.11+","+joykey.0.12+","+joykey.0.13+stat1
+		}else:if((headcmp(confstr.cnt,5,"joy2="))|(cex=30)){
+			confs+="joy2="+joykey.1.0+","+joykey.1.1+","+joykey.1.2+","+joykey.1.3+","+joykey.1.4+","+joykey.1.5+","+joykey.1.6+","+joykey.1.7+","+joykey.1.8+","+joykey.1.9+","+joykey.1.10+","+joykey.1.11+","+joykey.1.12+","+joykey.1.13+stat1
+		}else:if((headcmp(confstr.cnt,12,"currentlang="))|(cex=31)){
+			confs+="currentlang="+clang+stat1
+		}else:if((headcmp(confstr.cnt,11,"currentdir="))|(cex=32)){
+			confs+="currentdir="+dir_confsave+stat1
+		}else:if((headcmp(confstr.cnt,12,"currentitem="))|(cex=33)){
+			confs+="currentitem="+selnow_confsave+stat1
+		}else:if((headcmp(confstr.cnt,13,"currentlevel="))|(cex=34)){
+			confs+="currentlevel="+levnow+stat1
+		}else:if((headcmp(confstr.cnt,11,"showalldir="))|(cex=35)){
+			confs+="showalldir="+valldir+stat1
+		}else:if((headcmp(confstr.cnt,11,"currentver="))|(cex=36)){
+			confs+="currentver="+currentver+stat1
+		}else:if((headcmp(confstr.cnt,9,"closekey="))|(cex=37)){
+			confs+="closekey="+closekey+stat1
+		}else:if((headcmp(confstr.cnt,9,"mselview="))|(cex=38)){
+			if(sorttype=0){
+				confs+="mselview=directory"+stat1
+			}else{
+				confs+="mselview=level"+stat1
+			}
+		}else:if((headcmp(confstr.cnt,11,"laserdelay="))|(cex=39)){
+			confs+="laserdelay="+analogdelayconf+stat1
+		}else:if((headcmp(confstr.cnt,10,"usenumpad="))|(cex=40)){
+			confs+="usenumpad="+usenumpad+stat1
+		}else:if((headcmp(confstr.cnt,12,"hispeedtype="))|(cex=41)){
+			vhstypestat=""
+			if(vhstype.0=1):vhstypestat+="x,"
+			if(vhstype.1=1):vhstypestat+="C,"
+			if(vhstype.2=1):vhstypestat+="m,"
+			if(vhstype.3=1):vhstypestat+="a,"
+			if(vhstype.4=1):vhstypestat+="O,"
+			if(vhstypestat=""):vhstypestat="x,O,"
+			confs+="hispeedtype="+strmid(vhstypestat,0,strlen(vhstypestat)-1)+stat1
+		}else:if((headcmp(confstr.cnt,11,"inputdelay="))|(cex=42)){
+			confs+="inputdelay="+judgedelay+stat1
+		}else:if((headcmp(confstr.cnt,6,"vsync="))|(cex=43)){
+			confs+="vsync="+vsync+stat1
+		}else:if((headcmp(confstr.cnt,11,"esckey_bt3="))|(cex=44)){
+			if(confex.44<2){
+				confs+="esckey_bt3="+esc_bt3+stat1
+				confex.44=2
+			}
+		// Note: ソースコード公開用にTwitter連携関連の処理を削除
+		}else:if((headcmp(confstr.cnt,13,"hideitem_all="))|(cex=49)){
+			confs+="hideitem_all="+hidealldir+stat1
+		}else:if((headcmp(confstr.cnt,18,"ir_sign_in_cursor="))|(cex=50)){
+			confs+="ir_sign_in_cursor="+ir_selnow+stat1
+		}else{
+			confs+=confstr.cnt+stat1
+		}
+	loop
+	strrep confs,"\n\n\n","\n"
+	notesel confs
+	split confs,"\n",confstr
+	chdir dir_default
+	notesave "config.ini"
+	chdir dir_curp
+	return
+
+*confkeshu
+	if((state=st_option)&(lparam>>30=0)){
+		confkey=wparam
+	}
+	return
+
+*keshu
+	if(ginfo2()!=0):return
+	getkey shift_key,16
+	if(state=st_select){
+		if((shift_key=1)&(wparam!=16)&(iparam>='A')&(iparam<='Z')){
+			alphabetjump=iparam
+			return
+		}
+		if(shift_key=1):return
+	}
+	if(analoginput!=1):return
+	if(keshucnt<4){
+		//cnt3=cnt
+		if((state=st_select)&(keshucnt<3)){
+			if(analoginput=1){
+				if((wparam/*ke.cnt*/=key.(6+analogsw*2))&(timenow-levminustp>50)&(levnow>0)&(keshukeyp=key.(6+2*analogsw))&(keshukeypp=key.(6+2*analogsw))){
+					stat3=0
+					if((minfostr.selnow.(levnow-1).0!="")&(minfo.j.0.0>=0)){
+						stat1=BASS_SampleGetChannel(sellid,0)
+						BASS_ChannelSetAttribute stat1,2,double(mastervol)/100
+						BASS_ChannelPlay stat1
+						levnow--
+						levminustp=timenow
+						stat3=1
+					}else:if((levnow=3)&(minfostr.selnow.1.0!="")){
+						stat1=BASS_SampleGetChannel(sellid,0)
+						BASS_ChannelSetAttribute stat1,2,double(mastervol)/100
+						if(levm!=1):BASS_ChannelPlay stat1
+						levnow=1
+						levplustp=timenow
+						stat3=1
+					}else:if((levnow>=2)&(minfostr.selnow.0.0!="")){
+						stat1=BASS_SampleGetChannel(sellid,0)
+						BASS_ChannelSetAttribute stat1,2,double(mastervol)/100
+						if(levm!=0):BASS_ChannelPlay stat1
+						levnow=0
+						levplustp=timenow
+						stat3=1
+					}
+					levm=levnow
+					if(minfostr.selnow.levm.0=""){
+						if(levm=3){
+							if(minfostr.selnow.2.0!=""){
+								levm=2
+							}else:if(minfostr.selnow.1.0!=""){
+								levm=1
+							}else{
+								levm=0
+							}
+						}else:if(levm=2){
+							if(minfostr.selnow.1.0!=""){
+								levm=1
+							}else:if(minfostr.selnow.3.0!=""){
+								levm=3
+							}else{
+								levm=0
+							}
+						}else:if(levm=1){
+							if(minfostr.selnow.0.0!=""){
+								levm=0
+							}else:if(minfostr.selnow.2.0!=""){
+								levm=2
+							}else{
+								levm=3
+							}
+						}else{
+							if(minfostr.selnow.1.0!=""){
+								levm=1
+							}else:if(minfostr.selnow.2.0!=""){
+								levm=2
+							}else{
+								levm=3
+							}
+						}
+					}
+					if(stat3=1){
+						gosub *refreshscore
+						gosub *refreshjacket
+						gosub *refreshsonginfo
+					}
+				}else:if((wparam/*ke.cnt*/=key.(7+analogsw*2))&(timenow-levplustp>50)&(levnow<3)&(minfo.j.0.0>=0)&(keshukeyp=key.(7+2*analogsw))&(keshukeypp=key.(7+2*analogsw))){
+					stat3=0
+					if(minfostr.selnow.(levnow+1).0!=""){
+						stat1=BASS_SampleGetChannel(sellid,0)
+						BASS_ChannelSetAttribute stat1,2,double(mastervol)/100
+						BASS_ChannelPlay stat1
+						levnow++
+						levplustp=timenow
+						stat3=1
+					}else:if((levnow=0)&(minfostr.selnow.2.0!="")){
+						stat1=BASS_SampleGetChannel(sellid,0)
+						BASS_ChannelSetAttribute stat1,2,double(mastervol)/100
+						if(levm!=2):BASS_ChannelPlay stat1
+						levnow=2
+						levplustp=timenow
+						stat3=1
+					}else:if((levnow<=1)&(minfostr.selnow.3.0!="")){
+						stat1=BASS_SampleGetChannel(sellid,0)
+						BASS_ChannelSetAttribute stat1,2,double(mastervol)/100
+						if(levm!=3):BASS_ChannelPlay stat1
+						levnow=3
+						levplustp=timenow
+						stat3=1
+					}
+					levm=levnow
+					if(minfostr.selnow.levm.0=""){
+						if(levm=3){
+							if(minfostr.selnow.2.0!=""){
+								levm=2
+							}else:if(minfostr.selnow.1.0!=""){
+								levm=1
+							}else{
+								levm=0
+							}
+						}else:if(levm=2){
+							if(minfostr.selnow.1.0!=""){
+								levm=1
+							}else:if(minfostr.selnow.3.0!=""){
+								levm=3
+							}else{
+								levm=0
+							}
+						}else:if(levm=1){
+							if(minfostr.selnow.0.0!=""){
+								levm=0
+							}else:if(minfostr.selnow.2.0!=""){
+								levm=2
+							}else{
+								levm=3
+							}
+						}else{
+							if(minfostr.selnow.1.0!=""){
+								levm=1
+							}else:if(minfostr.selnow.2.0!=""){
+								levm=2
+							}else{
+								levm=3
+							}
+						}
+					}
+					if(stat3=1){
+						gosub *refreshscore
+						gosub *refreshjacket
+						gosub *refreshsonginfo
+					}
+				}
+				if((wparam/*ke.cnt*/=key.(8-analogsw*2))&(timenow-selminustp>50)&(keshukeyp=key.(8-2*analogsw))&(keshukeypp=key.(8-2*analogsw))){
+					stat1=BASS_SampleGetChannel(selmid,0)
+					BASS_ChannelSetAttribute stat1,2,double(mastervol)/100
+					BASS_ChannelPlay stat1
+					selnow--
+					if(selnow<0){
+						selnow=mnum-1
+					}
+					selnow_confsave=selnow
+					selminustpr=timenow
+					selminustp=timenow
+					selminustpstart=timenow
+					levm=levnow
+					if((minfostr.selnow.levm.0="")&(minfo.selnow.0.0>=0)){
+						if(levm=3){
+							if(minfostr.selnow.2.0!=""){
+								levm=2
+							}else:if(minfostr.selnow.1.0!=""){
+								levm=1
+							}else{
+								levm=0
+							}
+						}else:if(levm=2){
+							if(minfostr.selnow.1.0!=""){
+								levm=1
+							}else:if(minfostr.selnow.3.0!=""){
+								levm=3
+							}else{
+								levm=0
+							}
+						}else:if(levm=1){
+							if(minfostr.selnow.0.0!=""){
+								levm=0
+							}else:if(minfostr.selnow.2.0!=""){
+								levm=2
+							}else{
+								levm=3
+							}
+						}else{
+							if(minfostr.selnow.1.0!=""){
+								levm=1
+							}else:if(minfostr.selnow.2.0!=""){
+								levm=2
+							}else{
+								levm=3
+							}
+						}
+					}
+					gosub *refreshjacketup
+					gosub *refreshscore
+					gosub *refreshsonginfo
+				}else:if((wparam/*ke.cnt*/=key.(9-analogsw*2))&(timenow-selplustp>50)&(keshukeyp=key.(9-2*analogsw))&(keshukeypp=key.(9-2*analogsw))){
+					stat1=BASS_SampleGetChannel(selmid,0)
+					BASS_ChannelSetAttribute stat1,2,double(mastervol)/100
+					BASS_ChannelPlay stat1
+					selnow++
+					if(selnow>=mnum){
+						selnow=0
+					}
+					selnow_confsave=selnow
+					selplustp=timenow
+					selplustpr=timenow
+					selplustpstart=timenow
+					levm=levnow
+					if((minfostr.selnow.levm.0="")&(minfo.selnow.0.0>=0)){
+						if(levm=3){
+							if(minfostr.selnow.2.0!=""){
+								levm=2
+							}else:if(minfostr.selnow.1.0!=""){
+								levm=1
+							}else{
+								levm=0
+							}
+						}else:if(levm=2){
+							if(minfostr.selnow.1.0!=""){
+								levm=1
+							}else:if(minfostr.selnow.3.0!=""){
+								levm=3
+							}else{
+								levm=0
+							}
+						}else:if(levm=1){
+							if(minfostr.selnow.0.0!=""){
+								levm=0
+							}else:if(minfostr.selnow.2.0!=""){
+								levm=2
+							}else{
+								levm=3
+							}
+						}else{
+							if(minfostr.selnow.1.0!=""){
+								levm=1
+							}else:if(minfostr.selnow.2.0!=""){
+								levm=2
+							}else{
+								levm=3
+							}
+						}
+					}
+					gosub *refreshjacketdown
+					gosub *refreshscore
+					gosub *refreshsonginfo
+				}
+			}
+		}
+		if((state=st_playing)&(plfl=0)){
+			getkey enter_key2,13
+			if((analoginput=1)&(enter_key2=1)){
+				repeat 2
+					cnt0=cnt
+					if((wparam/*ke.cnt3*/=key.(6+(cnt^analogsw)*2))&(anakp.cnt=0)&(d3timer()-keshuhstp2>50)){
+						gosub *refreshhs
+						if((hstypenow=0)&(hsr>5)){
+							hsr--
+						}else:if((hstypenow=1)&(hso>25)){
+							hso-=25
+						}else:if((hstypenow=2)&(hsc>25)){
+							hsc-=25
+						}else:if((hstypenow=3)&(hsm>25)){
+							hsm-=25
+						}else:if((hstypenow=4)&(hsa>25)){
+							hsa-=25
+						}
+						keshuhstp2=d3timer()
+						anakp.cnt=-1
+					}else:if(wparam/*ke.cnt3*/=key.(6+(cnt^analogsw)*2)):anakp.cnt=0
+					if((wparam/*ke.cnt3*/=key.(7+(cnt^analogsw)*2))&(anakp.cnt=1)&(d3timer()-keshuhstp2>50)){
+						gosub *refreshhs
+						if((hstypenow=0)&(hsr<99)){
+							hsr++
+						}else:if((hstypenow=1)&(hso<2000)){
+							hso+=25
+						}else:if((hstypenow=2)&(hsc<2000)){
+							hsc+=25
+						}else:if((hstypenow=3)&(hsm<2000)){
+							hsm+=25
+						}else:if((hstypenow=4)&(hsa<2000)){
+							hsa+=25
+						}
+						keshuhstp2=d3timer()
+						anakp.cnt=-1
+					}else:if(wparam/*ke.cnt3*/=key.(7+(cnt^analogsw)*2)):anakp.cnt=1
+				loop
+			}
+		}
+		if((state=st_playing)&(plfl=1)){
+			if((analoginput=1)&(enter_key=1)){
+				repeat 2
+					cnt0=cnt
+					if((wparam/*ke.cnt3*/=key.(6+(cnt^analogsw)*2))&(anakp.cnt=0)&(t-keshuhstp>50)){
+						gosub *refreshhs
+						if((hstypenow=0)&(hsr>5)){
+							hsr--
+						}else:if((hstypenow=1)&(hso>25)){
+							hso-=25
+						}else:if((hstypenow=2)&(hsc>25)){
+							hsc-=25
+						}else:if((hstypenow=3)&(hsm>25)){
+							hsm-=25
+						}else:if((hstypenow=4)&(hsa>25)){
+							hsa-=25
+						}
+						keshuhstp=t
+						anakp.cnt=-1
+					}else:if(wparam/*ke.cnt3*/=key.(6+(cnt^analogsw)*2)):anakp.cnt=0
+					if((wparam/*ke.cnt3*/=key.(7+(cnt^analogsw)*2))&(anakp.cnt=1)&(t-keshuhstp>50)){
+						gosub *refreshhs
+						if((hstypenow=0)&(hsr<99)){
+							hsr++
+						}else:if((hstypenow=1)&(hso<2000)){
+							hso+=25
+						}else:if((hstypenow=2)&(hsc<2000)){
+							hsc+=25
+						}else:if((hstypenow=3)&(hsm<2000)){
+							hsm+=25
+						}else:if((hstypenow=4)&(hsa<2000)){
+							hsa+=25
+						}
+						keshuhstp=t
+						anakp.cnt=-1
+					}else:if(wparam/*ke.cnt3*/=key.(7+(cnt^analogsw)*2)):anakp.cnt=1
+				loop
+			}else:if((analoginput=1)&(analogmode=mode_on)&(((effratetype<=0)&(iscourse=0))|(gauge/1000>0))){
+				repeat 2
+					anow=analognow.cnt
+					cnt0=cnt
+					if(arstat.(6+cnt).0=1){
+						if(wparam/*ke.cnt3*/=key.(6+(cnt^analogsw)*2)){
+							if(anakp.cnt!=0){
+								anakdiff.cnt++
+								anaktp.cnt=t
+							}else:anakdiff.cnt=0
+							anasame=(anakp.cnt=0)
+							anakp.cnt=0
+							if(anow=analogpos.cnt){
+								if((anaturnnextfl.cnt=1)&(anastraight.cnt=0)&(analogokt.cnt>(t_tp)*2)&(anadirection.cnt=1)){
+									if(anaturnnextt.cnt0-(t+ttp*adj-analogdelay)>500-250*(analog.(arstat.(6+cnt).1).8=0)-100*(analog.(arstat.(6+cnt).1).7-analog.(arstat.(6+cnt).1).6<=500)&(anasame=1)&((t>30+analoganokt.cnt)|(analoganokcnt.cnt=-1))){
+										if(t-analogngt.cnt<=(t_tp)*5){
+											analogngt.cnt=tp-(t_tp)
+										}else:if(t-analogngt.cnt<=(t_tp)*10){
+											analogngt.cnt=tp-(t_tp)*5
+										}else{
+											analogngt.cnt=tp-(t_tp)*10
+										}
+										analogokt.cnt-=(t_tp)/2
+									}
+								}
+								if((anastraight.cnt=0)&(anadirection.cnt=1)&((t>30+analoganokt.cnt)|(analoganokcnt.cnt=-1))){
+									analogpos.cnt-=40
+								}
+							}else:if((abs(anow-analogpos.cnt)<150+abs(anow-analogfuture.cnt)/12*(analogfuture.cnt!=-1))&(anow!=-1)){
+								if(anow<=analogpos.cnt){
+									analogpos.cnt=anow
+									anadjp.cnt=1
+									if(t-analogngt.cnt>20+(t_tp)):analogokt.cnt=t:analogokcnt.cnt=arstat.(6+cnt).1
+								}else:if(abs(anow-analogpos.cnt)<60){
+									analogpos.cnt-=(analog.(arstat.(6+cnt).1).3=analog.(arstat.(6+cnt).1).4)*(anaturnnextt.cnt0-(t+ttp*adj-analogdelay)>30)*2+4-2*(anaturnnextt.cnt0-(t+ttp*adj-analogdelay)<=30)-2*(anaturnnextt.cnt0-(t+ttp*adj-analogdelay)<=500-250*(analog.(arstat.(6+cnt).1).8=0)-100*(analog.(arstat.(6+cnt).1).7-analog.(arstat.(6+cnt).1).6<=500))
+								}else{
+									analogpos.cnt-=50-40*(anaturnnextt.cnt0-(t+ttp*adj-analogdelay)<=500-250*(analog.(arstat.(6+cnt).1).8=0)-100*(analog.(arstat.(6+cnt).1).7-analog.(arstat.(6+cnt).1).6<=500))
+								}
+							}else:if(((abs(anow-analogpos.cnt)>200)&(anow>analogpos.cnt))|(anow=-1)){
+								if(((analog.(arstat.(6+cnt).1).1-cnow-sttp*adj>bpba*3/32)|(analog.(arstat.(6+cnt).1).1+bpba_32<cnow+sttp*adj))&((t-analog.(arstat.(6+cnt).1).6>50)|(anow=-1))){
+									if((t-anastartt.cnt>120)&(t-anaendt.cnt>0)):analogpos.cnt-=80
+								}
+							}else{
+								if((t>30+analoganokt.cnt)|(analoganokcnt.cnt=-1)):analogpos.cnt-=80
+							}
+							cnt2=cnt
+							cnt3=0
+							cnt4=0
+							//if(anasame=1){
+								repeat analoganjnum-analoganjfcnt,analoganjfcnt
+									if(length(analoganj)<cnt+1):break
+									if(cnt<0):break
+									if((analoganj.cnt.0=cnt2)&(analog.(analoganj.cnt.1).6-(t-analogdelay)-ttp<=100)&(analog.(analoganj.cnt.1).3<analog.(analoganj.cnt.1).4)&(analoganj.cnt.2=0)){
+										if(cnt2=0):cnt3++
+										if(cnt2=1):cnt4++
+									}
+									if((cnt3>1)|(cnt4>1)):break
+								loop
+								if((cnt3<=1)&(cnt4<=1)){
+									repeat analoganjnum-analoganjfcnt,analoganjfcnt
+										if(analog.(analoganj.cnt.1).6-(t-analogdelay)-ttp>100):break
+										tjudgestat=(anasame=1)&(analog.(analoganj.cnt.1).6-(t-analogdelay)-ttp<=100)
+										tjudgestat=tjudgestat|(abs(analog.(analoganj.cnt.1).1-cnow+sttp*adj)<=int(double(bpm)/960))
+										if((analoganj.cnt.0=cnt2)&(tjudgestat=1)&(analog.(analoganj.cnt.1).3>analog.(analoganj.cnt.1).4)&(((analog.(analoganj.cnt.1).4*20-50<=analogpos.(analog.(analoganj.cnt.1).0)))|((analog.(analoganj.cnt.1).4>=analog.(analoganj.cnt.1).3)&(analog.(analoganj.cnt.1).4*20+50>=analogpos.(analog.(analoganj.cnt.1).0))))&(analoganj.cnt.2=0)){
+											analoganj.cnt.2=1
+											//if(analognow.cnt2!=-1):analogpos.cnt2=analog.(analoganj.cnt.1).4*20
+											chainnow++:chainnow_song++
+											critical++
+											analogscore++
+											if(chainnow>chainmax):chainmax=chainnow
+											if(chainnow_song>chainmax_song):chainmax_song=chainnow_song
+											if(chainnow\100=0):chainefft=t
+											chainvt=t
+											ngauge+=200*analoganj.cnt.5
+											if(ngauge>gaugemax):ngauge=gaugemax
+											addgauge 4*analoganj.cnt.5,0
+											analogefft.(analoganj.cnt.0).(analogefftnum.(analoganj.cnt.0)).0=max(t,analog.(analoganj.cnt.1).6)
+											analogefft.(analoganj.cnt.0).(analogefftnum.(analoganj.cnt.0)).1=analog.(analoganj.cnt.1).4*20
+											analogefftnum.(analoganj.cnt.0)++
+											analoganokt.(analoganj.cnt.0)=analog.(analoganj.cnt.1).6+100
+											analoganokcnt.(analoganj.cnt.0)=analoganj.cnt.1
+											spincheck analoganj.cnt.1
+										}
+									loop
+								}
+							//}
+						}
+						if(wparam/*ke.cnt3*/=key.(7+(cnt^analogsw)*2)){
+							if(anakp.cnt!=1){
+								anakdiff.cnt++
+								anaktp.cnt=t
+							}else:anakdiff.cnt=0
+							anasame=(anakp.cnt=1)
+							anakp.cnt=1
+							if(anow=analogpos.cnt){
+								if((anastraight.cnt=0)&(analogokt.cnt>(t_tp)*2)&(anadirection.cnt=0)){
+									if(anaturnnextt.cnt0-(t+ttp*adj-analogdelay)>500-250*(analog.(arstat.(6+cnt).1).8=0)-100*(analog.(arstat.(6+cnt).1).7-analog.(arstat.(6+cnt).1).6<=500)&(anasame=1)&((t>30+analoganokt.cnt)|(analoganokcnt.cnt=-1))){
+										if(t-analogngt.cnt<=(t_tp)*5){
+											analogngt.cnt=tp-(t_tp)
+										}else:if(t-analogngt.cnt<=(t_tp)*10){
+											analogngt.cnt=tp-(t_tp)*5
+										}else{
+											analogngt.cnt=tp-(t_tp)*10
+										}
+										analogokt.cnt-=(t_tp)/2
+									}
+								}
+								if((anastraight.cnt=0)&(anadirection.cnt=0)&((t>30+analoganokt.cnt)|(analoganokcnt.cnt=-1))){
+									analogpos.cnt+=40
+								}
+							}else:if((abs(analogpos.cnt-anow)<150+abs(anow-analogfuture.cnt)/12*(analogfuture.cnt!=-1))&(anow!=-1)){
+								if(anow>=analogpos.cnt){
+									analogpos.cnt=anow
+									anadjp.cnt=1
+									if(t-analogngt.cnt>20+(t_tp)):analogokt.cnt=t:analogokcnt.cnt=arstat.(6+cnt).1
+								}else:if(abs(anow-analogpos.cnt)<60){
+									analogpos.cnt+=(analog.(arstat.(6+cnt).1).3=analog.(arstat.(6+cnt).1).4)*(anaturnnextt.cnt0-(t+ttp*adj-analogdelay)>30)*2+4-2*(anaturnnextt.cnt0-(t+ttp*adj-analogdelay)<=30)-2*(anaturnnextt.cnt0-(t+ttp*adj-analogdelay)<=500-250*(analog.(arstat.(6+cnt).1).8=0)-100*(analog.(arstat.(6+cnt).1).7-analog.(arstat.(6+cnt).1).6<=500))
+								}else{
+									analogpos.cnt+=50-40*(anaturnnextt.cnt0-(t+ttp*adj-analogdelay)<=500-250*(analog.(arstat.(6+cnt).1).8=0)-100*(analog.(arstat.(6+cnt).1).7-analog.(arstat.(6+cnt).1).6<=500))
+								}
+							}else:if(((abs(analogpos.cnt-anow)>200)&(analogpos.cnt>anow))|(anow=-1)){
+								if(((analog.(arstat.(6+cnt).1).1-cnow-sttp*adj>bpba*3/32)|(analog.(arstat.(6+cnt).1).1+bpba_32<cnow+sttp*adj))&((t-analog.(arstat.(6+cnt).1).6>50)|(anow=-1))){
+									if((t-anastartt.cnt>120)&(t-anaendt.cnt>0)):analogpos.cnt+=80
+								}
+							}else{
+								if((t>30+analoganokt.cnt)|(analoganokcnt.cnt=-1)):analogpos.cnt+=80
+							}
+							cnt2=cnt
+							cnt3=0
+							cnt4=0
+							//if(anasame=1){
+								repeat analoganjnum-analoganjfcnt,analoganjfcnt
+									if(length(analoganj)<cnt+1):break
+									if(cnt<0):break
+									if((analoganj.cnt.0=cnt2)&(analog.(analoganj.cnt.1).6-(t-analogdelay)-ttp<=100)&(analog.(analoganj.cnt.1).3<analog.(analoganj.cnt.1).4)&(analoganj.cnt.2=0)){
+										if(cnt2=0):cnt3++
+										if(cnt2=1):cnt4++
+									}
+									if((cnt3>1)|(cnt4>1)):break
+								loop
+								if((cnt3<=1)&(cnt4<=1)){
+									repeat analoganjnum-analoganjfcnt,analoganjfcnt
+										if(analog.(analoganj.cnt.1).6-(t-analogdelay)-ttp>100):break
+										tjudgestat=(anasame=1)&(analog.(analoganj.cnt.1).6-(t-analogdelay)-ttp<=100)
+										tjudgestat=tjudgestat|(abs(analog.(analoganj.cnt.1).1-cnow+sttp*adj)<=int(double(bpm)/960))
+										if((analoganj.cnt.0=cnt2)&(tjudgestat=1)&(analog.(analoganj.cnt.1).3<analog.(analoganj.cnt.1).4)&(((analog.(analoganj.cnt.1).4<=analog.(analoganj.cnt.1).3)&(analog.(analoganj.cnt.1).4*20-50<=analogpos.(analog.(analoganj.cnt.1).0)))|((analog.(analoganj.cnt.1).4>=analog.(analoganj.cnt.1).3)&(analog.(analoganj.cnt.1).4*20+50>=analogpos.(analog.(analoganj.cnt.1).0))))&(analoganj.cnt.2=0)){
+											analoganj.cnt.2=1
+											//if(analognow.cnt2!=-1):analogpos.cnt2=analog.(analoganj.cnt.1).4*20
+											chainnow++:chainnow_song++
+											critical++
+											analogscore++
+											if(chainnow>chainmax):chainmax=chainnow
+											if(chainnow_song>chainmax_song):chainmax_song=chainnow_song
+											if(chainnow\100=0):chainefft=t
+											chainvt=t
+											ngauge+=200*analoganj.cnt.5
+											if(ngauge>gaugemax):ngauge=gaugemax
+											addgauge 4*analoganj.cnt.5,0
+											analogefft.(analoganj.cnt.0).(analogefftnum.(analoganj.cnt.0)).0=max(t,analog.(analoganj.cnt.1).6)
+											analogefft.(analoganj.cnt.0).(analogefftnum.(analoganj.cnt.0)).1=analog.(analoganj.cnt.1).4*20
+											analogefftnum.(analoganj.cnt.0)++
+											analoganokt.(analoganj.cnt.0)=analog.(analoganj.cnt.1).6+100
+											analoganokcnt.(analoganj.cnt.0)=analoganj.cnt.1
+											spincheck analoganj.cnt.1
+										}
+									loop
+								}
+							//}
+						}
+					}
+					if(analogpos.cnt<0):analogpos.cnt=0
+					if(analogpos.cnt>1000):analogpos.cnt=1000
+				loop
+			}
+		}
+	}else{
+		onkey 0
+	}
+	keshukeypp=keshukeyp
+	keshukeyp=wparam
+	//loop
+	keshucnt++
+	//keshucnt=0
+	return
+
+*refreshhs
+	hstypenow=-1
+	if(hso+hsc+hsm+hsa=-4){
+		hstypenow=0
+	}else:if(hsc+hsm+hsa=-3){
+		hstypenow=1
+	}else:if(hso+hsm+hsa=-3){
+		hstypenow=2
+	}else:if(hso+hsc+hsa=-3){
+		hstypenow=3
+	}else:if(hso+hsc+hsm=-3){
+		hstypenow=4
+	}
+	return
+
+*volactive
+	if((ginfo2()!=0)&(automute!=0)){
+		BASS_SetConfig 4,0
+		BASS_SetConfig 5,0
+		volzerofl=1
+	}else:if(volzerofl=1){
+		BASS_SetConfig 4,10000
+		BASS_SetConfig 5,10000
+		volzerofl=0
+	}
+	return
+
+*alt
+	if(wParam=18){
+		return 0
+	}else:return
+
+*ignoreerror
+	return
+
+*errorcheck
+	errorfl=1
+	return
+
+*exit
+	if(ginfo_act!=-1){
+		if(ginfo_act=BUF_TWEET_DIALOG){
+			tweet_stat=-1
+			return
+		}
+		if(ginfo_act=BUF_IR_LOGIN_DIALOG){
+			cancel@ksm_ir=1
+			return
+		}
+		gosub *saveconfig
+		DeleteObject hFont
+		if(exist_msftedit=1):f_FreeLibrary pLib
+		alDeleteAll
+		end
+	}
+	return
+
+*delcache
+	dir_stat=dir_cur
+	chdir dir_default+"\\cache"
+	dirlist stat1,"*",1
+	notesel stat1
+	repeat notemax
+		noteget stat2,cnt
+		DeleteFile dir_default+"\\cache\\"+stat2
+	loop
+	dirlist buf,"bg",5
+	if(buf!=""){
+		chdir "./bg"
+		dirlist stat1,"*",1
+		notesel stat1
+		repeat notemax
+			noteget stat2,cnt
+			DeleteFile dir_default+"\\cache\\bg\\"+stat2
+		loop
+		chdir ".."
+		RemoveDirectory dir_default+"\\cache\\bg"
+	}/*
+	dirlist buf,"gate",5
+	if(buf!=""){
+		chdir "./gate"
+		dirlist stat1,"*",1
+		notesel stat1
+		repeat notemax
+			noteget stat2,cnt
+			DeleteFile dir_default+"\\cache\\gate\\"+stat2
+		loop
+		chdir ".."
+		RemoveDirectory dir_default+"\\cache\\gate"
+	}*/
+	//chdir ".."
+	//RemoveDirectory dir_default+"\\cache"
+	chdir dir_stat
+	return
+
+*refreshgetsize
+	dim getsize,1280
+	repeat 1280
+		getsize.cnt=cnt*scrsize_h/480
+	loop
+	return
+
+*mdatafree
+	sdim mdata0,1
+	sdim mdata1,1
+	sdim mdata2,1
+	sdim mdata3,1
+	return
+
+#defcfunc ginfo2
+	ginfostat2=ginfo(2)
+	if(ginfostat2!=-1){
+		ginfostat=ginfo(3)
+		gsel 0
+		IsIconic hwnd
+		if(stat=1):ginfostat2=-1
+		gsel ginfostat
+	}
+	return ginfostat2
+
+#module
+	#uselib "kernel32.dll"
+	#func VirtualProtect "VirtualProtect" int, int, int, int
+#deffunc getdouble
+	if code == 0 {
+		code=$0424448b,$04c218dd,$00000000
+		VirtualProtect varptr(code), length(code)*4, $40, varptr(res)
+		fret=0.0
+	}
+	prm = varptr(fret)
+	res = callfunc(prm, varptr(code), 1)
+	return fret
+#global	
+
+#module "Ime_Control"
+    #uselib "imm32"
+    #cfunc ImmGetContext "ImmGetContext" sptr
+    #func ImmReleaseContext "ImmReleaseContext" sptr,sptr
+    #func ImmSetOpenStatus "ImmSetOpenStatus" sptr,sptr
+    #cfunc ImmGetOpenStatus "ImmGetOpenStatus" sptr
+ 
+; IME ON/OFF    on=1 : off=0
+#deffunc imeset int imesw
+    himc=ImmGetContext(hwnd)
+    ImmSetOpenStatus himc,imesw
+    ImmReleaseContext hwnd,himc
+    return
+ 
+; IMEが開かれているかどうかを調べる
+; 戻り値が0ならOFF、0以外ならONになっている
+#defcfunc imeget
+    himc=ImmGetContext(hwnd)
+    imesw=ImmGetOpenStatus(himc)
+    ImmReleaseContext hwnd,himc
+    return imesw
+#global
+
+#deffunc ardel array ar,int armax,int artarget
+	if(armax<2):return
+	if(artarget<0):return
+	if(artarget>armax-1):return
+	repeat armax-artarget-1,artarget
+		ar.cnt=ar.(cnt+1)
+	loop
+	return
+
+#deffunc ardel2 array ar1,int arxmax,int arymax,int artargetx
+	if(arxmax<2):return
+	if(artargetx<0):return
+	if(artargetx>arxmax-1):return
+	repeat arxmax-artargetx-1,artargetx
+		arcnt2=cnt
+		repeat arymax
+			ar1.arcnt2.cnt=ar1.(arcnt2+1).cnt
+		loop
+	loop
+	return
+
+#defcfunc min int a,int b
+	if(a>=b):return b
+	return a
+	
+#defcfunc max int a,int b
+	if(a>=b):return a
+	return b
+	
+#defcfunc ran int a,int b,int c
+	return min(max(a,b),c)
+	
+#defcfunc maxf double a,double b
+	if(a>=b):return a
+	return b
+	
+#defcfunc minf double a,double b
+	if(a>=b):return b
+	return a
+
+#defcfunc getjoykeystat int knum
+	joykeystat1=0
+	if(knum=11){
+		kstat_=0//getkey kstat_,key.11
+		getkey kstat_2,key2.11
+		if(usenumpad=1){
+			getkey kstat_,numkey_k.4
+		}else{
+			getkey kstat_,numkey_c.4
+		}
+		joykeystat1=joykeystat1|kstat_|kstat_2
+	}
+	if(knum=12){
+		kstat_=0//getkey kstat_,key.12
+		getkey kstat_2,key2.12
+		joykeystat1=joykeystat1|kstat_|kstat_2
+	}
+	if(knum=13){
+		kstat_=0//getkey kstat_,key.13
+		getkey kstat_2,key2.13
+		joykeystat1=joykeystat1|kstat_|kstat_2
+	}
+	if(joykey.0.knum>=0){
+		if(joykey.0.knum/32<length(joystat)):joykeystat1=joykeystat1|(joystat.(joykey.0.knum/32).(joykey.0.knum\32))
+	}
+	if(joykey.1.knum>=0){
+		if(joykey.1.knum/32<length(joystat)):joykeystat1=joykeystat1|(joystat.(joykey.1.knum/32).(joykey.1.knum\32))
+	}
+	return joykeystat1
+
+#deffunc getkey_a array v1,int v2
+	getkey v1,v2
+	if(usenumpad=1){
+		if(v2=37):getkey funcstat,numkey_k.3
+		if(v2=38):getkey funcstat,numkey_k.1
+		if(v2=39):getkey funcstat,numkey_k.5
+		if(v2=40):getkey funcstat,numkey_k.7
+		v1=v1|funcstat
+	}else:if(usenumpad=2){
+		if(v2=37):getkey funcstat,numkey_c.3
+		if(v2=38):getkey funcstat,numkey_c.1
+		if(v2=39):getkey funcstat,numkey_c.5
+		if(v2=40):getkey funcstat,numkey_c.7
+		v1=v1|funcstat
+	}
+
+#module
+#defcfunc getesckey
+	getkey stat1,27
+	stat1=stat1|getjoykeystat(12)
+	stat2=0
+	repeat 4
+		getkey stat2_,key@.cnt
+		stat2__=stat2_
+		getkey stat2_,key2@.cnt
+		stat2__=stat2__|stat2_
+		stat2__=stat2__|getjoykeystat(cnt)
+		stat2+=stat2__
+	loop
+	getkey stat2_,key@.11
+	getkey stat2__,key2@.11
+	stat2_=stat2_|stat2__|getjoykeystat(11)
+	if((stat2>=3)&(stat2_=1)&(esc_bt3@=1)):stat1=1
+	return stat1
+#global
+
+#deffunc drawtxt str text,int w1,int h1,int fontsize
+	_drawtxt text,w1,h1,fontsize,1,1
+	return
+	
+#deffunc _drawtxt str text,int w1,int h1,int fontsize,int wpos,int hpos
+	alCreateImage IMG_DRAWTXT_TEMP,w1,h1
+	alCopyScreenToImage ginfo_sel,IMG_DRAWTXT_TEMP,0,0,w1,h1,ginfo_cx,ginfo_cy
+	alColor ginfo_r,ginfo_g,ginfo_b
+	alFont lang.0.1,fontsize
+	alDrawText text,0,0,w1,h1,wpos,hpos
+	alCopyImageToScreen IMG_DRAWTXT_TEMP,ginfo_sel,ginfo_cx,ginfo_cy
+	alDeleteImage IMG_DRAWTXT_TEMP
+	return
+
+#deffunc blackout int blength
+	buffer 2,scrsize_w,scrsize_h
+	pos 0,0
+	gmode 0
+	gcopy 0,0,0,scrsize_w,scrsize_h
+	bstartt=d3timer()
+	gsel 0
+	pos 0,0
+	gmode 0
+	repeat
+		if(abs(d3timer()-bstartt)>blength){
+			redraw 0
+			gmode 0
+			color 0,0,0
+			boxf
+			redraw 1
+			break
+		}
+		redraw 0
+		gcopy 2,0,0,scrsize_w,scrsize_h
+		gmode 3,,,(d3timer()-bstartt)*256/blength
+		color 0,0,0
+		gsquare -1,sx_a,sy_a
+		gmode 0
+		redraw 1
+		await 7
+	loop
+	return
+
+#deffunc whiteout int wlength
+	buffer 2,scrsize_w,scrsize_h
+	pos 0,0
+	gmode 0
+	gcopy 0,0,0,scrsize_w,scrsize_h
+	wstartt=d3timer()
+	gsel 0
+	pos 0,0
+	gmode 0
+	repeat
+		if(abs(d3timer()-wstartt)>wlength){
+			redraw 0
+			gmode 0
+			color 255,255,255
+			boxf
+			redraw 1
+			break
+		}
+		redraw 0
+		gcopy 2,0,0,scrsize_w,scrsize_h
+		gmode 3,,,(d3timer()-wstartt)*256/wlength
+		color 255,255,255
+		gsquare -1,sx_a,sy_a
+		gmode 0
+		redraw 1
+		await 7
+	loop
+	return
+
+#deffunc imgbufload str fn,int bufnum,int sizex,int sizey,int ox,int oy,int size2x,int size2y,str mime,int texfl
+	exist dir_default+"\\cache\\"+fn
+	if(strsize>0){
+		buffer bufnum
+		picload dir_default+"\\cache\\"+fn
+	}else{
+		buffer 2
+		picload dir_default+"\\imgs\\"+fn
+		buffer bufnum,sizex,sizey
+		gzoom sizex,sizey,2,ox,oy,size2x,size2y,texfl
+		alCreateImage 90,sizex,sizey
+		alCopyScreenToImage bufnum,90
+		alSaveFile dir_default+"\\cache\\"+fn,mime
+		alDeleteImage 90
+	}
+	return
+
+#deffunc imgbufload_bg str fn,int bufnum,str mime,int texfl
+	exist dir_default+"\\cache\\"+fn
+	if(strsize>0){
+		buffer bufnum
+		picload dir_default+"\\cache\\"+fn
+	}else{
+		buffer 2
+		picload dir_default+"\\imgs\\"+fn
+		imgbufsize=ginfo_winx,ginfo_winy
+		buffer bufnum,scrsize_w,scrsize_h
+		gzoom scrsize_w,scrsize_h,2,imgbufsize.0/2-imgbufsize.1*scrsize_w/scrsize_h/2,0,imgbufsize.1*scrsize_w/scrsize_h,imgbufsize.1,texfl
+		alCreateImage 90,scrsize_w,scrsize_h
+		alCopyScreenToImage bufnum,90
+		alSaveFile dir_default+"\\cache\\"+fn,mime
+		alDeleteImage 90
+	}
+	return
+
+#deffunc generate_cache_imgs
+	alSelectImage 38
+	save_cache_img 38,dir_default+"\\cache\\result_scorenum.png",two(alGetWidth()),two(alGetHeight())
+	if(not_exists(dir_default+"\\cache\\num2_0.png")){
+		alCreateImage 2,two(getsize(10)),two(getsize(9)*16*2)
+		repeat 16
+			alCopyImageToImage 52,2,0,getsize(9)*2*cnt,getsize(10),getsize(9),0,getsize(9)*cnt
+		loop
+		alSaveFile dir_default+"\\cache\\num2_0.png",,0,0,two(getsize(10)),two(getsize(9)*16*2)
+		alDeleteImage 2
+	}
+	if(not_exists(dir_default+"\\cache\\num2_1.png")){
+		alCreateImage 2,two(getsize(10)),two(getsize(9)*16*2)
+		repeat 16
+			alCopyImageToImage 52,2,0,getsize(9)*2*cnt,getsize(10),getsize(9),getsize(10),getsize(9)*cnt
+		loop
+		alSaveFile dir_default+"\\cache\\num2_1.png",,0,0,two(getsize(10)),two(getsize(9)*16*2)
+		alDeleteImage 2
+	}
+	save_cache_img 59,dir_default+"\\cache\\minfo_cur.png",two(getsize(10)),two(getsize(10))
+	save_cache_img 143,dir_default+"\\cache\\fps.png",two(getsize(30)),two(getsize(9))
+	save_cache_img 144,dir_default+"\\cache\\er.png",two(round((192.0f*errate1)*scrsize_h/480)*6),two(round(double(570.0f*errate1)*scrsize_h/480))
+	save_cache_img 145,dir_default+"\\cache\\er_p.png",two(round(96.0f*errate1*scrsize_h/480)),two(round(42.0f*errate1*scrsize_h/480))
+	save_cache_img 146,dir_default+"\\cache\\timingadjust_ms.png",two(getsize(30)),two(getsize(9))
+	save_cache_img 147,dir_default+"\\cache\\timingadjust.png",two(getsize(60)),two(getsize(20))
+	save_cache_img 148,dir_default+"\\cache\\timingadjust_sign.png",two(getsize(9)),two(getsize(9))*2
+	save_cache_img 56,dir_default+"\\cache\\laser_p.png",two(getsize(60)*2),two(getsize(60)*2)
+	return
+
+#module
+
+// ファイルが存在しない場合のみArtlet2DのImageを保存
+#deffunc save_cache_img int image_id, str filename, int w, int h
+	if(not_exists(filename)){
+		alSelectImage image_id
+		alSaveFile filename,,0,0,w,h
+	}
+	return
+
+#defcfunc exists str filename
+	exist filename
+	return (strsize!=-1)
+
+#defcfunc not_exists str filename
+	exist filename
+	return (strsize=-1)
+
+#global
+
+#defcfunc tofloat double p1
+	temp = p1
+	return lpeek(temp)>>29&7|(p1<0)<<31|lpeek(temp,4)-(p1!0)*0x38000000<<3
+
+
+#module
+
+#deffunc hgcopy int texid,int sx,int sy,int sw,int sh,int cmode,int tr
+	hgzoom sw,sh,texid,sx,sy,sw,sh,cmode,tr
+	return
+
+#deffunc hgcopy_a int texid,int sx,int sy,int sw,int sh,int cmode,int tr
+	hgzoom_a sw,sh,texid,sx,sy,sw,sh,cmode,tr
+	return
+
+#deffunc hgzoom int cw,int ch,int texid,int sx,int sy,int sw,int sh,int cmode,int tr
+	gmode cmode,sw,sh,tr
+	hgrotate texid,sx,sy,0.0f,cw,ch
+	return
+
+#deffunc hgzoom_a int cw,int ch,int texid,int sx,int sy,int sw,int sh,int cmode,int tr
+	pos ginfo(22)+(cw+1)/2,ginfo(23)+(ch+1)/2
+	gmode cmode,sw,sh,tr
+	hgrotate texid,sx,sy,0.0f,cw,ch
+	return
+
+#deffunc settex2 int texid
+
+	;	texture reg
+	;
+	workscrid=ginfo(3)
+	winx=ginfo(12):winy=ginfo(13)
+
+	px=1:repeat 12
+	if px>=winx : break
+	px=px<<1:loop
+	py=1:repeat 12
+	if py>=winy : break
+	py=py<<1:loop
+	if ( px!=winx )|( py!=winy ) {	; 2^nサイズでない時は補正
+		buffer 3,px,py,0
+		cls 4
+		gmode 0
+		pos 0,0
+		gcopy workscrid,0,0,winx,winy
+	}
+	settex winx,winy,0,texid
+	if stat<0 : dialog "Texture Error("+stat+")" { gsel hgsel : return }
+	i=stat
+	await 0
+	gsel hgsel@HGIMG
+	return i
+
+#global
+#module
+#defcfunc two int winx
+	px=1:repeat 12
+	if px>=winx : break
+	px=px<<1:loop
+	return px
+#global
+
+#defcfunc headcmp var a,int num,str b
+	memcpy _headcmpstr,a,num,0,0
+	poke _headcmpstr,num
+	return _headcmpstr=b
+
+#defcfunc strmid2 var a,int _ofs,int num
+	memcpy _strmid_buf,a,num,0,_ofs
+	poke _strmid_buf,num
+	return _strmid_buf
+
+#module
+#uselib "gdi32.dll"
+#func GetTextExtentPoint32 "GetTextExtentPoint32A" int,int,int,int
+#deffunc GetTxtExtPoint var tBuf,array tSize
+	txtLen=strlen(tBuf)
+	dim tSize,2
+	GetTextExtentPoint32 hdc,varptr(tBuf),txtLen,varptr(tSize)
+	return
+#global
+
+#deffunc BASS_VST_SetParam_R  int vst_a,int vst_b,double vst_c
+	if(vst_a!=-1){
+		repeat 5
+			BASS_VST_SetParam vst_a,vst_b,vst_c
+			if(BASS_ErrorGetCode()=0){
+				break
+			}
+		loop
+	}
+	return

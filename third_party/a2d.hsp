@@ -1,0 +1,1028 @@
+
+;============================================================
+;                                                 2008/08/29
+;	Artlet2D for HSP 3.0 / GDI+
+;	Version 1.01
+;                    S.Programs http://sprocket.babyblue.jp/
+;============================================================
+
+#ifndef alInitModule
+
+;============================================================
+#module a2d
+
+#define IMGS_MAX 512 ; Number of Image IDs
+
+;-----------------------------------------------------------
+; declare func / const
+
+; GDI+ Token
+#uselib "gdiplus"
+#func GdiplusStartup	"GdiplusStartup"	int, int, int
+#func GdiplusShutdown	"GdiplusShutdown"	int
+
+; Image Object
+#uselib "gdiplus"
+#func GdipCreateBitmapFromScan0	"GdipCreateBitmapFromScan0"	int, int, int, int, int, int
+#func GdipCreateBitmapFromGdiDib "GdipCreateBitmapFromGdiDib"	int, int, int
+#func GdipLoadImageFromFile	"GdipLoadImageFromFile"	wstr, int
+#func GdipDisposeImage		"GdipDisposeImage"	int
+#func GdipBitmapLockBits	"GdipBitmapLockBits"	int, int, int, int, int
+#func GdipBitmapUnlockBits	"GdipBitmapUnlockBits"	int, int
+#func GdipGetImageWidth		"GdipGetImageWidth"	int, int
+#func GdipGetImageHeight	"GdipGetImageHeight"	int, int
+#func GdipBitmapGetPixel	"GdipBitmapGetPixel"	int, int, int, int
+#func GdipBitmapSetPixel	"GdipBitmapSetPixel"	int, int, int, int
+#func GdipSaveImageToFile	"GdipSaveImageToFile"	int, wstr, int, int
+
+; Graphics Object
+#uselib "gdiplus"
+#func GdipGetImageGraphicsContext "GdipGetImageGraphicsContext" int, int
+#func GdipCreateFromHDC		"GdipCreateFromHDC"	int, int
+#func GdipDeleteGraphics	"GdipDeleteGraphics"	int
+#func GdipSetSmoothingMode	"GdipSetSmoothingMode"	int, int
+#func GdipSetPixelOffsetMode	"GdipSetPixelOffsetMode"	int, int
+#func GdipSetCompositingQuality	"GdipSetCompositingQuality"	int, int
+#func GdipSetTextRenderingHint	"GdipSetTextRenderingHint"	int, int
+#func GdipSetCompositingMode	"GdipSetCompositingMode"	int, int
+#func GdipSetWorldTransform	"GdipSetWorldTransform"	int, int
+#func GdipResetWorldTransform	"GdipResetWorldTransform" int
+#func GdipSetClipRectI		"GdipSetClipRectI"	int, int, int, int, int, int
+#func GdipResetClip		"GdipResetClip"		int
+
+; Brush Object
+#uselib "gdiplus"
+#func GdipCreateSolidFill	"GdipCreateSolidFill"	int, int
+#func GdipCreateLineBrushI	"GdipCreateLineBrushI"	int, int, int, int, int, int
+#func GdipCreateTexture		"GdipCreateTexture"	int, int, int
+#func GdipDeleteBrush		"GdipDeleteBrush"	int
+
+; Pen Object
+#uselib "gdiplus"
+#func GdipCreatePen1		"GdipCreatePen1"	int, float, int, int
+#func GdipCreatePen2		"GdipCreatePen2"	int, float, int, int
+#func GdipDeletePen		"GdipDeletePen"		int
+#func GdipGetPenWidth		"GdipGetPenWidth"	int, int
+#func GdipSetPenWidth		"GdipSetPenWidth"	int, int
+#func GdipGetPenDashStyle	"GdipGetPenDashStyle"	int, int
+#func GdipSetPenDashStyle	"GdipSetPenDashStyle"	int, int
+#func GdipSetPenMode		"GdipSetPenMode"	int, int
+
+; Font Object
+#uselib "gdiplus"
+#func GdipCreateFontFromDC	"GdipCreateFontFromDC"	int, int
+#func GdipDeleteFont		"GdipDeleteFont"	int
+
+; DrawImage
+#uselib "gdiplus"
+#func GdipDrawImageI		"GdipDrawImageI"		int, int, int, int
+#func GdipDrawImagePointRectI	"GdipDrawImagePointRectI"	int, int, int, int, int, int, int, int, int
+#func GdipDrawImageRectRectI	"GdipDrawImageRectRectI"	int, int, int, int, int, int, int, int, int, int, int, int, int, int
+#func GdipDrawImagePointsI	"GdipDrawImagePointsI"		int, int, int, int
+
+; PixelFormat
+#const	PixelFormatGDI          0x00020000 // Is a GDI-supported format
+#const	PixelFormatAlpha        0x00040000 // Has an alpha component
+#const	PixelFormatCanonical    0x00200000
+#const	PixelFormat24bppRGB        (8 | (24 << 8) | PixelFormatGDI)
+#const	PixelFormat32bppARGB       (10 | (32 << 8) | PixelFormatAlpha | PixelFormatGDI | PixelFormatCanonical)
+
+;enum DashStyle
+#enum global	DashStyleSolid	= 0
+#enum global	DashStyleDash
+#enum global	DashStyleDot
+#enum global	DashStyleDashDot
+#enum global	DashStyleDashDotDot
+#enum global	DashStyleCustom
+
+;enum WrapMode
+#enum global	WrapModeTile	= 0
+#enum global	WrapModeTileFlipX
+#enum global	WrapModeTileFlipY
+#enum global	WrapModeTileFlipXY
+#enum global	WrapModeClamp
+
+;enum Unit
+#enum	UnitWorld = 0	// 0 -- World coordinate (non-physical unit)
+#enum	UnitDisplay	// 1 -- Variable -- for PageTransform only
+#enum	UnitPixel	// 2 -- Each unit is one device pixel.
+
+;-----------------------------------------------------------
+; tools
+
+; misc
+#uselib "kernel32"
+#cfunc alWstrlen "lstrlenW" wptr
+#cfunc alWstrlenW "lstrlenW" sptr
+
+; tool
+#defcfunc alFloat double p1
+	temp = p1
+	return ((p1 < 0) << 31) | (lpeek(temp,4) - 0x38000000 << 3) * (p1 ! 0) | (lpeek(temp,0) >> 29 & 7)
+
+; ginfo
+#define gf_sel ginfo(3)
+#define gf_r ginfo(16)
+#define gf_g ginfo(17)
+#define gf_b ginfo(18)
+#define gf_intid ginfo(24)
+
+; ARGB Macro
+#define global ctype RGBA(%1=0, %2=0, %3=0, %4=255) (((%4)<<24)|((%1)<<16)|((%2)<<8)|(%3))
+#define global ctype ARGB(%1=255, %2=0, %3=0, %4=0) (((%1)<<24)|((%2)<<16)|((%3)<<8)|(%4))
+#define global ctype ARGB_A(%1) (((%1)>>24)&255)
+#define global ctype ARGB_R(%1) (((%1)>>16)&255)
+#define global ctype ARGB_G(%1) (((%1)>>8)&255)
+#define global ctype ARGB_B(%1) ((%1)&255)
+
+; 命令名
+; ・命令名に Image を含むものは引数に Image ID を受け取る / そうでない命令は含んではいけない
+; ・命令名に Screen を含むものは引数に HSP Screen ID を受け取る / そうでない命令は含んではいけない
+; ・命令名に File を含むものは引数にファイル名を受け取る / そうでない命令は含んではいけない
+
+
+
+;============================================================
+;	イメージ管理
+;============================================================
+
+;-----------------------------------------------------------
+#deffunc alInitModule
+	; Initialize
+	if gdiplusToken = 0 {
+		; Image セットバッファ 作成
+		; 1 つの Image セットは、
+		; Valid, Width, Height, objImage, objGraphics, objBrush, objPen, objFont
+		; のセットである
+
+		; img プロパティ
+		dim imgValidArr, IMGS_MAX	; 有効フラグ
+		dim imgWidthArr, IMGS_MAX	; Image Width
+		dim imgHeightArr, IMGS_MAX	; Image Height
+
+		; img object
+		dim imgImageArr, IMGS_MAX
+		dim imgGraphicsArr, IMGS_MAX
+		dim imgBrushArr, IMGS_MAX
+		dim imgPenArr, IMGS_MAX
+		dim imgFontArr, IMGS_MAX
+
+		if varptr(GdiplusStartup) {
+			gsi = 1, 0, 0, 0
+			GdiplusStartup varptr(gdiplusToken), varptr(gsi), 0	; GDI+ 開始
+			return
+		}
+	}
+	return
+
+;-----------------------------------------------------------
+#deffunc alSelectImage int p1
+
+	if (p1 < 0) | (p1 >= IMGS_MAX) : return -1
+	alInitModule
+
+	if imgValidArr(p1) { ; 有効な Image ID ならコンテキスト切り替え
+		imgID = p1
+
+		; Image プロパティ
+		dup imgValid,	imgValidArr(imgID)
+		dup imgWidth,	imgWidthArr(imgID)
+		dup imgHeight,	imgHeightArr(imgID)
+
+		; Image object
+		dup imgImage,	imgImageArr(imgID)
+		dup imgGraphics,imgGraphicsArr(imgID)
+		dup imgBrush,	imgBrushArr(imgID)
+		dup imgPen,	imgPenArr(imgID)
+		dup imgFont,	imgFontArr(imgID)
+
+		return 0
+	}
+	return -1
+
+;-----------------------------------------------------------
+#deffunc alDeleteImage int p1, int p2
+
+	if (p1 < 0) | (p1 >= IMGS_MAX) : return -1
+	alInitModule
+
+	if imgValidArr(p1) {
+		; Image ID の開放
+		imgValidArr(p1) = 0
+
+		; リソースの開放
+		if imgImageArr(p1) {
+			GdipDisposeImage imgImageArr(p1)	; Image を処分
+			imgImageArr(p1) = 0
+		}
+		if imgGraphicsArr(p1) {
+			GdipDeleteGraphics imgGraphicsArr(p1)	; Graphics を削除
+			imgGraphicsArr(p1) = 0
+		}
+		if imgBrushArr(p1) {
+			GdipDeleteBrush imgBrushArr(p1)		; Brush を削除
+			imgBrushArr(p1) = 0
+		}
+		if imgPenArr(p1) {
+			GdipDeletePen imgPenArr(p1)		; Pen を削除
+			imgPenArr(p1) = 0
+		}
+		if imgFontArr(p1) {
+			GdipDeleteFont imgFontArr(p1)		; Font を削除
+			imgFontArr(p1) = 0
+		}
+
+		if p2 ! 1 { ; p2 = 1 の場合、GDI+ を終了しない
+			; すべての Image が開放されたら: GDI+ 終了
+			repeat IMGS_MAX + 1
+				if cnt = IMGS_MAX {
+					GdiplusShutdown gdiplusToken ; GDI+ 終了
+					gdiplusToken = 0
+					break
+				}
+				if imgValidArr(cnt) {
+					break
+				}
+			loop
+		}
+
+		return 0
+	}
+	return -1
+
+;-----------------------------------------------------------
+#deffunc alCreateImage_ int p1, int pw, int ph
+
+	if (p1 < 0) | (p1 >= IMGS_MAX) : return -1
+	alInitModule
+
+	if gdiplusToken {
+		; 有効化
+		alDeleteImage p1, 1	; Image ID 削除
+		imgValidArr(p1) = 1	; Image ID を有効化
+		alSelectImage p1	; 選択 (dup-context change)
+
+		; プロパティ 設定
+		imgWidth  = pw
+		imgHeight = ph
+
+		; オフスクリーンバッファ Image / Graphics 作成
+		GdipCreateBitmapFromScan0 imgWidth, imgHeight, 0, PixelFormat32bppARGB, 0, varptr(imgImage)
+		GdipGetImageGraphicsContext imgImage, varptr(imgGraphics)
+
+		; デフォルト Brush / Pen 作成
+		GdipCreateSolidFill 0xff000000, varptr(imgBrush)
+		GdipCreatePen2 imgBrush, 1, UnitPixel, varptr(imgPen) ; (default PenWidth = 1px)
+
+		; Graphics 高画質モードに設定
+		GdipSetSmoothingMode imgGraphics, 2	; SmoothingModeHighQuality = QualityModeHigh
+		GdipSetPixelOffsetMode imgGraphics, 2	; PixelOffsetModeHighQuality = QualityModeHigh
+		GdipSetTextRenderingHint imgGraphics, 4	; TextRenderingHintAntiAlias
+	;	GdipSetCompositingQuality imgGraphics, 2 ; CompositingQualityHighQuality = QualityModeHigh
+
+		return 0
+	}
+	return -1
+
+#define global alCreateImage(%1=0, %2=640, %3=480)	alCreateImage_ %1, %2, %3
+
+;-----------------------------------------------------------
+#deffunc alDeleteAll  onexit
+	if gdiplusToken {
+		repeat IMGS_MAX
+			alDeleteImage cnt
+		loop
+		return 0
+	}
+	return -1
+
+;-----------------------------------------------------------
+#defcfunc alGetID
+	if imgValid : return imgID
+	return -1
+
+#defcfunc alGetWidth
+	if imgValid : return imgWidth
+	return -1
+
+#defcfunc alGetHeight
+	if imgValid : return imgHeight
+	return -1
+
+
+
+;============================================================
+;	クリッピング
+;============================================================
+
+;-----------------------------------------------------------
+#deffunc alClipModeRect int px, int py, int pw, int ph
+	if imgValid : GdipSetClipRectI imgGraphics, px, py, pw, ph, 0
+	return
+
+;-----------------------------------------------------------
+#deffunc alResetClipMode
+	if imgValid : GdipResetClip imgGraphics
+	return
+
+
+
+;============================================================
+;	コピーモード
+;============================================================
+
+; ImageAttributes Object
+#uselib "gdiplus"
+#func GdipCreateImageAttributes		"GdipCreateImageAttributes"	int
+#func GdipDisposeImageAttributes	"GdipDisposeImageAttributes"	int
+#func GdipSetImageAttributesColorMatrix	"GdipSetImageAttributesColorMatrix"	int, int, int, int, int, int
+#func GdipSetImageAttributesColorKeys	"GdipSetImageAttributesColorKeys"	int, int, int, int, int
+#func GdipSetImageAttributesGamma	"GdipSetImageAttributesGamma"		int, int, int, float
+
+;-----------------------------------------------------------
+#deffunc alResetCopyMode
+	if pImageAttr {
+		GdipDisposeImageAttributes pImageAttr
+		pImageAttr = 0
+		return 0
+	}
+	return -1
+
+;-----------------------------------------------------------
+#deffunc alCopyModeColorMatrix array v
+	if gdiplusToken {
+		alResetCopyMode
+		GdipCreateImageAttributes varptr(pImageAttr)
+
+		; Color Matrix (float)
+		; 行列転置 + ダミー列追加
+		repeat 25
+			if cnt = 24 {
+				arr(cnt) = alFloat(1)
+			} else:if cnt \ 5 = 4 {
+				arr(cnt) = 0
+			} else {
+				arr(cnt) = alFloat(v(cnt\5*5+cnt/5))
+			}
+		loop
+
+		; ColorMatrixFlagsDefault = 0
+		; ColorAdjustTypeBitmap = 1
+		GdipSetImageAttributesColorMatrix pImageAttr, 1, 1, varptr(arr), 0, 0
+	}
+	return 0
+
+#define global MAT_R 0
+#define global MAT_G 5
+#define global MAT_B 10
+#define global MAT_A 15
+
+;-----------------------------------------------------------
+#deffunc alCopyModeAlpha double p1
+	cmatrix(MAT_R) = 1.0, 0.0, 0.0
+	cmatrix(MAT_G) = 0.0, 1.0, 0.0
+	cmatrix(MAT_B) = 0.0, 0.0, 1.0
+	cmatrix(MAT_A) = 0.0, 0.0, 0.0, limitf(p1, 0, 1), 0.0
+	alCopyModeColorMatrix cmatrix
+	return 0
+
+;-----------------------------------------------------------
+#deffunc alCopyModeGamma double p1
+	if gdiplusToken {
+		alResetCopyMode
+		GdipCreateImageAttributes varptr(pImageAttr)
+		GdipSetImageAttributesGamma pImageAttr, 1, 1, p1
+	}
+	return 0
+
+;-----------------------------------------------------------
+#deffunc alCopyModeColorKey int p1, int p2
+	if gdiplusToken {
+		alResetCopyMode
+		GdipCreateImageAttributes varptr(pImageAttr)
+		GdipSetImageAttributesColorKeys pImageAttr, 0, 1, p1, p2 ; (ColorAdjustTypeDefault = 0)
+	}
+	return 0
+
+
+
+;============================================================
+;	コピー・ズーム
+;============================================================
+
+;-----------------------------------------------------------
+#deffunc alStretchImageToImage int p2, int p1,  int psx, int psy, int psw, int psh,  int pdx, int pdy, int pdw, int pdh
+	if imgValidArr(p1) & imgValidArr(p2) {
+		GdipDrawImageRectRectI imgGraphicsArr(p1), imgImageArr(p2), pdx, pdy, pdw, pdh, psx, psy, psw, psh, UnitPixel, pImageAttr, 0, 0
+		return 0
+	}
+	return -1
+
+;-----------------------------------------------------------
+#deffunc alCopyImageToImage_ int p2, int p1,  int pdx, int pdy,  int psw, int psh, int psx, int psy
+	if imgValidArr(p1) & imgValidArr(p2) {
+		if psw=9999 & psh = 9999 & psx = 0 & psy = 0 {
+			GdipDrawImageI imgGraphicsArr(p1), imgImageArr(p2), pdx, pdy
+		}else{
+			GdipDrawImageRectRectI imgGraphicsArr(p1), imgImageArr(p2), pdx, pdy, psw, psh, psx, psy, psw, psh, UnitPixel, pImageAttr, 0, 0
+		}
+		return 0
+	}
+	return -1
+
+;-----------------------------------------------------------
+#deffunc alStretchImageToScreen int p2, int p1,  int psx, int psy, int psw, int psh,  int pdx, int pdy, int pdw, int pdh
+	if imgValidArr(p2) {
+		; HSP オフスクリーンバッファの Graphics 作成
+		gsel p1
+		GdipCreateFromHDC hdc, varptr(tmpGraphics)
+
+		if tmpGraphics {
+			GdipDrawImageRectRectI tmpGraphics, imgImageArr(p2), pdx, pdy, pdw, pdh, psx, psy, psw, psh, UnitPixel, pImageAttr, 0, 0
+			GdipDeleteGraphics tmpGraphics	; tmpGraphics を削除
+			tmpGraphics = 0
+			return 0
+		}
+	}
+	return -1
+
+;-----------------------------------------------------------
+#deffunc alCopyImageToScreen_ int p2, int p1,  int pdx, int pdy,  int psw, int psh, int psx, int psy
+	if imgValidArr(p2) {
+		; HSP オフスクリーンバッファの Graphics 作成
+		gsel p1
+		GdipCreateFromHDC hdc, varptr(tmpGraphics)
+
+		if tmpGraphics {
+			if psw=9999 & psh = 9999 & psx = 0 & psy = 0 {
+				GdipDrawImageI tmpGraphics, imgImageArr(p2), pdx, pdy
+			}else{
+				GdipDrawImageRectRectI tmpGraphics, imgImageArr(p2), pdx, pdy, psw, psh, psx, psy, psw, psh, UnitPixel, pImageAttr, 0, 0
+			}
+			GdipDeleteGraphics tmpGraphics	; tmpGraphics を削除
+			tmpGraphics = 0
+			return 0
+		}
+	}
+	return -1
+
+;-----------------------------------------------------------
+#deffunc alStretchScreenToImage int p2, int p1,  int psx, int psy, int psw, int psh,  int pdx, int pdy, int pdw, int pdh
+	if imgValidArr(p1) {
+		; HSP オフスクリーンバッファの Image 作成
+		gsel p2
+		mref v, 67
+		GdipCreateBitmapFromGdiDib v.6, v.5, varptr(tmpImage)
+
+		if tmpImage {
+			GdipDrawImageRectRectI imgGraphicsArr(p1), tmpImage, pdx, pdy, pdw, pdh, psx, psy, psw, psh, UnitPixel, pImageAttr, 0, 0
+			GdipDisposeImage tmpImage	; Image を処分
+			tmpImage = 0
+			return 0
+		}
+	}
+	return -1
+
+;-----------------------------------------------------------
+; Copy (prm : srcID, destID, destX, destY, width, height, srcX, srcY)
+#define global alCopyImageToImage(%1=0, %2=0, %3=0, %4=0, %5=9999, %6=9999, %7=0, %8=0)		alCopyImageToImage_ %1, %2, %3, %4, %5, %6, %7, %8
+#define global alCopyImageToScreen(%1=0, %2=0, %3=0, %4=0, %5=9999, %6=9999, %7=0, %8=0)	alCopyImageToScreen_ %1, %2, %3, %4, %5, %6, %7, %8
+//#define global alCopyImageToScreen(%1=0, %2=0, %3=0, %4=0, %5=9999, %6=9999, %7=0, %8=0)	alStretchImageToScreen %1, %2, %7, %8, %5, %6, %3, %4, %5, %6
+#define global alCopyScreenToImage(%1=0, %2=0, %3=0, %4=0, %5=9999, %6=9999, %7=0, %8=0)	alStretchScreenToImage %1, %2, %7, %8, %5, %6, %3, %4, %5, %6
+
+/*
+;-----------------------------------------------------------
+#deffunc al3PointsImageToImage int p2, int p1, array va
+	if imgValidArr(p1) & imgValidArr(p2) {
+		GdipDrawImagePointsI imgGraphicsArr(p1), imgImageArr(p2), varptr(va), 3
+		return 0
+	}
+	return -1
+*/
+
+
+
+;============================================================
+;	ピクセル操作
+;============================================================
+
+;-----------------------------------------------------------
+#defcfunc alGetPixel int px, int py
+	if imgValid {
+		a = 0
+		GdipBitmapGetPixel imgImage, px, py, varptr(a)
+		return a
+	}
+	return 0
+
+;-----------------------------------------------------------
+#deffunc alSetPixel int px, int py, int p1
+	if imgValid : GdipBitmapSetPixel imgImage, px, py, p1
+	return 0
+
+;-----------------------------------------------------------
+#deffunc alGetBitmapVData var ps, var pv ; size, vvar
+	if imgValid {
+		; LockBits して bitmap image へのポインタを得る
+		rect = 0, 0, imgWidth, imgHeight
+		dim BitmapData, 8
+		GdipBitmapLockBits imgImage, varptr(rect), 3, PixelFormat32bppARGB, varptr(BitmapData)
+		GdipBitmapUnlockBits imgImage, varptr(BitmapData)
+
+		ps = BitmapData(0) * BitmapData(1) * 4  ; Width * Height * ByPP
+		dupptr pv, BitmapData(4), ps
+		return 0
+	}
+	return -1
+
+;-----------------------------------------------------------
+#deffunc alErase
+	if imgValid {
+		alGetBitmapVData size, v
+
+		; ゼロクリア
+		memset v, 0, size
+		return 0
+	}
+	return -1
+
+
+
+;============================================================
+;	ファイル操作
+;============================================================
+
+; ImageEncoder
+#uselib "gdiplus"
+#func GdipGetImageEncodersSize	"GdipGetImageEncodersSize"	int, int
+#func GdipGetImageEncoders	"GdipGetImageEncoders"	int, int, int
+
+;-----------------------------------------------------------
+#deffunc alLoadFile str p1, int pdx, int pdy  ; filename, point
+	if imgValid {
+		GdipLoadImageFromFile p1, varptr(tmpImage) ; ファイルから Image をコンストラクト
+		if tmpImage {
+			GdipGetImageWidth  tmpImage, varptr(w)
+			GdipGetImageHeight tmpImage, varptr(h)
+			GdipDrawImageRectRectI imgGraphics, tmpImage, pdx, pdy, w, h, 0, 0, w, h, UnitPixel, 0, 0, 0
+			GdipDisposeImage tmpImage	; Image を処分
+			tmpImage = 0
+			return 0
+		}
+	}
+	return -1
+
+;-----------------------------------------------------------
+#deffunc alSaveFile_ str p1, str p2, int px, int py, int pw, int ph  ; filename, mime, rect
+	if imgValid {
+		dim CLSID, 4
+
+		; GetEncoderClsid() HSP Version
+		GdipGetImageEncodersSize varptr(numEncoders), varptr(size)
+		if size {
+			dim ImageCodecInfo, size / 4 ; ImageCodecInfo 構造体の配列を取得する var
+
+			GdipGetImageEncoders numEncoders, size, varptr(ImageCodecInfo)
+
+			; sizeof(ImageCodecInfo)         == 19int
+			; ImageCodecInfo.CLSID offset    == 0int
+			; ImageCodecInfo.MimeType offset == 12int
+			repeat numEncoders ; 全エンコーダから目的のものを探す
+				dupptr v, ImageCodecInfo(cnt * 19 + 12), 128 ; MimeType 名が入った wchar[]
+				if cnvwtos(v) = p2 { ; 目的の MimeType (p2) があったらば
+					memcpy CLSID, ImageCodecInfo(cnt * 19), 16 ; それをコピーして
+					break ; 探索終了
+				}
+			loop
+		}
+
+		if CLSID {
+			; rect で切り取られた領域を temp Image に作成して Save
+			GdipCreateBitmapFromScan0 pw, ph, 0, PixelFormat32bppARGB, 0, varptr(tmpImage)	; temp Image 作成
+			GdipGetImageGraphicsContext tmpImage, varptr(tmpGraphics)			; temp Graphics 作成
+
+			GdipDrawImageI tmpGraphics, imgImage, -px, -py		; メイン Image から転送
+			GdipSaveImageToFile tmpImage, p1, varptr(CLSID), 0	; Save tmpImage
+
+			GdipDeleteGraphics tmpGraphics	; tmp Graphics を削除
+			tmpGraphics = 0
+			GdipDisposeImage tmpImage	; tmp Image を処分
+			tmpImage = 0
+			return 0
+		}
+	}
+	return -1
+
+#define global alSaveFile(%1, %2="image/png", %3=0, %4=0, %5=imgWidth@a2d, %6=imgHeight@a2d)	alSaveFile_ %1, %2, %3, %4, %5, %6
+; MIME : image/bmp image/jpeg image/gif image/tiff image/png
+
+;-----------------------------------------------------------
+#deffunc alGetFileWidth str p1, var vx, var vy  ; filename, width, height
+	alInitModule
+	if gdiplusToken {
+		GdipLoadImageFromFile p1, varptr(tmpImage) ; ファイルから Image をコンストラクト
+		if tmpImage {
+			GdipGetImageWidth  tmpImage, varptr(vx)
+			GdipGetImageHeight tmpImage, varptr(vy)
+
+			GdipDisposeImage tmpImage	; Image を処分
+			tmpImage = 0
+			return 0
+		}
+	}
+	return -1
+
+;-----------------------------------------------------------
+#deffunc alCreateImageByFile int p1, str p2 ; ID, filename
+	alGetFileWidth p2, w, h
+	if stat = 0 {
+		alCreateImage p1, w, h	; 強制的に 32bpp にするために 2 pass でロード
+		alLoadFile p2
+		return 0
+	}
+	return -1
+
+
+
+;============================================================
+;	ブラシ設定
+;============================================================
+; (Pen と Brush はモジュール外からは区別しない)
+
+;-----------------------------------------------------------
+#deffunc alPenWidth int p1
+	if imgValid : GdipSetPenWidth imgPen, alFloat(p1)
+	return
+
+;-----------------------------------------------------------
+#deffunc alPenStyle int p1
+	if imgValid : GdipSetPenDashStyle imgPen, p1
+	return
+
+;-----------------------------------------------------------
+#deffunc alRenewPen
+	if imgValid {
+		GdipGetPenDashStyle imgPen, varptr(a)	; 旧ペンのスタイルを保存
+		GdipGetPenWidth imgPen, varptr(b)	; 旧ペンの Width を保存
+
+		GdipDeletePen imgPen		; 旧ペンを削除
+		;imgPen = 0
+		GdipCreatePen2 imgBrush, 1, UnitPixel, varptr(imgPen)	; ペンを作成
+
+		GdipSetPenDashStyle imgPen, a	; 旧ペンのスタイルを復元
+		GdipSetPenWidth imgPen, b	; 旧ペンの Width を復元
+
+		GdipSetCompositingMode imgGraphics, 0 ; (default:SourceOver = 0, SourceCopy = 1)
+	}
+	return
+
+;-----------------------------------------------------------
+#deffunc alColorAlpha_ int p1
+	if imgValid {
+		GdipDeleteBrush imgBrush	; 旧ブラシを削除
+		;imgBrush = 0
+		GdipCreateSolidFill RGBA(gf_r, gf_g, gf_b, p1), varptr(imgBrush)	; ブラシを作成
+		alRenewPen
+	}
+	return
+
+; color 系命令
+#define global alColor(%1=0, %2=0, %3=0, %4=255)	color %1, %2, %3 : alColorAlpha_ %4
+#define global alHsvColor(%1=0, %2=0, %3=0, %4=255)	hsvcolor %1, %2, %3 : alColorAlpha_ %4
+#define global alSysColor(%1=0, %2=255)			syscolor %1 : alColorAlpha_ %2
+
+;-----------------------------------------------------------
+#deffunc alGradientColor_ int px1, int py1, int px2, int py2, int pc1, int pc2, int p1
+	if imgValid {
+		GdipDeleteBrush imgBrush	; 旧ブラシを削除
+		;imgBrush = 0
+		point1 = px1, py1
+		point2 = px2, py2
+		GdipCreateLineBrushI varptr(point1), varptr(point2), pc1, pc2, p1, varptr(imgBrush)
+		alRenewPen
+	}
+	return
+
+#define global alGradientColor(%1=0, %2=0, %3=imgWidth@a2d, %4=imgHeight@a2d, %5=0xff000000, %6=0xff000000, %7=WrapModeTile)	alGradientColor_ %1, %2, %3, %4, %5, %6, %7
+
+;-----------------------------------------------------------
+#deffunc alTextureImage_ int p1, int p2
+	if imgValid & imgValidArr(p1) {
+		GdipDeleteBrush imgBrush	; 旧ブラシを削除
+		;imgBrush = 0
+		GdipCreateTexture imgImageArr(p1), p2, varptr(imgBrush)
+		alRenewPen
+		return 0
+	}
+	return -1
+
+#define global alTextureImage(%1=0, %2=WrapModeTile)	alTextureImage_ %1, %2
+
+;-----------------------------------------------------------
+#deffunc alEraserBrush
+	if imgValid {
+		GdipDeleteBrush imgBrush	; 旧ブラシを削除
+		;imgBrush = 0
+		GdipCreateSolidFill 0, varptr(imgBrush)	; ブラシを作成
+		alRenewPen
+		GdipSetCompositingMode imgGraphics, 1 ; (SourceOver = 0, SourceCopy = 1)
+	}
+	return
+
+;-----------------------------------------------------------
+#deffunc alFont_ str p1, int p2, int p3
+	if imgValid {
+		font p1, p2, p3
+		if imgFont {
+			GdipDeleteFont imgFont	; 旧フォントを削除
+			;imgFont = 0
+		}
+		GdipCreateFontFromDC hdc, varptr(imgFont)	; HSP オフスクリーン dc からフォントをコンストラクト
+	}
+	return
+
+#define global alFont(%1="Arial", %2=16, %3=0)	alFont_ %1, %2, %3
+
+
+
+;============================================================
+;	図形描画
+;============================================================
+
+; String Format Object
+#uselib "gdiplus"
+#func GdipCreateStringFormat	"GdipCreateStringFormat"	int, int, int
+#func GdipDeleteStringFormat	"GdipDeleteStringFormat"	int
+#func GdipSetStringFormatAlign	"GdipSetStringFormatAlign"	int, int
+#func GdipSetStringFormatLineAlign "GdipSetStringFormatLineAlign"	int, int
+
+; Graphics Object -> Draw / Fill
+#uselib "gdiplus"
+#func GdipDrawLineI		"GdipDrawLineI"		int, int, int, int, int, int
+#func GdipDrawEllipseI		"GdipDrawEllipseI"	int, int, int, int, int, int
+#func GdipFillEllipseI		"GdipFillEllipseI"	int, int, int, int, int, int
+#func GdipDrawRectangleI	"GdipDrawRectangleI"	int, int, int, int, int, int
+#func GdipFillRectangleI	"GdipFillRectangleI"	int, int, int, int, int, int
+#func GdipDrawLinesI		"GdipDrawLinesI"	int, int, int, int
+#func GdipDrawPolygonI		"GdipDrawPolygonI"	int, int, int, int
+#func GdipFillPolygonI		"GdipFillPolygonI"	int, int, int, int, int
+#func GdipDrawCurve2I		"GdipDrawCurve2I"	int, int, int, int, float
+#func GdipDrawClosedCurve2I	"GdipDrawClosedCurve2I"	int, int, int, int, float
+#func GdipFillClosedCurve2I	"GdipFillClosedCurve2I"	int, int, int, int, float, int
+#func GdipDrawArcI		"GdipDrawArcI"		int, int, int, int, int, int, float, float
+#func GdipDrawPieI		"GdipDrawPieI"		int, int, int, int, int, int, float, float
+#func GdipFillPieI		"GdipFillPieI"		int, int, int, int, int, int, float, float
+#func GdipDrawString		"GdipDrawString"	int, wstr, int, int, int, int, int
+#func GdipDrawStringW		"GdipDrawString"	int, int, int, int, int, int, int
+
+;-----------------------------------------------------------
+#deffunc alDrawText_ str p1, int px, int py, int pw, int ph, int pah, int pav
+	if imgFont {
+		GdipCreateStringFormat 0, 0, varptr(tmpFormat) ; アラインメント用 Format オブジェクト
+		GdipSetStringFormatAlign tmpFormat, pah
+		GdipSetStringFormatLineAlign tmpFormat, pav
+
+		rectf = alFloat(px), alFloat(py), alFloat(pw), alFloat(ph)
+		GdipDrawString imgGraphics, p1, alWstrlen(p1), imgFont, varptr(rectf), tmpFormat, imgBrush
+
+		GdipDeleteStringFormat tmpFormat ; Format オブジェクト 削除
+		tmpFormat = 0
+	}
+	return
+
+#define global alDrawText(%1="", %2=0, %3=0, %4=9999, %5=9999, %6=0, %7=0)	alDrawTextW_ %1, %2, %3, %4, %5, %6, %7
+
+;-----------------------------------------------------------
+#deffunc alDrawTextW_ str p1, int px, int py, int pw, int ph, int pah, int pav
+	if imgFont {
+		GdipCreateStringFormat 0, 0, varptr(tmpFormat) ; アラインメント用 Format オブジェクト
+		GdipSetStringFormatAlign tmpFormat, pah
+		GdipSetStringFormatLineAlign tmpFormat, pav
+		
+		alStat1=p1
+		if(lpeek(alStat1, 0) & 0x00FFFFFF) == 0xBFBBEF{
+			// BOMがある場合は削除
+			DeleteUTF8BOM alStat1
+			// UTF-8からUTF-16に変換
+			UTF8toUTF16 alStat1, alStat2
+			
+			rectf = alFloat(px), alFloat(py), alFloat(pw), alFloat(ph)
+			GdipDrawStringW imgGraphics, varptr(alStat2), alWstrlenW(varptr(alStat2)), imgFont, varptr(rectf), tmpFormat, imgBrush
+			
+		}else{
+			rectf = alFloat(px), alFloat(py), alFloat(pw), alFloat(ph)
+			GdipDrawString imgGraphics, p1, alWstrlen(p1), imgFont, varptr(rectf), tmpFormat, imgBrush
+		}
+		GdipDeleteStringFormat tmpFormat ; Format オブジェクト 削除
+		tmpFormat = 0
+
+	}
+	return
+
+#define global alDrawTextW(%1="", %2=0, %3=0, %4=9999, %5=9999, %6=0, %7=0)	alDrawTextW_ %1, %2, %3, %4, %5, %6, %7
+
+
+#func GdipMeasureString "GdipMeasureString" int, wstr, int, int, int, int, int, int, int
+#func GdipMeasureStringW "GdipMeasureString" int, int, int, int, int, int, int, int, int
+#uselib "kernel32.dll"
+#func VirtualProtect "VirtualProtect" int, int, int, int
+#defcfunc float2int int p1
+	if pfunc == 0 {
+		dim fncode,10
+		fncode.0 = $50e58955, $fe7dd950, $fe45b70f, $800845d9, $89660ccc
+		fncode.5 = $6dd9fc45, $f85ddbfc, $8bfe6dd9, $c2c9f845, $90900004
+		VirtualProtect varptr(fncode), 10*4, 0x40, varptr(old)
+		pfunc = varptr(fncode)
+	}
+	prm = p1
+	return callfunc(prm, pfunc, 1)
+#deffunc alDrawText_CalcRect_ array p0, str p1, int px, int py, int pw, int ph, int pah, int pav
+	if imgFont {
+		GdipCreateStringFormat 0, 0, varptr(tmpFormat) ; アラインメント用 Format オブジェクト
+		GdipSetStringFormatAlign tmpFormat, pah
+		GdipSetStringFormatLineAlign tmpFormat, pav
+
+		alStat1=p1
+		if(lpeek(alStat1, 0) & 0x00FFFFFF) == 0xBFBBEF{
+			// BOMがある場合は削除
+			DeleteUTF8BOM alStat1
+			// UTF-8からUTF-16に変換
+			UTF8toUTF16 alStat1, alStat2
+			rectf = alFloat(px), alFloat(py), alFloat(pw), alFloat(ph)
+			dim br, 4
+			GdipMeasureStringW imgGraphics, varptr(alStat2), alWstrlenW(varptr(alStat2)), imgFont, varptr(rectf), tmpFormat, varptr(br), varptr(a), varptr(b)
+		}else{
+			rectf = alFloat(px), alFloat(py), alFloat(pw), alFloat(ph)
+			dim br, 4
+			GdipMeasureString imgGraphics, p1, alWstrlen(p1), imgFont, varptr(rectf), tmpFormat, varptr(br), varptr(a), varptr(b)
+		}
+
+		
+		GdipDeleteStringFormat tmpFormat ; Format オブジェクト 削除
+		tmpFormat = 0
+		dim p0,4
+		repeat 4
+			p0.cnt = float2int(br.cnt)
+		loop
+	}
+	return
+#define global alDrawText_CalcRect(%1, %2="", %3=0, %4=0, %5=9999, %6=9999, %7=0, %8=0)	alDrawText_CalcRect_ %1, %2, %3, %4, %5, %6, %7, %8
+
+;-----------------------------------------------------------
+#deffunc alDrawLine int p1, int p2, int p3, int p4
+	if imgValid : GdipDrawLineI imgGraphics, imgPen,  p1, p2, p3, p4
+	return
+
+;-----------------------------------------------------------
+#deffunc alDrawRect_ int p1, int p2, int p3, int p4
+	if imgValid : GdipDrawRectangleI imgGraphics, imgPen,  p1, p2, p3, p4
+	return
+
+#deffunc alFillRect_ int p1, int p2, int p3, int p4
+	if imgValid : GdipFillRectangleI imgGraphics, imgBrush,  p1, p2, p3, p4
+	return
+
+#deffunc alDrawEllip_ int p1, int p2, int p3, int p4
+	if imgValid : GdipDrawEllipseI imgGraphics, imgPen,  p1, p2, p3, p4
+	return
+
+#deffunc alFillEllip_ int p1, int p2, int p3, int p4
+	if imgValid : GdipFillEllipseI imgGraphics, imgBrush,  p1, p2, p3, p4
+	return
+
+#define global alDrawRect(%1=0, %2=0, %3=imgWidth@a2d, %4=imgHeight@a2d)	alDrawRect_ %1, %2, %3, %4
+#define global alFillRect(%1=0, %2=0, %3=imgWidth@a2d, %4=imgHeight@a2d)	alFillRect_ %1, %2, %3, %4
+#define global alDrawEllip(%1=0, %2=0, %3=imgWidth@a2d, %4=imgHeight@a2d)	alDrawEllip_ %1, %2, %3, %4
+#define global alFillEllip(%1=0, %2=0, %3=imgWidth@a2d, %4=imgHeight@a2d)	alFillEllip_ %1, %2, %3, %4
+
+;-----------------------------------------------------------
+#deffunc alDrawLines var p1, int p2
+	if imgValid : GdipDrawLinesI imgGraphics, imgPen,  varptr(p1), p2
+	return
+
+#deffunc alDrawPoly var p1, int p2
+	if imgValid : GdipDrawPolygonI imgGraphics, imgPen,  varptr(p1), p2
+	return
+
+#deffunc alFillPoly var p1, int p2
+	if imgValid : GdipFillPolygonI imgGraphics, imgBrush,  varptr(p1), p2, 1;FillModeWinding
+	return
+
+#deffunc alDrawCurve_ var p1, int p2, double p3
+	if imgValid : GdipDrawCurve2I imgGraphics, imgPen,  varptr(p1), p2, p3
+	return
+
+#deffunc alDrawClosedCurve_ var p1, int p2, double p3
+	if imgValid : GdipDrawClosedCurve2I imgGraphics, imgPen,  varptr(p1), p2, p3
+	return
+
+#deffunc alFillClosedCurve_ var p1, int p2, double p3
+	if imgValid : GdipFillClosedCurve2I imgGraphics, imgBrush,  varptr(p1), p2, p3, 1;FillModeWinding
+	return
+
+#define global alDrawCurve(%1, %2, %3=0.5)	alDrawCurve_ %1, %2, %3
+#define global alDrawClosedCurve(%1, %2, %3=0.5)	alDrawClosedCurve_ %1, %2, %3
+#define global alFillClosedCurve(%1, %2, %3=0.5)	alFillClosedCurve_ %1, %2, %3
+
+;-----------------------------------------------------------
+#deffunc alDrawArc_ int p1, int p2, int p3, int p4, double p5, double p6
+	if imgValid : GdipDrawArcI imgGraphics, imgPen,  p1, p2, p3, p4, p5, p6
+	return
+
+#deffunc alDrawPie_ int p1, int p2, int p3, int p4, double p5, double p6
+	if imgValid : GdipDrawPieI imgGraphics, imgPen,  p1, p2, p3, p4, p5, p6
+	return
+
+#deffunc alFillPie_ int p1, int p2, int p3, int p4, double p5, double p6
+	if imgValid : GdipFillPieI imgGraphics, imgBrush,  p1, p2, p3, p4, p5, p6
+	return
+
+#define global alDrawArc(%1=0, %2=0, %3=imgWidth@a2d, %4=imgHeight@a2d, %5=0, %6=0)	alDrawArc_ %1, %2, %3, %4, %5, %6
+#define global alDrawPie(%1=0, %2=0, %3=imgWidth@a2d, %4=imgHeight@a2d, %5=0, %6=0)	alDrawPie_ %1, %2, %3, %4, %5, %6
+#define global alFillPie(%1=0, %2=0, %3=imgWidth@a2d, %4=imgHeight@a2d, %5=0, %6=0)	alFillPie_ %1, %2, %3, %4, %5, %6
+
+
+
+;============================================================
+;	座標変換モード
+;============================================================
+
+; Matrix Object
+#uselib "gdiplus"
+#func GdipCreateMatrix		"GdipCreateMatrix"	int
+#func GdipCreateMatrix2		"GdipCreateMatrix2"	float, float, float, float, float, float, int
+#func GdipDeleteMatrix		"GdipDeleteMatrix"	int
+#func GdipTranslateMatrix	"GdipTranslateMatrix"	int, float, float, int
+#func GdipRotateMatrix		"GdipRotateMatrix"	int, float, int
+#func GdipScaleMatrix		"GdipScaleMatrix"	int, float, float, int
+
+;-----------------------------------------------------------
+#deffunc alResetTransMode
+	if imgValid : GdipResetWorldTransform imgGraphics
+	return
+
+;-----------------------------------------------------------
+#deffunc alTransModeMatrix double m11, double m12, double m21, double m22, double dx, double dy
+	if imgValid {
+		GdipCreateMatrix2 m11, m12, m21, m22, dx, dy, varptr(tmpMatrix)
+
+		GdipSetWorldTransform imgGraphics, tmpMatrix
+		GdipDeleteMatrix tmpMatrix
+		tmpMatrix = 0
+	}
+	return
+
+;-----------------------------------------------------------
+#deffunc alTransModeOffsetRotateZoom_ int dx, int dy, double pa, double sx, double sy
+	if imgValid {
+		GdipCreateMatrix varptr(tmpMatrix)
+		GdipTranslateMatrix tmpMatrix, dx, dy, 0 ; order = MatrixOrderPrepend = 0
+		GdipRotateMatrix tmpMatrix, pa, 0
+		GdipScaleMatrix tmpMatrix, sx, sy, 0
+
+		GdipSetWorldTransform imgGraphics, tmpMatrix
+		GdipDeleteMatrix tmpMatrix
+		tmpMatrix = 0
+	}
+	return
+
+#define global alTransModeOffsetRotateZoom(%1=0, %2=0, %3=0, %4=1, %5=1)	alTransModeOffsetRotateZoom_ %1, %2, %3, %4, %5
+
+;-----------------------------------------------------------
+#deffunc alTransModeRotateAt double pa, int px, int py
+	if imgValid {
+		GdipCreateMatrix varptr(tmpMatrix)
+		GdipTranslateMatrix tmpMatrix, px, py, 0 ; order = MatrixOrderPrepend = 0
+		GdipRotateMatrix tmpMatrix, pa, 0
+		GdipTranslateMatrix tmpMatrix, -px, -py, 0
+
+		GdipSetWorldTransform imgGraphics, tmpMatrix
+		GdipDeleteMatrix tmpMatrix
+		tmpMatrix = 0
+	}
+	return
+
+#global
+#endif
+
+#uselib "user32.dll"
+#func SendMessageW "SendMessageW" int, int, int, int
+#define WM_GETTEXT 0x000D
+#define WM_SETTEXT 0x000C
+
+#module
+#uselib "kernel32"
+#cfunc MultiByteToWideChar "MultiByteToWideChar" int, int, sptr, int, sptr, int
+#define CP_UTF8 65001
+#deffunc UTF8toUTF16 var utf8, var utf16
+	size = MultiByteToWideChar(CP_UTF8, 0, varptr(utf8), -1, 0, 0)
+	sdim utf16, size*2+2
+	return MultiByteToWideChar(CP_UTF8, 0, varptr(utf8), -1, varptr(utf16), size)
+#deffunc DeleteUTF8BOM var utf8
+	// BOMチェック
+	if (lpeek(utf8, 0) & 0x00FFFFFF) == 0xBFBBEF{
+		dupptr tmp, varptr(utf8) + 3, 1, 2
+		utf8 = tmp
+	}
+	return
+#global

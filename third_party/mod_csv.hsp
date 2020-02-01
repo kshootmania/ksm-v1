@@ -1,0 +1,182 @@
+
+;###################################################
+;	モジュール
+#module
+;２重ダブルクォーテーションをカットする
+;strin = cutwqt( _strin )
+;	_strin	元になる文字列
+;	strin	変換後文字列
+;
+;例：「"テスト""文字列""テスト"」→「テスト"文字列"テスト」
+#defcfunc cutwqt str _strin
+    strin = _strin
+    if strmid( strin, 0, 1 ) = "\"" {
+        strin = strmid( strin, 1, strlen(strin)-2 )
+        position = 0
+        repeat
+            await 1
+            position1 = instr( strin, position, "\"" )
+                if position1 = -1 : break
+            position += position1     ;検索結果位置
+            if strmid( strin, position + 1, 1 ) = "\"" : p = 2 : else : p = 1
+            strin = strmid( strin, 0, position) + strmid( strin, position+1, strlen(strin) )
+            position += p     ;次の検索開始位置
+        loop
+    }
+return strin
+#global
+ 
+#module
+;CSV形式のセル内書式を通常の書式に変換する
+;strin = cell2str( _strin )
+;	_strin	元になる文字列
+;	strin	変換後文字列
+#defcfunc cell2str str _strin
+    strin = _strin
+    if strlen(strin)!0 {
+        strin = _strin
+        ;改行コードの置換
+        strsrch = "" :    poke strsrch,0,10    ;改行コード
+        strin = strrep( strin, strsrch, "\n")
+        ;ダブルクォーテーションの置換
+        strin = cutwqt( strin )
+    }
+return strin
+ 
+#global
+ 
+;csvの１行を配列に変換。
+;csvstr2 _arrayout, _strin
+;	_arrayout	結果を入れる文字列型配列変数
+;	_strin		元になる文字列
+;	stat		使用した配列の数
+;
+;_arrayoutは事前に
+;	sdim _arrayout, 256, 10
+;などとして十分な配列を確保しておいてください。
+;
+#module
+#deffunc csvstr2 array _arrayout, str _strin
+    strin = _strin
+    cellcnt = 0
+    flg = 0            ;ダブルクォーテーションで始まるセルを検出結果
+    st = 0            ;使用した配列の数
+    fcellend = 0    ;１行読み終わりフラグ
+    scln = 0    ;区切り間文字数カウント
+ 
+    repeat
+        await 0
+        ;区切り検索
+        ;１文字目をチェック
+        if strmid( strin, cellcnt, 1 ) = "\"" {
+            flg = 1        ;ダブルクォーテーションで始まるセルを検出。
+            kugiri = "\""
+        } else {
+            flg = 0
+            kugiri = ","
+        }
+ 
+        ;文字列抽出
+        if flg = 1 {
+            ;\"スタートのとき
+            ;終わりを探す
+            scln = 1    ;区切り文字の次の文字から
+            repeat
+                await
+                k = instr( strin, cellcnt + scln, "\"" )
+                if k!-1 {
+                    scln += k + 1
+                    ;if strmid( strin, cellcnt + scln, 1 ) = "\"" :    ;\"\"はスルー
+                    if strmid( strin, cellcnt + scln, 1 ) = ","  : break    ;\",で一区切り
+                    if strmid( strin, cellcnt + scln, 2 ) = "\n" : fcellend = 1 : break    ;\"\nで処理終了
+                    scln++
+                } else {
+                    scln = strlen(strin) - cellcnt
+                    fcellend = 1
+                    break
+                }
+            loop
+        } else {
+            ;通常
+            getstr stra, strin, cellcnt, ','    ;カンマ、改行、終端のうち一番近い方を探す(1024byteまで。straはダミー)
+            scln = strsize
+            if stat = ',' {    ;,まで読み出された
+                scln--
+            } else {    ;終端か\nまで読み出された
+                fcellend = 1
+                if stat = 13 : scln -= 2    ;\nまで読み出された
+            }
+        }
+        _arrayout.cnt = strmid( strin, cellcnt, scln )    ;区切り間の文字を出力
+        cellcnt += scln + strlen(kugiri)    ;次の検索開始位置へ
+        if fcellend ! 0 : st = cnt+1 : break
+    loop
+ 
+    return st
+#global
+
+#module
+;▼必要となるAPIや定数の定義
+#uselib "kernel32.dll"
+#cfunc  FindFirstFile "FindFirstFileA" var,var
+#func   FindClose "FindClose" int
+#func   FileTimeToLocalFileTime "FileTimeToLocalFileTime" var,var
+#func   FileTimeToSystemTime "FileTimeToSystemTime" var,var
+
+#deffunc getstamp array prm1,str prm2,int prm3
+mref ref,65
+sdim dir,260 : dim fd,80 : dim st,8
+dir   = prm2 : if dir=="" : dir=exedir
+nMode = prm3 : if (nMode<=0)|(nMode>2) : nMode=0
+
+hFind=FindFirstFile(dir,fd) : if hFind=-1 : return -1
+ref=dir     ; refstrにdir(filename)を返す
+exist dir   : fsize=strsize
+FindClose hFind
+
+if nMode==0 : ft=fd(1),fd(2)    ;作成日時
+if nMode==1 : ft=fd(3),fd(4)    ;アクセス日時
+if nMode==2 : ft=fd(5),fd(6)    ;更新日時
+
+;ファイル時間をローカルファイル時間に変換
+//FileTimeToLocalFileTime ft,ft
+
+;ファイル時間をシステム時間に変換
+FileTimeToSystemTime ft,st
+
+;SystemTime構造体 stより各要素を分解抽出する
+n=0
+repeat 6
+	if cnt==2 : n+2
+	s(cnt)=wpeek(st,n) : n+2
+	prm1(cnt)=s(cnt)
+loop
+
+;文字列として編集した形式で取得値prm1にを返す
+ret =str(s(0))+"/"+strf("%02d",s(1))+"/"+strf("%02d",s(2))+" "
+ret+=strf("%02d",s(3))+":"+strf("%02d",s(4))+":"+strf("%02d",s(5))
+
+ref = ret   ;編集文字列は、refstrに返す
+sdim dir,0 : dim fd,0 : dim st,0
+return fsize
+#global
+
+#module ;文字数を数えるモジュール
+#defcfunc charalen str a
+
+i=0 ;文字数カウンタ
+;全部英字ならUnicode変換で2倍で最大。
+sdim buf,strlen(a)*2+2
+
+//cnvstow buf,a
+b=a
+UTF8toUTF16 b,buf
+repeat
+	tmp = wpeek(buf,cnt*2)
+	if tmp = 0 : break
+	i=i+1
+loop
+
+return i
+
+#global

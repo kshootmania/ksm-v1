@@ -1,0 +1,768 @@
+#deffunc start_title
+	font lang.0.1,getsize(18)
+	gsel 0
+	chdir dir_default
+	chdir "./imgs"
+	if(stateinit=1){
+		JStickSearchID 0,joylist
+		length_joylist=stat
+		gosub *joyinit
+		if(imeget()=1):imeset 0
+		timestatestart=d3timer()
+		if(statep=st_gate):sdim glist,0
+		if((statep=st_option)&(imgrefresh=1)){
+			gmode 0
+			color 0,0,0
+			pos 0,0
+			boxf
+			color 255,255,255
+			//mes lang.2.0//"LOADING..."
+			alCreateImageByFile 2,dir_default+"\\imgs\\loading.png"
+			alCreateImage IMG_LOADING,getsize(360),getsize(90)
+			alStretchImageToImage 2,IMG_LOADING,0,0,400,60,0,0,getsize(200),getsize(30)
+			alDeleteImage 2
+			alCopyImageToScreen IMG_LOADING,0,scrsize_w-getsize(208),getsize(442)
+			redraw 1
+			await 0
+			centersh=(scrsize_w-scrsize_h*4/3)/2
+			exist dir_default+"\\cache\\standby.jpg"
+			if(strsize>0){
+				buffer 2
+				picload dir_default+"\\cache\\standby.jpg"
+				if((ginfo_winx!=scrsize_w)|(ginfo_winy!=scrsize_h)){
+					chdir dir_default
+					dirlist buf,"cache",5
+					if(buf!=""){
+						gosub *delcache
+					}
+					chdir dir_default+"\\imgs"
+				}
+			}
+			imgrefresh=0
+			bgname_lp=""
+			buffer 1
+			picload "fx_long.gif"
+			buffer 42
+			picload "bt_long.gif"
+			buffer 154
+			picload "laser.gif"
+			buffer 4,96,192
+			pos 95,0
+			gzoom -96,192,154,0,0,96,192
+			buffer 171
+			picload "laser_mask.gif"
+			buffer 172,192,192
+			pos 191,0
+			gzoom -192,192,171,0,0,192,192
+			buffer 6
+			picload "laserl_0.gif"
+			buffer 7
+			picload "laserr_0.gif"
+			buffer 47
+			picload "base.gif"
+			if((ginfo_winy!=vh)|(ginfo_winy!=vh)){
+				buffer 2
+				picload "base.gif"
+				stat1=ginfo_winy
+				buffer 47,ginfo_winx,vh
+				gzoom ginfo_winx,vh,2,0,0,ginfo_winx,stat1
+			}
+			/*alCreateImageByFile 2,"base.png"
+			alCreateImage 118,getsize(410),getsize(336)
+			alStretchImageToImage 2,118,0,0,820,676,0,0,getsize(410),getsize(336)
+			alDeleteImage 2*/
+			// 8番は未使用
+			/*
+			buffer 8
+			picload "bgst.gif"*/
+			buffer 9
+			picload "judge.gif"
+			buffer 2
+			picload "judge.gif"
+			buffer 44
+			gzoom 82*6,300,2,0,0,40*6,300
+			buffer 2
+			picload "bt_chip.gif"
+			// ※buffer12は未使用
+			dim kar,8
+			kar=14,19,23,26,28,30,32,35
+			// ※buffer53～124は使用済
+			repeat 8
+				cnt2=cnt
+				repeat 9
+					buffer 53+cnt2*9+cnt,80/ra,40/ra
+					pos 0,0
+					color 0,0,0
+					boxf
+					gzoom 80/ra,kar.cnt2/ra,2,80*cnt,0,80,14,1
+				loop
+			loop
+			// チップFX(通常)
+			buffer 2
+			picload "fx_chip.gif"
+			buffer 43,82*2,40*8
+			pos 0,0
+			color 0,0,0
+			boxf
+			repeat 8
+				pos 0,40*cnt
+				gzoom 82*2,kar.cnt,2,0,0,82*2,14
+			loop
+			// チップFX(効果音)
+			buffer 2
+			picload "fx_chip_se.gif"
+			buffer 186,82*2,40*8
+			pos 0,0
+			color 0,0,0
+			boxf
+			repeat 8
+				pos 0,40*cnt
+				gzoom 82*2,kar.cnt,2,0,0,82*2,14
+			loop
+			buffer 15
+			picload "bline.gif"
+			buffer 34
+			picload "lanelight.gif"
+			// buffer10は未使用
+			// buffer49は未使用
+			// buffer14は未使用
+			buffer 5,vw/ra,vh/ra  // 2D状態のレーン
+			buffer 168,vw/ra*2,vh/ra  // 2D状態のレーン [横幅2x]
+			buffer 51,vw/ra,vh/ra // 2D状態のレーン (減算)
+			buffer 169,vw/ra*2,vh/ra  // 2D状態のレーン (減算) [横幅2x]
+			//buffer 52,vw/ra,14/ra // レーン下部保管用
+			//buffer 158,512/ra,1024/ra
+			if(ra!=1){
+				gmode 1
+				foreach zoomtarget
+					g=zoomtarget.cnt
+					gsel g
+					gw=ginfo_winx
+					gh=ginfo_winy
+					if(zoomtype.cnt=0){
+						buffer 2,gw/ra,gh/ra
+						pos 0,0
+						gzoom gw/ra,gh/ra,g,0,0,gw,gh,1
+						buffer g,gw/ra,gh/ra
+						gcopy 2,0,0,gw/ra,gh/ra
+					}else{
+						buffer 2,gw/ra,gh
+						pos 0,0
+						gzoom gw/ra,gh,g,0,0,gw,gh,1
+						buffer g,gw/ra,gh
+						gcopy 2,0,0,gw/ra,gh
+					}
+				loop
+			}
+			// FXロングのレーン全体に引き延ばした画像
+			buffer 150,82/ra*4,vh/ra
+			pos 0,0
+			gzoom 82/ra,vh/ra,1,0,10,82/ra,1,0
+			pos 82/ra,0
+			gzoom 82/ra,vh/ra,1,0,8,82/ra,1,0
+			pos 82/ra*2,0
+			gzoom 82/ra,vh/ra,1,0,9,82/ra,1,0
+			pos 82/ra*3,0
+			gzoom 82/ra,vh/ra,1,0,0,82/ra,1,0
+			// BTロングのレーン全体に引き延ばした画像
+			buffer 151,80/ra*4,vh/ra
+			pos 0,0
+			gzoom 80/ra,vh/ra,42,0,10,80/ra,1,0
+			pos 80/ra,0
+			gzoom 80/ra,vh/ra,42,0,8,80/ra,1,0
+			pos 80/ra*2,0
+			gzoom 80/ra,vh/ra,42,0,9,80/ra,1,0
+			pos 80/ra*3,0
+			gzoom 80/ra,vh/ra,42,0,0,80/ra,1,0
+			// レーザー始点の画像の引き伸ばした画像
+			buffer 152,44/ra*4,200/ra
+			repeat 2
+				pos 44/ra*cnt*2,0
+				gzoom 44/ra*2,200/ra,6+cnt,0,0,44*2,200
+			loop
+			//buffer2,5,25,35は作業用
+			// 判定2の画像を準備
+			judgel_winx=452*scrsize_h/480
+			judgel_winy=140*scrsize_h/480
+			judgel_px=1:repeat 12
+			if judgel_px>=judgel_winx : break
+			judgel_px=judgel_px<<1:loop
+			judgel_py=1:repeat 12
+			if judgel_py>=judgel_winy : break
+			judgel_py=judgel_py<<1:loop
+			buffer 155,judgel_px,judgel_py
+			buffer 170,judgel_px*2,judgel_py
+			picload_zoom_cache 16,"judge1.gif",getsize(86),getsize(86)*12,150,150*12,1
+			picload_zoom_cache 17,"judge2.gif",getsize(86)*2,getsize(86)*12,150*2,150*12,1
+			picload_zoom_cache 18,"judge3.gif",getsize(86),getsize(86)*12,150,150*12,1
+			picload_zoom_cache_as 30,"judgelong.gif",getsize(140),getsize(140)*42,300,300*42,1,"judgelong_fx"
+			picload_zoom_cache_as 45,"judgelong.gif",getsize(120),getsize(120)*42,300,300*42,1,"judgelong_bt"
+			picload_zoom_cache 41,"judgelaser_d.gif",getsize(172)*2,getsize(86)*6,300*2,150*6,1
+			picload_zoom_cache 50,"judgelaser.gif",getsize(100)*2,getsize(100)*26,150*2,150*26,1
+			// CHAIN数の数字画像を準備
+			buffer 2
+			picload "combonum.gif"
+			buffer 21,getsize(40)*3,getsize(700)
+			pos 0,0
+			gzoom 40*scrsize_h/480*3,getsize(700),2,0,0,60*3,1050,1
+			// エフェクティブ・レートの画像を準備
+			buffer 2
+			picload "er_g.gif"
+			buffer 23,ceil(48.0f*errate1*scrsize_h/480)*6,ceil(435.0f*errate1*scrsize_h/480)
+			pos 0,0
+			gzoom ceil(48.0f*errate1*scrsize_h/480)*6,ceil(435.0f*errate1*scrsize_h/480),2,0,0,48*6,434
+			buffer 2
+			picload "er_g_pattern.gif"
+			buffer 147,ceil(48.0f*errate1*scrsize_h/480)*6,ceil(435.0f*errate1*scrsize_h/480)*4
+			pos 0,0
+			gzoom ceil(48.0f*errate1*scrsize_h/480)*6,ceil(435.0f*errate1*scrsize_h/480)*2,2,0,0,48*6,434*2
+			pos 0,ceil(435.0f*errate1*scrsize_h/480)*2
+			gzoom ceil(48.0f*errate1*scrsize_h/480)*6,ceil(435.0f*errate1*scrsize_h/480)*2,2,0,0,48*6,434*2
+			// 背景の画像を準備
+			//buffer 130,getsize(792),getsize(704),stat
+			//buffer 131,getsize(540),getsize(480) // 70%以上
+			//buffer 31,getsize(200)*9,getsize(320)*2
+			//buffer 32,getsize(200)*9+1,getsize(320)*2
+			// コンプリート・ゲージの画像を読み込み
+			/*buffer 2
+			picload "cg.gif"
+			buffer 126,getsize(240),getsize(20)*6
+			pos 0,0
+			gzoom 240*scrsize_h/480,getsize(20)*6,2,0,0,480,240,1*/
+			// プレイ前の画面の画像を読み込み
+			alCreateImageByFile 2,"pl_minfo.png"
+			alCreateImage 62,getsize(360),getsize(90)
+			alStretchImageToImage 2,62,0,0,720,180,0,0,getsize(360),getsize(90)
+			alDeleteImage 2
+			alCreateImageByFile 2,"num2_large.png"
+			alCreateImage 88,getsize(15)*2,int(12.5*scrsize_h/480)*16
+			alStretchImageToImage 2,88,0,0,30*2,27*16,0,0,getsize(15)*2,int(12.5*scrsize_h/480)*16
+			alDeleteImage 2
+			alCreateImageByFile 3,"pl_difficulty.png"
+			alCreateImage 89,getsize(63),getsize(18)*4
+			alStretchImageToImage 3,89,0,0,126,36*4,0,0,getsize(63),getsize(18)*4
+			alDeleteImage 3
+			alCreateImageByFile 3,"pl_hispeed.png"
+			alCreateImage 97,getsize(226),getsize(27)
+			alStretchImageToImage 3,97,0,0,452,54,0,0,getsize(226),getsize(27)
+			alDeleteImage 3
+			// 楽曲詳細の画像を読み込み
+			alCreateImageByFile 2,"minfo_label.png"
+			alCreateImage 51,getsize(240),getsize(44)
+			alStretchImageToImage 2,51,0,0,480,88,0,0,getsize(240),getsize(44)
+			alDeleteImage 2
+			alCreateImageByFile 2,"minfo_detail.png"
+			alCreateImage 141,getsize(240),getsize(66)
+			alStretchImageToImage 2,141,0,0,480,132,0,0,getsize(240),getsize(66)
+			alDeleteImage 2
+			alCreateImageByFile 2,"num2.png"
+			alCreateImage 52,getsize(10)*2,getsize(9)*16
+			alStretchImageToImage 2,52,0,0,20*2,18*16,0,0,getsize(10)*2,getsize(9)*16
+			alDeleteImage 2
+			alCreateImageByFile 2,"minfo_cur.png"
+			alCreateImage 59,getsize(10),getsize(10)
+			alStretchImageToImage 2,59,0,0,20,20,0,0,getsize(10),getsize(10)
+			alDeleteImage 2
+			alCreateImageByFile 2,"fps.png"
+			alCreateImage 143,getsize(30),getsize(9)
+			alStretchImageToImage 2,143,0,0,60,18,0,0,getsize(30),getsize(9)
+			alDeleteImage 2
+			alCreateImageByFile 2,"timingadjust_ms.png"
+			alCreateImage 146,getsize(30),getsize(9)
+			alStretchImageToImage 2,146,0,0,60,18,0,0,getsize(30),getsize(9)
+			alDeleteImage 2
+			alCreateImageByFile 2,"timingadjust.png"
+			alCreateImage 147,getsize(60),getsize(20)
+			alStretchImageToImage 2,147,0,0,120,40,0,0,getsize(60),getsize(20)
+			alDeleteImage 2
+			alCreateImageByFile 2,"timingadjust_sign.png"
+			alCreateImage 148,getsize(9),two(getsize(9))*2
+			alStretchImageToImage 2,148,0,0,18,18,0,0,getsize(9),getsize(9)
+			alStretchImageToImage 2,148,0,18,18,18,0,two(getsize(9)),getsize(9),getsize(9)
+			alDeleteImage 2
+			alCreateImageByFile 2,"er.png"
+			alCreateImage 144,round((192.0f*errate1)*scrsize_h/480)*6,round(double(570.0f*errate1)*scrsize_h/480)
+			alStretchImageToImage 2,144,0,0,1152,570,0,0,round((192.0f*errate1)*scrsize_h/480)*6,round(double(570.0f*errate1)*scrsize_h/480)
+			alDeleteImage 2
+			alCreateImageByFile 2,"er_p.png"
+			alCreateImage 145,round(96.0f*errate1*scrsize_h/480),round(42.0f*errate1*scrsize_h/480)
+			alStretchImageToImage 2,145,0,0,96,42,0,0,round(96.0f*errate1*scrsize_h/480),round(42.0f*errate1*scrsize_h/480)
+			alDeleteImage 2
+			// リザルト画面の画像を準備
+			alCreateImageByFile 3,"result_difficulty.png"
+			alCreateImage IMG_RESULT_DIFFICULTY,getsize(42),getsize(12)*4
+			alStretchImageToImage 3,IMG_RESULT_DIFFICULTY,0,0,84,24*4,0,0,getsize(42),getsize(12)*4
+			alDeleteImage 3
+			alCreateImageByFile 3,"result_scorenum.png"
+			alCreateImage 34,64*450*2*scrsize_h/480/1532,64*450*2*scrsize_h/480/1532*10
+			alStretchImageToImage 3,34,0,0,64,64*10,0,0,64*450*2*scrsize_h/480/1532,64*450*2*scrsize_h/480/1532*10
+			alCreateImage 38,getsize(24),getsize(24)*10
+			alStretchImageToImage 3,38,0,0,64,64*10,0,0,getsize(24),getsize(24)*10
+			alDeleteImage 3
+			alCreateImageByFile 3,"result_tweetbtn.png"
+			alCreateImage IMG_RESULT_TWEETBTN,getsize(90),getsize(24)*3
+			alStretchImageToImage 3,IMG_RESULT_TWEETBTN,0,0,180,48*3,0,0,getsize(90),getsize(24)*3
+			alDeleteImage 3/*
+			alCreateImageByFile 2,"playresult.png"
+			alCreateImage 63,getsize(270),getsize(75)*4
+			alStretchImageToImage 2,63,0,0,540,150*4,0,0,getsize(270),getsize(75)*4
+			alDeleteImage 2*/
+			// 選曲画面の画像を準備
+			imgbufload_bg "bg2.jpg",29,"image/jpeg",1
+			buffer 2
+			picload lang.1.0
+			buffer 128,getsize(405)*2,getsize(24)
+			pos 0,0
+			gzoom 540*scrsize_h/480*2,getsize(32),2,0,0,2160,64,1
+			alCreateImageByFile 2,"msel_bar.png"
+			alCreateImage 60,getsize(20),getsize(480)
+			alStretchImageToImage 2,60,0,0,40,960,0,0,getsize(20),getsize(480)
+			alDeleteImage 2
+			alCreateImageByFile 2,"msel_barcur.png"
+			alCreateImage 61,getsize(20),getsize(20)
+			alStretchImageToImage 2,61,0,0,40,40,0,0,getsize(20),getsize(20)
+			alDeleteImage 2
+			alCreateImageByFile 2,"msel_0.png"
+			alCreateImage 1,getsize(450),getsize(222)
+			alStretchImageToImage 2,1,0,0,766,378,0,0,getsize(450),getsize(222)
+			alCreateImage 2,getsize(450),getsize(222)
+			alCreateImageByFile 3,"msel_0_difficulty.png"
+			alCreateImage 4,220*450*scrsize_h/480/1532*4,220*450*scrsize_h/480/1532*2
+			alStretchImageToImage 3,4,0,0,460,220,0,0,220*450*scrsize_h/480/1532*4,220*450*scrsize_h/480/1532*2
+			alDeleteImage 3
+			alCreateImageByFile 3,"msel_level.png"
+			alCreateImage 5,150*450*scrsize_h/480/1532,120*450*scrsize_h/480/1532*20
+			alStretchImageToImage 3,5,0,0,150,120*20,0,0,150*450*scrsize_h/480/1532,120*450*scrsize_h/480/1532*20
+			alCreateImage 58,75*450*scrsize_h/480/1532,60*450*scrsize_h/480/1532*20
+			alStretchImageToImage 3,58,0,0,150,120*20,0,0,75*450*scrsize_h/480/1532,60*450*scrsize_h/480/1532*20
+			alDeleteImage 3
+			alCreateImageByFile 3,"msel_grade.png"
+			alCreateImage 7,64*450*scrsize_h/480/1532,64*450*scrsize_h/480/1532*7
+			alStretchImageToImage 3,7,0,0,64,64*7,0,0,64*450*scrsize_h/480/1532,64*450*scrsize_h/480/1532*7
+			alDeleteImage 3
+			alCreateImageByFile 3,"msel_medal.png"
+			alCreateImage 8,188*450*scrsize_h/480/1532,78*450*scrsize_h/480/1532*8
+			alStretchImageToImage 3,8,0,0,188,78*8,0,0,188*450*scrsize_h/480/1532,78*450*scrsize_h/480/1532*8
+			alDeleteImage 3
+			alCreateImageByFile IMG_MSEL_MEDAL_LARGE,"msel_medal.png"　// 188 x 78*8
+			alCreateImageByFile 3,"msel_0_bpmnum.png"
+			alCreateImage 9,45*450*scrsize_h/480/1532,41*450*scrsize_h/480/1532*12
+			alStretchImageToImage 3,9,0,0,45,41*12,0,0,45*450*scrsize_h/480/1532,41*450*scrsize_h/480/1532*12
+			alDeleteImage 3
+			alCreateImageByFile 3,"num0.png"
+			alCreateImage 10,136*450*scrsize_h/480/1532,120*450*scrsize_h/480/1532*10
+			alStretchImageToImage 3,10,0,0,136,120*10,0,0,136*450*scrsize_h/480/1532,120*450*scrsize_h/480/1532*10
+			alDeleteImage 3
+			alCreateImageByFile 3,"msel_1.png"
+			alCreateImage 11,1632*450*scrsize_h/480/1532,456*450*scrsize_h/480/1532
+			alStretchImageToImage 3,11,0,0,816,228,0,0,1632*450*scrsize_h/480/1532,456*450*scrsize_h/480/1532
+			alDeleteImage 3
+			alCreateImageByFile 3,"msel_2.png"
+			alCreateImage 12,1632*450*scrsize_h/480/1532,456*450*scrsize_h/480/1532
+			alStretchImageToImage 3,12,0,0,816,228,0,0,1632*450*scrsize_h/480/1532,456*450*scrsize_h/480/1532
+			alCreateImageByFile 3,"num1.png"
+			alCreateImage 13,136*450*scrsize_h/480/1532,120*450*scrsize_h/480/1532*10
+			alStretchImageToImage 3,13,0,0,136,120*10,0,0,136*450*scrsize_h/480/1532,120*450*scrsize_h/480/1532*10
+			repeat 7
+				alCreateImage 21+cnt,1632*450*scrsize_h/480/1532,456*450*scrsize_h/480/1532
+			loop
+			alDeleteImage 3
+			alCreateImageByFile 3,"msel_dir0.png"
+			alCreateImage 28,getsize(450),getsize(222)
+			alStretchImageToImage 3,28,0,0,766,378,0,0,getsize(450),getsize(222)
+			alDeleteImage 3
+			alCreateImageByFile 3,"msel_dir1.png"
+			alCreateImage 29,1632*450*scrsize_h/480/1532,456*450*scrsize_h/480/1532
+			alStretchImageToImage 3,29,0,0,816,228,0,0,1632*450*scrsize_h/480/1532,456*450*scrsize_h/480/1532
+			alDeleteImage 3
+			alCreateImageByFile 3,"msel_dir2.png"
+			alCreateImage 30,1632*450*scrsize_h/480/1532,456*450*scrsize_h/480/1532
+			alStretchImageToImage 3,30,0,0,816,228,0,0,1632*450*scrsize_h/480/1532,456*450*scrsize_h/480/1532
+			alDeleteImage 3
+			alCreateImageByFile 3,"msel_lev0.png"
+			alCreateImage 91,getsize(450),getsize(222)
+			alStretchImageToImage 3,91,0,0,766,378,0,0,getsize(450),getsize(222)
+			alDeleteImage 3
+			alCreateImageByFile 3,"msel_lev1.png"
+			alCreateImage 92,1632*450*scrsize_h/480/1532,456*450*scrsize_h/480/1532
+			alStretchImageToImage 3,92,0,0,816,228,0,0,1632*450*scrsize_h/480/1532,456*450*scrsize_h/480/1532
+			alDeleteImage 3
+			alCreateImageByFile 3,"msel_lev2.png"
+			alCreateImage 93,1632*450*scrsize_h/480/1532,456*450*scrsize_h/480/1532
+			alStretchImageToImage 3,93,0,0,816,228,0,0,1632*450*scrsize_h/480/1532,456*450*scrsize_h/480/1532
+			alDeleteImage 3
+			alCreateImageByFile 3,"msel_sub0.png"
+			alCreateImage IMG_MSEL_SUB0,getsize(450),getsize(222)
+			alStretchImageToImage 3,IMG_MSEL_SUB0,0,0,766,378,0,0,getsize(450),getsize(222)
+			alDeleteImage 3
+			alCreateImageByFile 3,"msel_sub1.png"
+			alCreateImage IMG_MSEL_SUB1,1632*450*scrsize_h/480/1532,456*450*scrsize_h/480/1532
+			alStretchImageToImage 3,IMG_MSEL_SUB1,0,0,816,228,0,0,1632*450*scrsize_h/480/1532,456*450*scrsize_h/480/1532
+			alDeleteImage 3
+			alCreateImageByFile 3,"msel_sub2.png"
+			alCreateImage IMG_MSEL_SUB2,1632*450*scrsize_h/480/1532,456*450*scrsize_h/480/1532
+			alStretchImageToImage 3,IMG_MSEL_SUB2,0,0,816,228,0,0,1632*450*scrsize_h/480/1532,456*450*scrsize_h/480/1532
+			alDeleteImage 3
+			alCreateImageByFile 3,"msel_course0.png"
+			alCreateImage 149,getsize(450),getsize(222)
+			alStretchImageToImage 3,149,0,0,766,378,0,0,getsize(450),getsize(222)
+			alDeleteImage 3
+			alCreateImageByFile 3,"msel_course1.png"
+			alCreateImage 150,1632*450*scrsize_h/480/1532,456*450*scrsize_h/480/1532
+			alStretchImageToImage 3,150,0,0,816,228,0,0,1632*450*scrsize_h/480/1532,456*450*scrsize_h/480/1532
+			alDeleteImage 3
+			alCreateImageByFile 3,"msel_course2.png"
+			alCreateImage 151,1632*450*scrsize_h/480/1532,456*450*scrsize_h/480/1532
+			alStretchImageToImage 3,151,0,0,816,228,0,0,1632*450*scrsize_h/480/1532,456*450*scrsize_h/480/1532
+			alDeleteImage 3
+			alCreateImageByFile 3,"msel_course0_item.png"
+			alCreateImage 152,1440*450*scrsize_h/480/1532,96*450*scrsize_h/480/1532
+			alStretchImageToImage 3,152,0,0,720,48,0,0,1440*450*scrsize_h/480/1532,96*450*scrsize_h/480/1532
+			alDeleteImage 3
+			alCreateImageByFile 3,"msel_optionbg.png"
+			alCreateImage 86,getsize(320),getsize(180)
+			alStretchImageToImage 3,86,0,0,640,360,0,0,getsize(320),getsize(180)
+			// Image87は使用済み (選曲画面でのオプション表示用)
+			buffer 2
+			picload "msel_0_cur.gif"
+			buffer 26,400*450*scrsize_h/480/1532,400*450*scrsize_h/480/1532*12
+			pos 0,0
+			gzoom 400*450*scrsize_h/480/1532,400*450*scrsize_h/480/1532*12,2,0,0,200,200*12,1
+			buffer 2
+			picload "msel_bgani1.gif"
+			buffer 148,getsize(853),getsize(12)
+			pos 0,0
+			gzoom 853*scrsize_h/480,getsize(12),2,0,0,1706,24,1
+			alDeleteImage 3
+			alCreateImageByFile 3,"msel_fav_add.png"
+			alCreateImage 119,getsize(288),getsize(96)
+			alStretchImageToImage 3,119,0,0,576,192,0,0,getsize(288),getsize(96)
+			alDeleteImage 3
+			alCreateImageByFile 3,"msel_fav_add_num.png"
+			alCreateImage 120,getsize(33),getsize(33)*9
+			alStretchImageToImage 3,120,0,0,66,66*9,0,0,getsize(33),getsize(33)*9
+			alDeleteImage 3
+			alCreateImageByFile 3,"msel_fav_del.png"
+			alCreateImage 121,getsize(288),getsize(96)*2
+			alStretchImageToImage 3,121,0,0,576,192*2,0,0,getsize(288),getsize(96)*2
+			// アナログデバイス関連の画像を準備
+			alCreateImageByFile 3,"laser_p.png"
+			alCreateImage 56,getsize(60)*2,getsize(60)*2
+			alStretchImageToImage 3,56,0,0,240*2,240*2,0,0,getsize(60)*2,getsize(60)*2
+			alDeleteImage 3
+			// 作業用バッファの確保
+			buffer 25,getsize(388),getsize(312)*2
+			buffer 35,getsize(344),getsize(312)*2
+			buffer 48,getsize(388),getsize(312)*2
+			buffer 129,getsize(120),getsize(120) // ジャケット確保用
+			
+			// Image85は使用済(楽曲リストのタイトル・アーティスト名画像)
+			alCreateImageByFile 3,"icon\\slimatsushi.png"
+			alCreateImage 122,getsize(48),getsize(24)
+			alStretchImageToImage 3,122,0,0,256,128,0,0,getsize(48),getsize(24)
+			alDeleteImage 3
+			alCreateImageByFile 3,"icon\\slimatsushi_disc1.png"
+			alCreateImage 123,getsize(48),getsize(24)
+			alStretchImageToImage 3,123,0,0,256,128,0,0,getsize(48),getsize(24)
+			alDeleteImage 3
+			alCreateImageByFile 3,"icon\\slimatsushi_disc2.png"
+			alCreateImage 124,getsize(48),getsize(24)
+			alStretchImageToImage 3,124,0,0,256,128,0,0,getsize(48),getsize(24)
+			alDeleteImage 3
+			alCreateImageByFile 3,"icon\\slimatsushi_disc3.png"
+			alCreateImage 125,getsize(48),getsize(24)
+			alStretchImageToImage 3,125,0,0,256,128,0,0,getsize(48),getsize(24)
+			alDeleteImage 3
+			alCreateImageByFile 3,"icon\\slimatsushi_disc4.png"
+			alCreateImage 126,getsize(48),getsize(24)
+			alStretchImageToImage 3,126,0,0,256,128,0,0,getsize(48),getsize(24)
+			alDeleteImage 3
+			alCreateImageByFile 3,"icon\\happypophardcore_reborn.png"
+			alCreateImage 127,getsize(48),getsize(24)
+			alStretchImageToImage 3,127,0,0,256,128,0,0,getsize(48),getsize(24)
+			alDeleteImage 3
+	
+			// IR関連の画像を準備
+			alCreateImageByFile 3,"ir_signin.png"
+			alCreateImage IMG_IR_SIGNIN,getsize(480),getsize(320)
+			alStretchImageToImage 3,IMG_IR_SIGNIN,0,0,960,640,0,0,getsize(480),getsize(320)
+			alDeleteImage 3
+			alCreateImageByFile 3,"ir_signin_cursor.png"
+			alCreateImage IMG_IR_SIGNIN_CURSOR,getsize(40),getsize(40)
+			alStretchImageToImage 3,IMG_IR_SIGNIN_CURSOR,0,0,80,80,0,0,getsize(40),getsize(40)
+			alDeleteImage 3
+			alCreateImageByFile 3,"ir_popup.png"
+			alCreateImage IMG_IR_POPUP,getsize(170)*2,scrsize_h
+			alStretchImageToImage 3,IMG_IR_POPUP,0,0,680,960,0,0,getsize(170)*2,scrsize_h
+			alDeleteImage 3
+			
+			buffer 2
+			picload "jacket\\nowprinting1.jpg"
+			buffer 142,getsize(52),getsize(52)
+			pos 0,0
+			gzoom 52*scrsize_h/480,getsize(52),2,0,0,350,350,1
+			buffer 2
+			picload "jacket\\nowprinting2.jpg"
+			buffer 143,getsize(52),getsize(52)
+			pos 0,0
+			gzoom 52*scrsize_h/480,getsize(52),2,0,0,350,350,1
+			buffer 2
+			picload "jacket\\nowprinting3.jpg"
+			buffer 144,getsize(52),getsize(52)
+			pos 0,0
+			gzoom 52*scrsize_h/480,getsize(52),2,0,0,350,350,1
+
+			generate_cache_imgs
+
+			//buffer145,146はジャケ予定
+			dim sx_a,4
+			dim sy_a,4
+			sx_a=0,scrsize_w,scrsize_w,0
+			sy_a=0,0,scrsize_h,scrsize_h
+			dim btkey,4
+			dim fxkey,2
+			dim fxkeyp,2
+			dim sortfl,2
+			if(iscmdline=1){
+				if(getpath(dir_cmdline2,2)=".kco"){
+					// コースモード
+					cnotesfile=dir_cmdline2
+					dirp=""
+					dir=""
+					stateinit=1
+					state=st_playing_
+					iscourse=1
+					dirvol=100
+					diroffset=0
+					dirtweetopt=""
+					sync=0
+					cmdline_from=0
+				}else:if(getpath(dir_cmdline2,2)=".ksh"){
+					cnotesfile=dir_cmdline2
+					dirp=""
+					dir=""
+					stateinit=1
+					state=st_playing_
+					iscourse=0
+					dirvol=100
+					diroffset=0
+					dirtweetopt=""
+					sync=0
+				}else{
+					dialog lang.2.13/*"指定された譜面ファイルが見つかりません。"*/
+					end
+				}
+				return
+			}
+		}
+		buffer 2
+		picload "standby_cur.gif"
+		buffer 19,getsize(175),getsize(25)*8
+		pos 0,0
+		gzoom 175*scrsize_h/480,getsize(25),2,0,0,525,75,1
+		buffer 2
+		picload "standby_item.gif"
+		buffer 20,getsize(175)*2,getsize(25)*4
+		pos 0,0
+		gzoom 175*scrsize_h/480*2,getsize(25)*4,2,0,0,525*2,75*4,1
+		imgbufload_bg "standby.jpg",27,"image/jpeg",1
+
+		escstatp=1
+		if(statep!=st_pass){
+			titlebgmid=BASS_StreamCreateFile(0,dir_default+"\\se\\title_bgm.ogg",0,0,0,0,BASS_SAMPLE_LOOP)
+			BASS_ChannelSetPosition_ms titlebgmid,0
+			BASS_ChannelSetAttribute titlebgmid,2,double(mastervol)/100
+			BASS_ChannelPlay titlebgmid
+		}
+	}
+	chdir "../songs"
+	gsel 0
+	await 0
+	selnow=standbyselp
+	ddim curpos,1
+	curpos=double(standbyselp)
+	onkey gosub *keshu
+	/*if(analoginput=1){
+		onkey 1
+	}else:onkey 0*/
+	kp1=1 : kp2=1
+	timestatestart=d3timer()
+	repeat
+		redraw 0
+		gosub *getjoystat
+		gsel 0
+		pos 0,0
+		color 0,0,0
+		boxf
+		gmode 0
+		gcopy 27,0,0,scrsize_w,scrsize_h
+		color 255,255,255
+		if(ginfo2()=0){
+			esc_key=getesckey()
+			if((esc_key=1)&(escstatp=0)&(ginfo2()=0)){
+				stat1=BASS_SampleGetChannel(titleselid,0)
+				BASS_ChannelSetAttribute stat1,2,double(mastervol)/100
+				BASS_ChannelPlay stat1
+				selnow=3
+			}else:escstatp=esc_key
+			getkey stat1,13
+			stat1=stat1|getjoykeystat(11)
+			if((stat1=1)&(esc_key=0)&(ginfo2()=0)){
+				BASS_ChannelSetAttribute titlebgmid,2,double(mastervol)/100
+				if(selnow!=0):BASS_ChannelSlideAttribute titlebgmid,2,0.0,100
+				if(selnow=0){
+					// タイトルBGMフェードアウト(IR実装時に削除)
+					//BASS_ChannelSetAttribute titlebgmid,2,double(mastervol)/100
+					//BASS_ChannelSlideAttribute titlebgmid,2,0.0,100
+	
+					stat1=BASS_SampleGetChannel(titleenterid,0)
+					BASS_ChannelSetAttribute stat1,2,1.0*double(mastervol)/100
+					BASS_ChannelPlay stat1
+					gsel 0
+					hgini
+					//hgsetreq SYSREQ_2DFILTER,1
+					//hgsetreq SYSREQ_DEFTIMER,1
+					//hgsetreq SYSREQ_FPUPRESERVE,1
+					blackout 500
+					state=st_pass
+	
+					// タイトルBGM解放(IR実装時に削除)
+					//BASS_StreamFree titlebgmid
+				}else:if(selnow=1){
+					stat1=BASS_SampleGetChannel(titleenterid,0)
+					BASS_ChannelSetAttribute stat1,2,double(mastervol)/100
+					BASS_ChannelPlay stat1
+					blackout 500
+					stateinit=1
+					state=st_option
+					BASS_StreamFree titlebgmid
+				}else:if(selnow=2){
+					stat1=BASS_SampleGetChannel(titleenterid,0)
+					BASS_ChannelSetAttribute stat1,2,double(mastervol)/100
+					BASS_ChannelPlay stat1
+					blackout 500
+					stateinit=1
+					ginitfl=0
+					state=st_gate
+					BASS_StreamFree titlebgmid
+				}else{
+					stat1=BASS_SampleGetChannel(titleenterid,0)
+					BASS_ChannelSetAttribute stat1,2,double(mastervol)/100
+					BASS_ChannelPlay stat1
+					blackout 800
+					goto *exit
+				}
+				buffer 20,1,1
+				buffer 27,1,1
+				buffer 28,1,1
+				break
+			}
+			getkey_a stat1,40
+			getkey stat2,key.(7+2*analogsw)
+			getkey stat2_,key2.(7+2*analogsw)
+			stat1=stat1|stat2|stat2_
+			getkey stat2,key.(9-2*analogsw)
+			getkey stat2_,key2.(9-2*analogsw)
+			stat1=stat1|stat2|stat2_|getjoykeystat(7+2*analogsw)|getjoykeystat(9-2*analogsw)
+			getkey stat2,key.1
+			getkey stat2_,key.1
+			stat1=stat1|stat2|stat2_|getjoykeystat(1)
+			if((kp1=0)&(stat1=1)&(ginfo2()=0)){
+				selnow++
+				stat1=BASS_SampleGetChannel(titleselid,0)
+				BASS_ChannelSetAttribute stat1,2,double(mastervol)/100
+				BASS_ChannelPlay stat1
+				kp1=1
+			}else:if((stat1=0)|(ginfo2()!=0)):kp1=0
+			getkey_a stat1,38
+			getkey stat2,key.(6+2*analogsw)
+			getkey stat2_,key2.(6+2*analogsw)
+			stat1=stat1|stat2|stat2_|getjoykeystat(6+2*analogsw)
+			getkey stat2,key.(8-2*analogsw)
+			getkey stat2_,key2.(8-2*analogsw)
+			stat1=stat1|stat2|stat2_|getjoykeystat(8-2*analogsw)
+			getkey stat2,key.2
+			getkey stat2_,key.2
+			stat1=stat1|stat2|stat2_|getjoykeystat(2)
+			if((kp2=0)&(stat1=1)&(ginfo2()=0)){
+				selnow--
+				stat1=BASS_SampleGetChannel(titleselid,0)
+				BASS_ChannelSetAttribute stat1,2,double(mastervol)/100
+				BASS_ChannelPlay stat1
+				kp2=1
+			}else:if((stat1=0)|(ginfo2()!=0)):kp2=0
+		}
+		if(selnow>3){
+			selnow=3
+		}
+		if(selnow<0){
+			selnow=0
+		}
+		timenow=d3timer()-timestatestart
+		if(cnt>0){
+			curpos=(curpos*max(30-(timenow-timenowp),0)+double(selnow)*min(timenow-timenowp,30))/30
+		}
+		gmode 5,,,166+int(sin(double(d3timer())/150+1.0)/2*90)
+		pos scrsize_w/2-getsize(175)/2,(260+curpos*25)*scrsize_h/480
+		gcopy 19,0,0,175*scrsize_w/640,getsize(25)
+		pos scrsize_w/2-getsize(175)/2,getsize(260)
+		gmode 6,,,256
+		gcopy 20,getsize(175),0,getsize(175),(getsize(25))*4
+		gmode 5,,,255
+		gcopy 20,0,0,getsize(175),getsize(25)*4
+		if((timenow<500)&(timenow>=0)){
+			gsel 0
+			gmode 3,,,(500-timenow)*256/500
+			color 0,0,0
+			gsquare -1,sx_a,sy_a
+		}
+		stat1=0
+		getkey stat2,key.4
+		if(stat2=1):stat1=1
+		getkey stat2,key2.4
+		if(stat2=1):stat1=1
+		if(getjoykeystat(4)=1):stat1=1
+		getkey stat2,key.5
+		if(stat2=1):stat1=2
+		getkey stat2,key2.5
+		if(stat2=1):stat1=2
+		if(getjoykeystat(5)=1):stat1=2
+		redraw 1
+		keshuoff=0
+		await 7
+		gosub *volactive
+		if(timenow>600){
+			while (ginfo2()!=0)
+				await 100
+			wend
+		}
+		timenowp=timenow
+	loop
+	session_id@ksm_ir=""
+	ksm_id@ksm_ir=0
+	return
+
+#module
+#deffunc picload_zoom_cache_as int buffer_id, str filename, int zoom_w, int zoom_h, int w, int h, int zoom_mode, str cache_name
+	if(exists(dir_default@+"\\cache\\"+cache_name+".png")){
+		buffer buffer_id,zoom_w,zoom_h
+		pos 0,0
+		picload dir_default@+"\\cache\\"+cache_name+".png",1
+	}else{
+		buffer 2
+		picload filename
+		buffer buffer_id,zoom_w,zoom_h
+		pos 0,0
+		gzoom zoom_w,zoom_h,2,0,0,w,h,zoom_mode
+		alCreateImage 90,zoom_w,zoom_h
+		alCopyScreenToImage buffer_id,90,,,zoom_w,zoom_h
+		alSaveFile dir_default@+"\\cache\\"+cache_name+".png","image/png"
+		alDeleteImage 90
+	}
+	return
+
+#deffunc picload_zoom_cache int buffer_id, str filename, int zoom_w, int zoom_h, int w, int h, int zoom_mode
+	filename_=filename
+	picload_zoom_cache_as buffer_id, filename, zoom_w, zoom_h, w, h, zoom_mode, strmid(filename_,0,instr(filename_,0,"."))
+	return
+#global

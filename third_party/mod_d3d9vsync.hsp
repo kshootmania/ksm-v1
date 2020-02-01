@@ -1,0 +1,315 @@
+//mod_d3d9vsync	v1.0	for HSP3	2013/04/13
+#module "mod_d3d9vsync"
+#uselib "d3d9"
+#cfunc Direct3DCreate9 "Direct3DCreate9" int
+#usecom IDirect3D9 "{81BDCBCA-64D4-426d-AE8D-AD0147F4275C}"
+#comfunc D3D9_GetAdapterDisplayMode	8	int, int
+#comfunc D3D9_GetDeviceCaps			14	int ,int,int,int
+#comfunc D3D9_CreateDevice			16	int, int, int, int, int, int
+
+#usecom IDirect3DDevice9 "{D0223B96-BF7A-43fd-92BD-A43B0D82B9EB}"
+#comfunc D3D9_TestCooperativeLevel 3
+#comfunc IDirect3DDevice9_GetRasterStatus	19	int,int
+#comfunc _D3DDV9_Reset	16	int
+
+#define D3DDEVTYPE_HAL	1
+#define D3DDEVTYPE_REF  2
+#define D3DDEVTYPE_SW  3
+#define D3DDEVTYPE_NULLREF  4
+
+#define D3DSWAPEFFECT_DISCARD	1
+#define D3DSWAPEFFECT_FLIP  2
+#define D3DSWAPEFFECT_COPY  3
+#define D3DSWAPEFFECT_FORCE_DWORD  0xFFFFFFF
+
+#define D3DCREATE_HARDWARE_VERTEXPROCESSING 0x00000040
+#define D3DCREATE_SOFTWARE_VERTEXPROCESSING 0x00000020
+
+#define DDCAPS_READSCANLINE   0x00020000
+
+#define D3DCREATE_FPU_PRESERVE   0x00000002
+#define D3DCREATE_MULTITHREADED  0x00000004
+
+#define D3D_SDK_VERSION 32
+#define ctype D3DPS_VERSION(%1,%2) (0xFFFF0000|((%1)<<8)|(%2))
+#define ctype D3DVS_VERSION(%1,%2) (0xFFFE0000|((%1)<<8)|(%2))
+#define ctype D3DVP_VERSION(%1) (((((%1))>>8)&$ff)),((%1&$ff))
+
+#uselib "KERNEL32.DLL"
+#func  _Sleep "Sleep" sptr
+#uselib "winmm.dll"
+#cfunc _timeGetTime "timeGetTime"
+#func _timeBeginPeriod "timeBeginPeriod" sptr
+#func _timeEndPeriod "timeEndPeriod" sptr
+
+#define global  d3d9vsync_GetTime	_timeGetTime@mod_d3d9vsync() //PC起動時からの時間をミリ秒で返す
+
+#define global D3D9WIN_ID			9999 //D3D9_CreateDevice用ウィンドウID
+#define global d3d9vsync_cpu		cpu@mod_d3d9vsync //1フレームのCPU使用率
+#define global d3d9vsync_cpu10 		cpu10@mod_d3d9vsync //10フレームのCPU平均使用率
+#define global d3d9vsync_ptime 		Processing_time@mod_d3d9vsync //1フレームの処理時間
+#define global d3d9vsync_fps 		fps@mod_d3d9vsync //1秒間のフレーム数
+#define global d3d9vsync_ftime 		fps_time@mod_d3d9vsync //1フレームあたりの使用できる時間
+
+#define global d3d9vsync_err 		d3d9err@mod_d3d9vsync //D3DERR
+
+//d3d9vsync_set_RefreshRate 現在のリフレッシュレート
+//d3d9vsync_init後にリフレッシュレートが変更された場合の最初期化用
+#define global d3d9vsync_set_RefreshRate(%1=-1)	_d3d9vsync_set_RefreshRate %1 
+#deffunc  _d3d9vsync_set_RefreshRate int RR
+	if RR>0 {set_RefreshRate=RR:D3DDV9_Reset}else{set_RefreshRate=RefreshRate}
+return RefreshRate
+
+//D3DDV9_Reset
+//D3DDV9リセット
+#deffunc  D3DDV9_Reset
+	if (vsyncoff\2)=0 {
+		D3D9_GetAdapterDisplayMode objd3d, 0, varptr(D3DFORMAT)	
+		if D3DFORMAT(2)>0 {RefreshRate=D3DFORMAT(2)}else{RefreshRate=set_RefreshRate}
+		_D3DDV9_Reset objd3ddv,varptr(d3dpp)
+		vsyncon=bak_vsyncon
+		vsyncoff=0
+		if (set_fps = RefreshRate) {vsyncon=0}else{if vsyncon=0 {vsyncoff=2} }
+		gosub  *timeinit
+	}
+return
+
+//RasterAdjust 修正値
+//フルスクリーン時の走査線監視位置修正 修正値省略時20（最終ラインより20手前の走査線を監視,リフレッシュレート60でY解像度1080の場合）
+//修正値を省略した場合statに現在の設定値が返る
+#define global RasterAdjust(%1=Raster_adjust@mod_d3d9vsync) _RasterAdjust %1 
+#deffunc _RasterAdjust int p1 
+	Raster_adjust=p1
+return Raster_adjust
+
+//d3d9vsync_init フレームレート , 走査線監視モード優先フラグ
+//d3d9各種初期化 フレームレート省略時60（0以下を指定するとリフレッシュレートが使われる）
+//リフレッシュレート優先フラグ：1の時フレームレートとリフレッシュレートが違っても走査線監視モードを設定
+#define global d3d9vsync_init(%1=60,%2=0)	vsyncon@mod_d3d9vsync=%2:_d3d9vsync_init %1
+#deffunc  _d3d9vsync_init int _set_fps
+	bak_ID = ginfo(3)
+	Target_ID=bak_ID
+	mref BMSCR,67
+	if (BMSCR(17) = 1) {}
+	if set_RefreshRate<=0 {set_RefreshRate=60}
+	bak_vsyncon=vsyncon
+	desktop_sizey=ginfo(21)
+	if set_fps {d3d9vsync_end}//再初期化された場合d3d9vsync_endを実行
+	_timeBeginPeriod 1	:	tBP=1
+	RefreshRate=set_RefreshRate //とりあえずリフレッシュレート60にしとく
+	if _set_fps<=0 {set_fps=60}else{set_fps=_set_fps}
+	Raster_adjust=20 //フルスクリーン時の走査線監視位置修正値
+	Sleep_adjust_full=1 //フルスクリーン時スリープ修正値
+	dim D3DFORMAT, 4	
+	dim D3DCAPS9,128	
+	dim RasterStatus,2
+	d3dpp = 0, 0, D3DFORMAT(3), 1, 0, 0, D3DSWAPEFFECT_DISCARD, 0, 1, 0, 0, 0, 0, 0
+	p = 0
+	d3d9err=0
+	vsyncoff=0
+	if (BMSCR(17) = 1) {vsyncoff=1: gosub  *timeinit: return -6 }	//現在の操作先がbufferだった
+	if varptr(Direct3DCreate9) = 0 {vsyncoff=1: gosub  *timeinit: return -1 }	 //Direct3DCreate9が無いのでタイマーモードを設定して初期化終了
+	newcom objd3d, , -1, Direct3DCreate9(D3D_SDK_VERSION)
+	
+	D3D9_GetAdapterDisplayMode objd3d, 0, varptr(D3DFORMAT)	
+
+	if D3DFORMAT(2)>0 {RefreshRate=D3DFORMAT(2)}//リフレッシュレートが読み取れない場合60を設定
+	if _set_fps<=0 {set_fps=RefreshRate}//フレームレートに0以下が指定されたのでリフレッシュレートをフレームレートに
+	
+	D3D9_GetDeviceCaps objd3d,0,D3DDEVTYPE_HAL,varptr(D3DCAPS9)
+	if stat<0 {
+		D3D9_GetDeviceCaps objd3d,0,D3DDEVTYPE_REF,varptr(D3DCAPS9)//そもそもD3DDEVTYPE_REFだとDDCAPS_READSCANLINEに対応してないかも
+		if stat<0 {d3d9err=stat:vsyncoff=1: gosub  *timeinit: return -2} //D3D9_GetDeviceCapsが失敗した
+	}
+
+	if (D3DCAPS9(2)&DDCAPS_READSCANLINE) = 0 {vsyncoff=1: gosub  *timeinit: return -3} //水平走査線取得非対応の場合タイマーモードを設定
+	
+	FPUtes=str(9876543210.98745+1)
+	FPU=(peek(FPUtes,15) = '5') //現在のFPU精度をテスト、小数点以下の'5'を読み取れなかったら単精度
+	bgscr D3D9WIN_ID,1,1,2
+	
+	BF_SV=D3DCREATE_SOFTWARE_VERTEXPROCESSING | D3DCREATE_FPU_PRESERVE*FPU //大抵初期化できるSOFTWAREにする
+	D3D9_CreateDevice objd3d, 0, D3DCAPS9 , hWnd, BF_SV, varptr(d3dpp), varptr(p)
+	d3d9err=stat
+	
+	gsel bak_ID 
+
+	if 	d3d9err<0{ vsyncoff=1:gosub  *timeinit: return -4} //D3D9_CreateDeviceが失敗した
+	newcom objd3ddv, , -1, p
+		
+	if vsyncon=0 {//走査線監視モード優先フラグOFF
+		if set_fps ! RefreshRate {//指定フレームレートとリフレッシュレートが違う場合タイマーモードを設定
+			vsyncoff=2: gosub  *timeinit: return -5 //タイマーモード選択
+		}
+	}else{ //走査線監視モード優先フラグON　指定フレームレートとリフレッシュレートが違ったらタイマーモード+走査線監視モードを設定
+		if (set_fps = RefreshRate) {vsyncon=0}//同じなら通常の走査線監視モードを設定
+	}
+
+	gosub  *timeinit
+
+return RefreshRate 
+
+*timeinit
+	Refresh_time=1000.0/RefreshRate
+	fps_time=1000.0/set_fps
+	timA=_timeGetTime()
+	Start_tim=timA
+	timB=timA
+	timC=timA
+	fs_tim=0.0
+	cpu10=0.0
+	cpu=0.0
+	Processing_time=0
+	Processing_time10=0
+return	
+
+//GetRasterStatus 垂直帰線期間フラグ, 水平走査線数
+//水平走査線取得
+#deffunc GetRasterStatus var V,var R //水平走査線取得
+	if (vsyncoff\2)=0 {
+		IDirect3DDevice9_GetRasterStatus objd3ddv,0,varptr(RasterStatus)
+		V=RasterStatus //1=垂直帰線期間中
+		R=RasterStatus(1) //現在の走査線、上が1の時0になる(環境によるかも知れない)
+	}
+return 
+
+#define  D3DERR_DEVICELOST  -2005530520
+#define  D3DERR_DEVICENOTRESET  -2005530519
+
+//d3d9vsync 走査線監視フラグ
+//垂直同期  フラグに1を指定するとタイマーモード（省略時は0走査線監視モード）
+#deffunc d3d9vsync int _vsyncoff
+	fps_cnt++
+	mref BMSCR,67
+	
+	if ginfo(2)<0 or (ginfo(3) ! Target_ID) or (BMSCR(17) = 1) or (desktop_sizey ! ginfo(21))  {//非アクティブになった、解像度が変更された、初期化時のウィンドウと違った、操作先がbufferだった
+		Reset_f=1  //D3DDV9リセット準備フラグセット
+	}else{
+		if Reset_f=1 { //リセット準備フラグが立ってから1フレーム経過した
+			Reset_f=2 //リセットフラグセット（アクティブになってから1フレーム待つため）
+		}else{
+			if Reset_f=2  {//リセットフラグが立っている
+				D3D9_TestCooperativeLevel objd3ddv
+				if D3DERR_DEVICENOTRESET=stat or stat=0 {//リセットが可能
+					D3DDV9_Reset 
+					Reset_f=0
+				}
+
+			}
+		}
+	}
+	
+	to=t
+	Rasterok_f=0
+	Processing_time10+Processing_time
+	if (fps_cnt\10)=0 {cpu10=(double(Processing_time10)*10)/fps_time:Processing_time10=0}
+	cpu=double(Processing_time*100)/fps_time
+	desktop_sizey=ginfo(21)
+	adjust=((60.0/double(RefreshRate))*(double(desktop_sizey)/1080))//解像度とリフレッシュレートによって1ラインの時間が変るので係数を出す
+	Raster_ms=double(desktop_sizey)/Refresh_time//1msで移動する走査線数
+	if (ginfo(7)<ginfo(21)) and (ginfo(7)>0) {WinRaster=ginfo(7)}else{WinRaster=ginfo(21)}//ウィンドウ下部位置とデスクトップＹサイズを比較して低い方をラスター比較位置にする
+	dup Raster,RasterStatus(1)
+	WinUpRaster=limit(ginfo(5)-adjust*10,0,ginfo(5))
+	
+	if (_vsyncoff | vsyncoff | Reset_f)=0 and vsyncon=0	{ //水平走査線監視処理ON
+		if ginfo(13)>=ginfo(21) {Sleep_adjust=Sleep_adjust_full } //フルスクリーン時スリープ修正値
+		timA = _timeGetTime()
+		Processing_time = timA - timB //前回監視開始からの現在までの経過時間(監視期間も含まれるからメイン処理時間より1ms程度余分になる)
+		sleep_tim=limit(fps_time-((timA - timC))-Sleep_adjust,0,fps_time)//スリープ時間（前回監視位置を超えたらSleep_adjust分短く）
+		if sleep_tim>0 {_Sleep sleep_tim}//スリープ
+
+		timB=_timeGetTime()
+		if ginfo(13)>=ginfo(21) {//ウィンドウサイズがデスクトップサイズ以上（フルスクリーンとして処理開始）
+			_WinRaster=WinRaster-(adjust*Raster_adjust)
+			IDirect3DDevice9_GetRasterStatus objd3ddv,0,varptr(RasterStatus)
+			if   RasterStatus=1 or Raster=0 or  (Raster>=_WinRaster) {
+				
+			}else{
+				Raster_bak=Raster
+				repeat
+					IDirect3DDevice9_GetRasterStatus objd3ddv,0,varptr(RasterStatus)
+					if   RasterStatus=1 or Raster=0 or  (Raster>=_WinRaster) {Rasterok_f=1:break}
+					if (cnt\100)=99 {if Raster_bak=Raster{break}else{Raster_bak=Raster}}//無限ループ回避策（100回ループしても同じ走査線数だったら抜ける）多分必要ないだろうけど・・・
+				loop
+			}
+		}else{
+			IDirect3DDevice9_GetRasterStatus objd3ddv,0,varptr(RasterStatus)
+			if Raster>=WinRaster {
+				Sleep_adjust=limit((Raster+Raster_ms-WinRaster)/Raster_ms,1,fps_time)//スリープ終了後すぐに監視位置を越えてるので次回のスリープを短くする修正値
+			}else{
+				Sleep_adjust=0
+				Raster_bak=Raster
+				repeat
+					IDirect3DDevice9_GetRasterStatus objd3ddv,0,varptr(RasterStatus)
+					if   (RasterStatus=1 or Raster=0 or Raster>=WinRaster) {Rasterok_f=1:break}
+					if (cnt\100)=99 {if Raster_bak=Raster{break}else{Raster_bak=Raster}}
+				loop
+			}
+		}
+		fs_tim=0.0
+		timC=_timeGetTime()
+		Start_tim=timC
+	}else{ //タイマー処理ON
+
+		fs_tim+fps_time //1フレームの時間を足して次フレームスタート時間にする
+		if fs_tim > 50 {Start_tim+50:fs_tim-50} //HSPDX使用時は単精度になるから桁数を抑える
+		timB=_timeGetTime()
+		sms=fs_tim-(timB-Start_tim) //次フレームスタート時間からスタートからの時間を引いてスリープ時間にする（結果が負なら1フレームの時間を越えた）
+		if sms < 0 {fs_tim-sms} //1フレームの時間以上使用したからオーバー分をフレームスタート時間に加算
+		_Sleep limit(sms,0,fps_time+1) //小数点以下のスリープは出来ないから最大スリープ時間を+1する
+		if (vsyncoff\2)=0 and Reset_f=0	{gosub *GetRaster}//GetRasterStatusが使えるなら使う
+		Processing_time=timB-timC//1フレームのスリープ時間を抜いた時間（処理に掛かった時間）
+		timC=_timeGetTime()
+	}
+	t=timC/1000
+	if t ! to {d3d9vsync_fps=fps_cnt-fps_cnt_old:fps_cnt_old=fps_cnt}
+return Rasterok_f //これが1の場合スリープ時間が少なかった（水平走査線取得に対応してる場合）
+
+*GetRaster
+	IDirect3DDevice9_GetRasterStatus objd3ddv,0,varptr(RasterStatus)
+	if   (Raster<=WinUpRaster or Raster>=WinRaster) {//メインウィンドウ外なら抜ける
+		return
+	}else{
+		if _vsyncoff>0 or vsyncon=0 {Rasterok_f=1:return }//タイマーモードなのですぐに抜ける
+		Raster_bak=Raster
+		repeat
+			IDirect3DDevice9_GetRasterStatus objd3ddv,0,varptr(RasterStatus)
+			if   (Raster<=_WinRaster or Raster>=WinRaster) {Rasterok_f=1:break}
+			if (cnt\100)=99 {if Raster_bak=Raster{break}else{Raster_bak=Raster}}
+		loop
+	}		
+return
+
+//d3d9vsync_end
+//d3d9vsync終了処理
+#deffunc d3d9vsync_end onexit
+	if tBP {_timeEndPeriod 1:tEP=0}
+	if vartype(objd3ddv)=6 {delcom objd3ddv:objd3ddv=0}
+	if vartype(objd3d)=6 {delcom objd3d:objd3d=0}
+return
+
+//d3d9vsync_logsave
+//ログ保存
+#deffunc d3d9vsync_logsave
+	D3DCAPS9_log="-------------------------------\n	D3DDISPLAYMODE\n-------------------------------\n"
+	repeat 4
+		D3DCAPS9_log+=strf("%2d :  %d\n",cnt,D3DFORMAT(cnt))
+	loop
+	D3DCAPS9_log+"\n-------------------------------\n	D3DCAPS9\n-------------------------------\n"
+	repeat 76
+		if cnt=62 {D3DCAPS9_log+"D3DVSHADERCAPS2_0 VS20Caps{\n"}
+		if cnt=66 {D3DCAPS9_log+"D3DPSHADERCAPS2_0 PS20Caps{\n"}
+		D3DCAPS9_log+=strf("%2d :  %s",cnt,str(D3DCAPS9(cnt)))
+		if cnt=49 {D3DCAPS9_log+strf("   VertexShaderVersion(%d,%d)",D3DVP_VERSION(D3DCAPS9(cnt)))}
+		if cnt=51 {D3DCAPS9_log+strf("   PixelShaderVersion(%d,%d)",D3DVP_VERSION(D3DCAPS9(cnt)))}	
+		if cnt=65 or cnt=69 {D3DCAPS9_log+"\n	}\n"}else{D3DCAPS9_log+"\n"}
+	loop
+	D3DCAPS9_log+"\n-------------------------------\n	D3DPRESENT_PARAMETERS\n-------------------------------\n"
+	repeat 14
+		D3DCAPS9_log+=strf("%2d :  %d\n",cnt,d3dpp(cnt))
+	loop
+	notesel D3DCAPS9_log
+	notesave  "d3d9vsync.log"
+return
+
+#global

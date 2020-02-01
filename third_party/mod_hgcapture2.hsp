@@ -1,0 +1,261 @@
+#module "mod_hgcapture2"
+#define global mod_hgcapture2version 0.5
+#define global SRCCOPY  $00CC0020;// { dest = source }
+#define global SRCPAINT  $00EE0086;// { dest = source OR dest }
+#define global SRCAND  $008800C6;// { dest = source AND dest }
+#define global SRCINVERT  $00660046;// { dest = source XOR dest }
+#define global SRCERASE  $00440328;// { dest = source AND (NOT dest ) }
+#define global NOTSRCCOPY  $00330008;// { dest = (NOT source) }
+#define global NOTSRCERASE  $001100A6;// { dest = (NOT src) AND (NOT dest) }
+#define global MERGECOPY  $00C000CA;// { dest = (source AND pattern) }
+#define global MERGEPAINT  $00BB0226;// { dest = (NOT source) OR dest }
+#define global PATCOPY  $00F00021;// { dest = pattern }
+#define global PATPAINT  $00FB0A09;// { dest = DPSnoo }
+#define global PATINVERT  $005A0049;// { dest = pattern XOR dest }
+#define global DSTINVERT  $00550009;// { dest = (NOT dest) }
+#define global BLACKNESS  $00000042;// { dest = BLACK }
+#define global WHITENESS  $00FF0062;// { dest = WHITE
+
+#define global BLACKONWHITE        1
+#define global COLORONCOLOR        3
+#define global HALFTONE            4
+
+#uselib "gdi32.dll"
+#cfunc SetDIBits "SetDIBits" int,int,int,int,int,var,int
+#cfunc SetDIBitsToDevice "SetDIBitsToDevice" int,int,int,int,int,int,int,int,int,int,var,int
+#cfunc StretchDIBits "StretchDIBits" int,int,int,int,int,int,int,int,int,int,var,int,int
+#func SetBrushOrgEx "SetBrushOrgEx" int,int,int,int
+#func SetStretchBltMode "SetStretchBltMode" int,int
+#usecom IDirect3DDevice8 "{7385E5DF-8FE8-41D5-86B6-D7B48547B6CF}"
+#comfunc IDirect3DDevice8_AddRef			1	
+#comfunc IDirect3DDevice8_TestCooperativeLevel 3
+#comfunc IDirect3DDevice8_CreateImageSurface 27 int,int,int,int
+#comfunc IDirect3DDevice8_CopyRects 			28 int,int,int,int,int
+#comfunc IDirect3DDevice8_GetRenderTarget		32 int
+#define  DIB_PAL_COLORS  1 ;DIBカラーは論理パレットによる
+#define  DIB_RGB_COLORS  0 ;DIBカラーはRGBカラー値
+
+#usecom IID_IDirect3DSurface8 "{B96EEBCA-B326-4ea5-882F-2FF5BAE021DD}" 
+#comfunc IDirect3DSurface8_GetDesc			8 int
+#comfunc IDirect3DSurface8_LockRect			9 int,int,int
+#comfunc IDirect3DSurface8_UnlockRect		10
+
+#usecom IID_IDirect3DTexture8 "{E4CDD575-2866-4f01-B12E-7EECE1EC9358}"
+#comfunc IDirect3DTexture8_GetSurfaceLevel	15 int,int
+
+#define  D3DPOOL_DEFAULT	0
+#define  D3DPOOL_MANAGED    1
+#define  D3DPOOL_SYSTEMMEM  2
+
+
+#define D3DUSAGE_DEPTHSTENCIL       0x00000002
+#define D3DUSAGE_DYNAMIC            0x00000200
+#define D3DUSAGE_AUTOGENMIPMAP      0x00000400 
+
+#define D3DLOCK_READONLY           0x00000010
+#define D3DLOCK_DISCARD             0x00002000
+#define D3DLOCK_NOSYSLOCK          0x00000800
+#define D3DLOCK_DONOTWAIT          0x00004000
+#define D3DLOCK_NO_DIRTY_UPDATE     0x00008000
+
+#define D3DFMT_R8G8B8		20	;24 ビットの RGB 各色 8 ビット
+#define D3DFMT_A8R8G8B8		21	;32 ビットの ARGB アルファ含む各色 8 ビット
+#define D3DFMT_X8R8G8B8		22	;32 ビットの RGB 各色 8 ビット
+#define D3DFMT_R5G6B5		23	;16 ビットの RGB 赤5 緑6 青5 ビット
+#define D3DFMT_X1R5G5B5		24	;16 ビットの RGB 各色 5 ビット
+#define D3DFMT_A1R5G5B5		25	;16 ビットの ARGB アルファ 1 ビット 各色 8 ビット
+#define D3DFMT_A4R4G4B4		26	;16 ビットの ARGB アルファ含む各色 4 ビット
+#define D3DFMT_R3G3B2		27	;8 ビットの RGB 赤3 緑3 青2 ビット
+#define D3DFMT_A8		28	;8 ビットのアルファのみ。
+#define D3DFMT_A8R3G3B2		29	;16 ビットの ARGB アルファ 8 ビット 赤緑 3 ビット 青 2 ビット
+#define D3DFMT_X4R4G4B4		30	;16 ビットの RGB 各色 4 ビット
+#define D3DFMT_A2B10G10R10	31	;32 ビットの ABGR アルファに 2 ビット 各色 10 ビット
+#define D3DFMT_A8B8G8R8		32	;32 ビットの ARGB アルファ含む各色 8 ビット
+#define D3DFMT_X8B8G8R8		33	;32 ビットの RGB 各色 8 ビット
+#define D3DFMT_G16R16		34	;32 ビットの GR 各色 16 ビット
+#define D3DFMT_A2R10G10B10	35	;32 ビットの ARGB アルファに 2 ビット 各色 10 ビット
+
+#define BI_BITFIELDS 0x00000003
+
+#enum SURFACE = 0
+#enum RENDERTARGET
+#enum PTRD3DDEV
+#enum PTRD3DDEVCOMEND
+
+#undef  hgini
+#undef  hgdraw
+//HGIMG3のhgdrawを乗っ取ってhgdrfを1に
+#define global hgdraw(%1=0) _hgdraw %1
+#deffunc _hgdraw int p1
+	hgdraw@hsp p1
+	hgdrf =1
+	return
+
+//HGIMG3のhginiを乗っ取ってhgcapture2_initを追加で実行
+//statに何ビット色なのか返る
+#define global hgini(%1=0,%2=0) __hgini %1,%2 
+#deffunc __hgini int p1,int p2
+	mref bm@HGIMG,67
+	hgmode@HGIMG = bm@HGIMG(3)
+	_hgini p1,p2
+	;
+	hgsel@HGIMG=ginfo(3)
+	buffer WORKSCR,128,128,hgmode@HGIMG
+	gsel hgsel@HGIMG
+	
+	wait 1
+
+//hgcapture2初期化
+	hgcapture2_init
+	return
+
+
+//mod_hgcapture2初期化 (hgini内で実行されるので通常自分で実行する必要は無い)
+//hgcapture2_init 
+//statに何ビット色なのか返る
+#deffunc hgcapture2_init
+	
+	if LPBITMAPINFO {
+		hgcapture2_end
+	}
+	dimtype com,6,PTRD3DDEVCOMEND
+	dim ret,PTRD3DDEVCOMEND
+
+	hggetreq ret(PTRD3DDEV),SYSREQ_PTRD3DDEV
+	newcom com(PTRD3DDEV), , -1, ret(PTRD3DDEV)
+	IDirect3DDevice8_AddRef com(PTRD3DDEV)
+
+	IDirect3DDevice8_GetRenderTarget com(PTRD3DDEV),varptr(ret(RENDERTARGET))	:if stat : dialog "error "+__line__+": GetRenderTargetData "+stat : end
+	newcom com(RENDERTARGET), , -1, ret(RENDERTARGET)
+	dupptr dup_RENDERTARGET,ret(RENDERTARGET),4,4
+
+	dim D3DSURFACE_DESC,8
+	
+	IDirect3DSurface8_GetDesc com(RENDERTARGET),varptr(D3DSURFACE_DESC)
+	delcom com(RENDERTARGET)
+	
+	dup dup_D3DFORMAT,D3DSURFACE_DESC
+	dup dup_tsizex,D3DSURFACE_DESC(6)
+	dup dup_tsizey,D3DSURFACE_DESC(7)
+	tsizex=dup_tsizex
+	tsizey=dup_tsizey
+	IDirect3DDevice8_CreateImageSurface com(PTRD3DDEV),D3DSURFACE_DESC(6),D3DSURFACE_DESC(7),D3DSURFACE_DESC,varptr(ret(SURFACE))
+	newcom com(SURFACE), , -1, ret(SURFACE)
+	dim D3DLOCKED_RECT8,2
+
+	bit(D3DFMT_R8G8B8)=24,32,32,16,16,16,16,8,8,16,16,32,32,32,32,32
+
+	biCompression(D3DFMT_R5G6B5)=BI_BITFIELDS
+	biCompression(D3DFMT_A4R4G4B4)=BI_BITFIELDS
+	biCompression(D3DFMT_A8R3G3B2)=BI_BITFIELDS
+	biCompression(D3DFMT_X4R4G4B4)=BI_BITFIELDS
+	biCompression(D3DFMT_A2B10G10R10)=BI_BITFIELDS
+	biCompression(D3DFMT_A8B8G8R8)=BI_BITFIELDS
+	biCompression(D3DFMT_G16R16)=BI_BITFIELDS
+	biCompression(D3DFMT_A2R10G10B10)=BI_BITFIELDS
+	
+	dim bmiColors_mask,3,1
+	bmiColors_mask(0,D3DFMT_R5G6B5)=0xF800,0x07E0,0x001F
+	bmiColors_mask(0,D3DFMT_A4R4G4B4)=0xF00,0xF0,0xF
+	bmiColors_mask(0,D3DFMT_A8R3G3B2)=%111_000_00,%111_00,%11
+	bmiColors_mask(0,D3DFMT_X4R4G4B4)=%1111_0000_0000,%1111_0000,%1111
+	bmiColors_mask(0,D3DFMT_A2B10G10R10)=%1111111111,%1111111111_0000000000,%1111111111_0000000000_0000000000
+	bmiColors_mask(0,D3DFMT_A8B8G8R8)=$FF,$FF00,$FF0000
+	bmiColors_mask(0,D3DFMT_G16R16)=$FFFF,$FFFF0000,0
+	bmiColors_mask(0,D3DFMT_A2R10G10B10)=%1111111111_0000000000_0000000000,%1111111111_0000000000,%1111111111
+	dim LPBITMAPINFO,14
+
+	LPBITMAPINFO = 40 ,tsizex ,-tsizey ,((bit(dup_D3DFORMAT)<<16) | 1),biCompression(dup_D3DFORMAT),0	//上下反転したbitビットの色データとしてLPBITMAPINFOを設定
+	LPBITMAPINFO(10)=bmiColors_mask(0,dup_D3DFORMAT),bmiColors_mask(1,dup_D3DFORMAT),bmiColors_mask(2,dup_D3DFORMAT)
+
+	return bit(dup_D3DFORMAT)
+
+//DirectX画面データの取得
+//hgcapture2  id, s_left, s_top, s_sizx, s_sizy, d_left, d_top
+//id		=コピー先HSPバッファID
+//s_left	=コピー元矩形左
+//s_top		=コピー元矩形上
+//s_sizx	=コピー横サイズ
+//s_sizy	=コピー縦サイズ
+//d_left	=コピー先左
+//d_top		=コピー先上
+//コピーされたライン数がstatに返る
+//statが-1の場合システム変数 refstr に命令名とエラーコードが返る
+#define global hgcapture2(%1=-1,%2=0,%3=0,%4=dup_tsizex@mod_hgcapture2,%5=dup_tsizey@mod_hgcapture2,%6=0,%7=0) _hgcapture2 %1,%2,%3,%4,%5,%6,%7,0,0,0,0,0
+
+//拡大縮小ラスタオペレーション付きDirectX画面データの取得
+//hgcapture2Ex id, d_left, d_top, d_sizx, d_sizy, s_left, s_top, s_sizx, s_sizy,  mode, copyf
+//id		=コピー先HSPバッファID
+//d_left	=コピー先左
+//d_top		=コピー先上
+//d_sizx	=コピー先横サイズ
+//d_sizy	=コピー先縦サイズ
+//s_left	=コピー元矩形左
+//s_top		=コピー元矩形上
+//s_sizx	=コピー元横サイズ
+//s_sizy	=コピー元縦サイズ
+//modey		=ズームのモード(COLORONCOLORが通常,HALFTONEがgzoomのモード1と同じ)
+//copyfy	=ラスタオペレーション(SRCCOPYが通常、他にANDや色反転などがある)
+//コピーされたライン数がstatに返る
+//statが-1の場合システム変数 refstr に命令名とエラーコードが返る
+#define global hgcapture2Ex(%1=-1,%2=0,%3=0,%4=dup_tsizex@mod_hgcapture2,%5=dup_tsizey@mod_hgcapture2,%6=0,%7=0,%8=dup_tsizex@mod_hgcapture2,%9=dup_tsizey@mod_hgcapture2,%10=COLORONCOLOR,%11=SRCCOPY) _hgcapture2 %1,%6,%7,%8,%9,%2,%3,%4,%5,%10,%11,1
+
+#deffunc _hgcapture2 int id,int s_left,int s_top,int s_sizx,int s_sizy,int d_left ,int d_top ,int d_sizx ,int d_sizy,int mode,int copyf,int copyt
+if (hg_DevLost() ! 0) {mref _refstr,65:_refstr="DEVICELOST" :return -1}
+	if id < 0 {_id=ginfo(3)}else{_id=id}
+		if (((WHITENESS = copyf) or  (BLACKNESS = copyf))=0) and hgdrf {hgdrf=0	//hgdrfはhgdrawが実行されたら1になり1フレーム内に複数回hgcapture2しても無駄にCopyRectsを使わないようにしてる
+		//hgdrawとhgsyncの間にCopyRectsが実行されると少し処理時間が増す事がある（不安定）
+		//グラボ側の設定次第でCopyRectsの速度がだいぶ変る(自分の環境だとミップマップ詳細レベルを高画質とパフォーマンス優先設定で2,3倍違う)
+		//何故か詳細レベルを落としていてもフルスクリーンから復帰後などで重くなる事があるグラボ側のD3D設定を何か変更すると直る・・・（これは自分の環境に問題がある可能性が高いが）
+		//CopyRectsでもコピー座標サイズを指定できるがバッファ全体を対象にしないと処理時間が不安定になるのでDIBitsの方で対応
+		IDirect3DDevice8_GetRenderTarget com(PTRD3DDEV),varptr(ret(RENDERTARGET))	:if stat :mref _refstr,65:_refstr="GetRenderTarget D3DERR["+stat+"]" :DEVICELOST=-1:return -1
+		newcom com(RENDERTARGET), , -1, ret(RENDERTARGET)
+		delcom com(RENDERTARGET)
+		IDirect3DDevice8_CopyRects com(PTRD3DDEV),ret(RENDERTARGET),0,0,ret(SURFACE),0	:if stat :mref _refstr,65:_refstr="CopyRects D3DERR["+stat+"]" :DEVICELOST=-1:return -1
+	}
+	IDirect3DSurface8_LockRect com(SURFACE),varptr(D3DLOCKED_RECT8), 0, D3DLOCK_READONLY	:if stat :mref _refstr,65:_refstr="LockRect D3DERR["+stat+"]" :DEVICELOST=-1:return -1
+	id_bak=ginfo(3)
+	gsel _id
+	if copyt=0 {_s_sizy=s_top+s_sizy
+		 CopyLine = SetDIBitsToDevice(hdc, d_left, d_top, s_sizx,_s_sizy, s_left,-s_top, limit(_s_sizy-dup_tsizey,0,s_sizy), _s_sizy-limit(_s_sizy-dup_tsizey,0,s_sizy), D3DLOCKED_RECT8(1),LPBITMAPINFO, DIB_RGB_COLORS)
+
+	}else{
+		SetStretchBltMode hdc,mode
+		if mode=HALFTONE {SetBrushOrgEx hdc,0,0,0}
+		CopyLine = StretchDIBits(hdc, d_left, d_top, d_sizx,d_sizy,s_left, -s_top+(dup_tsizey-s_sizy), s_sizx, s_sizy, D3DLOCKED_RECT8(1), LPBITMAPINFO, DIB_RGB_COLORS, copyf) 
+	}
+	gsel id_bak	
+	IDirect3DSurface8_UnlockRect com(SURFACE)		:if stat :mref _refstr,65:_refstr="UnlockRect D3DERR["+stat+"]" :DEVICELOST=-1:return -1
+	return CopyLine
+
+//デバイスロストチェック(通常使う必要は無い)
+//変数 = hg_DevLost()
+//戻り値が0なら通常、-1ならデバイスロスト中、1ならデバイスロストから復帰した
+#defcfunc hg_DevLost
+	IDirect3DDevice8_TestCooperativeLevel com(PTRD3DDEV)
+	if  stat<0 {
+			DEVICELOST=-1
+		return -1
+	}else{
+		if DEVICELOST<0 {
+			DEVICELOST=0
+			hgcapture2_init
+			return 1
+		}
+	}
+	return 0
+
+//mod_hgcapture2で使用したCOMオブジェクト型変数の破棄（終了時に自動で呼ばれる）
+//hgcapture2_end
+//http://hsp.tv/play/pforum.php?mode=all&num=58920
+//のmod_hgResizeのhgResize命令を使う場合
+//hgcapture2_end	:hgResize	:hgcapture2_init
+//のようにする必要がある
+#deffunc hgcapture2_end onexit
+	dim LPBITMAPINFO,14
+	repeat PTRD3DDEVCOMEND
+		if vartype(com(cnt)) = 6 : delcom com(cnt)
+	loop
+	return
+
+#global

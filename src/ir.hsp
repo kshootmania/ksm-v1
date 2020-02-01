@@ -1,0 +1,118 @@
+
+#module ksm_ir
+
+#define neturl neturl@
+#define netrequest_get netrequest_get@
+#define netrequest_post netrequest_post@
+#define netexec netexec@
+#define netgetv netgetv@
+#define varmd5 varmd5@
+#define urlencode urlencode@
+#define jsonopen jsonopen@
+#define jsongeti jsongeti@
+#define jsongets jsongets@
+#define jsonclose jsonclose@
+
+#define getsize getsize@
+#define scrsize_w scrsize_w@
+#define scrsize_h scrsize_h@
+
+#define IMG_IR_POPUP IMG_IR_POPUP@
+#define IMG_IR_POPUP_TEMP IMG_IR_POPUP_TEMP@
+
+output=""
+popup_text=""
+
+#defcfunc ir_is_logged_in
+	// Note: ソースコード公開用に削除
+	return 0
+
+#deffunc ir_login
+	// Note: ソースコード公開用に削除
+
+*ir_login_error
+	dialog "Connection failed."
+*ir_login_success
+	return
+
+#deffunc ir_send_score
+	// Note: ソースコード公開用に削除
+	return -1
+
+#deffunc ir_send_chart
+	// Note: ソースコード公開用に削除
+	return -1
+
+#deffunc ir_popup_init
+	popup_startt=0
+	popup_endt=-10000
+	popup_height=1
+	alCreateImage IMG_IR_POPUP_TEMP, getsize(200), scrsize_h
+	return
+
+#deffunc ir_popup_set_text str text, int time, int is_error
+	popup_text=text
+	if(text=""){
+		popup_startt=0
+		popup_endt=-10000
+		alDeleteImage IMG_IR_POPUP_TEMP
+		alCreateImage IMG_IR_POPUP_TEMP, getsize(170), scrsize_h
+	}else{
+		popup_startt=d3timer@()
+		popup_endt=d3timer@()+time
+		alDeleteImage IMG_IR_POPUP_TEMP
+		alCreateImage IMG_IR_POPUP_TEMP, getsize(170), scrsize_h@
+		alCopyImageToImage IMG_IR_POPUP, IMG_IR_POPUP_TEMP, 0, 0, getsize(170), scrsize_h, getsize(170)*is_error, 0
+		alSelectImage IMG_IR_POPUP_TEMP
+		alColor 255,255,255
+		alFont "MS Gothic", getsize(11)
+		dim rect, 4
+		alDrawText_CalcRect rect, text, getsize(6), getsize(26), getsize(160), getsize(430)
+		popup_height=rect.3+getsize(32)
+		alDrawText text, getsize(6), getsize(26), getsize(160), getsize(430)
+	}
+	return
+
+#deffunc ir_popup_draw
+	timenow=d3timer@()
+	alResetCopyMode
+	if((popup_startt <= timenow) && (popup_startt + 200 > timenow)){
+		alCopyModeAlpha double(timenow - popup_startt) / 200
+		dx = -getsize(40) + getsize(40) * (timenow - popup_startt) / 200
+	}else:if((popup_startt + 200 <= timenow) && (popup_endt > timenow)){
+		alCopyModeAlpha 1.0f
+		dx = 0
+	}else:if((popup_endt <= timenow) && (popup_endt + 200 > timenow)){
+		alCopyModeAlpha double(popup_endt + 200 - timenow) / 200
+		dx = -getsize(40) + getsize(40) * (popup_endt + 200 - timenow) / 200
+	}else{
+		return
+	}
+	alCopyImageToScreen IMG_IR_POPUP_TEMP, 0, scrsize_w-getsize(170)-dx, scrsize_h-popup_height, getsize(170), popup_height
+	alResetCopyMode
+	return
+
+#defcfunc url_utf8_enc str src_string
+	return urlenc(utf8enc_auto(src_string))
+
+#defcfunc urlenc str src_string, local var_src_string, local url_string
+	var_src_string = src_string
+	urlencode@ url_string, var_src_string
+	strrep url_string, "%2D", "-"
+	strrep url_string, "%2E", "."
+	return url_string
+
+#defcfunc urldec str src_string, local var_src_string, local url_string
+	var_src_string = src_string
+	urldecode@ url_string, var_src_string
+	return url_string
+
+#defcfunc utf8enc_auto str src_string, local buf
+	buf=src_string
+	if (lpeek(buf, 0) & 0x00FFFFFF) == 0xBFBBEF{
+		DeleteUTF8BOM buf
+	}else{
+		buf=utf8enc(buf)
+	}
+	return buf
+#global

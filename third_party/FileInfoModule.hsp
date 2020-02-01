@@ -1,0 +1,463 @@
+/*=======================================================================================================
+                                                                        ファイルインフォモジュール２号
+HSP3.22         2011.04.06  新規作成(タイムスタンプ)
+                        18  追加(パス変換、判定)
+                      5. 9  修正：バグ取り(笑)
+HSP3.3          2012. 2.12  追加：FileI_bmove
+HSP3.31RC1            9.11  変更：FileI_GetFileTime,FileI_GetPathType(高速化)
+HSP3.31              11. 1  追加：FileI_ExplorerWithSelect
+                     12.19  追加：FileI_bcopy
+                        21  追加：FileI_mkdir,FileI_GetDriveType
+                2013. 1. 2  修正：バグ取り
+HSP3.4β1             7.16  廃止(統合＆仕様変更)：FileI_GetFileTime,FileI_GetTime
+                            追加：FileI_GetFileInfo,FileI_GetTime
+                            変更：FileI_GetPathType
+                            HSP Document Library対応
+HSP3.4β2             7.17  変更：FileI_bcopy(コールバック対応)
+                            追加：FileI_bcopy_Info,FileI_bcopy_Cancel
+                      9.11  名称変更：FileI_GetFileInfo→FileI_SelectFile
+                            追加：FileI_InfoFile
+---------------------------------------------------------------------------------------------------------
+%dll        ;                   HDL(HSP Document Library)対応ファイル。commonに放り込むだけで対応します。
+和謹製モジュール
+%port       ;   DLLやモジュールを別途用意する必要はありませんがWin32APIを使用しますので環境に依存します。
+Win
+%author     ;                                       Copyright (C) 2011-2013 衣日和 All rights reserved.
+衣日和
+%url        ;                                   最新版はこちらから。なんかてきとーWEB Site『略して仮。』
+http://www.tvg.ne.jp/menyukko/
+%note       ;                                                                           標準ファイル名
+FileInfoModule.hsp をインクルードする。
+%group
+ファイルインフォモジュール２号
+=======================================================================================================*/
+#ifndef FileInfoModuleIncluded
+#define FileInfoModuleIncluded
+#module FileInfoModule
+#uselib "kernel32.dll"
+#func MoveFile              "MoveFileA"             str, str                ;ファイル移動
+;#func CopyFile             "CopyFileA"             str, str, int           ;ファイルコピー
+#func CopyFileEx            "CopyFileExA"           str, str, var, var, var, int    ;↑差し替え
+#func VirtualProtect        "VirtualProtect"        var, int, int, var      ;マシン語を実行できるように
+#func GetFullPathName       "GetFullPathNameA"      str, int, var, nullptr  ;フルパス変換
+#func GetLongPathName       "GetLongPathNameA"      str, var, int           ;ロングパス変換
+#func GetShortPathName      "GetShortPathNameA"     str, var, int           ;ショートパス変換
+#func FileTimeToLocalFileTime   "FileTimeToLocalFileTime"   var, var        ;日本時間へ変換する
+#func FileTimeToSystemTime  "FileTimeToSystemTime"  var, var                ;機械的時間を人間的時間へ
+#func FindFirstFile         "FindFirstFileA"        str, var                ;条件一致のファイルを捜索
+#func FindNextFile          "FindNextFileA"         int, int                ;次の条件一致ファイル
+#func FindClose             "FindClose"             int                     ;条件検索終了のお知らせ
+#func GetLogicalDrives      "GetLogicalDrives"  ;現在のドライブを示すビットフラグを取得する 0bit:Aドラ～
+#func GetDriveType          "GetDriveTypeA"         str ;ドライブパスを渡してドライブの種類を得る
+
+#define PAGE_EXECUTE_READWRITE      $40     ;マシン語を実行できるように
+#define FILE_ATTRIBUTE_DIRECTORY    $10     ;ファイル属性：ディレクトリ
+#define INVALID_HANDLE_VALUE        -1      ;FindFirstFile失敗時の戻り値
+#define DRIVE_UNKNOWN               0       ;不明なドライブ     from WinBase.h
+#define DRIVE_NO_ROOT_DIR           1       ;ドライブではない
+#define DRIVE_REMOVABLE             2       ;交換可能(フロッピーとかMOとか)
+#define DRIVE_FIXED                 3       ;固定ドライブ(HDD)
+#define DRIVE_REMOTE                4       ;リモートとかネットワークとか
+#define DRIVE_CDROM                 5       ;CD-ROM
+#define DRIVE_RAMDISK               6       ;RAMディスク
+
+;#uselib "shlwapi.dll"
+;#func PathRemoveBackslash  "PathRemoveBackslashA"  var     ;strtrim()があるからいらなくなった。
+
+#uselib "user32.dll"
+#func SendMessage   "SendMessageA"  int, int, int, int  ;SendMsg
+
+;WIN32_FIND_DATA構造体  80*4[bytes]
+;   [0:属性][1-2:作成日時][3-4:アクセス日時][5-6:更新日時][7:][8:サイズLow][9-10:][11-75:名前][76-79:短名]
+;   日時はFILETIME構造体:世界協定時刻(UTC)→1601年1月1日からの経過100ナノ秒(64bits)
+
+/*=======================================================================================================
+%index
+FileI_SelectFile
+情報を取得するファイルを選択
+%prm
+FilePath
+FilePath [文字]対象を示すファイルパス文字列
+%inst
+モジュール内の変数にファイルの情報を取得します(直近の1回分のみ保持する)。取得した情報は取得関数を使って取り出します。
+
+FilePathには、対象となるファイル/フォルダのパスを相対パス/絶対パスで指定します。
+
+statには、0(パスが存在しない) or 1(パスはファイル) or 2(パスはフォルダ) or 4(パスはドライブ)のいずれかが返ります。1または2の時、取得関数は有効です。
+%href
+FileI_GetPathType
+FileI_InfoFile
+FileI_GetTime
+%------------------------------------------------------------------------------------------------------*/
+#deffunc FileI_SelectFile str s
+    Win32_Find_Data(79) = 0  : memset Win32_Find_Data, 0, 80 * 4    ;容量確保＆ぜろクリ
+
+    sb = FileI_GetPathFull(s)           ;絶対パスに変換＆区切りに'/'を使用していた場合'\'に変換
+    if strlen(sb) <= 3 {                ;ドライブ名を渡された可能性が高い
+        ib = FileI_GetDriveType(sb)                     ;FindFirstFileにドライブ名を渡すと挙動が怪しく
+        if ib == -1  : return 0  : else  : return 4     ;なるのでここで終了にする。
+    }
+
+    sb = strtrim(sb, 2, '\\')           ;FindFirstFileは末尾の \ に対応できないので取り除いておく。
+    FindFirstFile sb, Win32_Find_Data
+    if stat == INVALID_HANDLE_VALUE  : return 0     ;当該パスはひとつも見つからなかった...
+    FindClose stat
+    if Win32_Find_Data & FILE_ATTRIBUTE_DIRECTORY  : return 2   ;当該パスはフォルダ
+    return 1                                                    ;当該パスはフォルダ以外(つまりファイル)
+    ;stat==3 はフォルダもファイルもある場合...Win7現在あり得ない
+
+/*=======================================================================================================
+%index
+FileI_GetPathType
+パスの種類を判定
+%prm
+(FilePath)
+FilePath [文字]対象を示すファイルパス文字列
+%inst
+※この関数は、FileI_SelectFile命令の関数版としての機能を持ちます※
+指定のパスが存在するかを判定し、存在する場合にはその種類を返します。
+
+FilePathには、対象となるファイル/フォルダのパスを相対パス/絶対パスで指定します。
+
+返値：0(パスが存在しない) or 1(パスはファイル) or 2(パスはフォルダ) or 4(パスはドライブ)のいずれかです。
+%------------------------------------------------------------------------------------------------------*/
+#defcfunc FileI_GetPathType str s
+    FileI_SelectFile s  
+    return stat
+
+
+/*=======================================================================================================
+%index
+FileI_InfoFile
+選択したファイルの情報を取得
+%prm
+(Type)
+Type [定数]取得する情報の種類
+    0   : 属性
+    1,2 : 作成日時        (下位-上位)
+    3,4 : 最終アクセス日時(下位-上位)
+    5,6 : 最終更新日時    (下位-上位)
+    7,8 : ファイルサイズ  (上位-下位)
+%inst
+FileI_SelectFileで指定したファイルの各情報を取得します。
+
+属性を取得した場合は以下のビットフラグの合計となります。
+  $0001 (FILE_ATTRIBUTE_READONLY)  読み取り専用
+  $0002 (FILE_ATTRIBUTE_HIDDEN)    隠しファイル
+  $0004 (FILE_ATTRIBUTE_SYSTEM)    システムファイル
+  $0010 (FILE_ATTRIBUTE_DIRECTORY) ディレクトリ
+  $0020 (FILE_ATTRIBUTE_ARCHIVE)   アーカイブ
+  $0080 (FILE_ATTRIBUTE_NORMAL)    他のどの属性も持っていない
+  $0100 (FILE_ATTRIBUTE_TEMPORARY) テンポラリファイル
+  ...他
+
+日時(タイムスタンプ)は、世界協定時刻(UTC)で取得されます。つまり1601年1月1日からの経過100ナノ秒(64bits)でローカル時刻(日本時間)とは時差があります。
+分かりやすい形式＆時差加味した時間の取得はFileI_GetTimeで可能です。
+%href
+FileI_SelectFile
+FileI_GetPathType
+FileI_GetTime
+%------------------------------------------------------------------------------------------------------*/
+#defcfunc FileI_InfoFile int i
+    return Win32_Find_Data(i)
+
+/*=======================================================================================================
+%index
+FileI_GetTime
+ファイルのタイムスタンプを取得
+%prm
+(Stamp, Type)
+Stamp [定数]取得するタイムスタンプの種類
+    0(作成日時) or 1(最終アクセス日時) or 2(更新日時)
+Type  [定数]取得する日付・時刻の種類
+    0(年) or 1(月) or 2(曜日) or 3(日) or 4(時) or 5(分) or 6(秒) or 7(ミリ秒)
+%inst
+FileI_SelectFileで指定したファイルのタイムスタンプを取得します。
+曜日を取得(Type=2)した場合、0(日曜日)～6(土曜日)が返ります。
+%------------------------------------------------------------------------------------------------------*/
+#defcfunc FileI_GetTime int i, int o
+    ib = 0, 0, 0, 0, 0, 0
+    FileTimeToLocalFileTime Win32_Find_Data(i * 2 + 1), ib  ;世界協定時刻(UTC)をローカル時刻に変換
+    FileTimeToSystemTime ib, ib(2)                          ;FILETIMEをSYSTEMTIMEに変換
+    return wpeek(ib(2), o * 2)
+
+/*=======================================================================================================
+%index
+FileI_GetPathFull
+ファイルパスを絶対パスに変換
+%prm
+(FilePath)
+FilePath [文字]変換元のパス
+%inst
+指定したパスをドライブ名からのパス(絶対パス)へ変換します。フォルダ区切りに/を使用していた場合\に置き換わります。パスが通るかの判定は行いません。
+%href
+FileI_GetPathLong
+FileI_GetPathShort
+%------------------------------------------------------------------------------------------------------*/
+#defcfunc FileI_GetPathFull str s
+    sb = ""
+    GetFullPathName s, 0, sb  : memexpand sb, stat  ;バッファ用意
+    GetFullPathName s, stat, sb
+    return sb
+
+/*=======================================================================================================
+%index
+FileI_GetPathLong
+ファイルパスをロングパスに変換
+%prm
+(FilePath)
+FilePath [文字]変換元のパス
+%inst
+指定したパスをロングパスへ変換します。ロングパスは通常使用している形式のパスで絶対パスのことではありません。相対パスを指定した場合、指定した部分のみが変換の対象になります。
+また、パスが通らなかった場合は、""(空文字)が返ります。
+%href
+FileI_GetPathFull
+FileI_GetPathShort
+%------------------------------------------------------------------------------------------------------*/
+#defcfunc FileI_GetPathLong str s
+    sb = ""
+    GetLongPathName s, sb, 0  : if stat <= 0  : return ""
+    memexpand sb, stat
+    GetLongPathName s, sb, stat
+    return sb
+
+/*=======================================================================================================
+%index
+FileI_GetPathShort
+ファイルパスをショートパスに変換
+%prm
+(FilePath)
+FilePath [文字]変換元のパス
+%inst
+指定したパスをショートパスへ変換します。ショートパスは字数制限のある環境では有用ですがサポートされている必要があります。
+絶対パスのことではありませんので相対パスを指定した場合、指定した部分のみが変換の対象になります。
+また、パスが通らなかった場合は、""(空文字)が返ります。
+%href
+FileI_GetPathFull
+FileI_GetPathLong
+%------------------------------------------------------------------------------------------------------*/
+#defcfunc FileI_GetPathShort str s
+    ;ショートパス(短いパス)、昔懐かしいらしい形式のパスなのだとか...
+    ;ボリュームがサポートしていないとエラーがごにょとかorz
+    sb = ""
+    GetShortPathName s, sb, 0  : if stat <= 0  : return ""
+    memexpand sb, stat
+    GetShortPathName s, sb, stat
+    return sb
+
+/*=======================================================================================================
+%index
+FileI_bmove
+ファイル/フォルダ移動
+%prm
+ExistingFileName, NewFileName
+ExistingFileName [文字]移動元のファイル名
+NewFileName      [文字]移動先(新しい)ファイル名
+%inst
+既存のファイルまたはディレクトリを移動します(bcopyの移動版)。また、ファイル名の変更にも使えます。
+ファイルの場合はドライブ間を越えての移動も可能ですが、フォルダの場合は同一ドライブ内である必要があります。
+移動先に同名のパスが存在する場合、この命令は失敗します。
+
+statには、0以外(成功) or 0(失敗)が返ります。
+%------------------------------------------------------------------------------------------------------*/
+#deffunc FileI_bmove str b, str a   ;before→after
+    MoveFile b, a                   ;API呼び出すだけ
+    return stat                     ;将来的にはこーるばっくで監視を？
+
+/*=======================================================================================================
+%index
+FileI_bcopy
+ファイルのコピー
+%prm
+ExistingFileName, NewFileName, Flag, WinMessage, wParam, lParam
+ExistingFileName [文字]コピー元のファイル名
+NewFileName      [文字]コピー先(新しい)ファイル名
+Flag             [数値]ファイルが存在するときの動作
+WinMessage       [数値]コールバック中に受け取るウィンドウメッセージ番号
+wParam           [数値]ウィンドウメッセージ発行時のwParam値
+lParam           [数値]ウィンドウメッセージ発行時のlParam値
+%inst
+ExistingFileNameのファイルをNewFileNameというファイル名にコピーします。bcopyと違い、更新日時とファイル属性(読み取り専用とか)を引き継ぎます。
+
+Flagには、コピー開始時点でNewFileNameが存在していた時の動作を指定します。
+  0(既存のファイルを上書き)
+  1(ファイルが存在した場合はこの命令は失敗する,上書きはしない)
+
+WinMessageに 0以外 を指定すると、部分コピーが完了するたびに指定のウィンドウメッセージを発行します。
+システムとの衝突を避けるために WM_USER = 1024 = $400 以上の値にしたほうが無難です。
+発行先は、FileI_bcopy実行時のカレントウィンドウですのであらかじめ
+    oncmd gosub *xxx, WinMessage
+のようにしてメッセージ割り込みを設定しておいてください。
+このとき、wParamとlParamに指定した値がそのままシステム変数wparam,lparamに代入されます。
+
+HSPがメッセージ処理をしている間コピー作業は中断しますので、必要な処理が終わったらすぐ制御を返してください。
+また、メッセージ割り込み設定(oncmd)は必ずgosubキーワードとし、
+    return 0    ;コピーを続行する
+    return 1    ;コピーを中止する
+のいずれかで制御を返す必要があります。
+
+statには、0以外(成功) or 0(失敗)が返ります。
+%href
+FileI_bcopy_Info
+FileI_bcopy_Cancel
+%------------------------------------------------------------------------------------------------------*/
+#deffunc FileI_bcopy str b, str a, int f, int m, int w, int l
+    CancelFlag_CFE = 0                  ;キャンセルフラグ、初期化済みフラグも兼ねる
+    if length(CancelFlag_CFE) < 2 {     ;▽初期化(値ではなく配列数で判断)
+        CancelFlag_CFE(1) = 1               ;初期化フラグ：未初期化変数対策のためこんな形にf(^ ^;)
+        dim CopyProgressRoutine_CBB, 29     ;CALLBACK CopyProgressRoutine
+        CopyProgressRoutine_CBB( 0) = $8BEC8B55, $8B560845, $06893875, $890C458B, $458B0446, $08468910
+        CopyProgressRoutine_CBB( 6) = $8914458B, $458B0C46, $4846FF18, $00306683, $8B104689, $46891C45
+        CopyProgressRoutine_CBB(12) = $20458B14, $8B184689, $46892445, $28458B1C, $8B204689, $46892C45
+        CopyProgressRoutine_CBB(18) = $30458B24, $8B284689, $46893445, $3C468B2C, $1074C085, $FF4476FF
+        CopyProgressRoutine_CBB(24) = $FF504076, $56FF3876, $30468934, $5E30468B, $0034C25D
+        ib = 0                              ;ちなみに、CBBはCallBackのBinaryデータの略。
+        VirtualProtect CopyProgressRoutine_CBB,length(CopyProgressRoutine_CBB)*4,PAGE_EXECUTE_READWRITE,ib
+    }                                       ;ちなみに。CFEはCopyFileExの略。
+
+    PrmStruct_CFE = 0,0, 0,0, 0,0, 0,0, 0,0,0,0,0, 0,0,0,0,0, 0     ;コールバックが参照/代入するメモリ
+    ;               [  コルバ呼出時パラム代入部  ] [SndMsg部] [なんとなくカウントアップ]
+    if m  : PrmStruct_CFE(13) = varptr(SendMessage), hwnd, m, w, l  ;コールバック中にSendMessageさせる時
+    CopyFileEx b, a, CopyProgressRoutine_CBB, PrmStruct_CFE, CancelFlag_CFE, f
+    return stat
+
+;   このマシン語は、コールバックCopyProgressRoutineをDLLレスで実装するためのもの。
+;   コールバック不要の場合は、CopyFileEx関数の当該パラメをnullptrに変更すること。
+;   コールバック中にウィンドウメッセージを発生させて、いったんHSPに制御を返す機能付き！その際は
+;   必ず返値を設定すること！(0:処理続行  1:処理中止  2:処理中断...ってか中止、APIの設計が変わった？)
+;#include <windows.h>
+;typedef struct {       //作業用・受渡し用・通知用こみこみメモリ
+;   LARGE_INTEGER Prm1[4];  //1要素につき8バイト
+;           //[0]ファイル総データ量, [1]転送済みデータ量, [2]ストリーム総データ量, [3]ストリーム転送量
+;   DWORD  Prm2[2];         //[0]ストリーム番号, [1]なぜ関数が呼ばれたか
+;   HANDLE Prm3[2];         //[0]コピー元ファイルハンドル, [1]コピー先ファイルハンドル
+;   long StatBuf;           //関数が返した値
+;   long (WINAPI *pfnSendMessage) (HWND,long,long,long);        //SendMessage関数
+;   HWND WinHandle; long WinMsgId; long PrmW; long PrmL;        //SendMessage関数パラ
+;   long Countup;           //呼び出されるたびにカウントアップする
+;} CB_CPR_PARAM;
+;// buf(0,2,4,6)各サイズ  buf(1,3,5,7)各サイズの上位  buf(13)SM関数のポインタ  buf(18)ここまで用意する
+;DWORD CALLBACK CopyProgressRoutine(LARGE_INTEGER TFS, LARGE_INTEGER TBT, LARGE_INTEGER SS, LARGE_INTEGER SBT, DWORD SN, DWORD CR, HANDLE SF, HANDLE DF, LPVOID D) {
+;   CB_CPR_PARAM *C = (CB_CPR_PARAM *)D;
+;   C->Countup ++;
+;   C->Prm1[0] = TFS; C->Prm1[1] = TBT; C->Prm1[2] =  SS; C->Prm1[3] = SBT;     //呼び出しパラ返し
+;   C->Prm2[0] =  SN; C->Prm2[1] =  CR; C->Prm3[0] =  SF; C->Prm3[1] =  DF;     //呼び出しパラ返し
+;   C->StatBuf = 0;
+;   if(C->WinMsgId) {       //WM_xxxあればSendMsgを発砲する(もっと適切な判定法あるよ？)
+;       C->StatBuf = C->pfnSendMessage(C->WinHandle, C->WinMsgId, C->PrmW, C->PrmL);
+;   }
+;   return C->StatBuf;
+;}
+
+/*=======================================================================================================
+%index
+FileI_bcopy_Info
+ファイルコピー割り込み時のステータス取得
+%prm
+(Type)
+Type [定数]取得するステータスの種類
+    0(ファイルの総サイズ) or 2(コピー済みデータ量)
+%inst
+FileI_bcopyで発生したメッセージ割り込み処理中にこの関数を実行することで、割り込みステータスを取得できます。
+
+なお、ファイルコピーが2Gまたは4G bytesを超えるファイルをサポートしているのに対してHSPで扱える標準的なint型の最大が2Gほどであることに留意してください。
+%href
+FileI_bcopy
+FileI_bcopy_Cancel
+%------------------------------------------------------------------------------------------------------*/
+#defcfunc FileI_bcopy_Info int i
+    return PrmStruct_CFE(i)
+
+/*=======================================================================================================
+%index
+FileI_bcopy_Cancel
+ファイルコピーの途中でコピーをキャンセルする
+%inst
+FileI_bcopyで発生したメッセージ割り込み処理中にこの命令を実行すると以降のコピーを中止します。
+%href
+FileI_bcopy
+FileI_bcopy_Info
+%------------------------------------------------------------------------------------------------------*/
+#deffunc FileI_bcopy_Cancel
+    CancelFlag_CFE = 1
+    return
+
+/*=======================================================================================================
+%index
+FileI_mkdir
+ディレクトリ製作
+%prm
+dirname
+dirname [文字]製作するディレクトリ名
+%inst
+dirnameで指定した名前でディレクトリを製作します。mkdirとの違いは複数階層のフォルダを一度に製作できることと既にフォルダが存在していてもエラーにならないことです。
+%------------------------------------------------------------------------------------------------------*/
+#deffunc FileI_mkdir str s, local b
+    sb = FileI_GetPathFull(s)       ;大胆にも絶対パスにする(/を\にしたいがために)
+    sb = strtrim(sb, 2, '\\')       ;末尾にあるかもしれない\を取り除く
+    ib = 0
+    split sb, "\\", b               ;配列化
+    repeat stat - 1, 1
+        if b(cnt) == ""  : break                ;splitのstatを信用しないw。
+        b(cnt) = b(cnt - 1) + "\\" + b(cnt)     ;パス連結
+        ib ++
+    loop
+    repeat ib, 1                    ;存在しないフォルダをチェックして１層ずつ作っていく
+        if FileI_GetPathType(b(cnt)) == 2  : continue   ;このフォルダは存在する
+        mkdir b(cnt)
+    loop
+    return
+
+/*=======================================================================================================
+%index
+FileI_GetDriveType
+ドライブの種類を取得
+%prm
+(DriveName)
+DriveName [文字]ドライブ名
+%inst
+指定のドライブが存在するか判定し、存在する場合にはそのドライブの種類を返します。
+
+DriveNameに "C:\" や "e:/" などのドライブを示す文字列(A～Zまでの一文字限定)を指定します。
+
+返値は以下のいずれかです。
+    -1  そんな名前のドライブは存在しない
+     0  不明な種類のドライブ
+     1  ドライブだけどドライブじゃない(わたした文字列が規則に沿っていないなど)
+     2  リムーバブルディスクドライブ
+     3  固定ドライブ(HDDなど)
+     4  リモートやネットワークドライブ
+     5  CD-ROM
+     6  RAMディスク
+%------------------------------------------------------------------------------------------------------*/
+#defcfunc FileI_GetDriveType str s
+    sb = s
+    if peek(sb, 1) != ':'  : return -1          ;あきらかにドライブ名じゃないものを渡された
+    ib = peek(sb, 0), -1
+    if 'a' <= ib & ib <= 'z'  : ib(1) = ib - 'a'
+    if 'A' <= ib & ib <= 'Z'  : ib(1) = ib - 'A'
+    if ib(1) < 0 | 25 < ib(1)  : return -1      ;a～z,A～Z以外の文字だったようだ。
+    GetLogicalDrives
+    if (stat & (1 << ib(1))) == 0  : return -1  ;そんなドライブは無いようだ。
+    GetDriveType s
+    return stat
+
+/*=======================================================================================================
+%index
+FileI_ExplorerWithSelect
+1アイテムを選択した状態でエクスプローラを開く
+%prm
+FilePath
+FilePath [文字]選択状態にするフォルダやファイルのパス
+%inst
+エクスプローラでFilePathで指定したフォルダ/ファイルの一つ上の階層のフォルダを開き、その中の指定アイテムを選択状態にします。
+%------------------------------------------------------------------------------------------------------*/
+#deffunc FileI_ExplorerWithSelect str s
+    ;パスが存在しない場合はエクスプローラのデフォルト画面が表示される
+    ;※win7ではzipフォルダー内のファイルでもいけた。zipファイルまでのパスとその内部のパスは\記号でつなぐだけ。
+    exec "explorer /select,\"" + FileI_GetPathFull(s) + "\""
+    return
+
+; http://www.tvg.ne.jp/menyukko/ ; Copyright(C) 2011-2014 衣日和 All rights reserved.
+#global
+#endif
