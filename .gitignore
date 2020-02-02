@@ -3,7 +3,10 @@ cache/gate/jacket/*
 courses/
 data/
 score/
-songs/
+songs/*
+!songs/K-Shoot MANIA/
+songs/K-Shoot MANIA/*
+!songs/K-Shoot MANIA/.gitkeep
 config.ini
 *.exe
 hsptmp
