@@ -282,8 +282,6 @@
 	shake2len=1
 	shake2n=1
 	shake2type=1
-	keshuhstp=-50000
-	keshuhstp2=-50000
 	stat179p=1
 	tadj=0
 	stat0tp=0
@@ -1798,16 +1796,15 @@
 	stat4=0
 	stat4_2=0
 	totalcombo=0
-	dp=""
 	mlinkfailed=0
 	pturnlp=pturnl
 	dim arfcnt,6
 	dim np,6
+	np=-1,-1,-1,-1,-1,-1
 	ddim cbcnt,1
 	beatn=4
 	beatd=4
 	t_finalnote=1
-	np=-1,-1,-1,-1,-1,-1
 	fl_Retr=0
 	fl_Gate=0
 	fl_Flan=0
@@ -2282,7 +2279,6 @@
 				pacnt=0
 			}
 		}*/
-		if(dp=""):dp=d.cnt2a
 		exc=0
 		if(cnt2a>0){
 			repeat
@@ -3077,7 +3073,6 @@
 				}
 			}
 		}
-		dp=d.cnt2a
 		pturnlp=pturnl
 		next_se="",""
 		next_se_vol=100,100
@@ -5329,7 +5324,6 @@
 			tiltrnow=(tiltrnow*(t_tp)+tiltrnowp*(140-t+tp))/140
 		}*/
 		ddim ror,1
-		ddim lineshift,1
 		ror=double(sgn(ro.0+ro.1)*min(abs(ro.0+ro.1),int(800+200*rhsrate)))
 		rotimed=2
 		if((csongver!="")&(strmid(csongver,0,3)!="120")&(t-tiltnowt<150)&(ror=0)&(tiltnow<3)&((tiltpre>=3)|(tiltnow>tiltpre))):ror=double(sgn(tiltnowstart2)*min(abs(tiltnowstart2),int(800+200*rhsrate))):rotimed=3
@@ -5341,7 +5335,6 @@
 		if(rotime2>double(t_tp)){
 			ror=(rorp*(rotime2-double(t_tp))+ror*double(t_tp))/rotime2
 		}
-		//lineshift=ror
 		
 		// 傾きキープ
 		if((csongver="")|(csongver="120")|(csongver="120a")){
@@ -5353,7 +5346,6 @@
 			if((tiltnow>=3)&(tiltnow<6)&((abs(ro.0+ro.1)<abs(rop.0+rop.1))|((sgn(ro.0+ro.1)+sgn(rop.0+rop.1)=0)&(absf(rorp)>18.0)))):ror=rorp:ro=rop.0,rop.1
 		}
 		
-		lineshift=0.0f//ror
 		dim anaturnnextfl,2
 		repeat 2
 			anaturnnextfl.cnt=(((anaturnnextt.cnt-(t+ttp*adj-analogdelay))>180)|((anaturnnextt.cnt-(t+ttp*adj-analogdelay))<0))
@@ -7202,8 +7194,8 @@
 				pos (8+xsh)/ra+(anaranfl=2)*vw/ra/2,(300*cnt+300*((t+10000)\200)/200)/ra
 				gcopy 34,0,0,210/ra,64/ra
 			loop
+
 			// ショート/ロングオブジェクトの描画
-			sstat=min(min(min(min(min(notefcnt.0,notefcnt.1),notefcnt.2),notefcnt.3),notefcnt.4),notefcnt.5)
 			// ロングFX
 			repeat 2,4
 				gsel 5+163*(anaranfl=2)
