@@ -19,7 +19,12 @@ void InsertPointToLineGraph(LineGraph *pLineGraph, int measure, double v)
     pLineGraph->insert(static_cast<std::int64_t>(measure), v);
 }
 
-double LineGraphValueAt(const LineGraph *pLineGraph, int measure)
+void LineGraphValueAt(const LineGraph *pLineGraph, int measure, double *pRet)
 {
-    return pLineGraph->valueAt(static_cast<std::int64_t>(measure));
+    *pRet = pLineGraph->valueAt(static_cast<std::int64_t>(measure));
+}
+
+bool LineGraphContains(const LineGraph *pLineGraph, int measure)
+{
+    return static_cast<bool>(pLineGraph->count(measure));
 }

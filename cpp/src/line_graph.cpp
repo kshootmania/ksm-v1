@@ -44,23 +44,29 @@ std::size_t LineGraph::erase(Measure measure)
 
 double LineGraph::valueAt(Measure measure) const
 {
-    if (m_plots.size() == 0)
+    if (m_plots.empty())
     {
         return 0.0;
     }
 
     const auto secondItr = m_plots.upper_bound(measure);
-    const auto firstItr = std::prev(secondItr);
+    if (secondItr == m_plots.begin())
+    {
+        // Before the first plot
+        return (*secondItr).second.first;
+    }
 
+    const auto firstItr = std::prev(secondItr);
     const double firstValue = (*firstItr).second.second;
-    const double secondValue = (*secondItr).second.first;
 
     if (secondItr == m_plots.end())
     {
+        // After the last plot
         return firstValue;
     }
     else
     {
+        const double secondValue = (*secondItr).second.first;
         const double firstMeasure = (*firstItr).first;
         const double secondMeasure = (*secondItr).first;
         return firstValue + (secondValue - firstValue) * (measure - firstMeasure) / (secondMeasure - firstMeasure);
