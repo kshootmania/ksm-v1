@@ -7326,7 +7326,7 @@
 					pos (bt_xsh+bt_width*cnt)/ra+(anaranfl=2)*vw/ra/2+center_split_px*(cnt/2*2-1),(vh-300)/ra
 					if((t-judge.cnt.0)<75){
 						gmode 5,,,220
-						pos ginfo_cx+20-((t-judge.cnt.0)*20/75)/ra,ginfo_cy
+						pos ginfo_cx+(20-(t-judge.cnt.0)*20/75)/ra,ginfo_cy
 						gcopy 9,(40*judge.cnt.1-40+20-(t-judge.cnt.0)*20/75)/ra,0,(t-judge.cnt.0)*40/75/ra,300/ra
 					}else{
 						gmode 5,,,220+(judge.cnt.0-t+75)*220/80
@@ -7343,7 +7343,7 @@
 					pos (bt_xsh+(cnt-4)*fx_width)/ra+(anaranfl=2)*vw/ra/2+center_split_px*((cnt-4)*2-1),(vh-300)/ra
 					if((t-judge.cnt.0)<75){
 						gmode 5,,,200
-						pos ginfo_cx+41-((t-judge.cnt.0)*41/75)/ra,ginfo_cy
+						pos ginfo_cx+(41-(t-judge.cnt.0)*41/75)/ra,ginfo_cy
 						gcopy 44,(82*judge.cnt.1-82+41-(t-judge.cnt.0)*41/75)/ra,0,(t-judge.cnt.0)*82/75/ra,300/ra
 					}else{
 						gmode 5,,,200+(judge.cnt.0-t+75)*220/80
