@@ -202,6 +202,7 @@
 #func ren "rename" str, str
 
 #include "src/kshlib.as"
+#include "src/ksmcore.as"
 
 #uselib "bass.dll"
 #func BASS_Init "BASS_Init" int, int, int, int, int
