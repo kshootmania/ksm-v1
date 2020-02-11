@@ -7738,8 +7738,6 @@
 			ddim ztopnow,1
 			ddim ztopnow2,1
 			ztopnow2=LineGraphValueAt(zoom_top,cnow+sttp)
-			gsel 0
-			title ""+ztopnow2
 			if(csongver_int<167){
 				// ‹Œƒo[ƒWƒ‡ƒ“ŒÝŠ·
 				ztopnow2/=1.5f
