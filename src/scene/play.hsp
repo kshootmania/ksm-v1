@@ -7031,6 +7031,9 @@
 			//gsel 0
 			//if(output=0):redraw 0
 			// レーン描画
+			center_split_now=1.2f // FIXME: LineGraphを使う
+			anaranfl=2 // FIXME: 譜面にcenter_splitが含まれる場合だけ2にする
+			center_split_px=int(center_split_now*bt_width)/2/ra
 			if((bg>=1)&((lanesubflp=1)|(lanesubfl=1))){
 				gsel 51+118*(anaranfl=2)
 				gmode 0
@@ -7040,7 +7043,10 @@
 					boxf
 					pos vw/ra/2,0
 				}
-				gcopy 47,vw/ra,0,vw/ra,vh/ra
+				pos ginfo_cx-center_split_px,ginfo_cy
+				gcopy 47,vw/ra,0,vw/ra/2,vh/ra
+				pos ginfo_cx+vw/ra/2+center_split_px*2,ginfo_cy
+				gcopy 47,vw/ra+vw/ra/2,0,vw/ra/2,vh/ra
 			}
 			gsel 5+163*(anaranfl=2)
 			/*pos (5+xsh)/ra,0
@@ -7053,7 +7059,10 @@
 				boxf
 				pos vw/ra/2,0
 			}
-			gcopy 47,0,0,vw/ra,vh/ra
+			pos ginfo_cx-center_split_px,ginfo_cy
+			gcopy 47,0,0,vw/ra/2,vh/ra
+			pos ginfo_cx+vw/ra/2+center_split_px*2,ginfo_cy
+			gcopy 47,vw/ra/2,0,vw/ra/2,vh/ra
 			
 			// 小節線描画
 			beatn=4
@@ -7073,18 +7082,24 @@
 				if(cbcnt>=cnow-bpba_4){
 					stat1=-(hsrc(int(cbcnt),-1)*10*hs/bpba-vh+24)/ra
 					if(stat1!=stat1_){
-						pos xsh/ra+(anaranfl=2)*vw/ra/2,stat1
-						gcopy 15,0,0,220/ra,16/ra
+						pos xsh/ra+(anaranfl=2)*vw/ra/2-center_split_px,stat1
+						gcopy 15,0,0,220/ra/2,16/ra
+						pos ginfo_cx+220/ra/2+center_split_px*2,ginfo_cy
+						gcopy 15,220/ra/2,0,220/ra/2,16/ra
 						if(stat1<0):break
 						stat1_=stat1
 					}
 				}
 				cbcnt+=double(bpba)*beatn/beatd
 			loop
+
+			// レーン光沢アニメーションの描画
 			repeat 4
 				gmode 5,,,255
-				pos (8+xsh)/ra+(anaranfl=2)*vw/ra/2,(300*cnt+300*((t+10000)\200)/200)/ra
-				gcopy 34,0,0,210/ra,64/ra
+				pos (8+xsh)/ra+(anaranfl=2)*vw/ra/2-center_split_px,(300*cnt+300*((t+10000)\200)/200)/ra
+				gcopy 34,0,0,210/ra/2,64/ra
+				pos ginfo_cx+210/ra/2+center_split_px*2,ginfo_cy
+				gcopy 34,210/ra/2,0,210/ra/2,64/ra
 			loop
 
 			// ショート/ロングオブジェクトの描画
@@ -7117,7 +7132,7 @@
 						stat3=max(0,(hsrc1*10*hs/bpba)/ra+16/ra-vh/ra-7/ra+stat1)
 						stat4=max(0,-(hsrc1*10*hs/bpba)/ra-16/ra+7/ra)
 						gsel 5+163*(anaranfl=2)
-						pos (bt_xsh+(note.i.0-4)*fx_width)/ra+(anaranfl=2)*vw/ra/2, -(hsrc1*10*hs/bpba)/ra+vh/ra-16/ra+7/ra-stat1+stat3-slshift
+						pos (bt_xsh+(note.i.0-4)*fx_width)/ra+(anaranfl=2)*vw/ra/2+center_split_px*((note.i.0-4)*2-1), -(hsrc1*10*hs/bpba)/ra+vh/ra-16/ra+7/ra-stat1+stat3-slshift
 						if(stat1-stat3-stat4>0){
 							stat2=note.i.3-t
 							if((arstat.(note.i.0).2=i)&(stat2<=50)&(ljudge.(note.i.0-4)=0)){
@@ -7145,9 +7160,9 @@
 								lanesubfl=1
 								gsel 5+163*(anaranfl=2)
 							}
-							pos (bt_xsh+(note.i.0-4)*fx_width)/ra+(anaranfl=2)*vw/ra/2, -(hsrc1*10*hs/bpba)/ra+vh/ra-16/ra+7/ra-stat1-slshift
+							pos ginfo_cx, -(hsrc1*10*hs/bpba)/ra+vh/ra-16/ra+7/ra-stat1-slshift
 							gcopy 1,0,9,82/ra,1
-							pos (bt_xsh+(note.i.0-4)*fx_width)/ra+(anaranfl=2)*vw/ra/2, -(hsrc1*10*hs/bpba)/ra+vh/ra-6/ra-16/ra+7/ra-slshift
+							pos ginfo_cx, -(hsrc1*10*hs/bpba)/ra+vh/ra-6/ra-16/ra+7/ra-slshift
 							gcopy 156,0,0,82/ra,7/ra
 						}
 					}
@@ -7184,7 +7199,7 @@
 						if(stat1-stat3-stat4>0){
 							gsel 5+163*(anaranfl=2)
 							gmode 5,,,255
-							pos (bt_xsh+note.i.0*bt_width)/ra+(anaranfl=2)*vw/ra/2, -(hsrc1*10*hs/bpba+16)/ra+vh/ra+7/ra-stat1+stat3-slshift
+							pos (bt_xsh+note.i.0*bt_width)/ra+(anaranfl=2)*vw/ra/2+center_split_px*(note.i.0/2*2-1), -(hsrc1*10*hs/bpba+16)/ra+vh/ra+7/ra-stat1+stat3-slshift
 							stat2=note.i.3-t
 							if((arstat.(note.i.0).2=i)&(stat2<=50)&(shljudge.(note.i.0)=0)){
 								gcopy 151,0,0,40/ra,stat1-stat3-stat4
@@ -7198,7 +7213,7 @@
 							if(bg>=1){
 								gsel 51+118*(anaranfl=2)
 								gmode 6,,,256
-								pos (bt_xsh+note.i.0*bt_width)/ra+(anaranfl=2)*vw/ra/2, -(hsrc1*10*hs/bpba+16)/ra+vh/ra+7/ra-stat1+stat3-slshift
+								pos (bt_xsh+note.i.0*bt_width)/ra+(anaranfl=2)*vw/ra/2+center_split_px*(note.i.0/2*2-1), -(hsrc1*10*hs/bpba+16)/ra+vh/ra+7/ra-stat1+stat3-slshift
 								if((arstat.(note.i.0).2=i)&(stat2<=50)&(shljudge.(note.i.0)=0)){
 									gcopy 151,40/ra,0,40/ra,stat1-stat3-stat4
 								}else:if((arstat.(note.i.0).2=i)&(stat2<=50)&(shljudge.(note.i.0)=1)&((t\100)<50)){
@@ -7211,13 +7226,13 @@
 								lanesubfl=1
 							}
 							gmode 2
-							pos (bt_xsh+note.i.0*bt_width)/ra+(anaranfl=2)*vw/ra/2, -(hsrc1*10*hs/bpba-vh+16)/ra-slshift
+							pos ginfo_cx, -(hsrc1*10*hs/bpba-vh+16)/ra-slshift
 							gcopy 157,0,0,40/ra,7/ra
 							gmode 0
 							if(bg>=1){
 								gsel 51+118*(anaranfl=2)
 								gmode 2
-								pos (bt_xsh+note.i.0*bt_width)/ra+(anaranfl=2)*vw/ra/2,-(hsrc1*10*hs/bpba-vh+16)/ra-slshift
+								pos ginfo_cx,-(hsrc1*10*hs/bpba-vh+16)/ra-slshift
 								gcopy 2,40/ra,0,40/ra,7/ra
 								gmode 0
 								lanesubfl=1
@@ -7251,7 +7266,7 @@
 							break
 						}
 						gmode 7
-						pos (bt_xsh+(note.i.0-4)*fx_width)/ra+(anaranfl=2)*vw/ra/2, (-hsrc1*10*hs/bpba+vh-16+2-1)/ra-slshift
+						pos (bt_xsh+(note.i.0-4)*fx_width)/ra+(anaranfl=2)*vw/ra/2+center_split_px*((note.i.0-4)*2-1), (-hsrc1*10*hs/bpba+vh-16+2-1)/ra-slshift
 						if(notese.i=-1){
 							gcopy 43,0,(hsrc1*10*hs/bpba*8/vh*40)/ra,82/ra,40/ra
 						}else{
@@ -7286,7 +7301,7 @@
 						}
 						gsel 5+163*(anaranfl=2)
 						gmode 7
-						pos (bt_xsh+note.i.0*bt_width)/ra+(anaranfl=2)*vw/ra/2, (-hsrc1*10*hs/bpba-16+2+vh)/ra-slshift
+						pos (bt_xsh+note.i.0*bt_width)/ra+(anaranfl=2)*vw/ra/2+center_split_px*(note.i.0/2*2-1), (-hsrc1*10*hs/bpba-16+2+vh)/ra-slshift
 						gcopy 53+min(max((hsrc1*10*hs/bpba*8/vh),0),7)*9+note.i.6,0,0,40/ra,40/ra
 					}
 					i=note.i.5
@@ -7300,13 +7315,13 @@
 						judge.cnt.1=0
 						continue
 					}
+					pos (bt_xsh+bt_width*cnt)/ra+(anaranfl=2)*vw/ra/2+center_split_px*(cnt/2*2-1),(vh-300)/ra
 					if((t-judge.cnt.0)<75){
 						gmode 5,,,220
-						pos (bt_xsh+bt_width*cnt+20-(t-judge.cnt.0)*20/75)/ra+(anaranfl=2)*vw/ra/2,(vh-300)/ra
+						pos ginfo_cx+20-((t-judge.cnt.0)*20/75)/ra,ginfo_cy
 						gcopy 9,(40*judge.cnt.1-40+20-(t-judge.cnt.0)*20/75)/ra,0,(t-judge.cnt.0)*40/75/ra,300/ra
 					}else{
 						gmode 5,,,220+(judge.cnt.0-t+75)*220/80
-						pos (bt_xsh+bt_width*cnt)/ra+(anaranfl=2)*vw/ra/2,(vh-300)/ra
 						gcopy 9,(40*judge.cnt.1-40)/ra,0,40/ra,300/ra
 					}
 				}
@@ -7317,13 +7332,13 @@
 						judge.cnt.1=0
 						continue
 					}
+					pos (bt_xsh+(cnt-4)*fx_width)/ra+(anaranfl=2)*vw/ra/2+center_split_px*((cnt-4)*2-1),(vh-300)/ra
 					if((t-judge.cnt.0)<75){
 						gmode 5,,,200
-						pos (bt_xsh+(cnt-4)*fx_width+41-(t-judge.cnt.0)*41/75)/ra+(anaranfl=2)*vw/ra/2,(vh-300)/ra
+						pos ginfo_cx+41-((t-judge.cnt.0)*41/75)/ra,ginfo_cy
 						gcopy 44,(82*judge.cnt.1-82+41-(t-judge.cnt.0)*41/75)/ra,0,(t-judge.cnt.0)*82/75/ra,300/ra
 					}else{
 						gmode 5,,,200+(judge.cnt.0-t+75)*220/80
-						pos (bt_xsh+(cnt-4)*fx_width)/ra+(anaranfl=2)*vw/ra/2,(vh-300)/ra
 						gcopy 44,(82*judge.cnt.1-82)/ra,0,82/ra,300/ra
 					}
 				}
@@ -7563,9 +7578,9 @@
 					if(t-judgel.cnt0.cnt2.0>=500):judgelnext.cnt0=(cnt2+1)\judgelmax:continue
 					if(t-judgel.cnt0.cnt2.0<0):break
 					if(cnt0<=3){
-						pos (92+60*cnt0)*scrsize_h/480+(anaranfl=2)*judgel_winx/2,getsize(17)
+						pos (92+60*cnt0)*scrsize_h/480+(anaranfl=2)*judgel_winx/2+int(center_split_now*60)/2*(cnt0/2*2-1),getsize(17)
 					}else{
-						pos (92+30+120*(cnt0-4))*scrsize_h/480+(anaranfl=2)*judgel_winx/2,getsize(17)
+						pos (92+30+120*(cnt0-4))*scrsize_h/480+(anaranfl=2)*judgel_winx/2+int(center_split_now*60)/2*((cnt0-4)*2-1),getsize(17)
 					}
 					if((t-judgel.cnt0.cnt2.0<500)&(judgel.cnt0.cnt2.1=4)){
 						gcopy 17,getsize(86),getsize(86)*((t-judgel.cnt0.cnt2.0)*12/500),getsize(86),getsize(86)
@@ -7580,18 +7595,16 @@
 			loop
 			repeat 4
 				if(t-shlstartt.cnt>=0){
+					pos (92-17+60*cnt)*scrsize_h/480+(anaranfl=2)*judgel_winx/2+int(center_split_now*60)/2*(cnt/2*2-1),getsize(20)/2
 					if((t-shlstartt.cnt<500)&(shljudge.cnt=1)){
-						pos (92-17+60*cnt)*scrsize_h/480+(anaranfl=2)*judgel_winx/2,getsize(20)/2
 						gcopy 45,0,getsize(120)*((t-shlstartt.cnt)*8/500),getsize(120),getsize(120)
 					}else:if(shljudge.cnt=1){
-						pos (92-17+60*cnt)*scrsize_h/480+(anaranfl=2)*judgel_winx/2,getsize(20)/2
 						gcopy 45,0,getsize(120)*(9+((t-shlstartt.cnt-500)\1625)*26/1625),getsize(120),getsize(120)
 					}else{
 						if(shljudgep.cnt=1){
 							shljudgeendt.cnt=t
 						}
 						if(t-shljudgeendt.cnt<500){
-							pos (92-17+60*cnt)*scrsize_h/480+(anaranfl=2)*judgel_winx/2,getsize(20)/2
 							gcopy 45,0,getsize(120)*(34+(t-shljudgeendt.cnt)*8/500),getsize(120),getsize(120)
 						}
 					}
@@ -7599,18 +7612,16 @@
 			loop
 			repeat 2
 				if(t-lstartt.cnt>=0){
+					pos (96+120*cnt)*scrsize_h/480+(anaranfl=2)*judgel_winx/2+int(center_split_now*60)/2*(cnt*2-1),0
 					if((t-lstartt.cnt<500)&(ljudge.cnt=1)){
-						pos (96+120*cnt)*scrsize_h/480+(anaranfl=2)*judgel_winx/2,0
 						gcopy 30,0,getsize(140)*((t-lstartt.cnt)*8/500),getsize(140),getsize(140)
 					}else:if(ljudge.cnt=1){
-						pos (96+120*cnt)*scrsize_h/480+(anaranfl=2)*judgel_winx/2,0
 						gcopy 30,0,getsize(140)*(9+(((t-lstartt.cnt-500)\1625)*26/1625)),getsize(140),getsize(140)
 					}else{
 						if(ljudgep.cnt=1){
 							ljudgeendt.cnt=t
 						}
 						if(t-ljudgeendt.cnt<500){
-							pos (96+120*cnt)*scrsize_h/480+(anaranfl=2)*judgel_winx/2,0
 							gcopy 30,0,getsize(140)*(34+(t-ljudgeendt.cnt)*8/500),getsize(140),getsize(140)
 						}
 					}
