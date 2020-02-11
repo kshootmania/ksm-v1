@@ -166,14 +166,10 @@
 	dim anvol,131072,3
 	ansenum=0
 	dim anse,131072,2
-	ztopnum=0
-	dim ztop,131072,3
-	zbotnum=0
-	dim zbot,131072,3
-	zsidenum=0
-	dim zside,131072,3
-	ztiltnum=0
-	dim ztilt,131072,3
+	zoom_top=CreateLineGraph()
+	zoom_bottom=CreateLineGraph()
+	zoom_side=CreateLineGraph()
+	manual_tilt=CreateLineGraph()
 	divnum=0
 	dim div,8192
 	ddim rop,2
@@ -294,10 +290,6 @@
 	bpmlcfcnt_fx=0
 	bpmlcfcnt_fx_50ms=0
 	stpfcnt=0
-	ztopfcnt=0
-	zbotfcnt=0
-	zsidefcnt=0
-	ztiltfcnt=0
 	ddim ztopnowp,1
 	ddim zbotnowp,1
 	ddim zsidenowp,1
@@ -839,6 +831,16 @@
 			}
 			continue
 		}
+
+		// 現在のmeasure値(カウント値)
+		if(cnt3<0){
+			cmeasure=int(cbcnt)
+		}else:if(div.cnt3=0){
+			cmeasure=int(cbcnt)
+		}else{
+			cmeasure=(cnt2+1)*bpba*beatn/beatd/div.cnt3+int(cbcnt)
+		}
+		
 		if(headcmp(d.cnt,5,"tilt=")){
 			if(cnt3<0){
 				tilt.tiltnum.0=cbcnt+stpsh
@@ -871,37 +873,21 @@
 			}
 			if((f=1)|(tiltp=7)){
 				// 傾きの数値指定追加
-				if(cnt3<0){
-					ztilt.ztiltnum.0=int(cbcnt)
-				}else{
-					ztilt.ztiltnum.0=(cnt2+1)*bpba*beatn/beatd/div.cnt3+int(cbcnt)
-				}
-				if((f=0)&(tiltp=7)&(ztiltnum>0)){
+				if((f=0)&(tiltp=7)){
 					// 数値指定の次の通常指定の位置に一つ前の値の数値指定を追加
 					// (最後の数値指定の値を一定値で維持させる必要があるため)
-					stat1=ztilt.(ztiltnum-1).2
+					stat1=LineGraphValueAt(manual_tilt,cmeasure)
 				}else:if((int(strmid(d.cnt,5,16))>=-1000)&(int(strmid(d.cnt,5,16))<=1000)){
 					// 数値指定の値
 					stat1=int(double(strmid(d.cnt,5,16))*100000)
 				}
-				if((ztilt.ztiltnum.0=ztilt.max(ztiltnum-1,0).0)&(ztiltnum>0)){
-					ztilt.(ztiltnum-1).2=stat1
-				}else{
-					ztilt.ztiltnum.1=stat1
-					ztilt.ztiltnum.2=stat1
-					ztiltnum++
-				}
+				InsertPointToLineGraph manual_tilt,cmeasure,stat1
 			}
 			tiltp=tilt.tiltnum.1
 			if((tilt.tiltnum.0!=0)|(tilt.tiltnum.1!=0)):tiltnum++
 			continue
 		}
 		if(headcmp(d.cnt,9,"zoom_top=")){
-			if(cnt3<0){
-				ztop.ztopnum.0=int(cbcnt)
-			}else{
-				ztop.ztopnum.0=(cnt2+1)*bpba*beatn/beatd/div.cnt3+int(cbcnt)
-			}
 			if(csongver_int>=167){
 				f1=((int(strmid(d.cnt,9,16))<=65535)&(int(strmid(d.cnt,9,16))>=-65535))
 				f2=f1
@@ -912,21 +898,12 @@
 				f2=(int(strmid(d.cnt,9,4))>=-300)&(int(strmid(d.cnt,9,4))<=300)
 				stat1=4
 			}
-			if(f1&(ztop.ztopnum.0=ztop.max(ztopnum-1,0).0)&(ztopnum>0)){
-				ztop.(ztopnum-1).2=int(strmid(d.cnt,9,stat1))
-			}else:if(f2){
-				ztop.ztopnum.1=int(strmid(d.cnt,9,stat1))
-				ztop.ztopnum.2=int(strmid(d.cnt,9,stat1))
-				ztopnum++
+			if((f1&LineGraphContains(zoom_top,cmeasure))|f2){
+				InsertPointToLineGraph zoom_top,cmeasure,double(int(strmid(d.cnt,9,stat1)))
 			}
 			continue
 		}
 		if(headcmp(d.cnt,12,"zoom_bottom=")){
-			if(cnt3<0){
-				zbot.zbotnum.0=int(cbcnt)
-			}else{
-				zbot.zbotnum.0=(cnt2+1)*bpba*beatn/beatd/div.cnt3+int(cbcnt)
-			}
 			if(csongver_int>=167){
 				f1=((int(strmid(d.cnt,12,16))<=65535)&(int(strmid(d.cnt,12,16))>=-65535))
 				f2=f1
@@ -937,21 +914,12 @@
 				f2=(int(strmid(d.cnt,12,4))>=-300)&(int(strmid(d.cnt,12,4))<=300)
 				stat1=4
 			}
-			if(f1&(zbot.zbotnum.0=zbot.max(zbotnum-1,0).0)&(zbotnum>0)){
-				zbot.(zbotnum-1).2=int(strmid(d.cnt,12,stat1))
-			}else:if(f2){
-				zbot.zbotnum.1=int(strmid(d.cnt,12,stat1))
-				zbot.zbotnum.2=int(strmid(d.cnt,12,stat1))
-				zbotnum++
+			if((f1&LineGraphContains(zoom_bottom,cmeasure))|f2){
+				InsertPointToLineGraph zoom_bottom,cmeasure,double(int(strmid(d.cnt,12,stat1)))
 			}
 			continue
 		}
 		if(headcmp(d.cnt,10,"zoom_side=")){
-			if(cnt3<0){
-				zside.zsidenum.0=int(cbcnt)
-			}else{
-				zside.zsidenum.0=(cnt2+1)*bpba*beatn/beatd/div.cnt3+int(cbcnt)
-			}
 			if(csongver_int>=167){
 				f1=((int(strmid(d.cnt,10,16))<=65535)&(int(strmid(d.cnt,10,16))>=-65535))
 				f2=f1
@@ -962,12 +930,8 @@
 				f2=(int(strmid(d.cnt,10,4))>=-300)&(int(strmid(d.cnt,10,4))<=300)
 				stat1=4
 			}
-			if(f1&(zside.zsidenum.0=zside.max(zsidenum-1,0).0)&(zsidenum>0)){
-				zside.(zsidenum-1).2=int(strmid(d.cnt,10,stat1))
-			}else:if(f2){
-				zside.zsidenum.1=int(strmid(d.cnt,10,stat1))
-				zside.zsidenum.2=int(strmid(d.cnt,10,stat1))
-				zsidenum++
+			if((f1&LineGraphContains(zoom_side,cmeasure))|f2){
+				InsertPointToLineGraph zoom_side,cmeasure,double(int(strmid(d.cnt,10,stat1)))
 			}
 			continue
 		}
@@ -3300,26 +3264,6 @@
 	if(gaugemax>stat4_2):gaugemax=stat4_2
 	if(gaugemax=0):gaugemax=1
 	csongtotal=stat4_2*100/gaugemax
-	if(ztopnum=0){
-		ztop.0.0=0
-		ztop.0.1=0
-		ztopnum=1
-	}
-	if(zbotnum=0){
-		zbot.0.0=0
-		zbot.0.1=0
-		zbotnum=1
-	}
-	if(zsidenum=0){
-		zside.0.0=0
-		zside.0.1=0
-		zsidenum=1
-	}
-	if(ztiltnum=0){
-		ztilt.0.0=0
-		ztilt.0.1=0
-		ztiltnum=1
-	}
 	// 無駄な確保をやめる
 	sdim d,1
 	dim kar,notenum,8
@@ -3586,62 +3530,6 @@
 		cnt2=cnt
 		repeat 2
 			stp.cnt2.cnt=kar.cnt2.cnt
-		loop
-	loop
-	dim kar,ztopnum,3
-	repeat ztopnum
-		cnt2=cnt
-		repeat 3
-			kar.cnt2.cnt=ztop.cnt2.cnt
-		loop
-	loop
-	dim ztop,ztopnum,3
-	repeat ztopnum
-		cnt2=cnt
-		repeat 3
-			ztop.cnt2.cnt=kar.cnt2.cnt
-		loop
-	loop
-	dim kar,zbotnum,3
-	repeat zbotnum
-		cnt2=cnt
-		repeat 3
-			kar.cnt2.cnt=zbot.cnt2.cnt
-		loop
-	loop
-	dim zbot,zbotnum,3
-	repeat zbotnum
-		cnt2=cnt
-		repeat 3
-			zbot.cnt2.cnt=kar.cnt2.cnt
-		loop
-	loop
-	dim kar,zsidenum,3
-	repeat zsidenum
-		cnt2=cnt
-		repeat 3
-			kar.cnt2.cnt=zside.cnt2.cnt
-		loop
-	loop
-	dim zside,zsidenum,3
-	repeat zsidenum
-		cnt2=cnt
-		repeat 3
-			zside.cnt2.cnt=kar.cnt2.cnt
-		loop
-	loop
-	dim kar,ztiltnum,3
-	repeat ztiltnum
-		cnt2=cnt
-		repeat 3
-			kar.cnt2.cnt=ztilt.cnt2.cnt
-		loop
-	loop
-	dim ztilt,ztiltnum,3
-	repeat ztiltnum
-		cnt2=cnt
-		repeat 3
-			ztilt.cnt2.cnt=kar.cnt2.cnt
 		loop
 	loop
 	dim kar,1
@@ -4536,7 +4424,11 @@
 		  		if(se_ids_keys(cnt)==""):continue
 				BASS_SampleFree se_ids_values.cnt
 			loop
-			
+			DestroyLineGraph zoom_top
+			DestroyLineGraph zoom_bottom
+			DestroyLineGraph zoom_side
+			DestroyLineGraph manual_tilt
+
 			gosub *mdatafree
 			//BASS_SetConfig 24,1
 			BASS_SetConfig 1,updateperiod
@@ -7787,15 +7679,7 @@
 			// レーン傾きの数値指定の計算
 			ddim ztiltnow,1
 			ddim ztiltnow2,1
-			if(ztiltnum>=1):ztiltnow2=double(ztilt.0.1)*romax/100000
-			repeat ztiltnum-ztiltfcnt,ztiltfcnt
-				if(ztilt.cnt.0<=cnow+sttp){
-					if(cnt!=ztiltnum-1){
-						ztiltnow2=double(ztilt.cnt.2)*romax/100000+double(ztilt.(cnt+1).1-ztilt.cnt.2)*romax/100000*(cnow+sttp-ztilt.cnt.0)/max(ztilt.(cnt+1).0-ztilt.cnt.0,1)
-					}else:ztiltnow2=double(ztilt.cnt.2)*romax/100000
-					ztiltfcnt=cnt
-				}else:break
-			loop
+			ztiltnow2=LineGraphValueAt(manual_tilt,cnow+sttp)*romax/100000
 			if(cnt=0):ztiltnowp=ztiltnow2
 			ztiltnow=ztiltnow2*min(max(t_tp,1),ztilttime)/ztilttime+ztiltnowp*(ztilttime-min(max(t_tp,1),ztilttime))/ztilttime
 			ztiltrate=1.0f*ztilton*min(max(t_tp,1),ztiltontime)/ztiltontime+ztiltratep*(ztiltontime-min(max(t_tp,1),ztiltontime))/ztiltontime
@@ -7843,15 +7727,7 @@
 			}
 			ddim zsidenow,1
 			ddim zsidenow2,1
-			if(zsidenum>=1):zsidenow2=double(zside.0.1)
-			repeat zsidenum-zsidefcnt,zsidefcnt
-				if(zside.cnt.0<=cnow+sttp){
-					if(cnt!=zsidenum-1){
-						zsidenow2=double(zside.cnt.2)+double(zside.(cnt+1).1-zside.cnt.2)*(cnow+sttp-zside.cnt.0)/max(zside.(cnt+1).0-zside.cnt.0,1)
-					}else:zsidenow2=double(zside.cnt.2)
-					zsidefcnt=cnt
-				}else:break
-			loop
+			zsidenow2=LineGraphValueAt(zoom_side,cnow+sttp)
 			zsidenow2/=1.5f
 			zsidenow2/=2.0f
 			if(cnt=0):zsidenowp=zsidenow2
@@ -7861,15 +7737,9 @@
 			// 3D表示
 			ddim ztopnow,1
 			ddim ztopnow2,1
-			if(ztopnum>=1):ztopnow2=double(ztop.0.1)
-			repeat ztopnum-ztopfcnt,ztopfcnt
-				if(ztop.cnt.0<=cnow+sttp){
-					if(cnt!=ztopnum-1){
-						ztopnow2=double(ztop.cnt.2)+double(ztop.(cnt+1).1-ztop.cnt.2)*(cnow+sttp-ztop.cnt.0)/max(ztop.(cnt+1).0-ztop.cnt.0,1)
-					}else:ztopnow2=double(ztop.cnt.2)
-					ztopfcnt=cnt
-				}else:break
-			loop
+			ztopnow2=LineGraphValueAt(zoom_top,cnow+sttp)
+			gsel 0
+			title ""+ztopnow2
 			if(csongver_int<167){
 				// 旧バージョン互換
 				ztopnow2/=1.5f
@@ -7884,15 +7754,7 @@
 
 			ddim zbotnow,1
 			ddim zbotnow2,1
-			if(zbotnum>=1):zbotnow2=double(zbot.0.1)
-			repeat zbotnum-zbotfcnt,zbotfcnt
-				if(zbot.cnt.0<=cnow+sttp){
-					if(cnt!=zbotnum-1){
-						zbotnow2=double(zbot.cnt.2)+double(zbot.(cnt+1).1-zbot.cnt.2)*(cnow+sttp-zbot.cnt.0)/max(zbot.(cnt+1).0-zbot.cnt.0,1)
-					}else:zbotnow2=double(zbot.cnt.2)
-					zbotfcnt=cnt
-				}else:break
-			loop
+			zbotnow2=LineGraphValueAt(zoom_bottom,cnow+sttp)
 			zbotnow2/=1.5f
 			zbotnow2/=120.0f
 			if(zbotnow2>=0.0f):zbotnow2/=2.5f
