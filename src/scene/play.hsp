@@ -132,6 +132,7 @@
 	dim analoggr,131072
 	dim analoggrmax,2
 	anarannum=0
+	anaranfl=1
 	dim anaran,131072,3
 	dim anagrran,2,131072
 	dim analognext,131072
@@ -169,6 +170,7 @@
 	zoom_top=CreateLineGraph()
 	zoom_bottom=CreateLineGraph()
 	zoom_side=CreateLineGraph()
+	center_split=CreateLineGraph()
 	manual_tilt=CreateLineGraph()
 	divnum=0
 	dim div,8192
@@ -935,6 +937,13 @@
 			}
 			continue
 		}
+		if(headcmp(d.cnt,13,"center_split=")){
+			if((int(strmid(d.cnt,13,16))<=65535)&(int(strmid(d.cnt,13,16))>=-65535)){
+				InsertPointToLineGraph center_split,cmeasure,double(int(strmid(d.cnt,13,16)))
+			}
+			anaranfl=2
+			continue
+		}
 		if(headcmp(d.cnt,13,"laserrange_l=")){
 			anaran.anarannum.0=0^(pturna|(turn=1))
 			if(cnt3<0){
@@ -946,6 +955,7 @@
 				anaran.anarannum.2=2
 			}else:anaran.anarannum.2=1
 			anarannum++
+			anaranfl=2
 			continue
 		}
 		if(headcmp(d.cnt,13,"laserrange_r=")){
@@ -959,6 +969,7 @@
 				anaran.anarannum.2=2
 			}else:anaran.anarannum.2=1
 			anarannum++
+			anaranfl=2
 			continue
 		}
 		if(headcmp(d.cnt,12,"pfiltergain=")){
@@ -3226,9 +3237,6 @@
 			if((analog.cnt.1>=anaran.cnt2.1)&(analog.cnt.0=anaran.cnt2.0)):break
 		loop
 	loop
-	if(anarannum=0){
-		anaranfl=1
-	}else:anaranfl=2
 	if(adjmode=1){
 		repeat
 			note.notenum.0=2
@@ -4427,6 +4435,7 @@
 			DestroyLineGraph zoom_top
 			DestroyLineGraph zoom_bottom
 			DestroyLineGraph zoom_side
+			DestroyLineGraph center_split
 			DestroyLineGraph manual_tilt
 
 			gosub *mdatafree
@@ -7031,8 +7040,7 @@
 			//gsel 0
 			//if(output=0):redraw 0
 			// ƒŒ[ƒ“•`‰æ
-			center_split_now=1.2f // FIXME: LineGraph‚ðŽg‚¤
-			anaranfl=2 // FIXME: •ˆ–Ê‚Écenter_split‚ªŠÜ‚Ü‚ê‚éê‡‚¾‚¯2‚É‚·‚é
+			center_split_now=LineGraphValueAt(center_split,cnow+sttp)/100.0f
 			center_split_px=int(center_split_now*bt_width)/2/ra
 			if((bg>=1)&((lanesubflp=1)|(lanesubfl=1))){
 				gsel 51+118*(anaranfl=2)
