@@ -19,8 +19,8 @@
     - `src/scene/result.hsp`: ゲーム本体(結果表示画面)
     - `kshooteditor.hsp`: 譜面エディタ
 
-- 注意: ライセンスは付与していません
-    - ソースコードの扱いはゲーム本体(最新版)の利用規約に準拠します
+- リポジトリ内のファイルはMITライセンスで提供されています
+    - ただし、ランキング機能等を含む公式サイトで配布されているバイナリはその利用規約に準拠します
 
 -------
 
@@ -46,5 +46,5 @@
     - `src/scene/result.hsp`: Game (result screen)
     - `kshooteditor.hsp`: Chart editor
 
-- Caution: No public LICENSE is provided for this code
-    - You must follow the "Terms of Use" of the latest K-Shoot MANIA for the use of the source codes
+- The files in this repository are available under the MIT license.
+    - However, to use the binary (w/ online features) from the official website, you must follow the "Terms of Use".
