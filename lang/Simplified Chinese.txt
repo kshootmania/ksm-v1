@@ -51,6 +51,7 @@ m01-072|FULLCOMBO:
 m01-073| PERFECT : 
 m02-000|载入中.....
 m02-001|第一小节必须在谱面起始位置之后.
+m02-005|An error occurred while loading the chart.
 m02-010|---
 m02-011|Some charts in this course are missing.
 m02-012|The latest version of K-Shoot MANIA is required to play this course.

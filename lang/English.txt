@@ -51,6 +51,7 @@ m01-072|Full combo:
 m01-073| Perfect  : 
 m02-000|LOADING...
 m02-001|The first measure (--) must be specified at the start of the chart.
+m02-005|An error occurred while loading the chart.
 m02-010|---
 m02-011|Some charts in this course are missing.
 m02-012|The latest version of K-Shoot MANIA is required to play this course.

@@ -167,11 +167,6 @@
 	dim anvol,131072,3
 	ansenum=0
 	dim anse,131072,2
-	zoom_top=CreateLineGraph()
-	zoom_bottom=CreateLineGraph()
-	zoom_side=CreateLineGraph()
-	center_split=CreateLineGraph()
-	manual_tilt=CreateLineGraph()
 	divnum=0
 	dim div,8192
 	ddim rop,2
@@ -352,18 +347,20 @@
 		chdir dir_default+"\\songs"
 		state=st_select
 		return
-	}else{
-		notesel buf
-		noteload cnotesfile,-1
 	}
+
+	// 譜面ファイルの読み込み
+	notesel buf
+	noteload cnotesfile,-1
+
 	varmd5 csongmd5hash, buf, strlen(buf)
 	isutf8=0
 	if (lpeek(buf, 0) & 0x00FFFFFF) == 0xBFBBEF{
 		isutf8=1
 		DeleteUTF8BOM buf
 	}
-	//buf=replace(buf,"!--+!","\n")
-	
+
+	// IR用のファイルハッシュを計算
 	sdim buf_ir_chart,strlen(buf)
 	cnt3=-1
 	dim anagrcnt,2
@@ -384,8 +381,8 @@
 		}
 	loop
 	varmd5 csongmd5hash_ir_chart, buf_ir_chart, strlen(buf_ir_chart)
-	//sdim csongmd5hash_ir_chart,16
-	//KSHLib_GetIrChartMD5 cnotesfile, varptr(csongmd5hash_ir_chart)
+
+	// 譜面内容の読み込み
 	sp=notemax
 	buf=""
 	repeat sp
@@ -849,7 +846,6 @@
 			}else{
 				tilt.tiltnum.0=(cnt2+1)*bpba*beatn/beatd/div.cnt3+cbcnt
 			}
-			f=0
 			if(strmid(d.cnt,5,16)="normal"){
 				tilt.tiltnum.1=0
 			}else:if(strmid(d.cnt,5,16)="big"){
@@ -869,78 +865,14 @@
 			}else:if(strmid(d.cnt,5,16)="keep"){
 				tilt.tiltnum.1=4
 			}else{
-				// 傾きの数値指定
+				// 傾きの数値指定(値の推移計算はGameSystemに移管済み)
 				tilt.tiltnum.1=7
-				f=1
-			}
-			if((f=1)|(tiltp=7)){
-				// 傾きの数値指定追加
-				if((f=0)&(tiltp=7)){
-					// 数値指定の次の通常指定の位置に一つ前の値の数値指定を追加
-					// (最後の数値指定の値を一定値で維持させる必要があるため)
-					stat1=LineGraphValueAt(manual_tilt,cmeasure)
-				}else:if((int(strmid(d.cnt,5,16))>=-1000)&(int(strmid(d.cnt,5,16))<=1000)){
-					// 数値指定の値
-					stat1=int(double(strmid(d.cnt,5,16))*100000)
-				}
-				InsertPointToLineGraph manual_tilt,cmeasure,stat1
 			}
 			tiltp=tilt.tiltnum.1
 			if((tilt.tiltnum.0!=0)|(tilt.tiltnum.1!=0)):tiltnum++
 			continue
 		}
-		if(headcmp(d.cnt,9,"zoom_top=")){
-			if(csongver_int>=167){
-				f1=((int(strmid(d.cnt,9,16))<=65535)&(int(strmid(d.cnt,9,16))>=-65535))
-				f2=f1
-				stat1=16
-			}else{
-				// 旧バージョン互換
-				f1=1
-				f2=(int(strmid(d.cnt,9,4))>=-300)&(int(strmid(d.cnt,9,4))<=300)
-				stat1=4
-			}
-			if((f1&LineGraphContains(zoom_top,cmeasure))|f2){
-				InsertPointToLineGraph zoom_top,cmeasure,double(int(strmid(d.cnt,9,stat1)))
-			}
-			continue
-		}
-		if(headcmp(d.cnt,12,"zoom_bottom=")){
-			if(csongver_int>=167){
-				f1=((int(strmid(d.cnt,12,16))<=65535)&(int(strmid(d.cnt,12,16))>=-65535))
-				f2=f1
-				stat1=16
-			}else{
-				// 旧バージョン互換
-				f1=1
-				f2=(int(strmid(d.cnt,12,4))>=-300)&(int(strmid(d.cnt,12,4))<=300)
-				stat1=4
-			}
-			if((f1&LineGraphContains(zoom_bottom,cmeasure))|f2){
-				InsertPointToLineGraph zoom_bottom,cmeasure,double(int(strmid(d.cnt,12,stat1)))
-			}
-			continue
-		}
-		if(headcmp(d.cnt,10,"zoom_side=")){
-			if(csongver_int>=167){
-				f1=((int(strmid(d.cnt,10,16))<=65535)&(int(strmid(d.cnt,10,16))>=-65535))
-				f2=f1
-				stat1=16
-			}else{
-				// 旧バージョン互換
-				f1=1
-				f2=(int(strmid(d.cnt,10,4))>=-300)&(int(strmid(d.cnt,10,4))<=300)
-				stat1=4
-			}
-			if((f1&LineGraphContains(zoom_side,cmeasure))|f2){
-				InsertPointToLineGraph zoom_side,cmeasure,double(int(strmid(d.cnt,10,stat1)))
-			}
-			continue
-		}
 		if(headcmp(d.cnt,13,"center_split=")){
-			if((int(strmid(d.cnt,13,16))<=65535)&(int(strmid(d.cnt,13,16))>=-65535)){
-				InsertPointToLineGraph center_split,cmeasure,double(int(strmid(d.cnt,13,16)))
-			}
 			anaranfl=2
 			continue
 		}
@@ -3675,7 +3607,7 @@
 		}
 	loop
 	/*if(length(ro)!=2):*/ddim ro,2
-	t_moex=-offset-T_MOEX_DELAY-globaloffset
+	t_moex=-offset-T_MOEX_DELAY-globaloffset // t_moex: expected music offset time
 	if((cmov=0)&(vmov=1)&(output=0)){
 		stat1=-voffset-T_MOEX_DELAY-globaloffset
 		if(stat1<0):mci "seek v to 0"
@@ -3974,7 +3906,16 @@
 	
 	csongfile_empty=(csongfile.0="")|(csongfile.0=".mp3")
 	scrsize480=double(scrsize_h)/480
-	
+
+	// GameSystemの生成
+	game_system = 0
+	if (CreateGameSystem(cnotesfile, double(t_moex), varptr(game_system)) == 0) {
+		dialog lang.2.5/*"譜面データの読み込み中にエラーが発生しました。"*/
+		chdir dir_default+"\\songs"
+		state=st_select
+		return // CreateGameSystemでfalseが返された場合、DestroyGameSystemを明示的に呼ぶ必要はない
+	}
+
 	; playmainloop
 	repeat
 		cpos=0
@@ -4304,6 +4245,10 @@
 		}
 		vflp=vfl
 		mflp=mfl
+
+		// GameSystemを更新
+		UpdateGameSystem game_system, double(t)
+		
 		dim arstat,8,3
 		dim arfl,6
 		repeat 6
@@ -4432,11 +4377,8 @@
 		  		if(se_ids_keys(cnt)==""):continue
 				BASS_SampleFree se_ids_values.cnt
 			loop
-			DestroyLineGraph zoom_top
-			DestroyLineGraph zoom_bottom
-			DestroyLineGraph zoom_side
-			DestroyLineGraph center_split
-			DestroyLineGraph manual_tilt
+			DestroyGameSystem game_system
+			game_system = 0
 
 			gosub *mdatafree
 			//BASS_SetConfig 24,1
@@ -7040,8 +6982,8 @@
 			//gsel 0
 			//if(output=0):redraw 0
 			// レーン描画
-			center_split_now=LineGraphValueAt(center_split,cnow+sttp)/100.0f
-			center_split_px=int(center_split_now*bt_width)/2/ra
+			center_split_now = GetCurrentCamValue(game_system, CAM_CENTER_SPLIT) / 100.0f
+			center_split_px = int(center_split_now * bt_width) / 2 / ra
 			if((bg>=1)&((lanesubflp=1)|(lanesubfl=1))){
 				gsel 51+118*(anaranfl=2)
 				gmode 0
@@ -7698,7 +7640,7 @@
 			// レーン傾きの数値指定の計算
 			ddim ztiltnow,1
 			ddim ztiltnow2,1
-			ztiltnow2=LineGraphValueAt(manual_tilt,cnow+sttp)*romax/100000
+			ztiltnow2 = GetCurrentCamValue(game_system, CAM_MANUAL_TILT) * romax
 			if(cnt=0):ztiltnowp=ztiltnow2
 			ztiltnow=ztiltnow2*min(max(t_tp,1),ztilttime)/ztilttime+ztiltnowp*(ztilttime-min(max(t_tp,1),ztilttime))/ztilttime
 			ztiltrate=1.0f*ztilton*min(max(t_tp,1),ztiltontime)/ztiltontime+ztiltratep*(ztiltontime-min(max(t_tp,1),ztiltontime))/ztiltontime
@@ -7746,7 +7688,7 @@
 			}
 			ddim zsidenow,1
 			ddim zsidenow2,1
-			zsidenow2=LineGraphValueAt(zoom_side,cnow+sttp)
+			zsidenow2 = GetCurrentCamValue(game_system, CAM_ZOOM_SIDE)
 			zsidenow2/=1.5f
 			zsidenow2/=2.0f
 			if(cnt=0):zsidenowp=zsidenow2
@@ -7756,7 +7698,7 @@
 			// 3D表示
 			ddim ztopnow,1
 			ddim ztopnow2,1
-			ztopnow2=LineGraphValueAt(zoom_top,cnow+sttp)
+			ztopnow2 = GetCurrentCamValue(game_system, CAM_ZOOM_TOP)
 			if(csongver_int<167){
 				// 旧バージョン互換
 				ztopnow2/=1.5f
@@ -7771,7 +7713,7 @@
 
 			ddim zbotnow,1
 			ddim zbotnow2,1
-			zbotnow2=LineGraphValueAt(zoom_bottom,cnow+sttp)
+			zbotnow2 = GetCurrentCamValue(game_system, CAM_ZOOM_BOTTOM)
 			zbotnow2/=1.5f
 			zbotnow2/=120.0f
 			if(zbotnow2>=0.0f):zbotnow2/=2.5f
