@@ -4982,13 +4982,13 @@
 			ldelayresett=t
 		}
 		// アナログデバイスによる傾き処理
-		ddim ro,2
+		ddim ro,2         // レーンの傾き
 		sh=0
-		analognow=-1,-1
-		panalognow=0,1000
-		panalognow2=-1,-1
-		canalognow=-1,-1
-		analogfuture=-1,-1
+		analognow=-1,-1    // 理想カーソル位置として使用される値(判定調整に依存)
+		panalognow=0,1000  // LASER音声エフェクトに使用される値(バッファリングによるエフェクトのタイミングずれを考慮したもの)
+		panalognow2=-1,-1  // LASER音声エフェクトに使用される値(上のものをLASER非アクティブ時を-1にしたもの)
+		canalognow=-1,-1   // 理想カーソル位置として使用される値(判定調整に非依存)
+		analogfuture=-1,-1 // 30ms後のanalognowの値(LASER判定の補正およびLASER音声エフェクトで理想値を鳴らすかどうかの判断に活用)
 		dim prerofl,2
 		repeat analognum-min(analogjfcnt.0,analogjfcnt.1),min(analogjfcnt.0,analogjfcnt.1)
 			if((min(min(analog.cnt.6-(t+ttp2),analog.cnt.6-(t+ttp*adj)),analog.cnt.6-(t+ttp*adj-analogdelay))>0)&(analog.cnt.1>cnow+sttp*adj+bpba_2)):break
