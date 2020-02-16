@@ -5024,9 +5024,9 @@
 				}
 			}else:if((analog.cnt.1<=cnow+sttp*adj+bpba_2)&(analog.cnt.1>cnow+sttp*adj)&(canalognow.(analog.cnt.0)=-1)&(prerofl.(analog.cnt.0)=0)){
 				if(analog.cnt.0=0){
-					ro.0+=double(analog.cnt.3)*20*min((cnow+sttp*adj+bpba_2)-analog.cnt.1,bpba_4)/(bpba_4)
+					ro.0+=double(analog.cnt.3)*20//*min((cnow+sttp*adj+bpba_2)-analog.cnt.1,bpba_4)/(bpba_4)
 				}else{
-					ro.1-=double(abs(analog.cnt.3-50))*20*min((cnow+sttp*adj+bpba_2)-analog.cnt.1,bpba_4)/(bpba_4)
+					ro.1-=double(abs(analog.cnt.3-50))*20//*min((cnow+sttp*adj+bpba_2)-analog.cnt.1,bpba_4)/(bpba_4)
 				}
 				prerofl.(analog.cnt.0)=1
 			}
@@ -5088,10 +5088,22 @@
 		rotime2*=2
 		rotime2/=rotimed
 		ror_p=ror
-		if(rotime2>double(t_tp)){
-			ror=(rorp*(rotime2-double(t_tp))+ror*double(t_tp))/rotime2
+
+		// 傾きの値に向けて線形に推移
+		if((ror>1)|(ror<-1)){
+			speed=3.0f
+		}else{
+			speed=1.5f
 		}
-		
+		if((ror-rorp<100)&(ror-rorp>-100)){
+			speed/=2.0f
+		}
+		if(rorp<ror){
+			ror=minf(rorp+double(t_tp)*speed,ror)
+		}else{
+			ror=maxf(rorp-double(t_tp)*speed,ror)
+		}
+
 		// 傾きキープ
 		if((csongver="")|(csongver="120")|(csongver="120a")){
 			if((tiltnow>=3)&(tiltnow<6)&((abs(ro.0+ro.1)<abs(rop.0+rop.1))|((abs(ro.0+ro.1)=abs(rop.0+rop.1))&(sgn(ro.0+ro.1)!=sgn(rop.0+rop.1))))):ror=rorp:ro=rop.0,rop.1
