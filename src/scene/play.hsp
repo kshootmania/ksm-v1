@@ -4988,6 +4988,7 @@
 		panalognow=0,1000  // LASER音声エフェクトに使用される値(バッファリングによるエフェクトのタイミングずれを考慮したもの)
 		panalognow2=-1,-1  // LASER音声エフェクトに使用される値(上のものをLASER非アクティブ時を-1にしたもの)
 		canalognow=-1,-1   // 理想カーソル位置として使用される値(判定調整に非依存)
+		canalognow2=-1,-1  // 理想カーソル位置として使用される値(上のものをLASER非アクティブ時を-1にしたもの)
 		analogfuture=-1,-1 // 30ms後のanalognowの値(LASER判定の補正およびLASER音声エフェクトで理想値を鳴らすかどうかの判断に活用)
 		dim prerofl,2
 		repeat analognum-min(analogjfcnt.0,analogjfcnt.1),min(analogjfcnt.0,analogjfcnt.1)
@@ -5038,6 +5039,7 @@
 				}
 			}
 		loop
+		canalognow2=canalognow.0,canalognow.1
 		repeat 2
 			if(canalognow.cnt=-1):canalognow.cnt=analognow.cnt
 			if(canalognow.cnt=-1):canalognow.cnt=cnt*1000
@@ -5090,13 +5092,14 @@
 		ror_p=ror
 
 		// 傾きの値に向けて線形に推移
-		if((ror>1)|(ror<-1)){
-			speed=3.0f
-		}else{
-			speed=1.5f
-		}
-		if((ror-rorp<100)&(ror-rorp>-100)){
-			speed/=2.0f
+		speed=4.0f
+		if((absf(ror)<1.0f)|(((canalognow2.0=-1)|(absf(ro.0)<1.0f))&((canalognow2.1=-1)|(absf(ro.1)<1.0f)))){
+			// 目標の傾きがゼロ または レーザーが存在しない(予告傾きのみ) 場合、遅くする
+			speed/=3.0f
+			if(abs(rorp)<100){
+				// 現在の傾きがゼロに近い場合、さらに遅くする
+				speed/=2.0f
+			}
 		}
 		if(rorp<ror){
 			ror=minf(rorp+double(t_tp)*speed,ror)
