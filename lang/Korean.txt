@@ -51,6 +51,7 @@ m01-072|FULLCOMBO:
 m01-073| PERFECT : 
 m02-000|LOADING...
 m02-001|채보 데이터의 시작 부분에는 반드시 박자선(--)을 입력해야 합니다.
+m02-005|An error occurred while loading the chart.
 m02-010|---
 m02-011|채보 파일을 찾을 수 없습니다.
 m02-012|현 코스를 플레이하려면 K-Shoot MANIA의 최신 버전이 필요합니다.
@@ -257,6 +258,7 @@ e04-030|회전 이펙트(&I)\tS
 e04-034|기울기 이펙트 종류(&L)\tR
 e04-035|상단 레인 확대(&Z)\tZ
 e04-036|하단 레인 확대(&M)\tX
+e04-037|&Horizontal lane movement\tC
 e04-038|화면 정지(&F)\tF
 e04-040|1/4\tCtrl+4
 e04-041|1/8\tCtrl+8

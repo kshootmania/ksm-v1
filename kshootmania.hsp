@@ -58,9 +58,9 @@
 #const  bpba_32			bpba/32
 #define beat			4
 #define mplayfl			1
-#define romax			14.0
-#define rotatemax		21.0
-#define rotatemax2		28.0
+#define romax			12.0
+#define rotatemax		18.0
+#define rotatemax2		24.0
 #define rotime			175.0
 #define rotate0max		1000
 #define ztime			(1+39*(csongver_int<167))
@@ -72,8 +72,8 @@
 #define	defx			ginfo_dispx/2
 #define defy			ginfo_dispy/2
 #define siteurl			"https://www.kshootmania.com/"
-#define atitle			"K-Shoot MANIA v1.70beta"
-#define currentver		"168c"
+#define atitle			"K-Shoot MANIA v1.70"
+#define currentver		"170"
 
 #define FX_RE8		1
 #define FX_RE12		2
@@ -202,6 +202,7 @@
 #func ren "rename" str, str
 
 #include "src/kshlib.as"
+#include "src/ksmcore.as"
 
 #uselib "bass.dll"
 #func BASS_Init "BASS_Init" int, int, int, int, int
@@ -312,7 +313,13 @@ if(strsize>0){
 	exist_msftedit=1
 }
 
-title atitle
+if(hosts=""){
+	// 開発中バージョン(GitHub上で公開中のもの)
+	title atitle+" [in-dev]"
+}else{
+	// 配布バージョン(公式サイト上で公開中のもの)
+	title atitle
+}
 
 oncmd gosub *alt, 0x0105
 
@@ -1542,13 +1549,13 @@ end
 		clang="Japanese"
 		exist clang+".txt"
 		if((strsize=-1)&(length(langlist)=0)){
-			dialog "Langauge file does not exist.",0,"Error"
+			dialog "Language file does not exist.",0,"Error"
 			end
 		}else{
 			clang=langlist.0
 			exist clang+".txt"
 			if(strsize=-1){
-				dialog "Langauge file does not exist.",0,"Error"
+				dialog "Language file does not exist.",0,"Error"
 				end
 			}
 		}
@@ -1561,6 +1568,7 @@ end
 	langstr=""
 	notesel langstr
 	noteload clang+".txt"
+	conv_crlf langstr,TYPE_CRLF
 	repeat notemax
 		noteget stat1,cnt
 		split stat1,"|",langstat

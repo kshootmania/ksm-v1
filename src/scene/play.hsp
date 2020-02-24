@@ -132,6 +132,7 @@
 	dim analoggr,131072
 	dim analoggrmax,2
 	anarannum=0
+	anaranfl=1
 	dim anaran,131072,3
 	dim anagrran,2,131072
 	dim analognext,131072
@@ -166,14 +167,6 @@
 	dim anvol,131072,3
 	ansenum=0
 	dim anse,131072,2
-	ztopnum=0
-	dim ztop,131072,3
-	zbotnum=0
-	dim zbot,131072,3
-	zsidenum=0
-	dim zside,131072,3
-	ztiltnum=0
-	dim ztilt,131072,3
 	divnum=0
 	dim div,8192
 	ddim rop,2
@@ -294,10 +287,6 @@
 	bpmlcfcnt_fx=0
 	bpmlcfcnt_fx_50ms=0
 	stpfcnt=0
-	ztopfcnt=0
-	zbotfcnt=0
-	zsidefcnt=0
-	ztiltfcnt=0
 	ddim ztopnowp,1
 	ddim zbotnowp,1
 	ddim zsidenowp,1
@@ -358,18 +347,20 @@
 		chdir dir_default+"\\songs"
 		state=st_select
 		return
-	}else{
-		notesel buf
-		noteload cnotesfile,-1
 	}
+
+	// 譜面ファイルの読み込み
+	notesel buf
+	noteload cnotesfile,-1
+
 	varmd5 csongmd5hash, buf, strlen(buf)
 	isutf8=0
 	if (lpeek(buf, 0) & 0x00FFFFFF) == 0xBFBBEF{
 		isutf8=1
 		DeleteUTF8BOM buf
 	}
-	//buf=replace(buf,"!--+!","\n")
-	
+
+	// IR用のファイルハッシュを計算
 	sdim buf_ir_chart,strlen(buf)
 	cnt3=-1
 	dim anagrcnt,2
@@ -390,8 +381,8 @@
 		}
 	loop
 	varmd5 csongmd5hash_ir_chart, buf_ir_chart, strlen(buf_ir_chart)
-	//sdim csongmd5hash_ir_chart,16
-	//KSHLib_GetIrChartMD5 cnotesfile, varptr(csongmd5hash_ir_chart)
+
+	// 譜面内容の読み込み
 	sp=notemax
 	buf=""
 	repeat sp
@@ -839,13 +830,22 @@
 			}
 			continue
 		}
+
+		// 現在のmeasure値(カウント値)
+		if(cnt3<0){
+			cmeasure=int(cbcnt)
+		}else:if(div.cnt3=0){
+			cmeasure=int(cbcnt)
+		}else{
+			cmeasure=(cnt2+1)*bpba*beatn/beatd/div.cnt3+int(cbcnt)
+		}
+		
 		if(headcmp(d.cnt,5,"tilt=")){
 			if(cnt3<0){
 				tilt.tiltnum.0=cbcnt+stpsh
 			}else{
 				tilt.tiltnum.0=(cnt2+1)*bpba*beatn/beatd/div.cnt3+cbcnt
 			}
-			f=0
 			if(strmid(d.cnt,5,16)="normal"){
 				tilt.tiltnum.1=0
 			}else:if(strmid(d.cnt,5,16)="big"){
@@ -865,110 +865,15 @@
 			}else:if(strmid(d.cnt,5,16)="keep"){
 				tilt.tiltnum.1=4
 			}else{
-				// 傾きの数値指定
+				// 傾きの数値指定(値の推移計算はGameSystemに移管済み)
 				tilt.tiltnum.1=7
-				f=1
-			}
-			if((f=1)|(tiltp=7)){
-				// 傾きの数値指定追加
-				if(cnt3<0){
-					ztilt.ztiltnum.0=int(cbcnt)
-				}else{
-					ztilt.ztiltnum.0=(cnt2+1)*bpba*beatn/beatd/div.cnt3+int(cbcnt)
-				}
-				if((f=0)&(tiltp=7)&(ztiltnum>0)){
-					// 数値指定の次の通常指定の位置に一つ前の値の数値指定を追加
-					// (最後の数値指定の値を一定値で維持させる必要があるため)
-					stat1=ztilt.(ztiltnum-1).2
-				}else:if((int(strmid(d.cnt,5,16))>=-1000)&(int(strmid(d.cnt,5,16))<=1000)){
-					// 数値指定の値
-					stat1=int(double(strmid(d.cnt,5,16))*100000)
-				}
-				if((ztilt.ztiltnum.0=ztilt.max(ztiltnum-1,0).0)&(ztiltnum>0)){
-					ztilt.(ztiltnum-1).2=stat1
-				}else{
-					ztilt.ztiltnum.1=stat1
-					ztilt.ztiltnum.2=stat1
-					ztiltnum++
-				}
 			}
 			tiltp=tilt.tiltnum.1
 			if((tilt.tiltnum.0!=0)|(tilt.tiltnum.1!=0)):tiltnum++
 			continue
 		}
-		if(headcmp(d.cnt,9,"zoom_top=")){
-			if(cnt3<0){
-				ztop.ztopnum.0=int(cbcnt)
-			}else{
-				ztop.ztopnum.0=(cnt2+1)*bpba*beatn/beatd/div.cnt3+int(cbcnt)
-			}
-			if(csongver_int>=167){
-				f1=((int(strmid(d.cnt,9,16))<=65535)&(int(strmid(d.cnt,9,16))>=-65535))
-				f2=f1
-				stat1=16
-			}else{
-				// 旧バージョン互換
-				f1=1
-				f2=(int(strmid(d.cnt,9,4))>=-300)&(int(strmid(d.cnt,9,4))<=300)
-				stat1=4
-			}
-			if(f1&(ztop.ztopnum.0=ztop.max(ztopnum-1,0).0)&(ztopnum>0)){
-				ztop.(ztopnum-1).2=int(strmid(d.cnt,9,stat1))
-			}else:if(f2){
-				ztop.ztopnum.1=int(strmid(d.cnt,9,stat1))
-				ztop.ztopnum.2=int(strmid(d.cnt,9,stat1))
-				ztopnum++
-			}
-			continue
-		}
-		if(headcmp(d.cnt,12,"zoom_bottom=")){
-			if(cnt3<0){
-				zbot.zbotnum.0=int(cbcnt)
-			}else{
-				zbot.zbotnum.0=(cnt2+1)*bpba*beatn/beatd/div.cnt3+int(cbcnt)
-			}
-			if(csongver_int>=167){
-				f1=((int(strmid(d.cnt,12,16))<=65535)&(int(strmid(d.cnt,12,16))>=-65535))
-				f2=f1
-				stat1=16
-			}else{
-				// 旧バージョン互換
-				f1=1
-				f2=(int(strmid(d.cnt,12,4))>=-300)&(int(strmid(d.cnt,12,4))<=300)
-				stat1=4
-			}
-			if(f1&(zbot.zbotnum.0=zbot.max(zbotnum-1,0).0)&(zbotnum>0)){
-				zbot.(zbotnum-1).2=int(strmid(d.cnt,12,stat1))
-			}else:if(f2){
-				zbot.zbotnum.1=int(strmid(d.cnt,12,stat1))
-				zbot.zbotnum.2=int(strmid(d.cnt,12,stat1))
-				zbotnum++
-			}
-			continue
-		}
-		if(headcmp(d.cnt,10,"zoom_side=")){
-			if(cnt3<0){
-				zside.zsidenum.0=int(cbcnt)
-			}else{
-				zside.zsidenum.0=(cnt2+1)*bpba*beatn/beatd/div.cnt3+int(cbcnt)
-			}
-			if(csongver_int>=167){
-				f1=((int(strmid(d.cnt,10,16))<=65535)&(int(strmid(d.cnt,10,16))>=-65535))
-				f2=f1
-				stat1=16
-			}else{
-				// 旧バージョン互換
-				f1=1
-				f2=(int(strmid(d.cnt,10,4))>=-300)&(int(strmid(d.cnt,10,4))<=300)
-				stat1=4
-			}
-			if(f1&(zside.zsidenum.0=zside.max(zsidenum-1,0).0)&(zsidenum>0)){
-				zside.(zsidenum-1).2=int(strmid(d.cnt,10,stat1))
-			}else:if(f2){
-				zside.zsidenum.1=int(strmid(d.cnt,10,stat1))
-				zside.zsidenum.2=int(strmid(d.cnt,10,stat1))
-				zsidenum++
-			}
+		if(headcmp(d.cnt,13,"center_split=")){
+			anaranfl=2
 			continue
 		}
 		if(headcmp(d.cnt,13,"laserrange_l=")){
@@ -982,6 +887,7 @@
 				anaran.anarannum.2=2
 			}else:anaran.anarannum.2=1
 			anarannum++
+			anaranfl=2
 			continue
 		}
 		if(headcmp(d.cnt,13,"laserrange_r=")){
@@ -995,6 +901,7 @@
 				anaran.anarannum.2=2
 			}else:anaran.anarannum.2=1
 			anarannum++
+			anaranfl=2
 			continue
 		}
 		if(headcmp(d.cnt,12,"pfiltergain=")){
@@ -1060,7 +967,7 @@
 			continue
 		}
 		if(cnt3<0):continue
-		if(/*(d.cnt="--")|*/(div.cnt3=0)):continue
+		if(div.cnt3=0):continue
 		cnt2++ // カレント小節数/div(小節内)
 	loop
 	if(csongver=""){
@@ -1110,14 +1017,14 @@
 		foreach mid
 			hVolFX.cnt=BASS_ChannelSetFX(mid.cnt,0x10003,5)
 			dim volfx,2
-			volfx=0,tofloat(double(csongvol)/*/(1.0f+9.0f*((cnt>=2)|(auto=1))*(peffect=1))*//100.0f)
+			volfx=0,tofloat(double(csongvol)/100.0f)
 			BASS_FXSetParameters hVolFX.cnt,volfx
 		loop
 		dim hVolFX,swaudionum
 		repeat swaudionum
 			hVolFX_sw.cnt=BASS_ChannelSetFX(mid_sw.cnt,0x10003,5)
 			dim volfx,2
-			volfx=0,tofloat(double(csongvol)/*/(1.0f+9.0f*((cnt>=2)|(auto=1))*(peffect=1))*//100.0f)
+			volfx=0,tofloat(double(csongvol)/100.0f)
 			BASS_FXSetParameters hVolFX_sw.cnt,volfx
 		loop
 		csongvol=100
@@ -1620,8 +1527,6 @@
 			stat1=strmid(stat1,11,1024)
 			stat1=strtrim(stat1,0,' ')
 			if(stat1=""):continue
-			//sdim fxdefstat,1
-			//split stat1," ",fxdefstat
 			sdim fxdefstat,,2
 			fxdefstat.0=strmid(stat1,0,instr(stat1,0," "))
 			fxdefstat.1=strmid(stat1,instr(stat1,0," ")+1,strlen(stat1)-instr(stat1,0," ")-1)
@@ -1693,8 +1598,6 @@
 			stat1=strmid(stat1,15,1024)
 			stat1=strtrim(stat1,0,' ')
 			if(stat1=""):continue
-			//sdim fxdefstat,1
-			//split stat1," ",fxdefstat
 			sdim fxdefstat,,2
 			fxdefstat.0=strmid(stat1,0,instr(stat1,0," "))
 			fxdefstat.1=strmid(stat1,instr(stat1,0," ")+1,strlen(stat1)-instr(stat1,0," ")-1)
@@ -1818,7 +1721,6 @@
 	sdim next_se,256,2
 	next_se="",""
 	next_se_vol=100,100
-	//csongtitle_md5=""
 	_csongtitle=csongtitle
 	if (lpeek(_csongtitle, 0) & 0x00FFFFFF) == 0xBFBBEF{
 		DeleteUTF8BOM _csongtitle
@@ -2269,16 +2171,6 @@
 			continue
 		}
 		cnt2++ // カレント小節数/div(小節内)
-		/*if((turn=3)|(turn=4)){
-			if(strmid(d.cnt2a,5,2)="00"):pturnl=rnd(2)
-			if(strmid(d.cnt2a,8,2)="--"){
-				pacnt+=bpba/div.cnt3
-			}else:pacnt=0
-			if(pacnt>=bpba/6){
-				pturna=rnd(2)
-				pacnt=0
-			}
-		}*/
 		exc=0
 		if(cnt2a>0){
 			repeat
@@ -3262,9 +3154,6 @@
 			if((analog.cnt.1>=anaran.cnt2.1)&(analog.cnt.0=anaran.cnt2.0)):break
 		loop
 	loop
-	if(anarannum=0){
-		anaranfl=1
-	}else:anaranfl=2
 	if(adjmode=1){
 		repeat
 			note.notenum.0=2
@@ -3300,26 +3189,6 @@
 	if(gaugemax>stat4_2):gaugemax=stat4_2
 	if(gaugemax=0):gaugemax=1
 	csongtotal=stat4_2*100/gaugemax
-	if(ztopnum=0){
-		ztop.0.0=0
-		ztop.0.1=0
-		ztopnum=1
-	}
-	if(zbotnum=0){
-		zbot.0.0=0
-		zbot.0.1=0
-		zbotnum=1
-	}
-	if(zsidenum=0){
-		zside.0.0=0
-		zside.0.1=0
-		zsidenum=1
-	}
-	if(ztiltnum=0){
-		ztilt.0.0=0
-		ztilt.0.1=0
-		ztiltnum=1
-	}
 	// 無駄な確保をやめる
 	sdim d,1
 	dim kar,notenum,8
@@ -3588,62 +3457,6 @@
 			stp.cnt2.cnt=kar.cnt2.cnt
 		loop
 	loop
-	dim kar,ztopnum,3
-	repeat ztopnum
-		cnt2=cnt
-		repeat 3
-			kar.cnt2.cnt=ztop.cnt2.cnt
-		loop
-	loop
-	dim ztop,ztopnum,3
-	repeat ztopnum
-		cnt2=cnt
-		repeat 3
-			ztop.cnt2.cnt=kar.cnt2.cnt
-		loop
-	loop
-	dim kar,zbotnum,3
-	repeat zbotnum
-		cnt2=cnt
-		repeat 3
-			kar.cnt2.cnt=zbot.cnt2.cnt
-		loop
-	loop
-	dim zbot,zbotnum,3
-	repeat zbotnum
-		cnt2=cnt
-		repeat 3
-			zbot.cnt2.cnt=kar.cnt2.cnt
-		loop
-	loop
-	dim kar,zsidenum,3
-	repeat zsidenum
-		cnt2=cnt
-		repeat 3
-			kar.cnt2.cnt=zside.cnt2.cnt
-		loop
-	loop
-	dim zside,zsidenum,3
-	repeat zsidenum
-		cnt2=cnt
-		repeat 3
-			zside.cnt2.cnt=kar.cnt2.cnt
-		loop
-	loop
-	dim kar,ztiltnum,3
-	repeat ztiltnum
-		cnt2=cnt
-		repeat 3
-			kar.cnt2.cnt=ztilt.cnt2.cnt
-		loop
-	loop
-	dim ztilt,ztiltnum,3
-	repeat ztiltnum
-		cnt2=cnt
-		repeat 3
-			ztilt.cnt2.cnt=kar.cnt2.cnt
-		loop
-	loop
 	dim kar,1
 	if(gaugemax<=0):gaugemax=1
 	stateinit=0
@@ -3778,8 +3591,8 @@
 			}
 		}
 	loop
-	/*if(length(ro)!=2):*/ddim ro,2
-	t_moex=-offset-T_MOEX_DELAY-globaloffset
+	ddim ro,2
+	t_moex=-offset-T_MOEX_DELAY-globaloffset // t_moex: expected music offset time
 	if((cmov=0)&(vmov=1)&(output=0)){
 		stat1=-voffset-T_MOEX_DELAY-globaloffset
 		if(stat1<0):mci "seek v to 0"
@@ -3899,7 +3712,6 @@
 			addspr mod_bg1,0,0,0,getsize(900)-1,getsize(800)-1,stat
 		}
 		regobj obj_bg,mod_bg0
-		//setscale obj_bg,double(scrsize_h)/480.0f*1.1f,double(scrsize_h)/480.0f*1.1f,double(scrsize_h)/480.0f*1.1f
 	}
 	if(bg>=2){
 		exist dir_default+"\\imgs\\bg\\"+bgname_l+".gif"
@@ -3949,7 +3761,7 @@
 	settex2 -1
 	tex_jacket=stat
 	gsel 51+118*(anaranfl=2)
-	settex vw/ra*anaranfl,vh/ra/*stat2*/,0,tex_lane_s
+	settex vw/ra*anaranfl,vh/ra,0,tex_lane_s
 	tex_lane_s=stat
 	addmesh mod_lane_s,1,1,0,double(vw2)*2/13,double(vh2)*13/20,tex_lane_s
 	regobj obj_lane_s,mod_lane_s
@@ -3957,7 +3769,7 @@
 	sellambient
 	objsetf3 256.0f,256.0f,256.0f
 	gsel 5+163*(anaranfl=2)
-	settex vw/ra*anaranfl,vh/ra/*stat2*/,0,tex_lane
+	settex vw/ra*anaranfl,vh/ra,0,tex_lane
 	tex_lane=stat
 	texload2 dir_default+"\\imgs\\cline.png",344,26
 	tex_cline=stat
@@ -3988,26 +3800,6 @@
 		setpos obj_analogcur.cnt,0.0f,-2.8f,double(vh2)*13/20/2+1.0f
 		setang obj_analogcur.cnt,-M_PI/3,0.0f,0.0f
 	loop
-	// 判定2の画像を読み込み
-	/*
-	dim mod_judgel,3
-	addplate mod_judgel.0,0,20,20,0,0,149,149
-	texload dir_default+"\\imgs\\judge1.gif"
-	addplate mod_judgel.1,0,20,20,0,0,149,149
-	texload dir_default+"\\imgs\\judge2.gif"
-	addplate mod_judgel.2,0,20,20,0,0,149,149
-	texload dir_default+"\\imgs\\judge3.gif"
-	dim obj_judgel,6,judgelmax
-	repeat 6
-		cnt0=cnt
-		repeat judgelmax
-			regobj obj_judgel.cnt0.cnt,mod_judgel.0
-			regobj obj_judgel.cnt0.cnt,mod_cline
-			setpos obj_judgel.cnt0.cnt,-20.0f*(1.0f*(cnt0-2)*(cnt0<4)+(0.5f+2.0f*(cnt0-4))*(cnt0>=4)),-2.8f,double(vh2)*13/20/2+0.4f
-			setang obj_judgel.cnt0.cnt,-M_PI/6,0.0f,0.0f
-			setefx obj_judgel.cnt0.cnt,256
-		loop
-	loop*/
 	gsel 21
 	settex2 -1
 	tex_combonum=stat
@@ -4060,13 +3852,6 @@
 	plfl=1
 	font lang.0.1,getsize(18)
 	hgsettime -3400-1000*(cmovfile!=""),INT_MAX
-	//settime=d3timer()-(-3400-1000*(cmovfile!=""))
-	//settime2=d3timer()
-	//BASS_ChannelStop selenterid
-	if(peffect=1){
-		//BASS_SetConfig 24,0
-		//BASS_SetConfig 1,0
-	}
 	ts_bass=0
 	ddim timingdif,1
 	timingdif=-50000f
@@ -4078,7 +3863,16 @@
 	
 	csongfile_empty=(csongfile.0="")|(csongfile.0=".mp3")
 	scrsize480=double(scrsize_h)/480
-	
+
+	// GameSystemの生成
+	game_system = 0
+	if (CreateGameSystem(cnotesfile, double(t_moex), varptr(game_system)) == 0) {
+		dialog lang.2.5/*"譜面データの読み込み中にエラーが発生しました。"*/
+		chdir dir_default+"\\songs"
+		state=st_select
+		return // CreateGameSystemでfalseが返された場合、DestroyGameSystemを明示的に呼ぶ必要はない
+	}
+
 	; playmainloop
 	repeat
 		cpos=0
@@ -4088,8 +3882,6 @@
 		getkey enter_key,13
 		enter_key=enter_key|getjoykeystat(11)
 		stat1=BASS_ChannelGetPosition_ms(mid.0)
-		//stat1+=BASS_ChannelGetPosition_ms(mid.0)
-		//stat1/=2
 		if((stat1<mtp-500)&(mstop=0)&(stat179p=0)){
 			mrepeat=1
 			foreach mid
@@ -4113,43 +3905,29 @@
 			repeat swaudionum
 				BASS_ChannelSetPosition_ms mid_sw.cnt,stat1
 			loop
-			//hgsettime t_mo+stat1,t_mo+stat+100
-			//settime=d3timer()-(t_mo+stat1)
-			//settime2=d3timer()
 			mshift=0
 		}
-		//if((t_mop=-50000)&(t_mo!=-50000)):t_mo-=90//←? 削除(2019/10/28)
 		t=t_mo+stat1
-		//realt=t
 		t2=t
 		if(cnt=0):timestatestart=d3timer()
 		if(output=0){
 			hggettime at,0
 			if(mfl=0){
-				//at=d3timer()-settime
-				if((disableadjtimer=1)&((t>at)|(abs(at-t)>50)/*|(settime2<at+500)*/)&(mendt=-1)&(t_mo!=-50000)){
+				if((disableadjtimer=1)&((t>at)|(abs(at-t)>50))&(mendt=-1)&(t_mo!=-50000)){
 					hgsettime t,INT_MAX
-					//settime=d3timer()-t
-					//settime2=d3timer()
 					at=t
 				}
-			}//else:at=t
+			}
 		}else{
 			at=100*cnt/3-3400-1000*(cmovfile!="")
 		}
 		if((output=1)|(mfl=0)|(csongfile_empty)|(csongfile_exist=0)|(at>=mlength-1)){
 			t=at
-			//realt=at
 		}else:if((disableadjtimer=0)&(mstop=0)){
 			if(timingdif<-40000):timingdif=double(t-at)
 			timingdif=(timingdif*7+double(t-at))/8f
-			//gsel 0
-			//title ""+timingdif+","+double(t-at)
 			t=at+int(round(timingdif))
-		}/*else:t=tp+((t-tp)+(at-atp)*2)/3/*else:if(at<100){
-			t=int(round(double(t)*at/100+double(at)*(100-at)/100))
-		}*/
-		realtp=realt
+		}
 		if(mstop=1):t=t_mo+stoppos:at=t
 		if((endtype=0)&(adjmode=0)){
 			if((tochu=0)&(mendt=-1)){
@@ -4159,7 +3937,7 @@
 				mendat=d3timerp
 			}
 		}else{
-			if(/*(t-mendt>3000)&(*/mendt!=-1/*)*/){
+			if(mendt!=-1){
 				endfl=1
 			}
 			if((mlength<=stat1)&(mendt=-1)){
@@ -4168,8 +3946,6 @@
 				mendat=d3timerp
 			}
 		}
-		//gsel 0
-		//title ""+timingdif+","+t_mo
 		d3timerp=d3timer()
 		if(mlength=0):mlength=1
 		cpos=200*t/mlength
@@ -4197,10 +3973,7 @@
 					loop
 					repeat swaudionum
 						BASS_ChannelSetAttribute mid_sw.cnt,2,0.0
-					loop/*
-					foreach mid
-						BASS_ChannelSetPosition_ms mid.cnt,0
-					loop*/
+					loop
 					foreach mid
 						BASS_ChannelPlay mid.cnt
 						if(mlinkfailed=0):break
@@ -4232,11 +4005,6 @@
 						if(abs(stat1)<3+cnt/2):break
 					loop
 					hgsettime t_mo+stoppos,INT_MAX
-					//at=t_mo+stoppos
-					//atp=t_mo+stoppos-16
-					//t=t_mo+stoppos
-					//tp=t_mo+stoppos-16
-					//timingdif=0.0f
 					mstop=0
 				}
 			}
@@ -4313,12 +4081,10 @@
 			}
 			ttp=0
 		}
-		laserdelay0=laserdelay0_orig//-ttp
-		//laserdelay0=233-ttp-soundfx_delay
+		laserdelay0=laserdelay0_orig
 		if(ts>120):ts=0
 		if(ts2>60):ts2=0
 		if(ts3>30):ts3=0
-		//if(ts_bass>max(updateperiod/5,1)):ts_bass=0
 		ts_timer=d3timer()
 		if(cnt=0):ts_timerp=ts_timer
 		ts+=max(ts_timer-ts_timerp,1)
@@ -4347,14 +4113,14 @@
 				sync-=5.0
 			}
 		}
-		if((t_moex<=rt/*+t_tp*/)&(mfl=0)&(output=0)&(mendt=-1)&(mplayfl=1)){
+		if((t_moex<=rt)&(mfl=0)&(output=0)&(mendt=-1)&(mplayfl=1)){
 			if((csongfile_empty=0)&(csongfile_exist=1)){
-				if(rt/*+t_tp*/>t_moex){
+				if(rt>t_moex){
 					foreach mid
-						BASS_ChannelSetPosition_ms mid.cnt,rt/*+t_tp*/-t_moex
+						BASS_ChannelSetPosition_ms mid.cnt,rt-t_moex
 					loop
 					repeat swaudionum
-						BASS_ChannelSetPosition_ms mid_sw.cnt,rt/*+t_tp*/-t_moex
+						BASS_ChannelSetPosition_ms mid_sw.cnt,rt-t_moex
 					loop
 				}else{
 					foreach mid
@@ -4383,12 +4149,8 @@
 					foreach mid
 						BASS_ChannelUpdate mid.cnt
 					loop
-					//BASS_Update
 				}
-				t_mo=t_moex/*if(rt+t_tp<=t_moex){
-					t_mo=rt+t_tp
-					t2_mo=rt+t_tp
-				}else:t_mo=t_moex:t2_mo=t_moex*/
+				t_mo=t_moex
 				mfl=1
 			}
 		}
@@ -4408,6 +4170,10 @@
 		}
 		vflp=vfl
 		mflp=mfl
+
+		// GameSystemを更新
+		UpdateGameSystem game_system, double(t)
+		
 		dim arstat,8,3
 		dim arfl,6
 		repeat 6
@@ -4420,7 +4186,7 @@
 		}
 		stat4=0
 		stat5=0
-		de=0//int(round(double(t_tp)/2))
+		de=0
 		repeat 6
 			tcnt=cnt
 			rcnt=jfcnt.tcnt
@@ -4536,9 +4302,10 @@
 		  		if(se_ids_keys(cnt)==""):continue
 				BASS_SampleFree se_ids_values.cnt
 			loop
-			
+			DestroyGameSystem game_system
+			game_system = 0
+
 			gosub *mdatafree
-			//BASS_SetConfig 24,1
 			BASS_SetConfig 1,updateperiod
 			if((cmov=0)&(vmov=1)&(output=0)):mci "close v"
 			confs=""
@@ -4632,7 +4399,6 @@
 				redraw 1
 			}
 			chdir dir_default+"\\songs"
-			//title atitle
 			break
 		}
 		if(cnt=0){
@@ -4957,10 +4723,8 @@
 							stat1=cnt-4
 							repeat longjnum-longjfcnt.stat1,longjfcnt.stat1
 								if((longj.cnt.0=stat1)&((longj.cnt.3=0)|(longj.cnt.3=2))){
-									if((longj.cnt.4<=(t-judgedelay)-de)/*&(longj.cnt.5>(t-judgedelay)-de)*/){
+									if(longj.cnt.4<=(t-judgedelay)-de){
 										longj.cnt.3=1
-										//longjfcnt.(longj.cnt.0)=cnt
-										//longj.(cnt+1).3=2
 										chainnow++:chainnow_song++
 										critical++
 										lscore+=2
@@ -5015,7 +4779,6 @@
 					}
 					if(shortmode=mode_auto){
 						if((note.cnt.3<=t)&(noteresult.cnt=0)&(t>=0)){
-							//notejfcnt=max(cnt,notejfcnt)
 							if(notese.cnt!=-1){
 								if(notesej.(notese.cnt).1=0):notesej.(notese.cnt).1=1
 							}
@@ -5058,7 +4821,6 @@
 					}
 					if(longmode=mode_auto){
 						if((note.cnt.3<=t+(t_tp))&(noteresult.cnt=0)&(t>=0)){
-							//notejfcnt=max(cnt,notejfcnt)
 							if(notese.cnt!=-1){
 								if(notesej.(notese.cnt).1=0):notesej.(notese.cnt).1=1
 							}
@@ -5220,15 +4982,15 @@
 			ldelayresett=t
 		}
 		// アナログデバイスによる傾き処理
-		ddim ro,2
+		ddim ro,2         // レーンの傾き
 		sh=0
-		analognow=-1,-1
-		panalognow=0,1000
-		panalognow2=-1,-1
-		canalognow=-1,-1
-		analogfuture=-1,-1
+		analognow=-1,-1    // 理想カーソル位置として使用される値(判定調整に依存)
+		panalognow=0,1000  // LASER音声エフェクトに使用される値(バッファリングによるエフェクトのタイミングずれを考慮したもの)
+		panalognow2=-1,-1  // LASER音声エフェクトに使用される値(上のものをLASER非アクティブ時を-1にしたもの)
+		canalognow=-1,-1   // 理想カーソル位置として使用される値(判定調整に非依存)
+		canalognow2=-1,-1  // 理想カーソル位置として使用される値(上のものをLASER非アクティブ時を-1にしたもの)
+		analogfuture=-1,-1 // 30ms後のanalognowの値(LASER判定の補正およびLASER音声エフェクトで理想値を鳴らすかどうかの判断に活用)
 		dim prerofl,2
-		//panalogdt=d3timer()
 		repeat analognum-min(analogjfcnt.0,analogjfcnt.1),min(analogjfcnt.0,analogjfcnt.1)
 			if((min(min(analog.cnt.6-(t+ttp2),analog.cnt.6-(t+ttp*adj)),analog.cnt.6-(t+ttp*adj-analogdelay))>0)&(analog.cnt.1>cnow+sttp*adj+bpba_2)):break
 			if((t+ttp*adj+30>=analog.cnt.6)&(t-analogdelay+ttp*adj+30<analog.cnt.7)){
@@ -5252,7 +5014,7 @@
 							ro.1-=double(abs(analog.cnt.4-50))*20
 						}
 					}
-					canalognow.(analog.cnt.0)=x20(analog.cnt.4)//*(analog.cnt.8=0)+1000*analog.cnt.0*(analog.cnt.8=1)
+					canalognow.(analog.cnt.0)=x20(analog.cnt.4)
 				}else{
 					if(analog.cnt.0=0){
 						ro.0+=double(analog.cnt.3)*20+double(analog.cnt.4-analog.cnt.3)*20*(analog.cnt.7-analog.cnt.6-(analog.cnt.7-(t-analogdelay+ttp-(t_tp)/2)))/(analog.cnt.7-analog.cnt.6)
@@ -5263,9 +5025,9 @@
 				}
 			}else:if((analog.cnt.1<=cnow+sttp*adj+bpba_2)&(analog.cnt.1>cnow+sttp*adj)&(canalognow.(analog.cnt.0)=-1)&(prerofl.(analog.cnt.0)=0)){
 				if(analog.cnt.0=0){
-					ro.0+=double(analog.cnt.3)*20*min((cnow+sttp*adj+bpba_2)-analog.cnt.1,bpba_4)/(bpba_4)
+					ro.0+=double(analog.cnt.3)*20//*min((cnow+sttp*adj+bpba_2)-analog.cnt.1,bpba_4)/(bpba_4)
 				}else{
-					ro.1-=double(abs(analog.cnt.3-50))*20*min((cnow+sttp*adj+bpba_2)-analog.cnt.1,bpba_4)/(bpba_4)
+					ro.1-=double(abs(analog.cnt.3-50))*20//*min((cnow+sttp*adj+bpba_2)-analog.cnt.1,bpba_4)/(bpba_4)
 				}
 				prerofl.(analog.cnt.0)=1
 			}
@@ -5277,6 +5039,7 @@
 				}
 			}
 		loop
+		canalognow2=canalognow.0,canalognow.1
 		repeat 2
 			if(canalognow.cnt=-1):canalognow.cnt=analognow.cnt
 			if(canalognow.cnt=-1):canalognow.cnt=cnt*1000
@@ -5318,11 +5081,6 @@
 		romaxstat.1=maxf(romax*(tiltnow\3=0)+rotatemax*(tiltnow\3=1)+rotatemax2*(tiltnow\3=2),0.1)*(tiltnow<6)
 		romaxstat.2=double(min(1000,int(800+200*rhsrate)))*romaxstat.1/1000
 		tiltrnow=double(max(tiltnowslidet,16)-max(min(t-tiltnowt,max(tiltnowslidet,16)),0))*tiltnowstart/max(tiltnowslidet,16)+double(max(min(t-tiltnowt,max(tiltnowslidet,16)),0))*romaxstat.2/max(tiltnowslidet,16)
-		//if(tiltrnow=0.0):tiltrnow=romaxstat.2
-		/*tiltrnow=romaxstat.2
-		if(t_tp<140){
-			tiltrnow=(tiltrnow*(t_tp)+tiltrnowp*(140-t+tp))/140
-		}*/
 		ddim ror,1
 		ror=double(sgn(ro.0+ro.1)*min(abs(ro.0+ro.1),int(800+200*rhsrate)))
 		rotimed=2
@@ -5332,10 +5090,23 @@
 		rotime2*=2
 		rotime2/=rotimed
 		ror_p=ror
-		if(rotime2>double(t_tp)){
-			ror=(rorp*(rotime2-double(t_tp))+ror*double(t_tp))/rotime2
+
+		// 傾きの値に向けて線形に推移
+		speed=4.0f
+		if((absf(ror)<1.0f)|(((canalognow2.0=-1)|(absf(ro.0)<1.0f))&((canalognow2.1=-1)|(absf(ro.1)<1.0f)))){
+			// 目標の傾きがゼロ または レーザーが存在しない(予告傾きのみ) 場合、遅くする
+			speed/=3.0f
+			if(abs(rorp)<100){
+				// 現在の傾きがゼロに近い場合、さらに遅くする
+				speed/=2.0f
+			}
 		}
-		
+		if(rorp<ror){
+			ror=minf(rorp+double(t_tp)*speed,ror)
+		}else{
+			ror=maxf(rorp-double(t_tp)*speed,ror)
+		}
+
 		// 傾きキープ
 		if((csongver="")|(csongver="120")|(csongver="120a")){
 			if((tiltnow>=3)&(tiltnow<6)&((abs(ro.0+ro.1)<abs(rop.0+rop.1))|((abs(ro.0+ro.1)=abs(rop.0+rop.1))&(sgn(ro.0+ro.1)!=sgn(rop.0+rop.1))))):ror=rorp:ro=rop.0,rop.1
@@ -5565,7 +5336,6 @@
 						if(analog.(analoganj.cnt.1).6-(t-analogdelay)-ttp>100):break
 						if((analoganj.cnt.0=0)&(abs(analog.(analoganj.cnt.1).6-(t-analogdelay)-ttp)<=60)&(analog.(analoganj.cnt.1).4<analog.(analoganj.cnt.1).3)&(analog.(analoganj.cnt.1).4*20-50<=analogpos.(analog.(analoganj.cnt.1).0))/*&((arstat.6.1=analoganj.cnt.1)|(analog.(arstat.6.1).2>bpba_32))*/&(analoganj.cnt.2=0)){
 							analoganj.cnt.2=1
-							//if(analognow.0!=-1):analogpos.0=analog.(analoganj.cnt.1).4*20
 							chainnow++:chainnow_song++
 							critical++
 							analogscore++
@@ -5613,7 +5383,6 @@
 						if(analog.(analoganj.cnt.1).6-(t-analogdelay)-ttp>100):break
 						if((analoganj.cnt.0=0)&(abs(analog.(analoganj.cnt.1).6-(t-analogdelay)-ttp)<=60)&(analog.(analoganj.cnt.1).4>analog.(analoganj.cnt.1).3)&(analog.(analoganj.cnt.1).4*20+50>=analogpos.(analog.(analoganj.cnt.1).0))/*&((arstat.6.1=analoganj.cnt.1)|(analog.(arstat.6.1).2>bpba_32))*/&(analoganj.cnt.2=0)){
 							analoganj.cnt.2=1
-							//if(analognow.0!=-1):analogpos.0=analog.(analoganj.cnt.1).4*20
 							chainnow++:chainnow_song++
 							critical++
 							analogscore++
@@ -5662,7 +5431,6 @@
 						if(analog.(analoganj.cnt.1).6-(t-analogdelay)-ttp>100):break
 						if((analoganj.cnt.0=1)&(abs(analog.(analoganj.cnt.1).6-(t-analogdelay)-ttp)<=60)&(analog.(analoganj.cnt.1).4<analog.(analoganj.cnt.1).3)&(analog.(analoganj.cnt.1).4*20-50<=analogpos.(analog.(analoganj.cnt.1).0))/*&((arstat.7.1=analoganj.cnt.1)|(analog.(arstat.7.1).2>bpba_32))*/&(analoganj.cnt.2=0)){
 							analoganj.cnt.2=1
-							//if(analognow.1!=-1):analogpos.1=analog.(analoganj.cnt.1).4*20
 							chainnow++:chainnow_song++
 							critical++
 							analogscore++
@@ -5710,7 +5478,6 @@
 						if(analog.(analoganj.cnt.1).6-(t-analogdelay)-ttp>100):break
 						if((analoganj.cnt.0=1)&(abs(analog.(analoganj.cnt.1).6-(t-analogdelay)-ttp)<=60)&(analog.(analoganj.cnt.1).4>analog.(analoganj.cnt.1).3)&(analog.(analoganj.cnt.1).4*20+50>=analogpos.(analog.(analoganj.cnt.1).0))/*&((arstat.7.1=analoganj.cnt.1)|(analog.(arstat.7.1).2>bpba_32))*/&(analoganj.cnt.2=0)){
 							analoganj.cnt.2=1
-							//if(analognow.1!=-1):analogpos.1=analog.(analoganj.cnt.1).4*20
 							chainnow++:chainnow_song++
 							critical++
 							analogscore++
@@ -5990,16 +5757,16 @@
 			hs=108*hsa*1000/avebpm/2
 		}
 		if(hs<1):hs=1
+
 		// ずれがある場合は補正
-		//if(t<=1500){
-			stat1=BASS_ChannelGetPosition_ms(mid.0)
-			repeat max(length(mid)-1,0),1
-				stat2=BASS_ChannelGetPosition_ms(mid.cnt)
-				if(abs(stat1-stat2)>100){
-					tadj=2
-				}
-			loop
-		//}
+		stat1=BASS_ChannelGetPosition_ms(mid.0)
+		repeat max(length(mid)-1,0),1
+			stat2=BASS_ChannelGetPosition_ms(mid.cnt)
+			if(abs(stat1-stat2)>100){
+				tadj=2
+			}
+		loop
+
 		// 直角音の再生
 		analoganflag=0
 		canvol=0
@@ -6037,8 +5804,8 @@
 						chocnt++
 						if(chocnt=50):chocnt=0
 						if(analog.(analoganj.cnt.1).9>=-1){
-							shaket=tp//max(t,analog.(analoganj.cnt.1).6)
-							shakewidth=50/*max(abs(analog.(analoganj.cnt.1).4-analog.(analoganj.cnt.1).3),35)*/*sgn(analog.(analoganj.cnt.1).4-analog.(analoganj.cnt.1).3)
+							shaket=tp
+							shakewidth=50*sgn(analog.(analoganj.cnt.1).4-analog.(analoganj.cnt.1).3)
 						}
 					}else{
 						break
@@ -6195,7 +5962,7 @@
 					retr_beat=(cnowfx_50ms-b2c(c2bnow_50ms))/(bpba_2)
 					// Retrigger/Gate/Wobble 更新トリガ判定
 					if((retr_beat!=retr_beatp)|(c2bnow_50ms!=c2bnowp_50ms)){
-						// 小説頭から数えたカウント値をbpba/2間隔にそろえて時間変換、現在時刻からの時間差分を求める(Retrigger用)
+						// 小節頭から数えたカウント値をbpba/2間隔にそろえて時間変換、現在時刻からの時間差分を求める(Retrigger用)
 						dstat=c2tf(b2c(c2bnow_50ms)+(cnowfx_50ms-b2c(c2bnow_50ms))/(bpba_2)*(bpba_2))-double(t+laserdelay0+tfx_diff)
 						if(fl_Retr=1):BASS_VST_SetParam_R hFX_Retr,19,maxf(minf(dstat/10000.0f,1.0f),0.0f)
 						if(c2bnow_50ms!=c2bnowp_50ms){
@@ -6207,7 +5974,6 @@
 								}
 							loop
 						}
-						//bassupdatefl=1
 					}
 					retr_beatp=retr_beat
 					repeat userfxnum
@@ -6523,16 +6289,14 @@
 									BASS_VST_SetParam_R hFX_User.cnt2,4,minf(maxf(double(feffectparam2.cnt)/100.0f,0.0f),1.0f)
 								}
 							}
-							//bassupdatefl=1
 						}
 						feffectp_real.cnt=feffectnow_real.cnt
 						feffectp.cnt=feffectnow.cnt
 					loop
 					if(((sich_beat!=sich_beatp)|(c2bnow!=c2bnowp))&((feffectnow.0=FX_SICH)|(feffectnow.1=FX_SICH))){
-						if(/*(*/cnt!=0/*)|(iscnowfjust=1)*/){
+						if(cnt!=0){
 							sich_trigger=1-sich_trigger
 							if(fl_SiCh=1):BASS_VST_SetParam_R hFX_SiCh,0,double(sich_trigger)
-							//bassupdatefl=1
 						}
 					}
 					sich_beatp=sich_beat
@@ -6604,7 +6368,6 @@
 						f+=(1+cnt)*((note.(arstat.(4+cnt).2).2=0)|(arstat.(4+cnt).0<note.(arstat.(4+cnt).2).3-note.(arstat.(4+cnt).2).4))
 					}
 				loop
-				//stat1=(leffstat+peffstat*2)*(peffect=0)+(leffstat|(((f\2)|(arstat.4.0>0)|(arstat.4.1=0))&((f/2)|(arstat.5.0>0)|(arstat.5.1=0))))*(peffstat|((panalognow.0=0)&(panalognow.1=1000)))*(peffect=1)
 				stat1=(leffstat+peffstat3*2)*(peffect=0)+(leffstat|(((f\2)|(arstat.4.0>0)|(arstat.4.1=0))&((f/2)|(arstat.5.0>0)|(arstat.5.1=0))))*(peffstat3|((analognow.0=-1)&(analognow.1=-1)))*(peffect=1)
 			}else{
 				stat1=leffstat+peffstat3*2*(peffect=0)+((max(peffstata.0,0)+max(peffstata.1,0)+((t-shuwat<=200)&(disableshuwa=0)))>=1)*(peffect=1)*2
@@ -6627,14 +6390,7 @@
 			}
 			// SwitchAudioの処理
 			swaudionow_filter=-1
-			if(feffect=1){/*
-				repeat 2
-					if((leffstata.cnt=1)&(feffectnow.cnt>=100)){
-						if(int(userfx_params.(feffectnow.cnt-100).0)=FXDEF_FXTYPE_AUDI){
-							swaudionow=userfx_swaudiomid.(feffectnow.cnt-100)
-						}
-					}
-				loop*/
+			if(feffect=1){
 				if((peffstat3=1)&(filtertype2>=100)){
 					if(int(userfx_params.(filtertype2-100).0)=FXDEF_FXTYPE_AUDI){
 						swaudionow_filter=userfx_swaudiomid.(filtertype2-100)
@@ -6952,46 +6708,30 @@
 					loop
 				}
 				peffstat2p=peffstat2
-				//if((max(peffstata.0,0)+max(peffstata.1,0))>=1){
-					foreach mid
-						if(hCompFX.cnt=-1){
-							if(mnow=cnt){
-								hCompFX.cnt=BASS_ChannelSetFX(mid.cnt,0x10011,0)
-								BASS_FXSetParameters hCompFX.cnt,compparam
-								hVolFX2.cnt=BASS_ChannelSetFX(mid.cnt,0x10003,10)
-								dim volfx,2
-								volfx=0,tofloat(0.1f)
-								BASS_FXSetParameters hVolFX2.cnt,volfx
-							}
-						}/*else:if(mnow!=cnt){
-							BASS_ChannelRemoveFX mid.cnt,hCompFX.cnt
-							hCompFX.cnt=-1
-							BASS_ChannelRemoveFX mid.cnt,hVolFX2.cnt
-							hVolFX2.cnt=-1
-						}*/
-					loop
-					repeat swaudionum
-						if(hCompFX_sw.cnt=-1){
-							if(swaudionow_result=cnt){
-								hCompFX_sw.cnt=BASS_ChannelSetFX(mid_sw.cnt,0x10011,0)
-								BASS_FXSetParameters hCompFX_sw.cnt,compparam
-								hVolFX2_sw.cnt=BASS_ChannelSetFX(mid_sw.cnt,0x10003,10)
-								dim volfx,2
-								volfx=0,tofloat(0.1f)
-								BASS_FXSetParameters hVolFX2_sw.cnt,volfx
-							}
+				foreach mid
+					if(hCompFX.cnt=-1){
+						if(mnow=cnt){
+							hCompFX.cnt=BASS_ChannelSetFX(mid.cnt,0x10011,0)
+							BASS_FXSetParameters hCompFX.cnt,compparam
+							hVolFX2.cnt=BASS_ChannelSetFX(mid.cnt,0x10003,10)
+							dim volfx,2
+							volfx=0,tofloat(0.1f)
+							BASS_FXSetParameters hVolFX2.cnt,volfx
 						}
-					loop
-				/*}else{
-					foreach mid
-						if(hCompFX.cnt!=-1){
-							BASS_ChannelRemoveFX mid.cnt,hCompFX.cnt
-							hCompFX.cnt=-1
-							BASS_ChannelRemoveFX mid.cnt,hVolFX2.cnt
-							hVolFX2.cnt=-1
+					}
+				loop
+				repeat swaudionum
+					if(hCompFX_sw.cnt=-1){
+						if(swaudionow_result=cnt){
+							hCompFX_sw.cnt=BASS_ChannelSetFX(mid_sw.cnt,0x10011,0)
+							BASS_FXSetParameters hCompFX_sw.cnt,compparam
+							hVolFX2_sw.cnt=BASS_ChannelSetFX(mid_sw.cnt,0x10003,10)
+							dim volfx,2
+							volfx=0,tofloat(0.1f)
+							BASS_FXSetParameters hVolFX2_sw.cnt,volfx
 						}
-					loop
-				}*/
+					}
+				loop
 			}
 		}
 		if(fadeoutfl=0){
@@ -7008,10 +6748,9 @@
 							user_beat.cnt=int((double(c2bnow)+double(cnowfx-stat1)/(b2c(c2bnow+1)-stat1))/userfx_params.cnt.1)
 						}else:user_beat.cnt=0
 						if(((user_beat.cnt!=user_beatp.cnt)|(c2bnow!=c2bnowp))&(userfx_params.cnt.1>0.0f)&(userfx_params.cnt.1<1.0f)&((feffectnow.0=100+cnt)|(feffectnow.1=100+cnt)|(cnt>=userfxnum-userfilternum))){
-							if(/*(*/_cnt!=0/*)|(iscnowfjust=1)*/){
+							if(_cnt!=0){
 								user_trigger.cnt=1-user_trigger.cnt
 								BASS_VST_SetParam_R hFX_User.cnt,0,double(user_trigger.cnt)
-								//bassupdatefl=1
 							}
 						}
 					}
@@ -7021,30 +6760,16 @@
 				c2bnowp_50ms=c2bnow_50ms
 			}
 		}
-		/*
-		gsel 0
-		if(auto=0):title ""+hCompFX.0+","+hCompFX.1
-		if(auto=1):title ""+hCompFX.0*/
 		foreach mid
 			BASS_ChannelUpdate mid.cnt
 		loop
 		repeat swaudionum
 			BASS_ChannelUpdate mid_sw.cnt
 		loop
-		//BASS_Update
 		peffstatap=peffstata.0,peffstata.1
 		canagainp=canagain
 		filtertypep=filtertype
 		filtertype2p=filtertype2
-		/*
-		if(auto=1){
-			if((cnt\2=0)|(length(mid)=1)):BASS_ChannelUpdate mid.0
-			if(((cnt\2=1)|(mnow=1))&(length(mid)>=2)):BASS_ChannelUpdate mid.1
-		}else{
-			BASS_ChannelUpdate mid.(cnt\4)
-			BASS_ChannelUpdate mid.((cnt+2)\4)
-			if((mnow!=(cnt\4))&(mnow!=((cnt+2)\4))&(mnow>=2)):BASS_ChannelUpdate mid.mnow
-		}*/
 		if(analogmode=mode_off){
 			repeat spinnum
 				if((cnow+sttp*adj>=spin.cnt.1)&(cnow+sttp*adj<spin.cnt.1+spin.cnt.2)&(spin.cnt.0!=-1)){
@@ -7055,7 +6780,6 @@
 					spinnow.3=cnt
 				}
 			loop
-			//spinangle=spinangle*100/(((t-spintp)-100)/5+100)
 		}
 		// 画面回転の計算
 		spinangles=0
@@ -7079,7 +6803,7 @@
 					}else:if((spinangle>360)&(spinangle<440)){
 						stat2=(spinangle-360)*90/80
 						stat1=(stat2>90)
-						dstat=sin(deg2rad(stat2))//-sin(deg2rad(108))
+						dstat=sin(deg2rad(stat2))
 						dstat*=30
 						dstat=360+360*stat1+dstat
 						spinangle=int(dstat)
@@ -7090,7 +6814,6 @@
 						dstat=cos(deg2rad(int(dstat)))*cos(deg2rad(int(dstat)))
 						dstat*=double(30)
 						spinangle=30-int(dstat)
-						//if(spinnow0p=0):spinangle*=-1
 					}
 					spinangle*=1-spinnow.0*2
 					spinangles*=1-spinnow.0*2
@@ -7136,9 +6859,9 @@
 			totalscore=int(dstat*(critical*2+near))
 		}
 		if(cnt\(frameskip+1)=0){
-			//gsel 0
-			//if(output=0):redraw 0
 			// レーン描画
+			center_split_now = GetCurrentCamValue(game_system, CAM_CENTER_SPLIT) / 100.0f
+			center_split_px = int(center_split_now * bt_width) / 2 / ra
 			if((bg>=1)&((lanesubflp=1)|(lanesubfl=1))){
 				gsel 51+118*(anaranfl=2)
 				gmode 0
@@ -7148,12 +6871,12 @@
 					boxf
 					pos vw/ra/2,0
 				}
-				gcopy 47,vw/ra,0,vw/ra,vh/ra
+				pos ginfo_cx-center_split_px,ginfo_cy
+				gcopy 47,vw/ra,0,vw/ra/2,vh/ra
+				pos ginfo_cx+vw/ra/2+center_split_px*2,ginfo_cy
+				gcopy 47,vw/ra+vw/ra/2,0,vw/ra/2,vh/ra
 			}
 			gsel 5+163*(anaranfl=2)
-			/*pos (5+xsh)/ra,0
-			gmode 0
-			gcopy 8,0,0,210/ra,vh/ra*/
 			gmode 0
 			pos 0,0
 			if(anaranfl=2){
@@ -7161,7 +6884,10 @@
 				boxf
 				pos vw/ra/2,0
 			}
-			gcopy 47,0,0,vw/ra,vh/ra
+			pos ginfo_cx-center_split_px,ginfo_cy
+			gcopy 47,0,0,vw/ra/2,vh/ra
+			pos ginfo_cx+vw/ra/2+center_split_px*2,ginfo_cy
+			gcopy 47,vw/ra/2,0,vw/ra/2,vh/ra
 			
 			// 小節線描画
 			beatn=4
@@ -7181,18 +6907,24 @@
 				if(cbcnt>=cnow-bpba_4){
 					stat1=-(hsrc(int(cbcnt),-1)*10*hs/bpba-vh+24)/ra
 					if(stat1!=stat1_){
-						pos xsh/ra+(anaranfl=2)*vw/ra/2,stat1
-						gcopy 15,0,0,220/ra,16/ra
+						pos xsh/ra+(anaranfl=2)*vw/ra/2-center_split_px,stat1
+						gcopy 15,0,0,220/ra/2,16/ra
+						pos ginfo_cx+220/ra/2+center_split_px*2,ginfo_cy
+						gcopy 15,220/ra/2,0,220/ra/2,16/ra
 						if(stat1<0):break
 						stat1_=stat1
 					}
 				}
 				cbcnt+=double(bpba)*beatn/beatd
 			loop
+
+			// レーン光沢アニメーションの描画
 			repeat 4
 				gmode 5,,,255
-				pos (8+xsh)/ra+(anaranfl=2)*vw/ra/2,(300*cnt+300*((t+10000)\200)/200)/ra
-				gcopy 34,0,0,210/ra,64/ra
+				pos (8+xsh)/ra+(anaranfl=2)*vw/ra/2-center_split_px,(300*cnt+300*((t+10000)\200)/200)/ra
+				gcopy 34,0,0,210/ra/2,64/ra
+				pos ginfo_cx+210/ra/2+center_split_px*2,ginfo_cy
+				gcopy 34,210/ra/2,0,210/ra/2,64/ra
 			loop
 
 			// ショート/ロングオブジェクトの描画
@@ -7219,13 +6951,13 @@
 						if(hsrc1>bpba*(vh+20)/10/hs){
 							break
 						}
-						gmode 2//5,,,256
+						gmode 2
 						hsrc12=hsrc(note.i.1+note.i.2,note.i.4)
 						stat1=max(((hsrc12*hs*10/bpba)-(hsrc1*hs*10/bpba))/ra/*-6/ra*/,1)
 						stat3=max(0,(hsrc1*10*hs/bpba)/ra+16/ra-vh/ra-7/ra+stat1)
 						stat4=max(0,-(hsrc1*10*hs/bpba)/ra-16/ra+7/ra)
 						gsel 5+163*(anaranfl=2)
-						pos (bt_xsh+(note.i.0-4)*fx_width)/ra+(anaranfl=2)*vw/ra/2, -(hsrc1*10*hs/bpba)/ra+vh/ra-16/ra+7/ra-stat1+stat3-slshift
+						pos (bt_xsh+(note.i.0-4)*fx_width)/ra+(anaranfl=2)*vw/ra/2+center_split_px*((note.i.0-4)*2-1), -(hsrc1*10*hs/bpba)/ra+vh/ra-16/ra+7/ra-stat1+stat3-slshift
 						if(stat1-stat3-stat4>0){
 							stat2=note.i.3-t
 							if((arstat.(note.i.0).2=i)&(stat2<=50)&(ljudge.(note.i.0-4)=0)){
@@ -7240,22 +6972,12 @@
 							if(bg>=1){
 								gsel 51+118*(anaranfl=2)
 								gmode 6,,,256
-								/*!!*//*
-							if((arstat.(note.i.0).2=i)&(stat2<=50)&(ljudge.(note.i.0-4)=0)){
-								gcopy 150,0,0,82/ra,stat1-stat3-stat4
-							}else:if((arstat.(note.i.0).2=i)&(stat2<=50)&(ljudge.(note.i.0-4)=1)&((t\100)<50)){
-								gcopy 150,82/ra,0,82/ra,stat1-stat3-stat4
-							}else:if((arstat.(note.i.0).2=i)&(stat2<=50)&(ljudge.(note.i.0-4)=1)){
-								gcopy 150,82/ra*2,0,82/ra,stat1-stat3-stat4
-							}else{
-								gcopy 150,82/ra*3,0,82/ra,stat1-stat3-stat4
-							}*/
 								lanesubfl=1
 								gsel 5+163*(anaranfl=2)
 							}
-							pos (bt_xsh+(note.i.0-4)*fx_width)/ra+(anaranfl=2)*vw/ra/2, -(hsrc1*10*hs/bpba)/ra+vh/ra-16/ra+7/ra-stat1-slshift
+							pos ginfo_cx, -(hsrc1*10*hs/bpba)/ra+vh/ra-16/ra+7/ra-stat1-slshift
 							gcopy 1,0,9,82/ra,1
-							pos (bt_xsh+(note.i.0-4)*fx_width)/ra+(anaranfl=2)*vw/ra/2, -(hsrc1*10*hs/bpba)/ra+vh/ra-6/ra-16/ra+7/ra-slshift
+							pos ginfo_cx, -(hsrc1*10*hs/bpba)/ra+vh/ra-6/ra-16/ra+7/ra-slshift
 							gcopy 156,0,0,82/ra,7/ra
 						}
 					}
@@ -7292,7 +7014,7 @@
 						if(stat1-stat3-stat4>0){
 							gsel 5+163*(anaranfl=2)
 							gmode 5,,,255
-							pos (bt_xsh+note.i.0*bt_width)/ra+(anaranfl=2)*vw/ra/2, -(hsrc1*10*hs/bpba+16)/ra+vh/ra+7/ra-stat1+stat3-slshift
+							pos (bt_xsh+note.i.0*bt_width)/ra+(anaranfl=2)*vw/ra/2+center_split_px*(note.i.0/2*2-1), -(hsrc1*10*hs/bpba+16)/ra+vh/ra+7/ra-stat1+stat3-slshift
 							stat2=note.i.3-t
 							if((arstat.(note.i.0).2=i)&(stat2<=50)&(shljudge.(note.i.0)=0)){
 								gcopy 151,0,0,40/ra,stat1-stat3-stat4
@@ -7306,7 +7028,7 @@
 							if(bg>=1){
 								gsel 51+118*(anaranfl=2)
 								gmode 6,,,256
-								pos (bt_xsh+note.i.0*bt_width)/ra+(anaranfl=2)*vw/ra/2, -(hsrc1*10*hs/bpba+16)/ra+vh/ra+7/ra-stat1+stat3-slshift
+								pos (bt_xsh+note.i.0*bt_width)/ra+(anaranfl=2)*vw/ra/2+center_split_px*(note.i.0/2*2-1), -(hsrc1*10*hs/bpba+16)/ra+vh/ra+7/ra-stat1+stat3-slshift
 								if((arstat.(note.i.0).2=i)&(stat2<=50)&(shljudge.(note.i.0)=0)){
 									gcopy 151,40/ra,0,40/ra,stat1-stat3-stat4
 								}else:if((arstat.(note.i.0).2=i)&(stat2<=50)&(shljudge.(note.i.0)=1)&((t\100)<50)){
@@ -7319,13 +7041,13 @@
 								lanesubfl=1
 							}
 							gmode 2
-							pos (bt_xsh+note.i.0*bt_width)/ra+(anaranfl=2)*vw/ra/2, -(hsrc1*10*hs/bpba-vh+16)/ra-slshift
+							pos ginfo_cx, -(hsrc1*10*hs/bpba-vh+16)/ra-slshift
 							gcopy 157,0,0,40/ra,7/ra
 							gmode 0
 							if(bg>=1){
 								gsel 51+118*(anaranfl=2)
 								gmode 2
-								pos (bt_xsh+note.i.0*bt_width)/ra+(anaranfl=2)*vw/ra/2,-(hsrc1*10*hs/bpba-vh+16)/ra-slshift
+								pos ginfo_cx,-(hsrc1*10*hs/bpba-vh+16)/ra-slshift
 								gcopy 2,40/ra,0,40/ra,7/ra
 								gmode 0
 								lanesubfl=1
@@ -7359,7 +7081,7 @@
 							break
 						}
 						gmode 7
-						pos (bt_xsh+(note.i.0-4)*fx_width)/ra+(anaranfl=2)*vw/ra/2, (-hsrc1*10*hs/bpba+vh-16+2-1)/ra-slshift
+						pos (bt_xsh+(note.i.0-4)*fx_width)/ra+(anaranfl=2)*vw/ra/2+center_split_px*((note.i.0-4)*2-1), (-hsrc1*10*hs/bpba+vh-16+2-1)/ra-slshift
 						if(notese.i=-1){
 							gcopy 43,0,(hsrc1*10*hs/bpba*8/vh*40)/ra,82/ra,40/ra
 						}else{
@@ -7394,7 +7116,7 @@
 						}
 						gsel 5+163*(anaranfl=2)
 						gmode 7
-						pos (bt_xsh+note.i.0*bt_width)/ra+(anaranfl=2)*vw/ra/2, (-hsrc1*10*hs/bpba-16+2+vh)/ra-slshift
+						pos (bt_xsh+note.i.0*bt_width)/ra+(anaranfl=2)*vw/ra/2+center_split_px*(note.i.0/2*2-1), (-hsrc1*10*hs/bpba-16+2+vh)/ra-slshift
 						gcopy 53+min(max((hsrc1*10*hs/bpba*8/vh),0),7)*9+note.i.6,0,0,40/ra,40/ra
 					}
 					i=note.i.5
@@ -7408,13 +7130,13 @@
 						judge.cnt.1=0
 						continue
 					}
+					pos (bt_xsh+bt_width*cnt)/ra+(anaranfl=2)*vw/ra/2+center_split_px*(cnt/2*2-1),(vh-300)/ra
 					if((t-judge.cnt.0)<75){
 						gmode 5,,,220
-						pos (bt_xsh+bt_width*cnt+20-(t-judge.cnt.0)*20/75)/ra+(anaranfl=2)*vw/ra/2,(vh-300)/ra
+						pos ginfo_cx+(20-(t-judge.cnt.0)*20/75)/ra,ginfo_cy
 						gcopy 9,(40*judge.cnt.1-40+20-(t-judge.cnt.0)*20/75)/ra,0,(t-judge.cnt.0)*40/75/ra,300/ra
 					}else{
 						gmode 5,,,220+(judge.cnt.0-t+75)*220/80
-						pos (bt_xsh+bt_width*cnt)/ra+(anaranfl=2)*vw/ra/2,(vh-300)/ra
 						gcopy 9,(40*judge.cnt.1-40)/ra,0,40/ra,300/ra
 					}
 				}
@@ -7425,13 +7147,13 @@
 						judge.cnt.1=0
 						continue
 					}
+					pos (bt_xsh+(cnt-4)*fx_width)/ra+(anaranfl=2)*vw/ra/2+center_split_px*((cnt-4)*2-1),(vh-300)/ra
 					if((t-judge.cnt.0)<75){
 						gmode 5,,,200
-						pos (bt_xsh+(cnt-4)*fx_width+41-(t-judge.cnt.0)*41/75)/ra+(anaranfl=2)*vw/ra/2,(vh-300)/ra
+						pos ginfo_cx+(41-(t-judge.cnt.0)*41/75)/ra,ginfo_cy
 						gcopy 44,(82*judge.cnt.1-82+41-(t-judge.cnt.0)*41/75)/ra,0,(t-judge.cnt.0)*82/75/ra,300/ra
 					}else{
 						gmode 5,,,200+(judge.cnt.0-t+75)*220/80
-						pos (bt_xsh+(cnt-4)*fx_width)/ra+(anaranfl=2)*vw/ra/2,(vh-300)/ra
 						gcopy 44,(82*judge.cnt.1-82)/ra,0,82/ra,300/ra
 					}
 				}
@@ -7553,7 +7275,7 @@
 						sx1.cnt/=ra
 						sy1.cnt/=ra
 					loop
-					if(/*((sx1.0>=0)|(sx1.1>=0)|(sx1.2>=0)|(sx1.3>=0))&*/((sy1.0>=0)|(sy1.1>=0)|(sy1.2>=0)|(sy1.3>=0))/*&((sx1.0<vw/ra*anaranfl)|(sx1.1<vw/ra*anaranfl)|(sx1.2<vw/ra*anaranfl)|(sx1.3<vw/ra*anaranfl))&((sy1.0<vh/ra*anaranfl)|(sy1.1<vh/ra*anaranfl)|(sy1.2<vh/ra*anaranfl)|(sy1.3<vh/ra*anaranfl))*/){
+					if(((sy1.0>=0)|(sy1.1>=0)|(sy1.2>=0)|(sy1.3>=0))){
 						// 0…左下
 						// 1…左上
 						// 2…右上
@@ -7579,35 +7301,15 @@
 								sy1.2=0
 							}
 						}
-						/*if((analogbuf.i=0)&(double(sx1.3-sx1.1)*(sy1.3-sy1.1)<double(200)*double(200))){
-							dim sx1_,4
-							dim sy1_,4
-							repeat 4
-								sx1_.cnt=sx1.cnt-sx1.1
-								sy1_.cnt=sy1.cnt-sy1.1
-							loop
-							buffer 5000+i,sx1.3-sx1.1,sy1.3-sy1.1
-							color 0,0,0
-							boxf
+						repeat 4
+							sx1.cnt+=(anaranfl=2)*vw/ra/2
+						loop
+						gsquare 154,sx1,sy1,sx2,sy2
+						if(bg>=1){
+							gsel 51+118*(anaranfl=2)
 							gmode 5,,,255
-							gsquare 154,sx1_,sy1_,sx2,sy2
-							analogbuf.i=5000+i
-							gsel 5+163*(anaranfl=2)
+							gsquare 171,sx1,sy1,sx2,sy2
 						}
-						if(analogbuf.i!=0){
-							pos sx1.1,sy1.1
-							gcopy analogbuf.i,0,0,sx1.3-sx1.1,sy1.3-sy1.1
-						}else{*/
-							repeat 4
-								sx1.cnt+=(anaranfl=2)*vw/ra/2
-							loop
-							gsquare 154,sx1,sy1,sx2,sy2
-							if(bg>=1){
-								gsel 51+118*(anaranfl=2)
-								gmode 5,,,255
-								gsquare 171,sx1,sy1,sx2,sy2
-							}
-						//}
 					}
 					sx2=48*analog.i.0,48*analog.i.0,47+48*analog.i.0,47+48*analog.i.0
 					f=0
@@ -7625,9 +7327,6 @@
 							sx1.cnt/=ra
 							sy1.cnt/=ra
 						loop
-						//if((sx1.0=sx1.1)&(sy1.0>sy1.1)&(sx1.2=sx1.3)&(sy1.2<sy1.3)&(sy1.0=sy1.3)&(sy1.1=sy1.2)){
-						//	gzoom sx1.2-,3,sx1,sy1,sx2,sy2
-						//}else:
 						repeat 4
 							sx1.cnt+=(anaranfl=2)*vw/ra/2
 						loop
@@ -7638,15 +7337,13 @@
 								gmode 5,,,255
 								gsquare 171,sx1,sy1,sx2,sy2
 							}
-							//sz1=0,0,0,0
-							//d3texture sx1,sy1,sz1,3,sx2.1,sy2.1,sx2.3-sx2.1,sy2.3-sy2.1,1
 						}
 					}
 					gsel 5+163*(anaranfl=2)
 					gmode 0
 				next
 			loop
-			
+
 			// 判定の描画2
 			if((cnow+sttp*adj-spincp<spinnow.2*75/200)&(cnow+sttp*adj-spincp>0)&(spinnow.2>0)){
 				dstat=sin(deg2rad(180*(cnow+sttp*adj-spincp)/(spinnow.2*75/200)))*sin(deg2rad(180*(cnow+sttp*adj-spincp)/(spinnow.2*75/200)))*7
@@ -7671,9 +7368,9 @@
 					if(t-judgel.cnt0.cnt2.0>=500):judgelnext.cnt0=(cnt2+1)\judgelmax:continue
 					if(t-judgel.cnt0.cnt2.0<0):break
 					if(cnt0<=3){
-						pos (92+60*cnt0)*scrsize_h/480+(anaranfl=2)*judgel_winx/2,getsize(17)
+						pos (92+60*cnt0)*scrsize_h/480+(anaranfl=2)*judgel_winx/2+int(center_split_now*60)/2*(cnt0/2*2-1),getsize(17)
 					}else{
-						pos (92+30+120*(cnt0-4))*scrsize_h/480+(anaranfl=2)*judgel_winx/2,getsize(17)
+						pos (92+30+120*(cnt0-4))*scrsize_h/480+(anaranfl=2)*judgel_winx/2+int(center_split_now*60)/2*((cnt0-4)*2-1),getsize(17)
 					}
 					if((t-judgel.cnt0.cnt2.0<500)&(judgel.cnt0.cnt2.1=4)){
 						gcopy 17,getsize(86),getsize(86)*((t-judgel.cnt0.cnt2.0)*12/500),getsize(86),getsize(86)
@@ -7688,18 +7385,16 @@
 			loop
 			repeat 4
 				if(t-shlstartt.cnt>=0){
+					pos (92-17+60*cnt)*scrsize_h/480+(anaranfl=2)*judgel_winx/2+int(center_split_now*60)/2*(cnt/2*2-1),getsize(20)/2
 					if((t-shlstartt.cnt<500)&(shljudge.cnt=1)){
-						pos (92-17+60*cnt)*scrsize_h/480+(anaranfl=2)*judgel_winx/2,getsize(20)/2
 						gcopy 45,0,getsize(120)*((t-shlstartt.cnt)*8/500),getsize(120),getsize(120)
 					}else:if(shljudge.cnt=1){
-						pos (92-17+60*cnt)*scrsize_h/480+(anaranfl=2)*judgel_winx/2,getsize(20)/2
 						gcopy 45,0,getsize(120)*(9+((t-shlstartt.cnt-500)\1625)*26/1625),getsize(120),getsize(120)
 					}else{
 						if(shljudgep.cnt=1){
 							shljudgeendt.cnt=t
 						}
 						if(t-shljudgeendt.cnt<500){
-							pos (92-17+60*cnt)*scrsize_h/480+(anaranfl=2)*judgel_winx/2,getsize(20)/2
 							gcopy 45,0,getsize(120)*(34+(t-shljudgeendt.cnt)*8/500),getsize(120),getsize(120)
 						}
 					}
@@ -7707,18 +7402,16 @@
 			loop
 			repeat 2
 				if(t-lstartt.cnt>=0){
+					pos (96+120*cnt)*scrsize_h/480+(anaranfl=2)*judgel_winx/2+int(center_split_now*60)/2*(cnt*2-1),0
 					if((t-lstartt.cnt<500)&(ljudge.cnt=1)){
-						pos (96+120*cnt)*scrsize_h/480+(anaranfl=2)*judgel_winx/2,0
 						gcopy 30,0,getsize(140)*((t-lstartt.cnt)*8/500),getsize(140),getsize(140)
 					}else:if(ljudge.cnt=1){
-						pos (96+120*cnt)*scrsize_h/480+(anaranfl=2)*judgel_winx/2,0
 						gcopy 30,0,getsize(140)*(9+(((t-lstartt.cnt-500)\1625)*26/1625)),getsize(140),getsize(140)
 					}else{
 						if(ljudgep.cnt=1){
 							ljudgeendt.cnt=t
 						}
 						if(t-ljudgeendt.cnt<500){
-							pos (96+120*cnt)*scrsize_h/480+(anaranfl=2)*judgel_winx/2,0
 							gcopy 30,0,getsize(140)*(34+(t-ljudgeendt.cnt)*8/500),getsize(140),getsize(140)
 						}
 					}
@@ -7738,7 +7431,6 @@
 						analogvpos.cnt=canalognow.cnt
 						analogstatp.cnt=1
 					}else{
-						//if(analogstatp.cnt=1):analogpos.cnt=analognowp.cnt
 						stat1=((analogpos.cnt*anarannow(cnt)-500*(anarannow(cnt)=2))*scrsize_h*59/200)/480
 						analogvpos.cnt=analogpos.cnt
 						analogstatp.cnt=0
@@ -7751,13 +7443,13 @@
 			loop
 			// アナログデバイスのエフェクトを描画
 			repeat 2
-				if((analognowp.cnt!=-1)/*&(arstatp.(6+cnt).0=1)*/&((abs(analogposp.cnt-analognowp.cnt)<100)|(analogmode=mode_auto))&((anadirection.cnt!=anadirectionp.cnt)|(analognow.cnt=-1))){
+				if((analognowp.cnt!=-1)&((abs(analogposp.cnt-analognowp.cnt)<100)|(analogmode=mode_auto))&((anadirection.cnt!=anadirectionp.cnt)|(analognow.cnt=-1))){
 					if(analognow.cnt=-1){
 						analogefft.cnt.(analogefftnum.cnt).0=t
 						analogefft.cnt.(analogefftnum.cnt).1=analognowp.cnt*anarannowp(cnt)-500*(anarannowp(cnt)=2)
 					}else{
-						analogefft.cnt.(analogefftnum.cnt).0=tp//analog.(arstatp.(6+cnt).1).7
-						analogefft.cnt.(analogefftnum.cnt).1=analognowp.cnt*anarannowp(cnt)-500*(anarannowp(cnt)=2)//analog.(arstatp.(6+cnt).1).4*1000/50
+						analogefft.cnt.(analogefftnum.cnt).0=tp
+						analogefft.cnt.(analogefftnum.cnt).1=analognowp.cnt*anarannowp(cnt)-500*(anarannowp(cnt)=2)
 					}
 					analogefftnum.cnt++
 				}
@@ -7767,7 +7459,6 @@
 				cnt2=cnt
 				repeat max(analogefftnum.cnt2-analogefffcnt.cnt2-1,0),analogefffcnt.cnt2+1
 					if(t-analogefft.cnt2.cnt.0<90){
-						//if(analogefft.cnt2.cnt.0)//////////////////////////////
 						pos (analogefft.cnt2.cnt.1*scrsize_h*30/100)/480+(anaranfl=2)*judgel_winx/2,getsize(17)
 						gcopy 41,getsize(172)*cnt2,(t-analogefft.cnt2.cnt.0)/30*86*scrsize_h/480,getsize(172),getsize(86)
 					}else:if(t-analogefft.cnt2.cnt.0<170){
@@ -7787,15 +7478,7 @@
 			// レーン傾きの数値指定の計算
 			ddim ztiltnow,1
 			ddim ztiltnow2,1
-			if(ztiltnum>=1):ztiltnow2=double(ztilt.0.1)*romax/100000
-			repeat ztiltnum-ztiltfcnt,ztiltfcnt
-				if(ztilt.cnt.0<=cnow+sttp){
-					if(cnt!=ztiltnum-1){
-						ztiltnow2=double(ztilt.cnt.2)*romax/100000+double(ztilt.(cnt+1).1-ztilt.cnt.2)*romax/100000*(cnow+sttp-ztilt.cnt.0)/max(ztilt.(cnt+1).0-ztilt.cnt.0,1)
-					}else:ztiltnow2=double(ztilt.cnt.2)*romax/100000
-					ztiltfcnt=cnt
-				}else:break
-			loop
+			ztiltnow2 = GetCurrentCamValue(game_system, CAM_MANUAL_TILT) * romax
 			if(cnt=0):ztiltnowp=ztiltnow2
 			ztiltnow=ztiltnow2*min(max(t_tp,1),ztilttime)/ztilttime+ztiltnowp*(ztilttime-min(max(t_tp,1),ztilttime))/ztilttime
 			ztiltrate=1.0f*ztilton*min(max(t_tp,1),ztiltontime)/ztiltontime+ztiltratep*(ztiltontime-min(max(t_tp,1),ztiltontime))/ztiltontime
@@ -7843,33 +7526,17 @@
 			}
 			ddim zsidenow,1
 			ddim zsidenow2,1
-			if(zsidenum>=1):zsidenow2=double(zside.0.1)
-			repeat zsidenum-zsidefcnt,zsidefcnt
-				if(zside.cnt.0<=cnow+sttp){
-					if(cnt!=zsidenum-1){
-						zsidenow2=double(zside.cnt.2)+double(zside.(cnt+1).1-zside.cnt.2)*(cnow+sttp-zside.cnt.0)/max(zside.(cnt+1).0-zside.cnt.0,1)
-					}else:zsidenow2=double(zside.cnt.2)
-					zsidefcnt=cnt
-				}else:break
-			loop
+			zsidenow2 = GetCurrentCamValue(game_system, CAM_ZOOM_SIDE)
 			zsidenow2/=1.5f
 			zsidenow2/=2.0f
 			if(cnt=0):zsidenowp=zsidenow2
 			zsidenow=zsidenow2*min(max(t_tp,1),ztime)/ztime+zsidenowp*(ztime-min(max(t_tp,1),ztime))/ztime
 			sha+=zsidenow
-			color 0,0,0//,15,15
+			color 0,0,0
 			// 3D表示
 			ddim ztopnow,1
 			ddim ztopnow2,1
-			if(ztopnum>=1):ztopnow2=double(ztop.0.1)
-			repeat ztopnum-ztopfcnt,ztopfcnt
-				if(ztop.cnt.0<=cnow+sttp){
-					if(cnt!=ztopnum-1){
-						ztopnow2=double(ztop.cnt.2)+double(ztop.(cnt+1).1-ztop.cnt.2)*(cnow+sttp-ztop.cnt.0)/max(ztop.(cnt+1).0-ztop.cnt.0,1)
-					}else:ztopnow2=double(ztop.cnt.2)
-					ztopfcnt=cnt
-				}else:break
-			loop
+			ztopnow2 = GetCurrentCamValue(game_system, CAM_ZOOM_TOP)
 			if(csongver_int<167){
 				// 旧バージョン互換
 				ztopnow2/=1.5f
@@ -7884,15 +7551,7 @@
 
 			ddim zbotnow,1
 			ddim zbotnow2,1
-			if(zbotnum>=1):zbotnow2=double(zbot.0.1)
-			repeat zbotnum-zbotfcnt,zbotfcnt
-				if(zbot.cnt.0<=cnow+sttp){
-					if(cnt!=zbotnum-1){
-						zbotnow2=double(zbot.cnt.2)+double(zbot.(cnt+1).1-zbot.cnt.2)*(cnow+sttp-zbot.cnt.0)/max(zbot.(cnt+1).0-zbot.cnt.0,1)
-					}else:zbotnow2=double(zbot.cnt.2)
-					zbotfcnt=cnt
-				}else:break
-			loop
+			zbotnow2 = GetCurrentCamValue(game_system, CAM_ZOOM_BOTTOM)
 			zbotnow2/=1.5f
 			zbotnow2/=120.0f
 			if(zbotnow2>=0.0f):zbotnow2/=2.5f
@@ -7925,7 +7584,7 @@
 			gsel 0
 			if(bg>=1){
 				setang obj_lane_s,0,0,-dstat
-				setpos obj_lane_s,(42.0f/*+(lr-sr)/lr*ztopnow*sin(fv1)*/)*sin(-dstat)-double(-sha)*cos(dstat)/2,-42.0f+(42.0f/*+(lr-sr)/lr*ztopnow*/)*cos(-dstat)-double(-sha)*sin(dstat)/2,0
+				setpos obj_lane_s,42.0f*sin(-dstat)-double(-sha)*cos(dstat)/2,-42.0f+42.0f*cos(-dstat)-double(-sha)*sin(dstat)/2,0
 			}
 			sellang
 			if(csongver_int>=167){
@@ -7935,7 +7594,7 @@
 				objsetf3 -M_PI/2+atan((-slr*zbotnow*sin(fv1)-slr*ztopnow*sin(fv1))/(slr*slr-slr*zbotnow*cos(fv1)-slr*ztopnow*cos(fv1))),0,dstat
 			}
 			setang obj_lane,0,0,-dstat
-			setpos obj_lane,(42.0f/*+(lr-sr)/lr*ztopnow*sin(fv1)*/)*sin(-dstat)-double(-sha)*cos(dstat)/2,-42.0f+(42.0f/*+ztopnow*sin(-M_PI/2-fv1)*/)*cos(-dstat)-double(-sha)*sin(dstat)/2,0
+			setpos obj_lane,42.0f*sin(-dstat)-double(-sha)*cos(dstat)/2,-42.0f+42.0f*cos(-dstat)-double(-sha)*sin(dstat)/2,0
 			if(anaranfl=2){
 				setobjmodel obj_judgel,mod_judgel2x
 			}else{
@@ -8565,7 +8224,6 @@
 	loop
 	stat1=str(bpml.0.1)
 	stat1=strmid(stat1,0,strlen(stat1)-3)+"."+strmid(stat1,-1,3)
-	//stat1=str(double(bpml.0.1)/1000)
 	stat1=strtrim(stat1,2,'0')
 	stat1=strtrim(stat1,2,'.')
 	stat2=0
@@ -8710,8 +8368,6 @@
 	return ct
 
 #defcfunc hsrc int c, int t1
-	//hsrccnt++
-	//if(c=cnow):return 0
 	if(hsc=-1){
 		if(stpnum=0):return c-cnow-sttp
 		if(c>cnow){
@@ -8729,15 +8385,7 @@
 				}else:if(stp.cnt.0>=c):break
 			loop
 			return c-cnow-sttp-stpsh
-		}/*else{
-			repeat stpnum
-				if((cnow<stp.cnt.0+stp.cnt.1)&(cnow>=stp.cnt.0)){
-					stpsh+=stp.cnt.0+stp.cnt.1-cnow
-				}else:if((cnow<stp.cnt.0)&(c>stp.cnt.0)){
-					stpsh+=stp.cnt.1
-				}else:if(stp.cnt.0>=c):break
-			loop
-		}*/
+		}
 		return c-cnow-sttp
 	}else{
 		if(t1!=-1):return (t1-t-ttp*adj)*hsc/24
@@ -8751,9 +8399,7 @@
 		if((c<stp.cnt.0+stp.cnt.1)&(c>=stp.cnt.0)){
 			cstpsh+=stp.cnt.0+stp.cnt.1-c
 			cstp=cnt+1
-		}/*else:if((c<stp.cnt.0)&(c>stp.cnt.0)){
-			cstpsh+=stp.cnt.1
-		}*/
+		}
 	loop
 	return cstpsh
 
@@ -8873,7 +8519,7 @@
 				if((spinangle>360)&(spinangle<440)){
 					stat2=(spinangle-360)*90/80
 					stat1=(stat2>90)
-					dstat=sin(deg2rad(stat2))//-sin(deg2rad(108))
+					dstat=sin(deg2rad(stat2))
 					dstat*=30
 					dstat=360+360*stat1+dstat
 					spinangle=int(dstat)
@@ -8884,7 +8530,6 @@
 					dstat=cos(deg2rad(int(dstat)))*cos(deg2rad(int(dstat)))
 					dstat*=double(30)
 					spinangle=30-int(dstat)
-					//if(spinnow0p=0):spinangle*=-1
 					spinangle*=1-spinnow.0*2
 					spinangles*=1-spinnow.0*2
 					spinrp=spinangle\360

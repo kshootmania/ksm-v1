@@ -51,6 +51,7 @@ m01-072|FULLCOMBO:
 m01-073| PERFECT : 
 m02-000|载入中.....
 m02-001|第一小节必须在谱面起始位置之后.
+m02-005|An error occurred while loading the chart.
 m02-010|---
 m02-011|Some charts in this course are missing.
 m02-012|The latest version of K-Shoot MANIA is required to play this course.
@@ -257,6 +258,7 @@ e04-030|回转特效标记(&I)\tS
 e04-034|底盘倾斜种类(&L)\tR
 e04-035|画面上部放大率变更(&Z)\tZ
 e04-036|画面下部放大率变更(&M)\tX
+e04-037|画面左右移动量变更(&H)\tC
 e04-038|谱面停止标记(&F)\tF
 e04-040|4分\tCtrl+4
 e04-041|8分\tCtrl+8
