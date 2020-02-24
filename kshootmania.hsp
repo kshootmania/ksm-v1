@@ -72,7 +72,7 @@
 #define	defx			ginfo_dispx/2
 #define defy			ginfo_dispy/2
 #define siteurl			"https://www.kshootmania.com/"
-#define atitle			"K-Shoot MANIA v1.70beta"
+#define atitle			"K-Shoot MANIA v1.70beta2"
 #define currentver		"168c"
 
 #define FX_RE8		1
