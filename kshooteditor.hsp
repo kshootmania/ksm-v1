@@ -96,6 +96,7 @@
 #include "third_party/bitmap.as"
 #include "third_party/mod_encode.hsp"
 #include "third_party/mod_string.hsp"
+#include "third_party/gm_crlf.hsp"
 #include "third_party/alib_hash.as"
 
 #define ctype se_ids(%1) HashElem( se_ids, %1 )
@@ -923,6 +924,7 @@ sdim lang,256,11,96
 langstr=""
 notesel langstr
 noteload clang+".txt"
+conv_crlf langstr,TYPE_CRLF
 repeat notemax
 	noteget stat1,cnt
 	split stat1,"|",langstat
