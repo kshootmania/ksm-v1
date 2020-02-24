@@ -13806,7 +13806,7 @@ stop
 				loop
 			}
 		}
-		if((edittarget=TARGET_ZOOMBOTTOM)&(ctrl_key=0)&(shift_key=0)){
+		if((edittarget=TARGET_ZOOMSIDE)&(ctrl_key=0)&(shift_key=0)){
 			if(zsidenum>0){
 				repeat zsidenum
 					if(zside.cnt.0=cc){
