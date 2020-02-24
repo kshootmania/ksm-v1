@@ -313,7 +313,13 @@ if(strsize>0){
 	exist_msftedit=1
 }
 
-title atitle
+if(hosts=""){
+	// 開発中バージョン(GitHub上で公開中のもの)
+	title atitle+" [in-dev]"
+}else{
+	// 配布バージョン(公式サイト上で公開中のもの)
+	title atitle
+}
 
 oncmd gosub *alt, 0x0105
 
