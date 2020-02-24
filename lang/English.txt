@@ -258,6 +258,7 @@ e04-030|Lane sp&in effect\tS
 e04-034|Lane ti&lt effect type\tR
 e04-035|Lane &zoom (Top)\tZ
 e04-036|Lane zoo&m (Bottom)\tX
+e04-037|&Horizontal lane movement\tC
 e04-038|Pause(&F)\tF
 e04-040|1/4th note\tCtrl+4
 e04-041|1/8th note\tCtrl+8
