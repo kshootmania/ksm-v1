@@ -8506,36 +8506,6 @@
 	if(analog.a.9>=0){
 		scnt=analog.a.9
 		if((cnow<spin.scnt.1+spin.scnt.2)&(spin.scnt.0!=-1)){
-			if((spinnow.2>0)&(spinnow.0>=0)&(spinnow.1<=t+ttp*adj)){
-				spinrpt=t
-				spinangle=675*(cnow+sttp*adj-spinnow.1)/spinnow.2
-				spinangles=520*(cnow+sttp*adj-spinnow.1)/spinnow.2
-				spinangles*=360
-				spinangles/=520
-				spinangles=sin(deg2rad(spinangles))
-				spinangles*=20*(spinnow0p*-2+1)
-				if((spinangle>360)&(spinangle<440)){
-					stat2=(spinangle-360)*90/80
-					stat1=(stat2>90)
-					dstat=sin(deg2rad(stat2))
-					dstat*=30
-					dstat=360+360*stat1+dstat
-					spinangle=int(dstat)
-				}else:if(spinangle>=440){
-					dstat=double(675-spinangle)
-					dstat*=double(90)
-					dstat/=double(235)
-					dstat=cos(deg2rad(int(dstat)))*cos(deg2rad(int(dstat)))
-					dstat*=double(30)
-					spinangle=30-int(dstat)
-					spinangle*=1-spinnow.0*2
-					spinangles*=1-spinnow.0*2
-					spinrp=spinangle\360
-					if(spinrp>=180):spinrp-=360
-					spinrps=spinangles\360
-					if(spinrps>=180):spinrps-=360
-				}else:spinrp=0:spinrps=0
-			}
 			spinnow.0=spin.scnt.0
 			spinnow0p=spin.scnt.0
 			spinnow.1=cnowp+sttp*adj
