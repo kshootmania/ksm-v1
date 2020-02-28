@@ -6780,11 +6780,12 @@
 			loop
 		}
 		// 画面回転の計算
-		spinangles=0
+		spinangle=0.0f
+		spinangles=0.0f
 		if(spinnow.0>=0){
 			if(spinnow.1+spinnow.2<cnow+sttp*adj){
 				spinnow.0=-1
-				spinangle=0
+				spinangle=0.0f
 			}else:if((spinnow.2>0)&(spinnow.1<=cnow+sttp*adj)){
 				if(spinnow.0<2){
 					if(((cnow+sttp*adj-bgmouikkaic>bgmouikkai/2)|(bgmouikkai=0))&(spinnow.3>bgmouikkaicnt)){
@@ -6794,24 +6795,21 @@
 						bgmouikkaicnt=spinnow.3
 						bgmouikkaikaisu=2
 					}
-					spinangle=675*(cnow+sttp*adj-spinnow.1)/spinnow.2
-					spinangles=520*(cnow+sttp*adj-spinnow.1)/spinnow.2
-					if(spinangle<=360){
-						spinangle=int(sin(double(spinangle)*0.75/360)*360/sin(0.75))
-					}else:if((spinangle>360)&(spinangle<440)){
-						stat2=(spinangle-360)*90/80
-						stat1=(stat2>90)
-						dstat=sin(deg2rad(stat2))
-						dstat*=30
-						dstat=360+360*stat1+dstat
-						spinangle=int(dstat)
-					}else:if(spinangle>=440){
-						dstat=double(675-spinangle)
-						dstat*=double(90)
-						dstat/=double(235)
-						dstat=cos(deg2rad(int(dstat)))*cos(deg2rad(int(dstat)))
-						dstat*=double(30)
-						spinangle=30-int(dstat)
+					spinangle=675.0f*(cnow+sttp*adj-spinnow.1)/spinnow.2
+					spinangles=520.0f*(cnow+sttp*adj-spinnow.1)/spinnow.2
+					if(spinangle<360.0f){
+						spinangle=sin(double(spinangle)*0.75f/360.0f)*360.0f/sin(0.75f)
+					}else:if(spinangle<440.0f){
+						dstat=sin(deg2rad((spinangle-360.0f)*90.0f/80.0f))
+						dstat*=30.0f
+						spinangle=360.0f+dstat
+					}else{
+						dstat=675.0f-spinangle
+						dstat*=90.0f
+						dstat/=235.0f
+						dstat=cos(deg2rad(dstat))*cos(deg2rad(dstat))
+						dstat*=30.0f
+						spinangle=30.0f-dstat
 					}
 					spinangle*=1-spinnow.0*2
 					spinangles*=1-spinnow.0*2
@@ -6824,16 +6822,16 @@
 						bgmouikkaicnt=spinnow.3
 						bgmouikkaikaisu=1
 					}
-					spinangle=400*(cnow+sttp*adj-spinnow.1)/spinnow.2
-					spinangles=520*(cnow+sttp*adj-spinnow.1)/spinnow.2
-					if(spinangle<=110){
-						spinangle=int(sin(double(spinangle)*1.8/110)/sin(1.8)*85)
-					}else:if((spinangle>110)&(spinangle<=220)){
-						spinangle=int((cos(double(spinangle-110)*1.8/110)-cos(1.8))/(1.0-cos(1.8))*85)
-					}else:if((spinangle>220)&(spinangle<=310)){
-						spinangle=-int(sin(double(spinangle-220)*1.8/90)/sin(1.8)*20)
-					}else:if((spinangle>310)&(spinangle<=400)){
-						spinangle=-int((cos(double(spinangle-310)*1.8/90)-cos(1.8))/(1.0-cos(1.8))*20)
+					spinangle=400.0f*(cnow+sttp*adj-spinnow.1)/spinnow.2
+					spinangles=520.0f*(cnow+sttp*adj-spinnow.1)/spinnow.2
+					if(spinangle<110.0f){
+						spinangle=sin(double(spinangle)*1.8/110)/sin(1.8)*85
+					}else:if(spinangle<220.0f){
+						spinangle=(cos(double(spinangle-110)*1.8/110)-cos(1.8))/(1.0-cos(1.8))*85
+					}else:if(spinangle<310.0f){
+						spinangle=-sin(double(spinangle-220)*1.8/90)/sin(1.8)*20
+					}else:if(spinangle<400.0f){
+						spinangle=-(cos(double(spinangle-310)*1.8/90)-cos(1.8))/(1.0-cos(1.8))*20
 					}
 					spinangle*=1-(spinnow.0-2)*2
 					spinangles*=1-(spinnow.0-2)*2
@@ -7349,10 +7347,8 @@
 			}else{
 				mouikkai=0
 			}
-			dstat=double(spinangles)
-			dstat*=360
-			dstat/=520
-			dstat=sin(deg2rad(int(dstat)))
+			dstat=spinangles*360.0f/520.0f
+			dstat=sin(deg2rad(dstat))
 			dstat*=20*(1-2*(spinnow0p/2=1))
 			gsel 155+15*(anaranfl=2)
 			color 0,0,0
@@ -7618,10 +7614,8 @@
 				mouikkai=0
 			}
 			fv1=-0.6125 // カメラ座標と判定ラインを結んだ線の水平からの角度(rad)
-			dstat=double(spinangles)
-			dstat*=360
-			dstat/=520
-			dstat=sin(deg2rad(int(dstat)))
+			dstat=spinangles*360.0f/520.0f
+			dstat=sin(deg2rad(dstat))
 			dstat*=20*(1-2*(spinnow0p/2=1))
 			// 最終的な判定ラインの傾きの値
 			dstat=deg2rad(dstat/(1-3*((spinnow.0=2)|(spinnow.0=3)))+spinrps*(t-spinrpt<300)*(300-max(t-spinrpt,0))/300+ror*tiltrnow/1000*(1.0f-ztiltrate)+mouikkai+ztiltnow*ztiltrate)
