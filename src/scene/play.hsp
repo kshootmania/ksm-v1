@@ -6825,13 +6825,13 @@
 					spinangle=400.0f*(cnow+sttp*adj-spinnow.1)/spinnow.2
 					spinangles=520.0f*(cnow+sttp*adj-spinnow.1)/spinnow.2
 					if(spinangle<110.0f){
-						spinangle=sin(double(spinangle)*1.8/110)/sin(1.8)*85
+						spinangle=sin(double(spinangle)*1.8/110)/sin(1.8)*50
 					}else:if(spinangle<220.0f){
-						spinangle=(cos(double(spinangle-110)*1.8/110)-cos(1.8))/(1.0-cos(1.8))*85
+						spinangle=(cos(double(spinangle-110)*1.8/110)-cos(1.8))/(1.0-cos(1.8))*50
 					}else:if(spinangle<310.0f){
-						spinangle=-sin(double(spinangle-220)*1.8/90)/sin(1.8)*20
+						spinangle=-sin(double(spinangle-220)*1.8/90)/sin(1.8)*15
 					}else:if(spinangle<400.0f){
-						spinangle=-(cos(double(spinangle-310)*1.8/90)-cos(1.8))/(1.0-cos(1.8))*20
+						spinangle=-(cos(double(spinangle-310)*1.8/90)-cos(1.8))/(1.0-cos(1.8))*15
 					}
 					spinangle*=1-(spinnow.0-2)*2
 					spinangles*=1-(spinnow.0-2)*2
