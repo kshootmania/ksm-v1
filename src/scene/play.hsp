@@ -7609,9 +7609,9 @@
 			lanesubflp=lanesubfl
 			if((cnow+sttp*adj-spincp<spinnow.2*75/200)&(cnow+sttp*adj-spincp>0)&(spinnow.2>0)){
 				dstat=sin(deg2rad(180*(cnow+sttp*adj-spincp)/(spinnow.2*75/200)))*sin(deg2rad(180*(cnow+sttp*adj-spincp)/(spinnow.2*75/200)))*7
-				mouikkai=int(dstat)*((1-spinnow0p*2)*(spinnow0p/2=0)+(1-(spinnow0p-2)*2)*(spinnow0p/2=1))
+				mouikkai=dstat*((1-spinnow0p*2)*(spinnow0p/2=0)+(1-(spinnow0p-2)*2)*(spinnow0p/2=1))
 			}else{
-				mouikkai=0
+				mouikkai=0.0f
 			}
 			fv1=-0.6125 // カメラ座標と判定ラインを結んだ線の水平からの角度(rad)
 			dstat=spinangles*360.0f/520.0f
