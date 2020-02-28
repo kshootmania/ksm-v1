@@ -3670,6 +3670,11 @@
 				bgname="desert"
 			}else:stat3=1
 		}
+
+		// "cache/bg"ディレクトリが存在しなければ作成
+		dirlist buf,dir_default+"\\cache\\bg",5
+		if(buf=""):mkdir dir_default+"\\cache\\bg"
+
 		if(stat3=0){
 			exist dir_default+"\\cache\\bg\\"+bgname+"0.jpg"
 			if(strsize=-1){
