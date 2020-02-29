@@ -11300,9 +11300,9 @@ stop
 			loop
 			t.i=2 : it.i=lang.8.81 : r.i=stat1
 			_input lang.8.80/*"’ß‚Ì‘}“ü"*/,it,t,opt,r,2,INPUT_LARGEWIDTH
-			strrep r.0,"|",""
 			if((r.0!=stat1)&(stat!=-1)){
 				gosub *undokakuho
+				strrep r.0,"|",""
 				if(stat2_=1){
 					if(r.0=""){
 						ardel comment,commentnum,stat7
