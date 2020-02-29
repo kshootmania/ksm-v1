@@ -18,6 +18,9 @@
 	}
 	fps=0
 	totalscore=0
+	totalscorep=0
+	totalscore_disp_base=0
+	totalscore_disp_baset=-50000
 	c2tcnt=0
 	hsrccnt=0
 	notecnt=0
@@ -3670,6 +3673,11 @@
 				bgname="desert"
 			}else:stat3=1
 		}
+
+		// "cache/bg"ディレクトリが存在しなければ作成
+		dirlist buf,dir_default+"\\cache\\bg",5
+		if(buf=""):mkdir dir_default+"\\cache\\bg"
+
 		if(stat3=0){
 			exist dir_default+"\\cache\\bg\\"+bgname+"0.jpg"
 			if(strsize=-1){
@@ -5092,15 +5100,13 @@
 		ror_p=ror
 
 		// 傾きの値に向けて線形に推移
-		speed=4.0f
-		if((absf(ror)<1.0f)|(((canalognow2.0=-1)|(absf(ro.0)<1.0f))&((canalognow2.1=-1)|(absf(ro.1)<1.0f)))){
-			// 目標の傾きがゼロ または レーザーが存在しない(予告傾きのみ) 場合、遅くする
-			speed/=3.0f
-			if(abs(rorp)<100){
-				// 現在の傾きがゼロに近い場合、さらに遅くする
-				speed/=2.0f
-			}
+		speed=4.5f
+		speed*=minf(absf(ror-rorp),100.0f)/100.0f // 目標の傾きに近い場合は減速する
+		if(absf(ror)<1.0f){
+			// 目標の傾きがゼロ(1/1000未満)の場合、遅くする
+			speed/=5.0f
 		}
+		speed=maxf(speed,0.5f) // 速さが小さくなりすぎないように
 		if(rorp<ror){
 			ror=minf(rorp+double(t_tp)*speed,ror)
 		}else{
@@ -6782,11 +6788,12 @@
 			loop
 		}
 		// 画面回転の計算
-		spinangles=0
+		spinangle=0.0f
+		spinangles=0.0f
 		if(spinnow.0>=0){
 			if(spinnow.1+spinnow.2<cnow+sttp*adj){
 				spinnow.0=-1
-				spinangle=0
+				spinangle=0.0f
 			}else:if((spinnow.2>0)&(spinnow.1<=cnow+sttp*adj)){
 				if(spinnow.0<2){
 					if(((cnow+sttp*adj-bgmouikkaic>bgmouikkai/2)|(bgmouikkai=0))&(spinnow.3>bgmouikkaicnt)){
@@ -6796,24 +6803,21 @@
 						bgmouikkaicnt=spinnow.3
 						bgmouikkaikaisu=2
 					}
-					spinangle=675*(cnow+sttp*adj-spinnow.1)/spinnow.2
-					spinangles=520*(cnow+sttp*adj-spinnow.1)/spinnow.2
-					if(spinangle<=360){
-						spinangle=int(sin(double(spinangle)*0.75/360)*360/sin(0.75))
-					}else:if((spinangle>360)&(spinangle<440)){
-						stat2=(spinangle-360)*90/80
-						stat1=(stat2>90)
-						dstat=sin(deg2rad(stat2))
-						dstat*=30
-						dstat=360+360*stat1+dstat
-						spinangle=int(dstat)
-					}else:if(spinangle>=440){
-						dstat=double(675-spinangle)
-						dstat*=double(90)
-						dstat/=double(235)
-						dstat=cos(deg2rad(int(dstat)))*cos(deg2rad(int(dstat)))
-						dstat*=double(30)
-						spinangle=30-int(dstat)
+					spinangle=675.0f*(cnow+sttp*adj-spinnow.1)/spinnow.2
+					spinangles=520.0f*(cnow+sttp*adj-spinnow.1)/spinnow.2
+					if(spinangle<360.0f){
+						spinangle=sin(double(spinangle)*0.75f/360.0f)*360.0f/sin(0.75f)
+					}else:if(spinangle<440.0f){
+						dstat=sin(deg2rad((spinangle-360.0f)*90.0f/80.0f))
+						dstat*=30.0f
+						spinangle=360.0f+dstat
+					}else{
+						dstat=675.0f-spinangle
+						dstat*=90.0f
+						dstat/=235.0f
+						dstat=cos(deg2rad(dstat))*cos(deg2rad(dstat))
+						dstat*=30.0f
+						spinangle=30.0f-dstat
 					}
 					spinangle*=1-spinnow.0*2
 					spinangles*=1-spinnow.0*2
@@ -6826,16 +6830,16 @@
 						bgmouikkaicnt=spinnow.3
 						bgmouikkaikaisu=1
 					}
-					spinangle=400*(cnow+sttp*adj-spinnow.1)/spinnow.2
-					spinangles=520*(cnow+sttp*adj-spinnow.1)/spinnow.2
-					if(spinangle<=110){
-						spinangle=int(sin(double(spinangle)*1.8/110)/sin(1.8)*85)
-					}else:if((spinangle>110)&(spinangle<=220)){
-						spinangle=int((cos(double(spinangle-110)*1.8/110)-cos(1.8))/(1.0-cos(1.8))*85)
-					}else:if((spinangle>220)&(spinangle<=310)){
-						spinangle=-int(sin(double(spinangle-220)*1.8/90)/sin(1.8)*20)
-					}else:if((spinangle>310)&(spinangle<=400)){
-						spinangle=-int((cos(double(spinangle-310)*1.8/90)-cos(1.8))/(1.0-cos(1.8))*20)
+					spinangle=400.0f*(cnow+sttp*adj-spinnow.1)/spinnow.2
+					spinangles=520.0f*(cnow+sttp*adj-spinnow.1)/spinnow.2
+					if(spinangle<110.0f){
+						spinangle=sin(double(spinangle)*1.8/110)/sin(1.8)*60
+					}else:if(spinangle<220.0f){
+						spinangle=(cos(double(spinangle-110)*1.8/110)-cos(1.8))/(1.0-cos(1.8))*60
+					}else:if(spinangle<310.0f){
+						spinangle=-sin(double(spinangle-220)*1.8/90)/sin(1.8)*15
+					}else:if(spinangle<400.0f){
+						spinangle=-(cos(double(spinangle-310)*1.8/90)-cos(1.8))/(1.0-cos(1.8))*15
 					}
 					spinangle*=1-(spinnow.0-2)*2
 					spinangles*=1-(spinnow.0-2)*2
@@ -6858,6 +6862,19 @@
 		}else{
 			totalscore=int(dstat*(critical*2+near))
 		}
+
+		// 表示スコア(推移時間を設ける)
+		if(totalscorep!=totalscore){
+			totalscore_disp_base=totalscorep
+			totalscore_disp_baset=t
+		}
+		if((t>=totalscore_disp_baset)&(t-totalscore_disp_baset<200)){
+			totalscore_disp=totalscore_disp_base+int(double(totalscore-totalscore_disp_base)*(t-totalscore_disp_baset)/200) // 推移中のスコアを表示
+		}else{
+			totalscore_disp=totalscore // 時間が経っていれば真のスコアを表示
+		}
+		totalscorep=totalscore
+
 		if(cnt\(frameskip+1)=0){
 			// レーン描画
 			center_split_now = GetCurrentCamValue(game_system, CAM_CENTER_SPLIT) / 100.0f
@@ -7351,10 +7368,8 @@
 			}else{
 				mouikkai=0
 			}
-			dstat=double(spinangles)
-			dstat*=360
-			dstat/=520
-			dstat=sin(deg2rad(int(dstat)))
+			dstat=spinangles*360.0f/520.0f
+			dstat=sin(deg2rad(dstat))
 			dstat*=20*(1-2*(spinnow0p/2=1))
 			gsel 155+15*(anaranfl=2)
 			color 0,0,0
@@ -7615,15 +7630,13 @@
 			lanesubflp=lanesubfl
 			if((cnow+sttp*adj-spincp<spinnow.2*75/200)&(cnow+sttp*adj-spincp>0)&(spinnow.2>0)){
 				dstat=sin(deg2rad(180*(cnow+sttp*adj-spincp)/(spinnow.2*75/200)))*sin(deg2rad(180*(cnow+sttp*adj-spincp)/(spinnow.2*75/200)))*7
-				mouikkai=int(dstat)*((1-spinnow0p*2)*(spinnow0p/2=0)+(1-(spinnow0p-2)*2)*(spinnow0p/2=1))
+				mouikkai=dstat*((1-spinnow0p*2)*(spinnow0p/2=0)+(1-(spinnow0p-2)*2)*(spinnow0p/2=1))
 			}else{
-				mouikkai=0
+				mouikkai=0.0f
 			}
 			fv1=-0.6125 // カメラ座標と判定ラインを結んだ線の水平からの角度(rad)
-			dstat=double(spinangles)
-			dstat*=360
-			dstat/=520
-			dstat=sin(deg2rad(int(dstat)))
+			dstat=spinangles*360.0f/520.0f
+			dstat=sin(deg2rad(dstat))
 			dstat*=20*(1-2*(spinnow0p/2=1))
 			// 最終的な判定ラインの傾きの値
 			dstat=deg2rad(dstat/(1-3*((spinnow.0=2)|(spinnow.0=3)))+spinrps*(t-spinrpt<300)*(300-max(t-spinrpt,0))/300+ror*tiltrnow/1000*(1.0f-ztiltrate)+mouikkai+ztiltnow*ztiltrate)
@@ -7866,11 +7879,11 @@
 			}
 			// スコアの表示
 			stat1=""
-			stat2=str(totalscore)
+			stat2=str(totalscore_disp)
 			repeat max(8-strlen(stat2),0)
 				stat1+="0"
 			loop
-			stat1+=str(totalscore)
+			stat1+=str(totalscore_disp)
 			pos scrsize_w/2+getsize(60),getsize(16)
 			hgzoom_a 240*scrsize_h/480,getsize(24),tex_score_header,0,0,480,48,3,255
 			repeat 8
@@ -8508,36 +8521,6 @@
 	if(analog.a.9>=0){
 		scnt=analog.a.9
 		if((cnow<spin.scnt.1+spin.scnt.2)&(spin.scnt.0!=-1)){
-			if((spinnow.2>0)&(spinnow.0>=0)&(spinnow.1<=t+ttp*adj)){
-				spinrpt=t
-				spinangle=675*(cnow+sttp*adj-spinnow.1)/spinnow.2
-				spinangles=520*(cnow+sttp*adj-spinnow.1)/spinnow.2
-				spinangles*=360
-				spinangles/=520
-				spinangles=sin(deg2rad(spinangles))
-				spinangles*=20*(spinnow0p*-2+1)
-				if((spinangle>360)&(spinangle<440)){
-					stat2=(spinangle-360)*90/80
-					stat1=(stat2>90)
-					dstat=sin(deg2rad(stat2))
-					dstat*=30
-					dstat=360+360*stat1+dstat
-					spinangle=int(dstat)
-				}else:if(spinangle>=440){
-					dstat=double(675-spinangle)
-					dstat*=double(90)
-					dstat/=double(235)
-					dstat=cos(deg2rad(int(dstat)))*cos(deg2rad(int(dstat)))
-					dstat*=double(30)
-					spinangle=30-int(dstat)
-					spinangle*=1-spinnow.0*2
-					spinangles*=1-spinnow.0*2
-					spinrp=spinangle\360
-					if(spinrp>=180):spinrp-=360
-					spinrps=spinangles\360
-					if(spinrps>=180):spinrps-=360
-				}else:spinrp=0:spinrps=0
-			}
 			spinnow.0=spin.scnt.0
 			spinnow0p=spin.scnt.0
 			spinnow.1=cnowp+sttp*adj

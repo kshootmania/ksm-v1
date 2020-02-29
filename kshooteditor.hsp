@@ -259,7 +259,7 @@ HashInitInt se_ids
 #define TARGET_ZOOMSIDE 13
 #define TARGET_STOP 14
 
-#define atitle "K-Shoot Editor v1.70"
+#define atitle "K-Shoot Editor v1.70a"
 
 #define bpba			192
 #define BUF_ST			1
@@ -11300,9 +11300,9 @@ stop
 			loop
 			t.i=2 : it.i=lang.8.81 : r.i=stat1
 			_input lang.8.80/*"íçéﬂÇÃë}ì¸"*/,it,t,opt,r,2,INPUT_LARGEWIDTH
-			strrep r.0,"|",""
 			if((r.0!=stat1)&(stat!=-1)){
 				gosub *undokakuho
+				strrep r.0,"|",""
 				if(stat2_=1){
 					if(r.0=""){
 						ardel comment,commentnum,stat7
