@@ -18,6 +18,9 @@
 	}
 	fps=0
 	totalscore=0
+	totalscorep=0
+	totalscore_disp_base=0
+	totalscore_disp_baset=-50000
 	c2tcnt=0
 	hsrccnt=0
 	notecnt=0
@@ -6859,6 +6862,19 @@
 		}else{
 			totalscore=int(dstat*(critical*2+near))
 		}
+
+		// 表示スコア(推移時間を設ける)
+		if(totalscorep!=totalscore){
+			totalscore_disp_base=totalscorep
+			totalscore_disp_baset=t
+		}
+		if((t>=totalscore_disp_baset)&(t-totalscore_disp_baset<200)){
+			totalscore_disp=totalscore_disp_base+int(double(totalscore-totalscore_disp_base)*(t-totalscore_disp_baset)/200) // 推移中のスコアを表示
+		}else{
+			totalscore_disp=totalscore // 時間が経っていれば真のスコアを表示
+		}
+		totalscorep=totalscore
+
 		if(cnt\(frameskip+1)=0){
 			// レーン描画
 			center_split_now = GetCurrentCamValue(game_system, CAM_CENTER_SPLIT) / 100.0f
@@ -7863,11 +7879,11 @@
 			}
 			// スコアの表示
 			stat1=""
-			stat2=str(totalscore)
+			stat2=str(totalscore_disp)
 			repeat max(8-strlen(stat2),0)
 				stat1+="0"
 			loop
-			stat1+=str(totalscore)
+			stat1+=str(totalscore_disp)
 			pos scrsize_w/2+getsize(60),getsize(16)
 			hgzoom_a 240*scrsize_h/480,getsize(24),tex_score_header,0,0,480,48,3,255
 			repeat 8
