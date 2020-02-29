@@ -259,7 +259,7 @@ HashInitInt se_ids
 #define TARGET_ZOOMSIDE 13
 #define TARGET_STOP 14
 
-#define atitle "K-Shoot Editor v1.70"
+#define atitle "K-Shoot Editor v1.70a"
 
 #define bpba			192
 #define BUF_ST			1
