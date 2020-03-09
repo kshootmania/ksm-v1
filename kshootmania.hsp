@@ -561,8 +561,6 @@ hso=-1
 hsc=-1
 hsm=-1
 hsa=-1
-ddim rhsrate,1
-rhsrate=1.0
 
 autosync=0
 

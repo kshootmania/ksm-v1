@@ -3432,7 +3432,7 @@
 	ddim romaxstat,3
 	romaxstat.0=maxf(romax*(tiltnowp\3=0)+rotatemax*(tiltnowp\3=1)+rotatemax2*(tiltnowp\3=2),0.1)
 	romaxstat.1=maxf(romax*(tiltnow\3=0)+rotatemax*(tiltnow\3=1)+rotatemax2*(tiltnow\3=2),0.1)
-	romaxstat.2=double(min(1000,int(800+200*rhsrate)))*romaxstat.1/1000
+	romaxstat.2=romaxstat.1
 	tiltrnow=romaxstat.2
 	tiltnowt=-50000
 	tiltnowstart=tiltrnow
@@ -4338,16 +4338,6 @@
 			chdir dir_default+"\\songs"
 			break
 		}
-		if(cnt=0){
-			if(double(hs)*bpm>800000f){
-				rhsrate=1.0
-			}else{
-				rhsrate=double(maxf(hs*bpm,600000f))/800000f
-			}
-		}
-		if(double(hs)*bpm<800000f){
-			rhsrate=double(maxf(double(hs)*bpm,600000f))/800000*min(100,t_tp)/100+rhsrate*(100-min(100,t_tp))/100
-		}else:rhsrate=1.0*min(100,t_tp)/100+rhsrate*(100-min(100,t_tp))/100
 		if(bpm!=bpmp):minforefresh=1
 		gosub *getjoystat
 		dim keystat,7,11
@@ -5004,7 +4994,7 @@
 				ddim romaxstat,3
 				romaxstat.0=maxf(romax*(tiltnowp\3=0)+rotatemax*(tiltnowp\3=1)+rotatemax2*(tiltnowp\3=2),0.1)*(tiltnowp<6)
 				romaxstat.1=maxf(romax*(tiltnow\3=0)+rotatemax*(tiltnow\3=1)+rotatemax2*(tiltnow\3=2),0.1)*(tiltnow<6)
-				romaxstat.2=double(min(1000,int(800+200*rhsrate)))*romaxstat.1/1000
+				romaxstat.2=romaxstat.1
 				tiltnowt=t
 				tiltnowslidet=int(absf(tiltrnow-romaxstat.2)*20)
 				tiltnowstart2=tilt.cnt.4
@@ -5016,12 +5006,12 @@
 		ddim romaxstat,3
 		romaxstat.0=maxf(romax*(tiltnowp\3=0)+rotatemax*(tiltnowp\3=1)+rotatemax2*(tiltnowp\3=2),0.1)*(tiltnowp<6)
 		romaxstat.1=maxf(romax*(tiltnow\3=0)+rotatemax*(tiltnow\3=1)+rotatemax2*(tiltnow\3=2),0.1)*(tiltnow<6)
-		romaxstat.2=double(min(1000,int(800+200*rhsrate)))*romaxstat.1/1000
+		romaxstat.2=romaxstat.1
 		tiltrnow=double(max(tiltnowslidet,16)-max(min(t-tiltnowt,max(tiltnowslidet,16)),0))*tiltnowstart/max(tiltnowslidet,16)+double(max(min(t-tiltnowt,max(tiltnowslidet,16)),0))*romaxstat.2/max(tiltnowslidet,16)
 		ddim ror,1
-		ror=double(sgn(ro.0+ro.1)*min(abs(ro.0+ro.1),int(800+200*rhsrate)))
+		ror=ro.0+ro.1
 		rotimed=2
-		if((csongver!="")&(strmid(csongver,0,3)!="120")&(t-tiltnowt<150)&(ror=0)&(tiltnow<3)&((tiltpre>=3)|(tiltnow>tiltpre))):ror=double(sgn(tiltnowstart2)*min(abs(tiltnowstart2),int(800+200*rhsrate))):rotimed=3
+		if((csongver!="")&(strmid(csongver,0,3)!="120")&(t-tiltnowt<150)&(ror=0)&(tiltnow<3)&((tiltpre>=3)|(tiltnow>tiltpre))):ror=double(tiltnowstart2):rotimed=3
 		ddim rotime2,1
 		rotime2=rotime*(0.15f+0.85f*minf(maxf(absf(double(ror)-double(rorp)),100.0f),400.0f)/400.0f)+25.0*(2*(abs(ro.0+ro.1)>=980)+7*(abs(ro.0+ro.1)<=20))
 		rotime2*=2
