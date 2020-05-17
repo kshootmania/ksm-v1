@@ -51,12 +51,15 @@
 #define errate1			(0.5f*errate2/100)
 #define erxsh1			(155.0f+erxsh2)
 #define erysh1			(88.0f+erysh2)
-#define bpba			10000
-#const  bpba_2			bpba/2
-#const  bpba_4			bpba/4
-#const  bpba_8			bpba/8
-#const  bpba_16			bpba/16
-#const  bpba_32			bpba/32
+
+// 1小節あたりのカウント値
+#define UNIT_MEASURE			10000
+#const  UNIT_MEASURE_2			UNIT_MEASURE/2
+#const  UNIT_MEASURE_4			UNIT_MEASURE/4
+#const  UNIT_MEASURE_8			UNIT_MEASURE/8
+#const  UNIT_MEASURE_16			UNIT_MEASURE/16
+#const  UNIT_MEASURE_32			UNIT_MEASURE/32
+
 #define beat			4
 #define mplayfl			1
 #define romax			10.0
@@ -2165,7 +2168,7 @@ end
 									analogpos.cnt-=50-40*(anaturnnextt.cnt0-(t+ttp*adj-analogdelay)<=500-250*(analog.(arstat.(6+cnt).1).8=0)-100*(analog.(arstat.(6+cnt).1).7-analog.(arstat.(6+cnt).1).6<=500))
 								}
 							}else:if(((abs(anow-analogpos.cnt)>200)&(anow>analogpos.cnt))|(anow=-1)){
-								if(((analog.(arstat.(6+cnt).1).1-cnow-sttp*adj>bpba*3/32)|(analog.(arstat.(6+cnt).1).1+bpba_32<cnow+sttp*adj))&((t-analog.(arstat.(6+cnt).1).6>50)|(anow=-1))){
+								if(((analog.(arstat.(6+cnt).1).1-cnow-sttp*adj>UNIT_MEASURE*3/32)|(analog.(arstat.(6+cnt).1).1+UNIT_MEASURE_32<cnow+sttp*adj))&((t-analog.(arstat.(6+cnt).1).6>50)|(anow=-1))){
 									if((t-anastartt.cnt>120)&(t-anaendt.cnt>0)):analogpos.cnt-=80
 								}
 							}else{
@@ -2247,7 +2250,7 @@ end
 									analogpos.cnt+=50-40*(anaturnnextt.cnt0-(t+ttp*adj-analogdelay)<=500-250*(analog.(arstat.(6+cnt).1).8=0)-100*(analog.(arstat.(6+cnt).1).7-analog.(arstat.(6+cnt).1).6<=500))
 								}
 							}else:if(((abs(analogpos.cnt-anow)>200)&(analogpos.cnt>anow))|(anow=-1)){
-								if(((analog.(arstat.(6+cnt).1).1-cnow-sttp*adj>bpba*3/32)|(analog.(arstat.(6+cnt).1).1+bpba_32<cnow+sttp*adj))&((t-analog.(arstat.(6+cnt).1).6>50)|(anow=-1))){
+								if(((analog.(arstat.(6+cnt).1).1-cnow-sttp*adj>UNIT_MEASURE*3/32)|(analog.(arstat.(6+cnt).1).1+UNIT_MEASURE_32<cnow+sttp*adj))&((t-analog.(arstat.(6+cnt).1).6>50)|(anow=-1))){
 									if((t-anastartt.cnt>120)&(t-anaendt.cnt>0)):analogpos.cnt+=80
 								}
 							}else{

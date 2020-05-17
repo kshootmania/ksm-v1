@@ -443,7 +443,7 @@
 		cnt2a++
 		if(d.cnt="--"){
 			cnt3++ // カレント小節数
-			if(cnt3>0):cbcnt+=bpba*beatn/beatd
+			if(cnt3>0):cbcnt+=UNIT_MEASURE*beatn/beatd
 			cnt2=-1
 			continue
 		}
@@ -780,7 +780,7 @@
 				if(cnt3<0){
 					bpml.bpmlnum.0=int(cbcnt)
 				}else{
-					bpml.bpmlnum.0=(cnt2+1)*bpba*beatn/beatd/div.cnt3+int(cbcnt)
+					bpml.bpmlnum.0=(cnt2+1)*UNIT_MEASURE*beatn/beatd/div.cnt3+int(cbcnt)
 				}
 				if(bpml.bpmlnum.0<0):bpml.bpmlnum.0=0
 				bpml.bpmlnum.1=bpm
@@ -802,7 +802,7 @@
 				if(cnt3<0){
 					beatl.beatlnum.0=int(cbcnt)
 				}else{
-					beatl.beatlnum.0=(cnt2+1)*(bpba*beatn/beatd)/div.cnt3+int(cbcnt)
+					beatl.beatlnum.0=(cnt2+1)*(UNIT_MEASURE*beatn/beatd)/div.cnt3+int(cbcnt)
 				}
 				beatl.beatlnum.1=int(beatstat.0)
 				beatl.beatlnum.2=int(beatstat.1)
@@ -819,7 +819,7 @@
 				if(cnt3<0){
 					stp.stpnum.0=int(cbcnt)
 				}else{
-					stp.stpnum.0=(cnt2+1)*bpba*beatn/beatd/div.cnt3+int(cbcnt)
+					stp.stpnum.0=(cnt2+1)*UNIT_MEASURE*beatn/beatd/div.cnt3+int(cbcnt)
 				}
 				if((stp.stpnum.0>=0)&(int(strmid(d.cnt,5,16))>0)){
 					stp.stpnum.1=int(strmid(d.cnt,5,16))*625/12
@@ -840,14 +840,14 @@
 		}else:if(div.cnt3=0){
 			cmeasure=int(cbcnt)
 		}else{
-			cmeasure=(cnt2+1)*bpba*beatn/beatd/div.cnt3+int(cbcnt)
+			cmeasure=(cnt2+1)*UNIT_MEASURE*beatn/beatd/div.cnt3+int(cbcnt)
 		}
 		
 		if(headcmp(d.cnt,5,"tilt=")){
 			if(cnt3<0){
 				tilt.tiltnum.0=cbcnt+stpsh
 			}else{
-				tilt.tiltnum.0=(cnt2+1)*bpba*beatn/beatd/div.cnt3+cbcnt
+				tilt.tiltnum.0=(cnt2+1)*UNIT_MEASURE*beatn/beatd/div.cnt3+cbcnt
 			}
 			if(strmid(d.cnt,5,16)="normal"){
 				tilt.tiltnum.1=0
@@ -884,7 +884,7 @@
 			if(cnt3<0){
 				anaran.anarannum.1=int(cbcnt)
 			}else{
-				anaran.anarannum.1=(cnt2+1)*bpba*beatn/beatd/div.cnt3+int(cbcnt)
+				anaran.anarannum.1=(cnt2+1)*UNIT_MEASURE*beatn/beatd/div.cnt3+int(cbcnt)
 			}
 			if(strmid(d.cnt,13,2)="2x"){
 				anaran.anarannum.2=2
@@ -898,7 +898,7 @@
 			if(cnt3<0){
 				anaran.anarannum.1=int(cbcnt)
 			}else{
-				anaran.anarannum.1=(cnt2+1)*bpba*beatn/beatd/div.cnt3+int(cbcnt)
+				anaran.anarannum.1=(cnt2+1)*UNIT_MEASURE*beatn/beatd/div.cnt3+int(cbcnt)
 			}
 			if(strmid(d.cnt,13,2)="2x"){
 				anaran.anarannum.2=2
@@ -911,7 +911,7 @@
 			if(cnt3<0){
 				anagain.anagainnum.0=int(cbcnt)
 			}else{
-				anagain.anagainnum.0=(cnt2+1)*bpba*beatn/beatd/div.cnt3+int(cbcnt)
+				anagain.anagainnum.0=(cnt2+1)*UNIT_MEASURE*beatn/beatd/div.cnt3+int(cbcnt)
 			}
 			if(((int(strmid(d.cnt,12,3))=0)&(oldpfilter=0))|((int(strmid(d.cnt,12,3))>0)&(int(strmid(d.cnt,12,3))<=100))){
 				anagain.anagainnum.1=int(strmid(d.cnt,12,3))
@@ -923,7 +923,7 @@
 			if(cnt3<0){
 				anvol.anvolnum.0=int(cbcnt)
 			}else{
-				anvol.anvolnum.0=(cnt2+1)*bpba*beatn/beatd/div.cnt3+int(cbcnt)
+				anvol.anvolnum.0=(cnt2+1)*UNIT_MEASURE*beatn/beatd/div.cnt3+int(cbcnt)
 			}
 			if((int(strmid(d.cnt,12,3))>=0)&(int(strmid(d.cnt,12,3))<=100)){
 				anvol.anvolnum.1=int(strmid(d.cnt,12,3))
@@ -935,7 +935,7 @@
 			if(cnt3<0){
 				anse.ansenum.0=int(cbcnt)
 			}else{
-				anse.ansenum.0=(cnt2+1)*bpba*beatn/beatd/div.cnt3+int(cbcnt)
+				anse.ansenum.0=(cnt2+1)*UNIT_MEASURE*beatn/beatd/div.cnt3+int(cbcnt)
 			}
 			f=1
 			switch strmid(d.cnt,11,64)
@@ -1735,7 +1735,7 @@
 		}
 		if(d.cnt="--"){
 			cnt3++ // カレント小節数
-			if(cnt3>0):cbcnt+=bpba*beatn/beatd
+			if(cnt3>0):cbcnt+=UNIT_MEASURE*beatn/beatd
 			cnt2=-1
 			continue
 		}
@@ -1789,7 +1789,7 @@
 			if(cnt3<0){
 				anafil.anafilnum.0=int(cbcnt)
 			}else{
-				anafil.anafilnum.0=(cnt2+1)*bpba*beatn/beatd/div.cnt3+int(cbcnt)
+				anafil.anafilnum.0=(cnt2+1)*UNIT_MEASURE*beatn/beatd/div.cnt3+int(cbcnt)
 			}
 			f=1
 			_cnt=cnt
@@ -1834,7 +1834,7 @@
 				if(cnt3<0){
 					fx.fxnum.1=cbcnt
 				}else{
-					fx.fxnum.1=(cnt2+1)*bpba*beatn/beatd/div.cnt3+cbcnt
+					fx.fxnum.1=(cnt2+1)*UNIT_MEASURE*beatn/beatd/div.cnt3+cbcnt
 				}
 				stat1=strmid(d._cnt,5,64)
 				if(stat1=""){
@@ -1999,7 +1999,7 @@
 			if(cnt3<0){
 				fxparams.fxparamsnum.1=cbcnt
 			}else{
-				fxparams.fxparamsnum.1=(cnt2+1)*bpba*beatn/beatd/div.cnt3+cbcnt
+				fxparams.fxparamsnum.1=(cnt2+1)*UNIT_MEASURE*beatn/beatd/div.cnt3+cbcnt
 			}
 			fxparams.fxparamsnum.2=int(strmid(d.cnt,12,8))
 			fxparamsnum++
@@ -2010,7 +2010,7 @@
 			if(cnt3<0){
 				fxparams.fxparamsnum.1=cbcnt
 			}else{
-				fxparams.fxparamsnum.1=(cnt2+1)*bpba*beatn/beatd/div.cnt3+cbcnt
+				fxparams.fxparamsnum.1=(cnt2+1)*UNIT_MEASURE*beatn/beatd/div.cnt3+cbcnt
 			}
 			fxparams.fxparamsnum.2=int(strmid(d.cnt,12,8))
 			fxparamsnum++
@@ -2051,7 +2051,7 @@
 			if(cnt3<0){
 				userchprm.userchprmnum.0=c2tf(cbcnt)
 			}else{
-				userchprm.userchprmnum.0=c2tf((cnt2+1)*bpba*beatn/beatd/div.cnt3+cbcnt)
+				userchprm.userchprmnum.0=c2tf((cnt2+1)*UNIT_MEASURE*beatn/beatd/div.cnt3+cbcnt)
 			}
 			sdim fxsplit_stat,1
 			_stat1=strmid(d.cnt,3,instr(d.cnt,3,"="))
@@ -2102,7 +2102,7 @@
 			if(cnt3<0){
 				userchprm.userchprmnum.0=c2tf(cbcnt)
 			}else{
-				userchprm.userchprmnum.0=c2tf((cnt2+1)*bpba*beatn/beatd/div.cnt3+cbcnt)
+				userchprm.userchprmnum.0=c2tf((cnt2+1)*UNIT_MEASURE*beatn/beatd/div.cnt3+cbcnt)
 			}
 			_stat1=strmid(d.cnt,7,instr(d.cnt,7,"="))
 			_stat4=strmid(d.cnt,8+instr(d.cnt,7,"="),256)
@@ -2201,7 +2201,7 @@
 				}else{
 					note.notenum.0=cnt
 				}
-				note.notenum.1=int(cbcnt)+cnt2*bpba*beatn/beatd/div.cnt3
+				note.notenum.1=int(cbcnt)+cnt2*UNIT_MEASURE*beatn/beatd/div.cnt3
 				if(note.notenum.1>=cmdline_from){
 					note.notenum.2=0
 					note.notenum.3=c2t(note.notenum.1)
@@ -2288,18 +2288,18 @@
 			// long
 			lcnt=cnt
 			if(bpm<256000){
-				f1=(note.notenum.2<=bpba*3/16)
-				f2=bpba_16
+				f1=(note.notenum.2<=UNIT_MEASURE*3/16)
+				f2=UNIT_MEASURE_16
 			}else{
-				f1=(note.notenum.2<=bpba*3/8)
-				f2=bpba_8
+				f1=(note.notenum.2<=UNIT_MEASURE*3/8)
+				f2=UNIT_MEASURE_8
 			}
 			if(strmid(d.cnt2a,cnt,1)="2")&((strmid(d.(cnt2a-exc-1),cnt,1)!="2")|(exc=-1)){
 				excd=0
 				beatn2=beatn
 				beatd2=beatd
 				ddim lend,1
-				lend=double(bpba)*beatn2/beatd2/div.cnt3
+				lend=double(UNIT_MEASURE)*beatn2/beatd2/div.cnt3
 				repeat
 					if(cnt2a+cnt+1>=length(d)){
 						break
@@ -2328,7 +2328,7 @@
 					}
 					if(strmid(d.(cnt2a+cnt+1),lcnt,1)="2"){
 						if(div.(cnt3+excd)=0):break
-						lend+=double(bpba)*beatn2/beatd2/div.(cnt3+excd)
+						lend+=double(UNIT_MEASURE)*beatn2/beatd2/div.(cnt3+excd)
 					}else{
 						break
 					}
@@ -2340,7 +2340,7 @@
 				}else{
 					note.notenum.0=cnt
 				}
-				note.notenum.1=int(cbcnt)+cnt2*bpba*beatn/beatd/div.cnt3
+				note.notenum.1=int(cbcnt)+cnt2*UNIT_MEASURE*beatn/beatd/div.cnt3
 				if(note.notenum.1>=cmdline_from){
 					note.notenum.2=int(lend)
 					note.notenum.3=c2t(note.notenum.1)
@@ -2348,11 +2348,11 @@
 					if(t_finalnote<note.notenum.4):t_finalnote=note.notenum.4
 					if(shortmode!=1){
 						if(bpm<256000){
-							stat1=(note.notenum.2<=bpba*3/16)
-							stat2=bpba_16
+							stat1=(note.notenum.2<=UNIT_MEASURE*3/16)
+							stat2=UNIT_MEASURE_16
 						}else{
-							stat1=(note.notenum.2<=bpba*3/8)
-							stat2=bpba_8
+							stat1=(note.notenum.2<=UNIT_MEASURE*3/8)
+							stat2=UNIT_MEASURE_8
 						}
 						if(stat1=1){
 							if(turn=1){
@@ -2365,14 +2365,14 @@
 							shlj.shljnum.1=note.notenum.1
 							shlj.shljnum.2=note.notenum.2
 							if(bpm<256000){
-								if(note.notenum.2>=bpba_16*2){
-									shlj.shljnum.1+=bpba_16
-									shlj.shljnum.2=bpba_16
+								if(note.notenum.2>=UNIT_MEASURE_16*2){
+									shlj.shljnum.1+=UNIT_MEASURE_16
+									shlj.shljnum.2=UNIT_MEASURE_16
 								}
 							}else{
-								if(note.notenum.2>=bpba_8*2){
-									shlj.shljnum.1+=bpba_8
-									shlj.shljnum.2=bpba_8
+								if(note.notenum.2>=UNIT_MEASURE_8*2){
+									shlj.shljnum.1+=UNIT_MEASURE_8
+									shlj.shljnum.2=UNIT_MEASURE_8
 								}
 							}
 							shlj.shljnum.4=c2t(shlj.shljnum.1)
@@ -2436,7 +2436,7 @@
 				}else{
 					note.notenum.0=cnt+4
 				}
-				note.notenum.1=int(cbcnt)+cnt2*bpba*beatn/beatd/div.cnt3
+				note.notenum.1=int(cbcnt)+cnt2*UNIT_MEASURE*beatn/beatd/div.cnt3
 				if(note.notenum.1>=cmdline_from){
 					note.notenum.2=0
 					note.notenum.3=c2t(note.notenum.1)
@@ -2472,7 +2472,7 @@
 				beatn2=beatn
 				beatd2=beatd
 				ddim lend,1
-				lend=double(bpba)*beatn2/beatd2/div.cnt3
+				lend=double(UNIT_MEASURE)*beatn2/beatd2/div.cnt3
 				repeat
 					if(cnt2a+cnt+1>=length(d)){
 						break
@@ -2501,7 +2501,7 @@
 					}
 					if((strmid(d.(cnt2a+cnt+1),lcnt+5,1)!="0")&(strmid(d.(cnt2a+cnt+1),lcnt+5,1)!="2")){
 						if(div.(cnt3+excd)=0):break
-						lend+=double(bpba)*beatn2/beatd2/div.(cnt3+excd)
+						lend+=double(UNIT_MEASURE)*beatn2/beatd2/div.(cnt3+excd)
 					}else{
 						break
 					}
@@ -2513,7 +2513,7 @@
 				}else{
 					note.notenum.0=cnt+4
 				}
-				note.notenum.1=int(cbcnt)+cnt2*bpba*beatn/beatd/div.cnt3
+				note.notenum.1=int(cbcnt)+cnt2*UNIT_MEASURE*beatn/beatd/div.cnt3
 				if(note.notenum.1>=cmdline_from){
 					note.notenum.2=int(lend)
 					note.notenum.3=c2t(note.notenum.1)
@@ -2521,11 +2521,11 @@
 					if(t_finalnote<note.notenum.4):t_finalnote=note.notenum.4
 					if(longmode!=1){
 						if(bpm<256000){
-							stat1=(note.notenum.2<=bpba*3/16)
-							stat2=bpba_16
+							stat1=(note.notenum.2<=UNIT_MEASURE*3/16)
+							stat2=UNIT_MEASURE_16
 						}else{
-							stat1=(note.notenum.2<=bpba*3/8)
-							stat2=bpba_8
+							stat1=(note.notenum.2<=UNIT_MEASURE*3/8)
+							stat2=UNIT_MEASURE_8
 						}
 						if(stat1=1){
 							if(turn=1){
@@ -2538,14 +2538,14 @@
 							longj.longjnum.1=note.notenum.1
 							longj.longjnum.2=note.notenum.2
 							if(bpm<256000){
-								if(note.notenum.2>=bpba*2/16){
-									longj.longjnum.1+=bpba_16
-									longj.longjnum.2=bpba_16
+								if(note.notenum.2>=UNIT_MEASURE*2/16){
+									longj.longjnum.1+=UNIT_MEASURE_16
+									longj.longjnum.2=UNIT_MEASURE_16
 								}
 							}else{
-								if(note.notenum.2>=bpba*2/8){
-									longj.longjnum.1+=bpba_8
-									longj.longjnum.2=bpba_8
+								if(note.notenum.2>=UNIT_MEASURE*2/8){
+									longj.longjnum.1+=UNIT_MEASURE_8
+									longj.longjnum.2=UNIT_MEASURE_8
 								}
 							}
 							longj.longjnum.4=c2t(longj.longjnum.1)
@@ -2601,7 +2601,7 @@
 				beatn2=beatn
 				beatd2=beatd
 				ddim lend,1
-				lend=double(bpba)*beatn2/beatd2/div.cnt3
+				lend=double(UNIT_MEASURE)*beatn2/beatd2/div.cnt3
 				stat2=strmid(d.cnt2a,cnt+5,1)
 				repeat
 					if(cnt2a+cnt+1>=length(d)){
@@ -2631,7 +2631,7 @@
 					}
 					if(strmid(d.(cnt2a+cnt+1),lcnt+5,1)=stat2){
 						if(div.(cnt3+excd)=0):break
-						lend+=double(bpba)*beatn2/beatd2/div.(cnt3+excd)
+						lend+=double(UNIT_MEASURE)*beatn2/beatd2/div.(cnt3+excd)
 					}else{
 						break
 					}
@@ -2643,7 +2643,7 @@
 				}else{
 					notefx.notefxnum.0=cnt+4
 				}
-				notefx.notefxnum.1=int(cbcnt)+cnt2*bpba*beatn/beatd/div.cnt3
+				notefx.notefxnum.1=int(cbcnt)+cnt2*UNIT_MEASURE*beatn/beatd/div.cnt3
 				notefx.notefxnum.2=int(lend)
 				notefx.notefxnum.3=c2t(notefx.notefxnum.1)
 				notefx.notefxnum.4=c2t(notefx.notefxnum.1+notefx.notefxnum.2)
@@ -2794,7 +2794,7 @@
 				beatn2=beatn
 				beatd2=beatd
 				ddim lend,1
-				lend=double(bpba)*beatn2/beatd2/div.(cnt3+excd)
+				lend=double(UNIT_MEASURE)*beatn2/beatd2/div.(cnt3+excd)
 				repeat
 					if(stat3=1){
 						stat3=0
@@ -2829,7 +2829,7 @@
 						stat1=a2p(strmid(d.(cnt2a+cnt+1),cnt0+8,1))
 						break
 					}
-					lend+=double(bpba)*beatn2/beatd2/div.(cnt3+excd)
+					lend+=double(UNIT_MEASURE)*beatn2/beatd2/div.(cnt3+excd)
 				loop
 				// 異常がなければリストに追加
 				if(stat1!=-1){
@@ -2841,7 +2841,7 @@
 					}else{
 						analog.analognum.0=cnt
 					}
-					analog.analognum.1=int(cbcnt)+cnt2*bpba*beatn/beatd/div.cnt3 // 変化の始点カウント値
+					analog.analognum.1=int(cbcnt)+cnt2*UNIT_MEASURE*beatn/beatd/div.cnt3 // 変化の始点カウント値
 					if(analog.analognum.1>=cmdline_from){
 						analog.analognum.2=int(lend) // 変化にかかる時間
 						analog.analognum.6=c2t(analog.analognum.1) // 変化の始点t
@@ -2870,11 +2870,11 @@
 						analoggrmax.cnt=anagrcnt.cnt
 						if(analogmode!=mode_off){
 							if(bpm<256000){
-								stat1=bpba_16
+								stat1=UNIT_MEASURE_16
 							}else{
-								stat1=bpba_8
+								stat1=UNIT_MEASURE_8
 							}
-							if((analog.analognum.2>bpba_32)|(analog.analognum.3=analog.analognum.4)){
+							if((analog.analognum.2>UNIT_MEASURE_32)|(analog.analognum.3=analog.analognum.4)){
 								for i,(analog.analognum.1+stat1-1)/stat1*stat1/*+analog.analognum.5*stat1*/,analog.analognum.1+analog.analognum.2,stat1
 									if(turn=1){
 										analogj.analogjnum.0=1-cnt
@@ -2933,7 +2933,7 @@
 				}else:if((turn=2)|(turn=3)|(turn=4)){
 					spin.spinnum.0=spin.spinnum.0/2*2+(spin.spinnum.0-spin.spinnum.0/2*2)^pturna
 				}
-				spin.spinnum.1=int(cbcnt)+cnt2*bpba*beatn/beatd/div.cnt3 //位置
+				spin.spinnum.1=int(cbcnt)+cnt2*UNIT_MEASURE*beatn/beatd/div.cnt3 //位置
 				spin.spinnum.2=int(double(strmid(d.cnt2a,12,32))*625/12*145/100) //長さ(c)
 				spinnum++
 			}
@@ -2955,7 +2955,7 @@
 				}else:if((turn=2)|(turn=3)|(turn=4)){
 					spr.sprnum.0=spr.sprnum.0/2*2+(spr.sprnum.0-spr.sprnum.0/2*2)^pturna
 				}
-				spr.sprnum.1=int(cbcnt)+cnt2*bpba*beatn/beatd/div.cnt3 //位置
+				spr.sprnum.1=int(cbcnt)+cnt2*UNIT_MEASURE*beatn/beatd/div.cnt3 //位置
 				spr.sprnum.2=int(double(splitstat.0)*625/12) //長さ(c)
 				spr.sprnum.3=250 //揺れ幅
 				if(length(splitstat)>=2):spr.sprnum.3=max(int(splitstat.1),0)
@@ -3101,7 +3101,7 @@
 	spinfcnt=0
 	sprfcnt=0
 	repeat analognum
-		if((analog.cnt.2<=bpba_32)&(analog.cnt.3!=analog.cnt.4)){
+		if((analog.cnt.2<=UNIT_MEASURE_32)&(analog.cnt.3!=analog.cnt.4)){
 			stat1=cnt
 			repeat spinnum-spinfcnt,spinfcnt
 				if(spin.cnt.1<analog.stat1.1):spinfcnt=cnt
@@ -3160,7 +3160,7 @@
 	if(adjmode=1){
 		repeat
 			note.notenum.0=2
-			note.notenum.1=int(double(cnt)*bpba_4)
+			note.notenum.1=int(double(cnt)*UNIT_MEASURE_4)
 			note.notenum.2=0
 			note.notenum.3=c2t(note.notenum.1)
 			note.notenum.4=note.notenum.3
@@ -3561,7 +3561,7 @@
 		ddim ro,2
 		repeat analognum
 			if((analog.cnt.1<=tilt.cnt2.0-2)&(analog.cnt.1+analog.cnt.2>tilt.cnt2.0-2)){
-				if(analog.cnt.2<=bpba_32){
+				if(analog.cnt.2<=UNIT_MEASURE_32){
 					if(analog.cnt.8=0){
 						if(analog.cnt.0=0){
 							ro.0+=double(analog.cnt.4)*20
@@ -4865,7 +4865,7 @@
 						}
 					}
 				}
-				if(note.cnt.1-cnow>bpba_2):break
+				if(note.cnt.1-cnow>UNIT_MEASURE_2):break
 			loop
 			repeat 2
 				cnt0=cnt
@@ -5000,12 +5000,12 @@
 		analogfuture=-1,-1 // 30ms後のanalognowの値(LASER判定の補正およびLASER音声エフェクトで理想値を鳴らすかどうかの判断に活用)
 		dim prerofl,2
 		repeat analognum-min(analogjfcnt.0,analogjfcnt.1),min(analogjfcnt.0,analogjfcnt.1)
-			if((min(min(analog.cnt.6-(t+ttp2),analog.cnt.6-(t+ttp*adj)),analog.cnt.6-(t+ttp*adj-analogdelay))>0)&(analog.cnt.1>cnow+sttp*adj+bpba_2)):break
+			if((min(min(analog.cnt.6-(t+ttp2),analog.cnt.6-(t+ttp*adj)),analog.cnt.6-(t+ttp*adj-analogdelay))>0)&(analog.cnt.1>cnow+sttp*adj+UNIT_MEASURE_2)):break
 			if((t+ttp*adj+30>=analog.cnt.6)&(t-analogdelay+ttp*adj+30<analog.cnt.7)){
 				analogfuture.(analog.cnt.0)=x20(analog.cnt.3)+(x20(analog.cnt.4)-x20(analog.cnt.3))*(analog.cnt.7-analog.cnt.6-(analog.cnt.7-(t+ttp*adj+30)))/(analog.cnt.7-analog.cnt.6)
 			}
 			if((analog.cnt.6<=t+ttp2)&(analog.cnt.7>t+ttp2)){
-				if(analog.cnt.2<=bpba_32){
+				if(analog.cnt.2<=UNIT_MEASURE_32){
 					panalognow.(analog.cnt.0)=x20(analog.cnt.4)*(analog.cnt.8=0)+1000*analog.cnt.0*(analog.cnt.8=1)
 					if(analog.cnt.8=0):panalognow2.(analog.cnt.0)=panalognow.(analog.cnt.0)
 				}else{
@@ -5014,7 +5014,7 @@
 				}
 			}
 			if((analog.cnt.6<=t+ttp*adj)&(analog.cnt.7>t+ttp*adj)){
-				if(analog.cnt.2<=bpba_32){
+				if(analog.cnt.2<=UNIT_MEASURE_32){
 					if(analog.cnt.8=0){
 						if(analog.cnt.0=0){
 							ro.0+=double(analog.cnt.4)*20
@@ -5031,16 +5031,16 @@
 					}
 					canalognow.(analog.cnt.0)=x20(analog.cnt.3)+(x20(analog.cnt.4)-x20(analog.cnt.3))*(analog.cnt.7-analog.cnt.6-(analog.cnt.7-(t+ttp*adj)))/(analog.cnt.7-analog.cnt.6)
 				}
-			}else:if((analog.cnt.1<=cnow+sttp*adj+bpba_2)&(analog.cnt.1>cnow+sttp*adj)&(canalognow.(analog.cnt.0)=-1)&(prerofl.(analog.cnt.0)=0)){
+			}else:if((analog.cnt.1<=cnow+sttp*adj+UNIT_MEASURE_2)&(analog.cnt.1>cnow+sttp*adj)&(canalognow.(analog.cnt.0)=-1)&(prerofl.(analog.cnt.0)=0)){
 				if(analog.cnt.0=0){
-					ro.0+=double(analog.cnt.3)*20//*min((cnow+sttp*adj+bpba_2)-analog.cnt.1,bpba_4)/(bpba_4)
+					ro.0+=double(analog.cnt.3)*20//*min((cnow+sttp*adj+UNIT_MEASURE_2)-analog.cnt.1,UNIT_MEASURE_4)/(UNIT_MEASURE_4)
 				}else{
-					ro.1-=double(abs(analog.cnt.3-50))*20//*min((cnow+sttp*adj+bpba_2)-analog.cnt.1,bpba_4)/(bpba_4)
+					ro.1-=double(abs(analog.cnt.3-50))*20//*min((cnow+sttp*adj+UNIT_MEASURE_2)-analog.cnt.1,UNIT_MEASURE_4)/(UNIT_MEASURE_4)
 				}
 				prerofl.(analog.cnt.0)=1
 			}
 			if((analog.cnt.6<=t+ttp*adj-analogdelay)&(analog.cnt.7>t+ttp*adj-analogdelay)){
-				if(analog.cnt.2<=bpba_32){
+				if(analog.cnt.2<=UNIT_MEASURE_32){
 					analognow.(analog.cnt.0)=x20(analog.cnt.4)
 				}else{
 					analognow.(analog.cnt.0)=x20(analog.cnt.3)+(x20(analog.cnt.4)-x20(analog.cnt.3))*(analog.cnt.7-analog.cnt.6-(analog.cnt.7-(t-analogdelay+ttp*adj)))/(analog.cnt.7-analog.cnt.6)
@@ -5150,7 +5150,7 @@
 			if(t-anaktp.cnt>100):anakdiff.cnt=0
 			analogngcnt.cnt/=2
 			if(analoganokcnt.cnt!=-1){
-				if(((t-analoganokt.cnt<=18)&(analoggr.(arstat.(6+cnt).1)=analoggr.(analoganokcnt.cnt)))&(analoganokcnt.cnt!=arstat.(6+cnt).1)&(analog.(arstat.(6+cnt).1).2<=bpba_32)){
+				if(((t-analoganokt.cnt<=18)&(analoggr.(arstat.(6+cnt).1)=analoggr.(analoganokcnt.cnt)))&(analoganokcnt.cnt!=arstat.(6+cnt).1)&(analog.(arstat.(6+cnt).1).2<=UNIT_MEASURE_32)){
 					analoganokcnt.cnt=-1
 				}else:if(((t-analoganokt.cnt<=75)&(analoggr.(arstat.(6+cnt).1)=analoggr.(analoganokcnt.cnt)))):analogpos.cnt=analognow.cnt
 			}
@@ -5161,14 +5161,14 @@
 				continue
 			}
 			if((analogokcnt.cnt!=-1)&(analogngcnt.cnt<7+(analoginput=0)*3)){
-				if((analog.(arstat.(6+cnt).1).2<=bpba_32)&(analog.(analogokcnt.cnt).2>bpba_32)){
+				if((analog.(arstat.(6+cnt).1).2<=UNIT_MEASURE_32)&(analog.(analogokcnt.cnt).2>UNIT_MEASURE_32)){
 					analogokt.cnt=-10000
 				}
 				stat1=120+min(max(50-anaturnt.cnt,0),50)+25*(t-analogngt.cnt>75)*(analoginput=2)-30*(t-analogngt.cnt<25)*(analoginput=2)+60*(t-analogngt.cnt>60)*(analoginput=2)*(anaturnnextt.cnt0-(t+ttp*adj-analogdelay)<=50)*(anaturnnextt.cnt0-(t+ttp*adj-analogdelay)>0)+60*(analoginput=3)+60*(analoginput=4)+60*(analoginput=5)+(20*(analog.(analogokcnt.cnt).8=1)+40)*(anaturnnextt.cnt0-(t+ttp*adj-analogdelay)<=150)+20*(anaturnnextt.cnt0-(t+ttp*adj-analogdelay)<=180)+20*(t-analog.(analogokcnt.cnt).6<=20)+(85-25*(analoganokcnt.cnt!=arstat.(6+cnt).1))*(analoginput=1)-10*(anadirection.cnt!=anadirectionp.cnt)-3*(analogokcnt.cnt!=arstat.(6+cnt).1)+(analogfuture.cnt!=-1)*abs(analogfuture.cnt-analognow.cnt)/20-30*(analoganokcnt.cnt!=arstat.(6+cnt).1)
 				if(stat1<15):stat1=15
 				if(analogfuture.cnt=-1):stat1+=20
 				if(anaturnnextt.cnt0-(t+ttp*adj-analogdelay)<180):stat1+=12+(t_tp)*2+stat1/8+((t_tp)/2+5)*(analog.(arstat.(6+cnt).1).8=1)
-				if((((t-analogokt.cnt<stat1)&(analognow.cnt!=-1)&(arstat.(6+cnt).0=1)&(analoggr.(arstat.(6+cnt).1)=analoggr.(analogokcnt.cnt))))&(analog.(arstat.(6+cnt).1).2>bpba_32)){
+				if((((t-analogokt.cnt<stat1)&(analognow.cnt!=-1)&(arstat.(6+cnt).0=1)&(analoggr.(arstat.(6+cnt).1)=analoggr.(analogokcnt.cnt))))&(analog.(arstat.(6+cnt).1).2>UNIT_MEASURE_32)){
 					analogpos.cnt=analognow.cnt
 					anadjp.cnt=1
 				}
@@ -5240,10 +5240,10 @@
 					}
 					if(enter_key=1):stat1=0
 					if((arstat.(6+cnt0).0=1)&(analognow.cnt0!=-1)&(anadamage.cnt0<45.0f)){
-						if((analog.(arstat.(6+cnt0).1).2>bpba_32)|(anastraight.cnt0=1)){
+						if((analog.(arstat.(6+cnt0).1).2>UNIT_MEASURE_32)|(anastraight.cnt0=1)){
 							if(analogprev.(arstat.(6+cnt0).1)<0){
 								analogpos.cnt0=analognow.cnt0
-							}else:if(((analog.(analogprev.(arstat.(6+cnt0).1)).2>bpba_32)&(abs(analogpos.cnt0-analognow.cnt0)<200))|(analog.(analogprev.(arstat.(6+cnt0).1)).3=analog.(analogprev.(arstat.(6+cnt0).1)).4)|(t-analog.(arstat.(6+cnt0).1).6>130)){
+							}else:if(((analog.(analogprev.(arstat.(6+cnt0).1)).2>UNIT_MEASURE_32)&(abs(analogpos.cnt0-analognow.cnt0)<200))|(analog.(analogprev.(arstat.(6+cnt0).1)).3=analog.(analogprev.(arstat.(6+cnt0).1)).4)|(t-analog.(arstat.(6+cnt0).1).6>130)){
 								analogpos.cnt0=analognow.cnt0
 							}
 						}
@@ -5340,7 +5340,7 @@
 					}
 					repeat analoganjnum-analoganjfcnt,analoganjfcnt
 						if(analog.(analoganj.cnt.1).6-(t-analogdelay)-ttp>100):break
-						if((analoganj.cnt.0=0)&(abs(analog.(analoganj.cnt.1).6-(t-analogdelay)-ttp)<=60)&(analog.(analoganj.cnt.1).4<analog.(analoganj.cnt.1).3)&(analog.(analoganj.cnt.1).4*20-50<=analogpos.(analog.(analoganj.cnt.1).0))/*&((arstat.6.1=analoganj.cnt.1)|(analog.(arstat.6.1).2>bpba_32))*/&(analoganj.cnt.2=0)){
+						if((analoganj.cnt.0=0)&(abs(analog.(analoganj.cnt.1).6-(t-analogdelay)-ttp)<=60)&(analog.(analoganj.cnt.1).4<analog.(analoganj.cnt.1).3)&(analog.(analoganj.cnt.1).4*20-50<=analogpos.(analog.(analoganj.cnt.1).0))/*&((arstat.6.1=analoganj.cnt.1)|(analog.(arstat.6.1).2>UNIT_MEASURE_32))*/&(analoganj.cnt.2=0)){
 							analoganj.cnt.2=1
 							chainnow++:chainnow_song++
 							critical++
@@ -5387,7 +5387,7 @@
 					}
 					repeat analoganjnum-analoganjfcnt,analoganjfcnt
 						if(analog.(analoganj.cnt.1).6-(t-analogdelay)-ttp>100):break
-						if((analoganj.cnt.0=0)&(abs(analog.(analoganj.cnt.1).6-(t-analogdelay)-ttp)<=60)&(analog.(analoganj.cnt.1).4>analog.(analoganj.cnt.1).3)&(analog.(analoganj.cnt.1).4*20+50>=analogpos.(analog.(analoganj.cnt.1).0))/*&((arstat.6.1=analoganj.cnt.1)|(analog.(arstat.6.1).2>bpba_32))*/&(analoganj.cnt.2=0)){
+						if((analoganj.cnt.0=0)&(abs(analog.(analoganj.cnt.1).6-(t-analogdelay)-ttp)<=60)&(analog.(analoganj.cnt.1).4>analog.(analoganj.cnt.1).3)&(analog.(analoganj.cnt.1).4*20+50>=analogpos.(analog.(analoganj.cnt.1).0))/*&((arstat.6.1=analoganj.cnt.1)|(analog.(arstat.6.1).2>UNIT_MEASURE_32))*/&(analoganj.cnt.2=0)){
 							analoganj.cnt.2=1
 							chainnow++:chainnow_song++
 							critical++
@@ -5435,7 +5435,7 @@
 					}
 					repeat analoganjnum-analoganjfcnt,analoganjfcnt
 						if(analog.(analoganj.cnt.1).6-(t-analogdelay)-ttp>100):break
-						if((analoganj.cnt.0=1)&(abs(analog.(analoganj.cnt.1).6-(t-analogdelay)-ttp)<=60)&(analog.(analoganj.cnt.1).4<analog.(analoganj.cnt.1).3)&(analog.(analoganj.cnt.1).4*20-50<=analogpos.(analog.(analoganj.cnt.1).0))/*&((arstat.7.1=analoganj.cnt.1)|(analog.(arstat.7.1).2>bpba_32))*/&(analoganj.cnt.2=0)){
+						if((analoganj.cnt.0=1)&(abs(analog.(analoganj.cnt.1).6-(t-analogdelay)-ttp)<=60)&(analog.(analoganj.cnt.1).4<analog.(analoganj.cnt.1).3)&(analog.(analoganj.cnt.1).4*20-50<=analogpos.(analog.(analoganj.cnt.1).0))/*&((arstat.7.1=analoganj.cnt.1)|(analog.(arstat.7.1).2>UNIT_MEASURE_32))*/&(analoganj.cnt.2=0)){
 							analoganj.cnt.2=1
 							chainnow++:chainnow_song++
 							critical++
@@ -5482,7 +5482,7 @@
 					}
 					repeat analoganjnum-analoganjfcnt,analoganjfcnt
 						if(analog.(analoganj.cnt.1).6-(t-analogdelay)-ttp>100):break
-						if((analoganj.cnt.0=1)&(abs(analog.(analoganj.cnt.1).6-(t-analogdelay)-ttp)<=60)&(analog.(analoganj.cnt.1).4>analog.(analoganj.cnt.1).3)&(analog.(analoganj.cnt.1).4*20+50>=analogpos.(analog.(analoganj.cnt.1).0))/*&((arstat.7.1=analoganj.cnt.1)|(analog.(arstat.7.1).2>bpba_32))*/&(analoganj.cnt.2=0)){
+						if((analoganj.cnt.0=1)&(abs(analog.(analoganj.cnt.1).6-(t-analogdelay)-ttp)<=60)&(analog.(analoganj.cnt.1).4>analog.(analoganj.cnt.1).3)&(analog.(analoganj.cnt.1).4*20+50>=analogpos.(analog.(analoganj.cnt.1).0))/*&((arstat.7.1=analoganj.cnt.1)|(analog.(arstat.7.1).2>UNIT_MEASURE_32))*/&(analoganj.cnt.2=0)){
 							analoganj.cnt.2=1
 							chainnow++:chainnow_song++
 							critical++
@@ -5606,7 +5606,7 @@
 					}
 					analogjfcnt2.(analogj.cnt.0)=cnt
 				}
-				if(analogj.cnt.4-(t-analogdelay)-ttp*adj>bpba):af.(analogj.cnt.0)=1
+				if(analogj.cnt.4-(t-analogdelay)-ttp*adj>UNIT_MEASURE):af.(analogj.cnt.0)=1
 				if(af.0+af.1=2):break
 			loop
 		}
@@ -5785,7 +5785,7 @@
 			loop
 		}
 		repeat analoganjnum-max(min(chokkakup.0,chokkakup.1),0),max(min(chokkakup.0,chokkakup.1),0)
-			if((analog.(analoganj.cnt.1).2<=bpba_32)&(((auto_chokkaku_se=0)&&(analoganj.cnt.2=1))|(analogmode=mode_auto)|(auto_chokkaku_se!=0))){
+			if((analog.(analoganj.cnt.1).2<=UNIT_MEASURE_32)&(((auto_chokkaku_se=0)&&(analoganj.cnt.2=1))|(analogmode=mode_auto)|(auto_chokkaku_se!=0))){
 				if((analog.(analoganj.cnt.1).6>=t-500)&(chokkakup.(analoganj.cnt.0)<cnt)){
 					if(analog.(analoganj.cnt.1).6<=t+30){
 						stat1=min(abs(analog.(analoganj.cnt.1).3-analog.(analoganj.cnt.1).4)*(1+(anagrran.(analog.(analoganj.cnt.1).0).(analoggr.(analoganj.cnt.1))=2)),25)
@@ -5963,13 +5963,13 @@
 				}
 				if(ts_bass>max(updateperiod/5,1)){
 					c2bnow=c2b(cnowfx)
-					sich_beat=(cnowfx-b2c(c2bnow))/(bpba_4)
+					sich_beat=(cnowfx-b2c(c2bnow))/(UNIT_MEASURE_4)
 					c2bnow_50ms=c2b(cnowfx_50ms)
-					retr_beat=(cnowfx_50ms-b2c(c2bnow_50ms))/(bpba_2)
+					retr_beat=(cnowfx_50ms-b2c(c2bnow_50ms))/(UNIT_MEASURE_2)
 					// Retrigger/Gate/Wobble 更新トリガ判定
 					if((retr_beat!=retr_beatp)|(c2bnow_50ms!=c2bnowp_50ms)){
-						// 小節頭から数えたカウント値をbpba/2間隔にそろえて時間変換、現在時刻からの時間差分を求める(Retrigger用)
-						dstat=c2tf(b2c(c2bnow_50ms)+(cnowfx_50ms-b2c(c2bnow_50ms))/(bpba_2)*(bpba_2))-double(t+laserdelay0+tfx_diff)
+						// 小節頭から数えたカウUNIT_MEASUREUNIT_MEASURE/2間隔にそろえて時間変換、現在時刻からの時間差分を求める(Retrigger用)
+						dstat=c2tf(b2c(c2bnow_50ms)+(cnowfx_50ms-b2c(c2bnow_50ms))/(UNIT_MEASURE_2)*(UNIT_MEASURE_2))-double(t+laserdelay0+tfx_diff)
 						if(fl_Retr=1):BASS_VST_SetParam_R hFX_Retr,19,maxf(minf(dstat/10000.0f,1.0f),0.0f)
 						if(c2bnow_50ms!=c2bnowp_50ms){
 							// ユーザー定義FXのGate/Wobble更新(1小節間隔固定)
@@ -5985,14 +5985,14 @@
 					repeat userfxnum
 						if((userfx_params.cnt.0=FXDEF_FXTYPE_RETR)||(userfx_params.cnt.0=FXDEF_FXTYPE_ECHO)){
 							// ユーザー定義FXのRetrigger/Echo 更新トリガ判定
-							if((userfx_params.cnt.1>0.0f)&(int(userfx_params.cnt.1*bpba)>0)&(userfx_params.cnt.1<1.0f)){
-								user_beat.cnt=(cnowfx_50ms-b2c(c2bnow_50ms))/max(int(userfx_params.cnt.1*bpba),1)
+							if((userfx_params.cnt.1>0.0f)&(int(userfx_params.cnt.1*UNIT_MEASURE)>0)&(userfx_params.cnt.1<1.0f)){
+								user_beat.cnt=(cnowfx_50ms-b2c(c2bnow_50ms))/max(int(userfx_params.cnt.1*UNIT_MEASURE),1)
 							}else:if(userfx_params.cnt.1>=1.0f){
 								stat1=b2c(c2bnow_50ms)
 								user_beat.cnt=int((double(c2bnow_50ms)+double(cnowfx_50ms-stat1)/(b2c(c2bnow_50ms+1)-stat1))/userfx_params.cnt.1)
 							}else:user_beat.cnt=0
-							if(((user_beat.cnt!=user_beatp.cnt)|(c2bnow_50ms!=c2bnowp_50ms))&(int(userfx_params.cnt.1*bpba)>0)&(userfx_params.cnt.1<1.0f)){
-								dstat=c2tf(b2c(c2bnow_50ms)+(cnowfx_50ms-b2c(c2bnow_50ms))/int(userfx_params.cnt.1*bpba)*int(userfx_params.cnt.1*bpba))-double(t+laserdelay0+tfx_diff)
+							if(((user_beat.cnt!=user_beatp.cnt)|(c2bnow_50ms!=c2bnowp_50ms))&(int(userfx_params.cnt.1*UNIT_MEASURE)>0)&(userfx_params.cnt.1<1.0f)){
+								dstat=c2tf(b2c(c2bnow_50ms)+(cnowfx_50ms-b2c(c2bnow_50ms))/int(userfx_params.cnt.1*UNIT_MEASURE)*int(userfx_params.cnt.1*UNIT_MEASURE))-double(t+laserdelay0+tfx_diff)
 								BASS_VST_SetParam_R hFX_User.cnt,19,maxf(minf(dstat/10000.0f,1.0f),0.0f)
 							}else:if((user_beat.cnt!=user_beatp.cnt)&(userfx_params.cnt.1>=1.0f)){
 								stat1=int(double(user_beat.cnt)*userfx_params.cnt.1)
@@ -6327,7 +6327,7 @@
 					if((abs(analogpos.cnt-analognow.cnt)<100+abs(analognow.cnt-analogfuture.cnt)/24*(analogfuture.cnt!=-1))|(t-analoganokt.cnt<=50)){
 						peffstata3.cnt=1
 						if(arstat.(6+cnt).0=1){
-							if((analog.(arstat.(6+cnt).1).2<=bpba_32)&(analog.(arstat.(6+cnt).1).8=1)){
+							if((analog.(arstat.(6+cnt).1).2<=UNIT_MEASURE_32)&(analog.(arstat.(6+cnt).1).8=1)){
 								peffstata3.cnt=0
 							}
 						}
@@ -6356,7 +6356,7 @@
 				loop
 				pdstat=double(max((panalognow.0>=0)*panalogstat.0*((peffstata.0=1)|(analognow.0=-1)),(1000-panalogstat.1)*((peffstata.1=1)|(analognow.1=-1))))/1000.0f
 				pstat3=pstat2
-				pstat2=(((analognow.0!=-1)&(analog.(arstat.6.1).2<=bpba_32)&(analog.(arstat.6.1).8=1))|((analognow.1!=-1)&(analog.(arstat.7.1).2<=bpba_32)&(analog.(arstat.7.1).8=1))|((panalogstat.0<=20)&((panalogstat.1>=980))))|(pdstat=0.0f)
+				pstat2=(((analognow.0!=-1)&(analog.(arstat.6.1).2<=UNIT_MEASURE_32)&(analog.(arstat.6.1).8=1))|((analognow.1!=-1)&(analog.(arstat.7.1).2<=UNIT_MEASURE_32)&(analog.(arstat.7.1).8=1))|((panalogstat.0<=20)&((panalogstat.1>=980))))|(pdstat=0.0f)
 				if((pstat2=1)&(pstat3=0)){
 					shuwat=t
 					shuwapos=pdstat2
@@ -6747,8 +6747,8 @@
 				repeat userfxnum
 					if(userfx_params.cnt.0=FXDEF_FXTYPE_SICH){
 						// ユーザー定義FXのSideChain 更新トリガ判定
-						if((userfx_params.cnt.1>0.0f)&(int(userfx_params.cnt.1*bpba)>0)&(userfx_params.cnt.1<1.0f)){
-							user_beat.cnt=(cnowfx-b2c(c2bnow))/max(int(userfx_params.cnt.1*bpba),1)
+						if((userfx_params.cnt.1>0.0f)&(int(userfx_params.cnt.1*UNIT_MEASURE)>0)&(userfx_params.cnt.1<1.0f)){
+							user_beat.cnt=(cnowfx-b2c(c2bnow))/max(int(userfx_params.cnt.1*UNIT_MEASURE),1)
 						}else:if(userfx_params.cnt.1>=1.0f){
 							stat1=b2c(c2bnow)
 							user_beat.cnt=int((double(c2bnow)+double(cnowfx-stat1)/(b2c(c2bnow+1)-stat1))/userfx_params.cnt.1)
@@ -6921,8 +6921,8 @@
 						beatlfcnt=cnt+1
 					}
 				loop
-				if(cbcnt>=cnow-bpba_4){
-					stat1=-(hsrc(int(cbcnt),-1)*10*hs/bpba-vh+24)/ra
+				if(cbcnt>=cnow-UNIT_MEASURE_4){
+					stat1=-(hsrc(int(cbcnt),-1)*10*hs/UNIT_MEASURE-vh+24)/ra
 					if(stat1!=stat1_){
 						pos xsh/ra+(anaranfl=2)*vw/ra/2-center_split_px,stat1
 						gcopy 15,0,0,220/ra/2,16/ra
@@ -6932,7 +6932,7 @@
 						stat1_=stat1
 					}
 				}
-				cbcnt+=double(bpba)*beatn/beatd
+				cbcnt+=double(UNIT_MEASURE)*beatn/beatd
 			loop
 
 			// レーン光沢アニメーションの描画
@@ -6958,23 +6958,23 @@
 						notefcnt.tcnt=i
 						continue
 					}
-					if(note.i.1+note.i.2<cnow-bpba_4){
+					if(note.i.1+note.i.2<cnow-UNIT_MEASURE_4){
 						notefcnt.tcnt=note.i.5
 						i=note.i.5
 						continue
 					}
 					if(note.i.2>0){
 						hsrc1=hsrc(note.i.1,note.i.3)
-						if(hsrc1>bpba*(vh+20)/10/hs){
+						if(hsrc1>UNIT_MEASURE*(vh+20)/10/hs){
 							break
 						}
 						gmode 2
 						hsrc12=hsrc(note.i.1+note.i.2,note.i.4)
-						stat1=max(((hsrc12*hs*10/bpba)-(hsrc1*hs*10/bpba))/ra/*-6/ra*/,1)
-						stat3=max(0,(hsrc1*10*hs/bpba)/ra+16/ra-vh/ra-7/ra+stat1)
-						stat4=max(0,-(hsrc1*10*hs/bpba)/ra-16/ra+7/ra)
+						stat1=max(((hsrc12*hs*10/UNIT_MEASURE)-(hsrc1*hs*10/UNIT_MEASURE))/ra/*-6/ra*/,1)
+						stat3=max(0,(hsrc1*10*hs/UNIT_MEASURE)/ra+16/ra-vh/ra-7/ra+stat1)
+						stat4=max(0,-(hsrc1*10*hs/UNIT_MEASURE)/ra-16/ra+7/ra)
 						gsel 5+163*(anaranfl=2)
-						pos (bt_xsh+(note.i.0-4)*fx_width)/ra+(anaranfl=2)*vw/ra/2+center_split_px*((note.i.0-4)*2-1), -(hsrc1*10*hs/bpba)/ra+vh/ra-16/ra+7/ra-stat1+stat3-slshift
+						pos (bt_xsh+(note.i.0-4)*fx_width)/ra+(anaranfl=2)*vw/ra/2+center_split_px*((note.i.0-4)*2-1), -(hsrc1*10*hs/UNIT_MEASURE)/ra+vh/ra-16/ra+7/ra-stat1+stat3-slshift
 						if(stat1-stat3-stat4>0){
 							stat2=note.i.3-t
 							if((arstat.(note.i.0).2=i)&(stat2<=50)&(ljudge.(note.i.0-4)=0)){
@@ -6992,9 +6992,9 @@
 								lanesubfl=1
 								gsel 5+163*(anaranfl=2)
 							}
-							pos ginfo_cx, -(hsrc1*10*hs/bpba)/ra+vh/ra-16/ra+7/ra-stat1-slshift
+							pos ginfo_cx, -(hsrc1*10*hs/UNIT_MEASURE)/ra+vh/ra-16/ra+7/ra-stat1-slshift
 							gcopy 1,0,9,82/ra,1
-							pos ginfo_cx, -(hsrc1*10*hs/bpba)/ra+vh/ra-6/ra-16/ra+7/ra-slshift
+							pos ginfo_cx, -(hsrc1*10*hs/UNIT_MEASURE)/ra+vh/ra-6/ra-16/ra+7/ra-slshift
 							gcopy 156,0,0,82/ra,7/ra
 						}
 					}
@@ -7014,24 +7014,24 @@
 						notefcnt.tcnt=i
 						continue
 					}
-					if(note.i.1+note.i.2<cnow-bpba_4){
+					if(note.i.1+note.i.2<cnow-UNIT_MEASURE_4){
 						notefcnt.tcnt=note.i.5
 						i=note.i.5
 						continue
 					}
 					if(note.i.2>0){
 						hsrc1=hsrc(note.i.1,note.i.3)
-						if(hsrc1>bpba*(vh+20)/10/hs){
+						if(hsrc1>UNIT_MEASURE*(vh+20)/10/hs){
 							break
 						}
 						hsrc12=hsrc(note.i.1+note.i.2,note.i.4)
-						stat1=max(((hsrc12*hs*10/bpba)-(hsrc1*hs*10/bpba))/ra/*-6/ra*/,1)
-						stat3=max(0,(hsrc1*10*hs/bpba)/ra+16/ra-vh/ra-7/ra+stat1)
-						stat4=max(0,-(hsrc1*10*hs/bpba)/ra-16/ra+7/ra)
+						stat1=max(((hsrc12*hs*10/UNIT_MEASURE)-(hsrc1*hs*10/UNIT_MEASURE))/ra/*-6/ra*/,1)
+						stat3=max(0,(hsrc1*10*hs/UNIT_MEASURE)/ra+16/ra-vh/ra-7/ra+stat1)
+						stat4=max(0,-(hsrc1*10*hs/UNIT_MEASURE)/ra-16/ra+7/ra)
 						if(stat1-stat3-stat4>0){
 							gsel 5+163*(anaranfl=2)
 							gmode 5,,,255
-							pos (bt_xsh+note.i.0*bt_width)/ra+(anaranfl=2)*vw/ra/2+center_split_px*(note.i.0/2*2-1), -(hsrc1*10*hs/bpba+16)/ra+vh/ra+7/ra-stat1+stat3-slshift
+							pos (bt_xsh+note.i.0*bt_width)/ra+(anaranfl=2)*vw/ra/2+center_split_px*(note.i.0/2*2-1), -(hsrc1*10*hs/UNIT_MEASURE+16)/ra+vh/ra+7/ra-stat1+stat3-slshift
 							stat2=note.i.3-t
 							if((arstat.(note.i.0).2=i)&(stat2<=50)&(shljudge.(note.i.0)=0)){
 								gcopy 151,0,0,40/ra,stat1-stat3-stat4
@@ -7045,7 +7045,7 @@
 							if(bg>=1){
 								gsel 51+118*(anaranfl=2)
 								gmode 6,,,256
-								pos (bt_xsh+note.i.0*bt_width)/ra+(anaranfl=2)*vw/ra/2+center_split_px*(note.i.0/2*2-1), -(hsrc1*10*hs/bpba+16)/ra+vh/ra+7/ra-stat1+stat3-slshift
+								pos (bt_xsh+note.i.0*bt_width)/ra+(anaranfl=2)*vw/ra/2+center_split_px*(note.i.0/2*2-1), -(hsrc1*10*hs/UNIT_MEASURE+16)/ra+vh/ra+7/ra-stat1+stat3-slshift
 								if((arstat.(note.i.0).2=i)&(stat2<=50)&(shljudge.(note.i.0)=0)){
 									gcopy 151,40/ra,0,40/ra,stat1-stat3-stat4
 								}else:if((arstat.(note.i.0).2=i)&(stat2<=50)&(shljudge.(note.i.0)=1)&((t\100)<50)){
@@ -7058,13 +7058,13 @@
 								lanesubfl=1
 							}
 							gmode 2
-							pos ginfo_cx, -(hsrc1*10*hs/bpba-vh+16)/ra-slshift
+							pos ginfo_cx, -(hsrc1*10*hs/UNIT_MEASURE-vh+16)/ra-slshift
 							gcopy 157,0,0,40/ra,7/ra
 							gmode 0
 							if(bg>=1){
 								gsel 51+118*(anaranfl=2)
 								gmode 2
-								pos ginfo_cx,-(hsrc1*10*hs/bpba-vh+16)/ra-slshift
+								pos ginfo_cx,-(hsrc1*10*hs/UNIT_MEASURE-vh+16)/ra-slshift
 								gcopy 2,40/ra,0,40/ra,7/ra
 								gmode 0
 								lanesubfl=1
@@ -7087,22 +7087,22 @@
 						notefcnt.tcnt=i
 						continue
 					}
-					if(note.i.1+note.i.2<cnow-bpba_4){
+					if(note.i.1+note.i.2<cnow-UNIT_MEASURE_4){
 						notefcnt.tcnt=note.i.5
 						i=note.i.5
 						continue
 					}
 					if(note.i.2=0){
 						hsrc1=hsrc(note.i.1,note.i.3)
-						if(hsrc1>bpba*(vh+20)/10/hs){
+						if(hsrc1>UNIT_MEASURE*(vh+20)/10/hs){
 							break
 						}
 						gmode 7
-						pos (bt_xsh+(note.i.0-4)*fx_width)/ra+(anaranfl=2)*vw/ra/2+center_split_px*((note.i.0-4)*2-1), (-hsrc1*10*hs/bpba+vh-16+2-1)/ra-slshift
+						pos (bt_xsh+(note.i.0-4)*fx_width)/ra+(anaranfl=2)*vw/ra/2+center_split_px*((note.i.0-4)*2-1), (-hsrc1*10*hs/UNIT_MEASURE+vh-16+2-1)/ra-slshift
 						if(notese.i=-1){
-							gcopy 43,0,(hsrc1*10*hs/bpba*8/vh*40)/ra,82/ra,40/ra
+							gcopy 43,0,(hsrc1*10*hs/UNIT_MEASURE*8/vh*40)/ra,82/ra,40/ra
 						}else{
-							gcopy 186,0,(hsrc1*10*hs/bpba*8/vh*40)/ra,82/ra,40/ra
+							gcopy 186,0,(hsrc1*10*hs/UNIT_MEASURE*8/vh*40)/ra,82/ra,40/ra
 						}
 					}
 					i=note.i.5
@@ -7121,20 +7121,20 @@
 						notefcnt.tcnt=i
 						continue
 					}
-					if(note.i.1+note.i.2<cnow-bpba_4){
+					if(note.i.1+note.i.2<cnow-UNIT_MEASURE_4){
 						notefcnt.tcnt=note.i.5
 						i=note.i.5
 						continue
 					}
 					if(note.i.2=0){
 						hsrc1=hsrc(note.i.1,note.i.3)
-						if(hsrc1>bpba*(vh+20)/10/hs){
+						if(hsrc1>UNIT_MEASURE*(vh+20)/10/hs){
 							break
 						}
 						gsel 5+163*(anaranfl=2)
 						gmode 7
-						pos (bt_xsh+note.i.0*bt_width)/ra+(anaranfl=2)*vw/ra/2+center_split_px*(note.i.0/2*2-1), (-hsrc1*10*hs/bpba-16+2+vh)/ra-slshift
-						gcopy 53+min(max((hsrc1*10*hs/bpba*8/vh),0),7)*9+note.i.6,0,0,40/ra,40/ra
+						pos (bt_xsh+note.i.0*bt_width)/ra+(anaranfl=2)*vw/ra/2+center_split_px*(note.i.0/2*2-1), (-hsrc1*10*hs/UNIT_MEASURE-16+2+vh)/ra-slshift
+						gcopy 53+min(max((hsrc1*10*hs/UNIT_MEASURE*8/vh),0),7)*9+note.i.6,0,0,40/ra,40/ra
 					}
 					i=note.i.5
 				loop
@@ -7185,39 +7185,39 @@
 					if(analog.i.0!=cnt0){
 						_continue
 					}else:if(colfl=0):analogfcnt.cnt0=i:colfl=1
-					hsrc12=hsrc(analog.i.1+analog.i.2+(analog.i.2<=bpba_32)+sttp*(adj=0),analog.i.7+ttp*(adj=0)+75*adj3)
+					hsrc12=hsrc(analog.i.1+analog.i.2+(analog.i.2<=UNIT_MEASURE_32)+sttp*(adj=0),analog.i.7+ttp*(adj=0)+75*adj3)
 					analogcnt++
-					if(hsrc12<-bpba_2){
+					if(hsrc12<-UNIT_MEASURE_2){
 						analogfcnt.(analog.i.0)=i+1
 						_continue
 					}
 					hsrc1=hsrc(analog.i.1+sttp*(adj=0),analog.i.6+ttp*(adj=0)+75*adj3)
-					if((hsrc1>bpba*(vh+200)/(10*hs))&(colfl=1)){
+					if((hsrc1>UNIT_MEASURE*(vh+200)/(10*hs))&(colfl=1)){
 						_break
 					}
 					stat1=(((abs(analogpos.(analog.i.0)-analognow.(analog.i.0))<100+abs(analognow.(analog.i.0)-analogfuture.(analog.i.0))/24*(analogfuture.(analog.i.0)!=-1))&(analognow.(analog.i.0)!=-1))|(analogmode=mode_auto)|(t-analoganokt.(analog.i.0)<=50)|(t-analogokt.(analog.i.0)<(t_tp)*5+(analogfuture.(analog.i.0)!=-1)*abs(analogfuture.(analog.i.0)-analognow.(analog.i.0))/20))&(analognow.(analog.i.0)!=-1)&(analogmode!=mode_off)&(analoggr.i=analoggr.(arstat.(6+analog.i.0).1))
 					if(analog.i.5=1){
 						gsel 5+163*(anaranfl=2)
 						gmode 5,,,255
-						pos (analogxsh+((analog.i.3*(anagrran.(analog.i.0).(analoggr.i))-25*(anagrran.(analog.i.0).(analoggr.i)=2))*4+4*((analog.i.3=12)|(analog.i.3=37))*(anagrran.(analog.i.0).(analoggr.i)=2)-10)*analograte/100)/ra+(anaranfl=2)*vw/ra/2,(-hsrc1*10*hs/bpba+vh-15)/ra
+						pos (analogxsh+((analog.i.3*(anagrran.(analog.i.0).(analoggr.i))-25*(anagrran.(analog.i.0).(analoggr.i)=2))*4+4*((analog.i.3=12)|(analog.i.3=37))*(anagrran.(analog.i.0).(analoggr.i)=2)-10)*analograte/100)/ra+(anaranfl=2)*vw/ra/2,(-hsrc1*10*hs/UNIT_MEASURE+vh-15)/ra
 						gcopy 152,44/ra*analog.i.0*2,0,44/ra,200/ra
 						if(bg>=1){
 							gsel 51+118*(anaranfl=2)
 							gmode 5,,,255
-							pos (analogxsh+((analog.i.3*(anagrran.(analog.i.0).(analoggr.i))-25*(anagrran.(analog.i.0).(analoggr.i)=2))*4+4*((analog.i.3=12)|(analog.i.3=37))*(anagrran.(analog.i.0).(analoggr.i)=2)-10)*analograte/100)/ra+(anaranfl=2)*vw/ra/2,(-hsrc1*10*hs/bpba+vh-15)/ra
+							pos (analogxsh+((analog.i.3*(anagrran.(analog.i.0).(analoggr.i))-25*(anagrran.(analog.i.0).(analoggr.i)=2))*4+4*((analog.i.3=12)|(analog.i.3=37))*(anagrran.(analog.i.0).(analoggr.i)=2)-10)*analograte/100)/ra+(anaranfl=2)*vw/ra/2,(-hsrc1*10*hs/UNIT_MEASURE+vh-15)/ra
 							gcopy 152,44/ra*analog.i.0*2+44/ra,0,44/ra,200/ra
 						}
 					}
 					gmode 5,,,255
-					if((analog.i.3!=analog.i.4)&(analog.i.2<=bpba_32)){
+					if((analog.i.3!=analog.i.4)&(analog.i.2<=UNIT_MEASURE_32)){
 						// 直角(横棒)
 						stat1_=min((analog.i.3*(anagrran.(analog.i.0).(analoggr.i))-25*(anagrran.(analog.i.0).(analoggr.i)=2)+((analog.i.3=12)|(analog.i.3=37))*(anagrran.(analog.i.0).(analoggr.i)=2)),(analog.i.4*(anagrran.(analog.i.0).(analoggr.i))-25*(anagrran.(analog.i.0).(analoggr.i)=2)+((analog.i.4=12)|(analog.i.4=37))*(anagrran.(analog.i.0).(analoggr.i)=2)))*4+26
 						stat2_=max((analog.i.3*(anagrran.(analog.i.0).(analoggr.i))-25*(anagrran.(analog.i.0).(analoggr.i)=2)+((analog.i.3=12)|(analog.i.3=37))*(anagrran.(analog.i.0).(analoggr.i)=2)),(analog.i.4*(anagrran.(analog.i.0).(analoggr.i))-25*(anagrran.(analog.i.0).(analoggr.i)=2)+((analog.i.4=12)|(analog.i.4=37))*(anagrran.(analog.i.0).(analoggr.i)=2)))*4-21
 						sx1=stat1_,stat2_,stat2_,stat1_
-						sy1=-hsrc1*10*hs/bpba+vh-10,-hsrc1*10*hs/bpba+vh-10,-hsrc12*10*hs/bpba+vh-10,-hsrc12*10*hs/bpba+vh-10
+						sy1=-hsrc1*10*hs/UNIT_MEASURE+vh-10,-hsrc1*10*hs/UNIT_MEASURE+vh-10,-hsrc12*10*hs/UNIT_MEASURE+vh-10,-hsrc12*10*hs/UNIT_MEASURE+vh-10
 					}else{
 						sx1=(analog.i.3*(anagrran.(analog.i.0).(analoggr.i))-25*(anagrran.(analog.i.0).(analoggr.i)=2))*4+4*((analog.i.3=12)|(analog.i.3=37))*(anagrran.(analog.i.0).(analoggr.i)=2)-22,(analog.i.4*(anagrran.(analog.i.0).(analoggr.i))-25*(anagrran.(analog.i.0).(analoggr.i)=2))*4+4*((analog.i.4=12)|(analog.i.4=37))*(anagrran.(analog.i.0).(analoggr.i)=2)-22,(analog.i.4*(anagrran.(analog.i.0).(analoggr.i))-25*(anagrran.(analog.i.0).(analoggr.i)=2))*4+4*((analog.i.4=12)|(analog.i.4=37))*(anagrran.(analog.i.0).(analoggr.i)=2)+22,(analog.i.3*(anagrran.(analog.i.0).(analoggr.i))-25*(anagrran.(analog.i.0).(analoggr.i)=2))*4+4*((analog.i.3=12)|(analog.i.3=37))*(anagrran.(analog.i.0).(analoggr.i)=2)+22
-						sy1=-hsrc1*10*hs/bpba+vh-10,-hsrc12*10*hs/bpba+vh-10,-hsrc12*10*hs/bpba+vh-10,-hsrc1*10*hs/bpba+vh-10
+						sy1=-hsrc1*10*hs/UNIT_MEASURE+vh-10,-hsrc12*10*hs/UNIT_MEASURE+vh-10,-hsrc12*10*hs/UNIT_MEASURE+vh-10,-hsrc1*10*hs/UNIT_MEASURE+vh-10
 					}
 					sx1=analogxsh+round(double(sx1.0)*analograte/100)+10,analogxsh+round(double(sx1.1)*analograte/100)+10,analogxsh+round(double(sx1.2)*analograte/100)+10,analogxsh+round(double(sx1.3)*analograte/100)+10
 					sy1=sy1.0-5,sy1.1-5,sy1.2-5,sy1.3-5
@@ -7232,7 +7232,7 @@
 					gsel 5+163*(anaranfl=2)
 					gmode 5,,,255
 					sy2=(_sy2.0+1)*48-1,(_sy2.1+1)*48-1,(_sy2.2+1)*48-1,(_sy2.3+1)*48-1
-					if((analog.i.3!=analog.i.4)&(analog.i.2<=bpba_32)){
+					if((analog.i.3!=analog.i.4)&(analog.i.2<=UNIT_MEASURE_32)){
 						if(sy1.0/ra-sy1.2/ra>0){
 							// 直角(角)
 							if(chobufp.(analog.i.0*2+(analog.i.3<analog.i.4))!=sy1.0/ra-sy1.2/ra){
@@ -7297,7 +7297,7 @@
 						// 1…左上
 						// 2…右上
 						// 3…右下
-						if((analog.i.3=analog.i.4)|(analog.i.2>bpba_32)){
+						if((analog.i.3=analog.i.4)|(analog.i.2>UNIT_MEASURE_32)){
 							dim sx1_,2
 							if((sy1.1<0)&(sy1.1=sy1.2)&(sy1.1-sy1.0!=0)&(sy1.2-sy1.3!=0)){
 								sx1_.0=sy1.1*(sx1.0-sx1.1)/(sy1.1-sy1.0)+sx1.1
@@ -7334,10 +7334,10 @@
 					stat3=-1
 					gsel 5+163*(anaranfl=2)
 					f=analog.i.8
-					if((analog.i.3!=analog.i.4)&(analog.i.2<=bpba_32)&(f=1)){
-						hsrc2=-hsrc(analog.i.1+analog.i.2+bpba*2/32,-1)
+					if((analog.i.3!=analog.i.4)&(analog.i.2<=UNIT_MEASURE_32)&(f=1)){
+						hsrc2=-hsrc(analog.i.1+analog.i.2+UNIT_MEASURE*2/32,-1)
 						sx1=(analog.i.4*(anagrran.(analog.i.0).(analoggr.i))-25*(anagrran.(analog.i.0).(analoggr.i)=2))*4-24,(analog.i.4*(anagrran.(analog.i.0).(analoggr.i))-25*(anagrran.(analog.i.0).(analoggr.i)=2))*4-24,(analog.i.4*(anagrran.(analog.i.0).(analoggr.i))-25*(anagrran.(analog.i.0).(analoggr.i)=2))*4+24,(analog.i.4*(anagrran.(analog.i.0).(analoggr.i))-25*(anagrran.(analog.i.0).(analoggr.i)=2))*4+24
-						sy1=-hsrc12*10*hs/bpba+vh,hsrc2*10*hs/bpba+vh,hsrc2*10*hs/bpba+vh,-hsrc12*10*hs/bpba+vh
+						sy1=-hsrc12*10*hs/UNIT_MEASURE+vh,hsrc2*10*hs/UNIT_MEASURE+vh,hsrc2*10*hs/UNIT_MEASURE+vh,-hsrc12*10*hs/UNIT_MEASURE+vh
 						sx1=analogxsh+sx1.0*analograte/100+10,analogxsh+sx1.1*analograte/100+10,analogxsh+sx1.2*analograte/100+10,analogxsh+sx1.3*analograte/100+10
 						sy1=sy1.0-15,sy1.1-15,sy1.2-15,sy1.3-15
 						repeat 4
@@ -7948,7 +7948,7 @@
 			
 			; ゲージエフェクト
 			pos scrsize_w/2+round(erxsh1*scrsize_h/480)+int((34.0f*errate1)*scrsize_h/480),round(erysh1*scrsize_h/480)+round(126.0f*errate1*scrsize_h/480)+ceil(435.0f*errate1*scrsize_h/480)-ceil(435.0f*errate1*scrsize_h/480)*stat1/100
-			hgcopy_a tex_er_g_pattern,ceil(48.0f*errate1*scrsize_h/480)*2*(effratetype+1)+((effratetype<=0)&(iscourse=0))*((stat1>=70)*ceil(48.0f*errate1*scrsize_h/480))+((effratetype=1)|(iscourse=1))*((stat1>=30)*ceil(48.0f*errate1*scrsize_h/480)),ceil(435.0f*errate1*scrsize_h/480)*2*(((cnow-cnowstart)*2/3)\bpba)/bpba+ceil(435.0f*errate1*scrsize_h/480)-ceil(435.0f*errate1*scrsize_h/480)*stat1/100,ceil(48.0f*errate1*scrsize_h/480),ceil(435.0f*errate1*scrsize_h/480)*stat1/100,5,255
+			hgcopy_a tex_er_g_pattern,ceil(48.0f*errate1*scrsize_h/480)*2*(effratetype+1)+((effratetype<=0)&(iscourse=0))*((stat1>=70)*ceil(48.0f*errate1*scrsize_h/480))+((effratetype=1)|(iscourse=1))*((stat1>=30)*ceil(48.0f*errate1*scrsize_h/480)),ceil(435.0f*errate1*scrsize_h/480)*2*(((cnow-cnowstart)*2/3)\UNIT_MEASURE)/UNIT_MEASURE+ceil(435.0f*errate1*scrsize_h/480)-ceil(435.0f*errate1*scrsize_h/480)*stat1/100,ceil(48.0f*errate1*scrsize_h/480),ceil(435.0f*errate1*scrsize_h/480)*stat1/100,5,255
 			
 			; ゲージパーセント表示
 			pos scrsize_w/2+round(erxsh1*scrsize_h/480)+round(72.0f*errate1*scrsize_h/480),round(erysh1*scrsize_h/480)+round(127.0f*errate1*scrsize_h/480)+ceil(435.0f*errate1*scrsize_h/480)-ceil(435.0f*errate1*scrsize_h/480)*stat1/100-round(42.0f*errate1*scrsize_h/480/2)
@@ -8318,10 +8318,10 @@
 	b2=0
 	repeat beatlnum
 		if(cnt=beatlnum-1){
-			_cbcnt+=bpba*beatl.cnt.1/beatl.cnt.2*(b1-b2)
+			_cbcnt+=UNIT_MEASURE*beatl.cnt.1/beatl.cnt.2*(b1-b2)
 		}else{
-			_cbcnt+=bpba*beatl.cnt.1/beatl.cnt.2*min((beatl.(cnt+1).0-beatl.cnt.0)/(bpba*beatl.cnt.1/beatl.cnt.2),b1-b2)
-			b2+=min((beatl.(cnt+1).0-beatl.cnt.0)/(bpba*beatl.cnt.1/beatl.cnt.2),b1-b2)
+			_cbcnt+=UNIT_MEASURE*beatl.cnt.1/beatl.cnt.2*min((beatl.(cnt+1).0-beatl.cnt.0)/(UNIT_MEASURE*beatl.cnt.1/beatl.cnt.2),b1-b2)
+			b2+=min((beatl.(cnt+1).0-beatl.cnt.0)/(UNIT_MEASURE*beatl.cnt.1/beatl.cnt.2),b1-b2)
 		}
 		if(b1<=b2):break
 	loop
@@ -8338,8 +8338,8 @@
 				beatlfcnt=cnt+1
 			}
 		loop
-		if(cb+bpba*beatn/beatd>c1):break
-		cb+=bpba*beatn/beatd
+		if(cb+UNIT_MEASURE*beatn/beatd>c1):break
+		cb+=UNIT_MEASURE*beatn/beatd
 		cb2++
 	loop
 	return cb2
