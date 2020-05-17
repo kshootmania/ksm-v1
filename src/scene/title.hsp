@@ -3,14 +3,14 @@
 	gsel 0
 	chdir dir_default
 	chdir "./imgs"
-	if(stateinit=1){
+	if(is_scene_initial_frame=1){
 		JStickSearchID 0,joylist
 		length_joylist=stat
 		gosub *joyinit
 		if(imeget()=1):imeset 0
-		timestatestart=d3timer()
-		if(statep=st_gate):sdim glist,0
-		if((statep=st_option)&(imgrefresh=1)){
+		time_scene_start=d3timer()
+		if(prev_scene=SCENE_GATE):sdim glist,0
+		if((prev_scene=SCENE_OPTION)&(imgrefresh=1)){
 			gmode 0
 			color 0,0,0
 			pos 0,0
@@ -529,8 +529,8 @@
 					cnotesfile=dir_cmdline2
 					dirp=""
 					dir=""
-					stateinit=1
-					state=st_playing_
+					is_scene_initial_frame=1
+					scene=SCENE_BEFORE_PLAY
 					iscourse=1
 					dirvol=100
 					diroffset=0
@@ -541,8 +541,8 @@
 					cnotesfile=dir_cmdline2
 					dirp=""
 					dir=""
-					stateinit=1
-					state=st_playing_
+					is_scene_initial_frame=1
+					scene=SCENE_BEFORE_PLAY
 					iscourse=0
 					dirvol=100
 					diroffset=0
@@ -568,7 +568,7 @@
 		imgbufload_bg "standby.jpg",27,"image/jpeg",1
 
 		escstatp=1
-		if(statep!=st_pass){
+		if(prev_scene!=SCENE_IR_SIGN_IN){
 			titlebgmid=BASS_StreamCreateFile(0,dir_default+"\\se\\title_bgm.ogg",0,0,0,0,BASS_SAMPLE_LOOP)
 			BASS_ChannelSetPosition_ms titlebgmid,0
 			BASS_ChannelSetAttribute titlebgmid,2,double(mastervol)/100
@@ -586,7 +586,7 @@
 		onkey 1
 	}else:onkey 0*/
 	kp1=1 : kp2=1
-	timestatestart=d3timer()
+	time_scene_start=d3timer()
 	repeat
 		redraw 0
 		gosub *getjoystat
@@ -624,7 +624,7 @@
 					//hgsetreq SYSREQ_DEFTIMER,1
 					//hgsetreq SYSREQ_FPUPRESERVE,1
 					blackout 500
-					state=st_pass
+					scene=SCENE_IR_SIGN_IN
 	
 					// É^ÉCÉgÉãBGMâï˙(IRé¿ëïéûÇ…çÌèú)
 					//BASS_StreamFree titlebgmid
@@ -633,17 +633,17 @@
 					BASS_ChannelSetAttribute stat1,2,double(mastervol)/100
 					BASS_ChannelPlay stat1
 					blackout 500
-					stateinit=1
-					state=st_option
+					is_scene_initial_frame=1
+					scene=SCENE_OPTION
 					BASS_StreamFree titlebgmid
 				}else:if(selnow=2){
 					stat1=BASS_SampleGetChannel(titleenterid,0)
 					BASS_ChannelSetAttribute stat1,2,double(mastervol)/100
 					BASS_ChannelPlay stat1
 					blackout 500
-					stateinit=1
+					is_scene_initial_frame=1
 					ginitfl=0
-					state=st_gate
+					scene=SCENE_GATE
 					BASS_StreamFree titlebgmid
 				}else{
 					stat1=BASS_SampleGetChannel(titleenterid,0)
@@ -698,7 +698,7 @@
 		if(selnow<0){
 			selnow=0
 		}
-		timenow=d3timer()-timestatestart
+		timenow=d3timer()-time_scene_start
 		if(cnt>0){
 			curpos=(curpos*max(30-(timenow-timenowp),0)+double(selnow)*min(timenow-timenowp,30))/30
 		}

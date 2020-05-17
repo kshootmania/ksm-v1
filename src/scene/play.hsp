@@ -9,7 +9,7 @@
 		if(stat=0){
 			dialog lang.2.13/*"指定された譜面ファイルが見つかりません。"*/
 			chdir dir_default+"\\songs"
-			state=st_select
+			scene=SCENE_SELECT
 			return
 		}
 		chdir csongdir
@@ -348,7 +348,7 @@
 		dialog lang.2.13/*"指定された譜面ファイルが見つかりません。"*/
 		if(iscmdline=1):end
 		chdir dir_default+"\\songs"
-		state=st_select
+		scene=SCENE_SELECT
 		return
 	}
 
@@ -1490,7 +1490,7 @@
 			BASS_ChannelSlideAttribute selenterid,2,0.0,250
 			chdir dir_default+"\\songs"
 			refreshsonglistoff=1
-			state=st_select
+			scene=SCENE_SELECT
 		}else{
 			BASS_ChannelSlideAttribute selenterid,2,0.0,250
 			endfl2=0
@@ -3462,7 +3462,7 @@
 	loop
 	dim kar,1
 	if(gaugemax<=0):gaugemax=1
-	stateinit=0
+	is_scene_initial_frame=0
 	dim notefcnt,6
 	dim analogfcnt,2
 	dim jfcnt,6
@@ -3877,7 +3877,7 @@
 	if (CreateGameSystem(cnotesfile, double(t_moex), varptr(game_system)) == 0) {
 		dialog lang.2.5/*"譜面データの読み込み中にエラーが発生しました。"*/
 		chdir dir_default+"\\songs"
-		state=st_select
+		scene=SCENE_SELECT
 		return // CreateGameSystemでfalseが返された場合、DestroyGameSystemを明示的に呼ぶ必要はない
 	}
 
@@ -3917,7 +3917,7 @@
 		}
 		t=t_mo+stat1
 		t2=t
-		if(cnt=0):timestatestart=d3timer()
+		if(cnt=0):time_scene_start=d3timer()
 		if(output=0){
 			hggettime at,0
 			if(mfl=0){
@@ -4297,7 +4297,7 @@
 			mod_lane_s=-1
 			mod_judgel=-1
 			if((stat1=1)&(ginfo2()=0)&(autodemo>=1)):autodemo=-1
-			state=st_result
+			scene=SCENE_RESULT
 			hgreset
 			foreach mid
 				BASS_StreamFree mid.cnt

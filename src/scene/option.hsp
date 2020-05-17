@@ -1,6 +1,6 @@
 #deffunc on_update_option
 	keshuoff=0
-	if(stateinit=1){
+	if(is_scene_initial_frame=1){
 		JStickSearchID 0,joylist
 		length_joylist=stat
 		chdir dir_default+"\\imgs"
@@ -54,15 +54,15 @@
 		selnow=0
 		keyp=2
 		keystat5p=1
-		stateinit=0
-		timestatestart=d3timer()
+		is_scene_initial_frame=0
+		time_scene_start=d3timer()
 		onkey gosub *confkeshu
 		BASS_ChannelSetPosition_ms optionbgmid,0
 		BASS_ChannelSetAttribute optionbgmid,2,double(mastervol)/100
 		BASS_ChannelPlay optionbgmid
 	}
 	gosub *getjoystat
-	timenow=d3timer()-timestatestart
+	timenow=d3timer()-time_scene_start
 	gsel 0
 	pos 0,0
 	color 0,0,0
@@ -1070,8 +1070,8 @@
 			gsel 0
 			pos 0,0
 			gcopy 28,0,0,scrsize_w,scrsize_h
-			statep=st_option
-			state=st_standby
+			prev_scene=SCENE_OPTION
+			scene=SCENE_TITLE
 			dim bufdel,1
 			bufdel=36,132,136,137,138,139,141
 			foreach bufdel
@@ -1079,7 +1079,7 @@
 			loop
 			alDeleteImage 81
 			standbyselp=1
-			stateinit=1
+			is_scene_initial_frame=1
 			gosub *saveconfig
 			if(fullscr=1){
 				stat1=fullscrsize.0

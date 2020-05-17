@@ -3,8 +3,8 @@
 	dialog "This version does not support INPUT GATE."
 	wait 100
 	chdir dir_stat
-	statep=st_gate
-	state=st_standby
+	prev_scene=SCENE_GATE
+	scene=SCENE_TITLE
 	standbyselp=2
-	stateinit=1
+	is_scene_initial_frame=1
 	return

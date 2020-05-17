@@ -7,16 +7,17 @@
 
 #packopt name "kshootmania"
 
-#define st_standby		0
-#define st_plsel		1
-#define st_pass			2
-#define st_select		3
-#define st_playing_		4
-#define st_playing		5
-#define st_result		6
-#define st_courseresult	7
-#define st_option		8
-#define st_gate			9
+// シーンの列挙子
+#enum SCENE_TITLE = 0
+#enum SCENE_IR_SIGN_IN
+#enum SCENE_SELECT
+#enum SCENE_BEFORE_PLAY // TODO: これはフレーム描画を持つものではないのでシーンから除外
+#enum SCENE_PLAY
+#enum SCENE_RESULT
+#enum SCENE_COURSE_RESULT
+#enum SCENE_OPTION
+#enum SCENE_GATE
+
 #define mode_on			0
 #define mode_off		1
 #define mode_auto		2
@@ -323,8 +324,8 @@ if(hosts=""){
 
 oncmd gosub *alt, 0x0105
 
-state=0
-stateinit=1
+scene=0
+is_scene_initial_frame=1
 timestart=d3timer()
 
 confkey=-1
@@ -1183,7 +1184,7 @@ mod_judgel=-1
 
 chdir "../songs"
 
-statep=st_option
+prev_scene=SCENE_OPTION
 imgrefresh=1
 keshuoff=1
 dim ke,16
@@ -1233,14 +1234,14 @@ if(dir_cmdline2!=""){
 
 ; mainloop
 repeat
-	switch state
-	case st_standby
+	switch scene
+	case SCENE_TITLE
 		start_title
 		swbreak
-	case st_select
+	case SCENE_SELECT
 		start_select
 		swbreak
-	case st_playing_
+	case SCENE_BEFORE_PLAY
 		courselist=""
 		courselistnum=0
 		coursenow=0
@@ -1298,22 +1299,22 @@ repeat
 			repeat courselistnum
 				course_gr.cnt=-1
 			loop
-			state=st_playing
+			scene=SCENE_PLAY
 		}else:if(f=2){
 			dialog lang.2.12/*"このコースをプレイするには、最新バージョンのK-Shoot MANIAが必要です。"*/
 			refreshsonglistoff=1
-			state=st_select
+			scene=SCENE_SELECT
 		}else:if(f=0){
 			dialog lang.2.13/*"指定された譜面ファイルが見つかりません。"*/
 			refreshsonglistoff=1
-			state=st_select
+			scene=SCENE_SELECT
 		}else{
 			dialog lang.2.11/*"指定された譜面ファイルが見つかりません。"*/
 			refreshsonglistoff=1
-			state=st_select
+			scene=SCENE_SELECT
 		}
 		swbreak
-	case st_playing
+	case SCENE_PLAY
 		if((courseend!=1)&(cmdline_from=0)){
 			whiteout 250
 		}
@@ -1333,7 +1334,7 @@ repeat
 				if(instr(stat2,0,"./")+instr(stat2,0,".\\")>-2){
 					dialog lang.2.11/*"指定された譜面ファイルが見つかりません。"*/
 					chdir dir_default+"\\songs"
-					state=st_select
+					scene=SCENE_SELECT
 					continue
 				}
 				exist dir_default+"\\songs\\"+stat2
@@ -1364,30 +1365,30 @@ repeat
 		redraw 0
 		start_play
 		swbreak
-	case st_result
+	case SCENE_RESULT
 		on_update_result
 		swbreak
-	case st_courseresult
+	case SCENE_COURSE_RESULT
 		on_update_course_result
 		swbreak
-	case st_option
+	case SCENE_OPTION
 		on_update_option
 		swbreak
-	case st_gate
+	case SCENE_GATE
 		on_update_gate
 		swbreak
-	case st_pass
+	case SCENE_IR_SIGN_IN
 		gsel 0
 		selnow=standbyselp
 		ddim curpos,1
 		curpos=double(standbyselp)
 		onkey gosub *keshu
 		kp1=1 : kp2=1
-		timestatestart=d3timer()
+		time_scene_start=d3timer()
 		repeat
 			redraw 0
 			gosub *getjoystat
-			timenow=d3timer()-timestatestart
+			timenow=d3timer()-time_scene_start
 	
 			// 背景表示
 			gsel 0
@@ -1411,9 +1412,9 @@ repeat
 			if(ginfo2()=0){
 				esc_key=getesckey()
 				if((esc_key=1)&(escstatp=0)&(ginfo2()=0)){
-					stateinit=1
-					statep=st_pass
-					state=st_standby
+					is_scene_initial_frame=1
+					prev_scene=SCENE_IR_SIGN_IN
+					scene=SCENE_TITLE
 					standbyselp=0
 					//BASS_ChannelSlideAttribute titlebgmid,2,0.0,100
 					blackout 500
@@ -1437,9 +1438,9 @@ repeat
 					gsel 0,1
 					blackout 500
 					redraw 0
-					stateinit=1
+					is_scene_initial_frame=1
 					refreshsonglistoff=0
-					state=st_select
+					scene=SCENE_SELECT
 					BASS_StreamFree titlebgmid
 					break
 				}
@@ -1507,14 +1508,14 @@ repeat
 		confkey=-1
 		gsel 0
 		redraw 1
-		await (state!=st_gate)*7
+		await (scene!=SCENE_GATE)*7
 		gosub *volactive
-		if((state!=st_gate)&((iscourse!=1)&(autodemo=0))){
+		if((scene!=SCENE_GATE)&((iscourse!=1)&(autodemo=0))){
 			while (ginfo2()!=0)
 				await 100
 			wend
 		}
-		if((analoginput=1)&(state!=st_option)){
+		if((analoginput=1)&(scene!=SCENE_OPTION)){
 			keshucnt=0:onkey 1
 		}
 	}
@@ -1792,7 +1793,7 @@ end
 	return
 
 *confkeshu
-	if((state=st_option)&(lparam>>30=0)){
+	if((scene=SCENE_OPTION)&(lparam>>30=0)){
 		confkey=wparam
 	}
 	return
@@ -1800,7 +1801,7 @@ end
 *keshu
 	if(ginfo2()!=0):return
 	getkey shift_key,16
-	if(state=st_select){
+	if(scene=SCENE_SELECT){
 		if((shift_key=1)&(wparam!=16)&(iparam>='A')&(iparam<='Z')){
 			alphabetjump=iparam
 			return
@@ -1810,7 +1811,7 @@ end
 	if(analoginput!=1):return
 	if(keshucnt<4){
 		//cnt3=cnt
-		if((state=st_select)&(keshucnt<3)){
+		if((scene=SCENE_SELECT)&(keshucnt<3)){
 			if(analoginput=1){
 				if((wparam/*ke.cnt*/=key.(6+analogsw*2))&(timenow-levminustp>50)&(levnow>0)&(keshukeyp=key.(6+2*analogsw))&(keshukeypp=key.(6+2*analogsw))){
 					stat3=0
@@ -2048,7 +2049,7 @@ end
 				}
 			}
 		}
-		if((state=st_playing)&(plfl=0)){
+		if((scene=SCENE_PLAY)&(plfl=0)){
 			getkey enter_key2,13
 			if((analoginput=1)&(enter_key2=1)){
 				repeat 2
@@ -2088,7 +2089,7 @@ end
 				loop
 			}
 		}
-		if((state=st_playing)&(plfl=1)){
+		if((scene=SCENE_PLAY)&(plfl=1)){
 			if((analoginput=1)&(enter_key=1)){
 				repeat 2
 					cnt0=cnt

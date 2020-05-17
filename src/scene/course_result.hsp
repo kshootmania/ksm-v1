@@ -1,6 +1,6 @@
 #deffunc on_update_course_result
 	keshuoff=0
-	timestatestart=d3timer()
+	time_scene_start=d3timer()
 	stat_h=128*450*2*scrsize_h/480/1532+4*(courselistnum>=4)*450*2*scrsize_h/480/1532+36*(courselistnum<4)*450*2*scrsize_h/480/1532
 	if((auto=1)|(adjmode=1)){
 		refreshsonglistoff=1
@@ -8,7 +8,7 @@
 		//vload_get minfo
 		//vload_get minfostr
 		//vload_end
-		state=st_select
+		scene=SCENE_SELECT
 		gsel 0
 		gmode 0
 		color 255,255,255
@@ -217,7 +217,7 @@
 			pos 0,0
 			boxf
 			redraw 1
-			if(t-timestatestart>200):break
+			if(t-time_scene_start>200):break
 			gosub *volactive
 			await 7
 		loop
@@ -369,8 +369,8 @@
 			notesave _fname
 			chdir dir_stat1
 		}
-		timestatestart=d3timer()
-		diffstartt=timestatestart
+		time_scene_start=d3timer()
+		diffstartt=time_scene_start
 		// ハイスコア更新の通知
 		if(diff>0){
 			alCreateImage 37,320*450*2*scrsize_h/480/1532,90*450*2*scrsize_h/480/1532
@@ -398,13 +398,13 @@
 				alStretchImageToImage 10,37,0,120*450*scrsize_h/480/1532*stat1,136*450*scrsize_h/480/1532,120*450*scrsize_h/480/1532,192*450*2*scrsize_h/480/1532+28*450*2*scrsize_h/480/1532*cnt,44*450*2*scrsize_h/480/1532,25*450*2*scrsize_h/480/1532,24*450*2*scrsize_h/480/1532
 			loop
 		}
-		diffendt=timestatestart+3000+2000*(completedlist!="")
+		diffendt=time_scene_start+3000+2000*(completedlist!="")
 		stat12p=1
 		BASS_ChannelSetPosition_ms courseresultbgmid,0
 		BASS_ChannelSetAttribute courseresultbgmid,2,double(mastervol)/100
 		BASS_ChannelPlay courseresultbgmid
 		scrollposnow=0
-		scrollt=timestatestart
+		scrollt=time_scene_start
 		up_keyp=0
 		down_keyp=0
 		// Twitter連携
@@ -464,12 +464,12 @@
 			gcopy 29,0,0,scrsize_w,scrsize_h
 			mxy=ginfo_mx,ginfo_my
 			ScreenToClient hwnd, varptr(mxy)
-			if(t-timestatestart>=768){
+			if(t-time_scene_start>=768){
 				getkey tweet_key,122 // F11
 				tweet_key=tweet_key|getjoykeystat(13)
 			}else:tweet_key=0
 			getkey click_key,1
-			if((t-timestatestart>=768)&(mxy.0<scrsize_w)&(mousex>scrsize_w-getsize(90))&(mxy.1>=0)&(mousey<getsize(24))&(tweetfl=0)&(click_key=1)&(click_keyp=0)&(ginfo2()=0)){
+			if((t-time_scene_start>=768)&(mxy.0<scrsize_w)&(mousex>scrsize_w-getsize(90))&(mxy.1>=0)&(mousey<getsize(24))&(tweetfl=0)&(click_key=1)&(click_keyp=0)&(ginfo2()=0)){
 				tweet_key=1
 			}
 			click_keyp=click_key
@@ -491,7 +491,7 @@
 					//vload_get minfo
 					//vload_get minfostr
 					//vload_end
-					state=st_select
+					scene=SCENE_SELECT
 					gsel 0
 					//color 255,255,255
 					//font lang.0.1,getsize(18)
@@ -618,9 +618,9 @@
 			color 128,192,96
 			font "MS Gothic",getsize(12)
 			mes stat3*/
-			if(t-timestatestart<768){
+			if(t-time_scene_start<768){
 				color 255,255,255
-				gmode 3,,,256-256*(t-timestatestart)/768
+				gmode 3,,,256-256*(t-time_scene_start)/768
 				gsquare -1,sx_a,sy_a
 			}
 			redraw 1

@@ -1,6 +1,6 @@
 #deffunc on_update_result
 	keshuoff=0
-	timestatestart=d3timer()
+	time_scene_start=d3timer()
 	ir_popup_init
 	if(cmdline_from>0):end
 	if((auto=1)|(adjmode=1)){
@@ -12,15 +12,15 @@
 			courseerrorn+=errorn
 			if((coursenow>=courselistnum)|(courseendfl=1)|(isendbyesckey=1)){
 				refreshsonglistoff=1
-				state=st_select
+				scene=SCENE_SELECT
 				courseendfl=0
 			}else{
-				state=st_playing
+				scene=SCENE_PLAY
 			}
 		}else{
 			autodemo=0
 			refreshsonglistoff=1
-			state=st_select
+			scene=SCENE_SELECT
 		}
 		gsel 0
 		gmode 0
@@ -70,7 +70,7 @@
 			pos 0,0
 			boxf
 			redraw 1
-			if(t-timestatestart>200):break
+			if(t-time_scene_start>200):break
 			gosub *volactive
 			await 7
 		loop
@@ -217,7 +217,7 @@
 			stat1_=(totalscore2>=7000000)+(totalscore2>=8000000)+(totalscore2>=8900000)+(totalscore2>=9400000)+(totalscore2>=9800000)
 			if(tochu=1):stat1_=0
 			alCopyImageToImage 33,32,430*450*2*scrsize_h/480/1532,286*450*2*scrsize_h/480/1532,100*450*2*scrsize_h/480/1532,100*450*2*scrsize_h/480/1532,0,100*450*2*scrsize_h/480/1532*stat1_
-			timestatestart=d3timer()
+			time_scene_start=d3timer()
 			// パーセンテージ表示
 			if((effratetype<=0)&(iscourse=0)){
 				stat2=100*gauge/gaugemax
@@ -472,8 +472,8 @@
 					// Note: ソースコード公開用に条件解禁処理を削除
 				}
 			}
-			timestatestart=d3timer()
-			diffstartt=timestatestart
+			time_scene_start=d3timer()
+			diffstartt=time_scene_start
 			// 解禁条件達成の通知
 			if(completedlist!=""){
 				alCreateImage 96,getsize(300),getsize(169)
@@ -482,9 +482,9 @@
 				alColor 0,0,0
 				alFont lang.4.10,getsize(19)
 				alDrawText lang.2.70/*"インプット条件を達成！"*/+"\n"+completedlist,getsize(20),getsize(20),(300-20*2)*scrsize_h/480,(169-20*2)*scrsize_h/480,1,1
-				diffstartt=timestatestart+2500
+				diffstartt=time_scene_start+2500
 			}
-			compendt=timestatestart+2500
+			compendt=time_scene_start+2500
 			// ハイスコア更新の通知
 			if(diff>0){
 				alCreateImage 37,420*450*2*scrsize_h/480/1532,90*450*2*scrsize_h/480/1532
@@ -500,7 +500,7 @@
 					alStretchImageToImage 10,37,0,120*450*scrsize_h/480/1532*stat1,136*450*scrsize_h/480/1532,120*450*scrsize_h/480/1532,83*450*2*scrsize_h/480/1532+38*450*2*scrsize_h/480/1532*cnt,38*450*2*scrsize_h/480/1532,30*450*2*scrsize_h/480/1532,30*450*2*scrsize_h/480/1532
 				loop
 			}
-			diffendt=timestatestart+3000+2000*(completedlist!="")
+			diffendt=time_scene_start+3000+2000*(completedlist!="")
 			stat12p=1
 			BASS_ChannelSetPosition_ms resultbgmid,0
 			BASS_ChannelSetAttribute resultbgmid,2,double(mastervol)/100
@@ -617,12 +617,12 @@
 			}
 			mxy=ginfo_mx,ginfo_my
 			ScreenToClient hwnd, varptr(mxy)
-			if(t-timestatestart>=768){
+			if(t-time_scene_start>=768){
 				getkey tweet_key,122 // F11
 				tweet_key=tweet_key|getjoykeystat(13)
 			}else:tweet_key=0
 			getkey click_key,1
-			if((t-timestatestart>=768)&(mxy.0<scrsize_w)&(mousex>scrsize_w-getsize(90))&(mxy.1>=0)&(mousey<getsize(24))&(tweetfl=0)&(click_key=1)&(click_keyp=0)&(ginfo2()=0)){
+			if((t-time_scene_start>=768)&(mxy.0<scrsize_w)&(mousex>scrsize_w-getsize(90))&(mxy.1>=0)&(mousey<getsize(24))&(tweetfl=0)&(click_key=1)&(click_keyp=0)&(ginfo2()=0)){
 				tweet_key=1
 			}
 			click_keyp=click_key
@@ -655,9 +655,9 @@
 							//vload_get minfo
 							//vload_get minfostr
 							//vload_end
-							state=st_courseresult
+							scene=SCENE_COURSE_RESULT
 						}else{
-							state=st_playing
+							scene=SCENE_PLAY
 						}
 					}else{
 						refreshsonglistoff=1
@@ -665,7 +665,7 @@
 						//vload_get minfo
 						//vload_get minfostr
 						//vload_end
-						state=st_select
+						scene=SCENE_SELECT
 					}
 					if(courseend!=1){
 						gsel 0
@@ -724,17 +724,17 @@
 				alCopyImageToScreen 37,0,getsize(198)+(scrsize_w-getsize(640))/2,getsize(140),420*450*2*scrsize_h/480/1532,90*450*2*scrsize_h/480/1532,0,0
 				alCopyModeAlpha 1.0
 			}
-			if((completedlist!="")&(t-timestatestart>350)){
+			if((completedlist!="")&(t-time_scene_start>350)){
 				if((t>compendt)&(t<=compendt+150)){
-					if(t-timestatestart-350<=150){
-						alCopyModeAlpha 1.0-double(t-compendt)/150*double(t-timestatestart-350)/150
+					if(t-time_scene_start-350<=150){
+						alCopyModeAlpha 1.0-double(t-compendt)/150*double(t-time_scene_start-350)/150
 					}else{
 						alCopyModeAlpha 1.0-double(t-compendt)/150
 					}
 				}else:if(t>compendt+150){
 					alCopyModeAlpha 0.0
-				}else:if(t-timestatestart-350<=150){
-					alCopyModeAlpha 1.0*double(t-timestatestart-350)/150
+				}else:if(t-time_scene_start-350<=150){
+					alCopyModeAlpha 1.0*double(t-time_scene_start-350)/150
 				}
 				alCopyImageToScreen 96,0,scrsize_w/2-getsize(300)/2,scrsize_h/2-getsize(169)/2
 				alCopyModeAlpha 1.0
@@ -815,14 +815,14 @@
 			if((mxy.0<scrsize_w)&(mousex>scrsize_w-getsize(90))&(mxy.1>=0)&(mousey<getsize(24))&(tweetfl=0)&(stat12p=0)){
 				alCopyImageToScreen IMG_RESULT_TWEETBTN,0,scrsize_w-getsize(90),0,getsize(90),getsize(24)
 			}
-			if(tweet_notifyt+1200>t-timestatestart){
-				alCopyModeAlpha 1.0-double(max(t-timestatestart-tweet_notifyt,800)-800)/400
+			if(tweet_notifyt+1200>t-time_scene_start){
+				alCopyModeAlpha 1.0-double(max(t-time_scene_start-tweet_notifyt,800)-800)/400
 				alCopyImageToScreen IMG_RESULT_TWEETBTN,0,scrsize_w-getsize(90),0,getsize(90),getsize(24),0,getsize(24)*tweet_notifytype
 				alCopyModeAlpha 1.0
 			}
-			if(t-timestatestart<768){
+			if(t-time_scene_start<768){
 				color 255,255,255
-				gmode 3,,,256-256*(t-timestatestart)/768
+				gmode 3,,,256-256*(t-time_scene_start)/768
 				gsquare -1,sx_a,sy_a
 			}
 			ir_popup_draw

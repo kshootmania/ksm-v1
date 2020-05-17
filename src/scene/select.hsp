@@ -146,10 +146,10 @@
 		if(hidem=1):mouse -1,-1
 		mouse defx,defy
 	}
-	timestatestart=d3timer()
+	time_scene_start=d3timer()
 	repeat
 		gosub *getjoystat
-		timenow=d3timer()-timestatestart
+		timenow=d3timer()-time_scene_start
 		if((ginfo2()!=0)|(dialognow!=0)){
 			escstatp=1
 		}else{
@@ -175,9 +175,9 @@
 				stat2a=0
 			}else:if((esc_key=1)&(escstatp=0)&(ginfo2()=0)){
 				BASS_StreamFree mpid
-				stateinit=1
-				statep=st_select
-				state=st_standby
+				is_scene_initial_frame=1
+				prev_scene=SCENE_SELECT
+				scene=SCENE_TITLE
 				hgbye
 				standbyselp=0
 				selp=selnow
@@ -1588,8 +1588,8 @@
 				dirp=dir
 				dir=minfostr.selnow.levm.0
 				selp=selnow
-				stateinit=1
-				state=st_playing_
+				is_scene_initial_frame=1
+				scene=SCENE_BEFORE_PLAY
 				iscourse=1
 				dirvol=100
 				diroffset=0
@@ -1639,8 +1639,8 @@
 				csongdir=minfostr.selnow.levm.0
 				dirp=dir
 				selp=selnow
-				stateinit=1
-				state=st_playing_
+				is_scene_initial_frame=1
+				scene=SCENE_BEFORE_PLAY
 				iscourse=0
 				dirvol=100
 				diroffset=0
