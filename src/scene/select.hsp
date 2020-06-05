@@ -2954,7 +2954,12 @@
 			exist dir_default+"\\cache\\songs\\"+dir+"_abc.cacheinfo"
 			if (strsize >= 0) {
 				vload dir_default+"\\cache\\songs\\"+dir+"_abc.cacheinfo"
-				f = KSHLib_IsDirectoryUpdated(dir_default+"\\songs\\"+dir, lastUpdated, dirHash)
+				if (dircache = 2) {
+					f = 0
+				} else {
+					f = KSHLib_IsDirectoryUpdated(dir_default+"\\songs\\"+dir, lastUpdated, dirHash)
+				}
+
 				exist dir_default+"\\cache\\songs\\"+dir+"_abc.cache"
 				if (strsize = -1) {
 					f = 1
@@ -3195,7 +3200,7 @@
 					minfostr.mcnt.(minfonow.0).cnt=minfonowstr.cnt
 				loop
 			loop
-			if ((dircache = 1) && (dirtype = 0)) {
+			if ((dircache != 0) && (dirtype = 0)) {
 				vsave_start
 				vsave_put lastUpdated
 				vsave_put dirHash
@@ -3217,7 +3222,11 @@
 			if (strsize >= 0) {
 				vload dir_default+"\\cache\\songs\\"+dir+"_lv.cacheinfo"
 				dirHashp=dirHash
-				f = KSHLib_IsDirectoryUpdated(dir_default+"\\songs\\"+dir, lastUpdated, dirHash)
+				if (dircache = 2) {
+					f = 0
+				} else {
+					f = KSHLib_IsDirectoryUpdated(dir_default+"\\songs\\"+dir, lastUpdated, dirHash)
+				}
 				exist dir_default+"\\cache\\songs\\"+dir+"_lv.cache"
 				if (strsize = -1) {
 					f = 1
@@ -3493,7 +3502,7 @@
 					}
 				}
 			loop
-			if ((dircache = 1) && (dirtype = 0)) {
+			if ((dircache != 0) && (dirtype = 0)) {
 				vsave_start
 				vsave_put lastUpdated
 				vsave_put dirHash
