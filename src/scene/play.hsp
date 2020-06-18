@@ -96,6 +96,7 @@
 	dim judgel,6,judgelmax,2
 	dim judgelnext,6
 	notenum=0
+	notesejnum=0
 	notefxnum=0
 	shljnum=0
 	longjnum=0
@@ -2035,7 +2036,12 @@
 			}
 			if(HashCheckKey(se_ids,_stat1)=0){
 				// まだ読み込んだことのない効果音の場合
-				se_ids(_stat1)=BASS_SampleLoad(0,_stat1,0,0,0,10,0)
+				pKeySound = 0
+				if (CreateKeySound(_stat1, 10, varptr(pKeySound))) {
+					se_ids(_stat1) = pKeySound
+				} else {
+					dialog "Error: An error occurred while loading sound \"" + _stat1 + "\""
+				}
 			}
 			if(headcmp(d.cnt,8,"fx-l_se=")){
 				next_se.0=_stat1
@@ -2454,7 +2460,7 @@
 						notese.notenum=notesejnum
 						notesej.notesejnum.0=notenum // ノートSEの元オブジェクト番号
 						notesej.notesejnum.1=0 // ノートSEの判定(0/1)
-						notesej.notesejnum.2=se_ids(next_se.lcnt) // 再生するSampleのID
+						notesej.notesejnum.2=se_ids(next_se.lcnt) // 再生するKeySoundへのポインタ
 						notesej.notesejnum.3=next_se_vol.lcnt // 再生音量(%)
 						notesejnum++
 					}
@@ -4307,8 +4313,8 @@
 				KSHLib_SwitchAudioFree cnt
 			loop
 			foreach se_ids_keys
-		  		if(se_ids_keys(cnt)==""):continue
-				BASS_SampleFree se_ids_values.cnt
+		  		if(se_ids_keys(cnt)=""):continue
+				DestroyKeySound se_ids_values.cnt
 			loop
 			DestroyGameSystem game_system
 			game_system = 0
@@ -5829,9 +5835,7 @@
 			if((note.(notesej.cnt.0).2=0)&(notesej.cnt.1!=2)&(((auto_note_se=0)&&(notesej.cnt.1=1))|(((note.(notesej.cnt.0).0<4)&(shortmode=mode_auto))|((note.(notesej.cnt.0).0>=4)&(longmode=mode_auto)))|(auto_note_se!=0))){
 				if(note.(notesej.cnt.0).3>=t-500){
 					if(note.(notesej.cnt.0).3<=t+30){
-						stat2=BASS_SampleGetChannel(notesej.cnt.2,0)
-						BASS_ChannelSetAttribute stat2,2,double(mastervol)/100*dirvol/100*notesej.cnt.3/100
-						BASS_ChannelPlay stat2
+						PlayKeySound notesej.cnt.2, double(mastervol)/100*dirvol/100*notesej.cnt.3/100
 						notesej.cnt.1=2
 					}else{
 						break

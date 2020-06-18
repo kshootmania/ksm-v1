@@ -3,6 +3,9 @@
 #func DestroyGameSystem "DestroyGameSystem" int
 #func UpdateGameSystem "UpdateGameSystem" int, double
 #func GetCurrentCamValue_ "GetCurrentCamValue" int, int, var
+#cfunc CreateKeySound "CreateKeySound" sptr, int, int
+#func DestroyKeySound "DestroyKeySound" int
+#func PlayKeySound "PlayKeySound" int, double
 
 #enum CAM_ZOOM_TOP = 0
 #enum CAM_ZOOM_BOTTOM
