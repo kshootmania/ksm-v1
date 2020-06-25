@@ -2826,19 +2826,20 @@
 				sortget stat3,cnt
 				notesel filelistdir
 				noteget sndir,stat3
-				chdir dir_default+"\\songs\\"+dir+"\\"+sndir
-				dirlist stat1,"*.ksh",1
-				notesel stat1
-				if(notemax=0){
-					filelistsubdir+=sndir+"\n"
+				if (safeChdirC(dir_default + "\\songs\\" + dir + "\\" + sndir)) {
+					dirlist stat1,"*.ksh",1
+					notesel stat1
+					if(notemax=0){
+						filelistsubdir+=sndir+"\n"
+					}
+					repeat notemax
+						noteget stat2,cnt
+						filelist+=dir_cur+"\\"+stat2+"\n"
+						fvol.filelistnum=dirvol
+						foffset.filelistnum=diroffset
+						filelistnum++
+					loop
 				}
-				repeat notemax
-					noteget stat2,cnt
-					filelist+=dir_cur+"\\"+stat2+"\n"
-					fvol.filelistnum=dirvol
-					foffset.filelistnum=diroffset
-					filelistnum++
-				loop
 			loop
 			filelistsub_start=filelistnum
 			filelistsubdir2=strlowerf(filelistsubdir)  // É\Å[ÉgçœÇ›(è¨ï∂éö)
