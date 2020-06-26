@@ -90,7 +90,13 @@
 #define UNKNOWN			$200 ; HSPのインプットボックスに設定されていたEXスタイルの値
 #define  WM_SETFONT    0x0030
 
-//#include "user32.as"
+#include "src/ksmcore.as"
+
+#include "src/key_sound.as"
+
+#define FS_UTILS_REPLACE_CHDIR_WITH_SAFE_CHDIR
+#include "src/filesystem_utils.as"
+
 #include "d3m.hsp"
 #include "third_party/a2d.hsp"
 #include "third_party/bitmap.as"
@@ -98,9 +104,6 @@
 #include "third_party/mod_string.hsp"
 #include "third_party/gm_crlf.hsp"
 #include "third_party/alib_hash.as"
-
-#define ctype se_ids(%1) HashElem( se_ids, %1 )
-HashInitInt se_ids
 
 //#include "hgimg3.as"
 #include "llmod3/llmod3.hsp"
@@ -260,6 +263,7 @@ HashInitInt se_ids
 #define TARGET_STOP 14
 
 #define atitle "K-Shoot Editor v1.71beta"
+#const CURRENT_KSH_VERSION 171
 
 // 1小節あたりのカウント値
 #define UNIT_MEASURE	192
@@ -385,14 +389,19 @@ HashInitInt se_ids
 
 dir_default=dir_cur
 
+// 各種モジュールの初期化
+initKeySoundModule dir_default
+
 sdim _kaigyobuf,768
 sdim _kaigyobuf2,768
 
 // 変数の初期化
 dim note,131072,6
 sdim notesefname,256,131072
-HashClear se_ids
-gosub *loaddefaultse
+
+clearKeySoundLibrary
+loadKeySoundPresetsToLibrary CURRENT_KSH_VERSION
+
 dim analog,131072,6
 dim spin,131072,6
 dim tilt,131072,3
@@ -2530,10 +2539,13 @@ stop
 		}
 		exist stat1
 		if((stat1="")|(strsize=-1)):acmd=-1:return
+
 		dim note,131072,6
 		sdim notesefname,256,131072
-		HashClear se_ids
-		gosub *loaddefaultse
+
+		clearKeySoundLibrary
+		loadKeySoundPresetsToLibrary CURRENT_KSH_VERSION
+
 		dim analog,131072,6
 		dim spin,131072,6
 		dim bpml,131072,2
@@ -2719,8 +2731,8 @@ stop
 			loop
 		}
 		dim fxfl,2
-		sdim next_se,256,2
-		next_se="",""
+		sdim nextKeySoundStrsLR, 256, 2
+		nextKeySoundStrsLR = "", ""
 		cnt2a=-1
 		stat4=0
 		stpsh=0
@@ -3238,32 +3250,20 @@ stop
 				_stat1=strmid(d.cnt,8,256)
 				sdim splitstat,1
 				split _stat1,";",splitstat
+				_stat1 = splitstat.0
 				if(length(splitstat)=1){
 					_stat3=100
 				}else{
-					_stat3=int(splitstat.1)
+					_stat3=min(max(int(splitstat.1),0),100)
 				}
-				_stat1=splitstat.0
-				if(getpath(_stat1,2)=""){
-					_stat2=dir_default+"\\se\\note\\"+_stat1+".wav"
-				}else{
-					_stat2=getpath(fname,32)+_stat1
+				loadKeySoundToLibrary _stat1, CURRENT_KSH_VERSION
+				if (headcmp(d.cnt, 8, "fx-l_se=")) {
+					nextKeySoundStrsLR.0 = _stat1
+					if (_stat3 != 100) : nextKeySoundStrsLR.0 += ";" + _stat3
 				}
-				exist _stat2
-				if(strsize<=0){
-					dialog "Error: Cannot open sound \""+strmid(d.cnt,8,256)+"\""
-				}
-				if(HashCheckKey(se_ids,_stat1)=0){
-					// まだ読み込んだことのない効果音の場合
-					se_ids(_stat1)=BASS_SampleLoad(0,_stat2,0,0,0,10,0)
-				}
-				if(headcmp(d.cnt,8,"fx-l_se=")){
-					next_se.0=_stat1
-					if(_stat3!=100):next_se.0+=";"+_stat3
-				}
-				if(headcmp(d.cnt,8,"fx-r_se=")){
-					next_se.1=_stat1+";"+_stat3
-					if(_stat3!=100):next_se.1+=";"+_stat3
+				if (headcmp(d.cnt, 8, "fx-r_se=")) {
+					nextKeySoundStrsLR.1 = _stat1
+					if (_stat3 != 100) : nextKeySoundStrsLR.1 += ";" + _stat3
 				}
 				continue
 			}
@@ -3835,7 +3835,7 @@ stop
 					note.notenum.1=cbcnt+cnt2*UNIT_MEASURE*beatn/beatd/div.cnt3+stpsh
 					note.notenum.2=0
 					note.notenum.3=0
-					notesefname.notenum=next_se.lcnt
+					notesefname.notenum=nextKeySoundStrsLR.lcnt
 					notenum++
 					continue
 				}
@@ -4109,7 +4109,7 @@ stop
 					}
 				}
 			}
-			next_se="",""
+			nextKeySoundStrsLR = "", ""
 		loop
 
 		// layer名の区切り文字置き換え(v1.67)
@@ -14346,19 +14346,6 @@ stop
 	e=1:gosub *refreshtitle
 	return
 
-*loaddefaultse
-	foreach se_ids_keys
-		if(se_ids_keys.cnt=""):continue
-		BASS_SampleFree se_ids_values.cnt
-	loop
-	dirlist selist,dir_default+"\\se\\note\\*.wav"
-	notesel selist
-	repeat notemax
-		noteget sefname,cnt
-		se_ids(strmid(sefname,0,strlen(sefname)-4))=BASS_SampleLoad(0,dir_default+"\\se\\note\\"+sefname,0,0,0,10,0)
-	loop
-	return
-
 *exit
 	if(inputnow=1){
 		inputnow=3
@@ -14918,8 +14905,10 @@ stop
 	pendfl=-1
 	dim note,131072,6
 	sdim notesefname,256,131072
-	HashClear se_ids
-	gosub *loaddefaultse
+
+	clearKeySoundLibrary
+	loadKeySoundPresetsToLibrary CURRENT_KSH_VERSION
+
 	dim analog,131072,6
 	dim spin,131072,6
 	dim tilt,131072,3
@@ -15145,7 +15134,7 @@ stop
 	if(laserdelay1!=40):buf+="pfilterdelay="+laserdelay1+"\n"
 	if(csonginfo!=""):buf+="information="+csonginfo+"\n"
 	if((csongicon!="")&(csongicon!=".png")):buf+="icon="+utf8enc(csongicon)+"\n"
-	buf+="ver=171\n"
+	buf += "ver=" + CURRENT_KSH_VERSION + "\n"
 	commentfcnt=0
 	repeat commentnum
 		if(comment.cnt<0){
@@ -16057,35 +16046,25 @@ stop
 	repeat notenum
 		noteendt.cnt=c2t(note.cnt.1+note.cnt.2)
 	loop
-	dim notesej,notenum,4
-	notesejnum=0
+	dim notesej, notenum, 4
+	notesejnum = 0
 	repeat notenum
-		if(notesefname.cnt!=""){
-			notesej.notesejnum.0=cnt
-			notesej.notesejnum.1=1 // 判定(オートのため1)
-			
-			sdim splitstat,1
-			split notesefname.cnt,";",splitstat
-			if(length(splitstat)=1){
-				notesej.notesejnum.3=100
-			}else{
-				notesej.notesejnum.3=int(splitstat.1)
+		if (notesefname.cnt != "") {
+			notesej.notesejnum.0 = cnt
+			notesej.notesejnum.1 = 1 // 判定(オートのため1)
+
+			sdim splitstat, 1
+			split notesefname.cnt, ";", splitstat
+			if (length(splitstat) = 1) {
+				notesej.notesejnum.3 = 100
+			} else {
+				notesej.notesejnum.3 = int(splitstat.1)
 			}
-			_stat1=splitstat.0
-			
-			if(HashCheckKey(se_ids,_stat1)=0){
-				if(getpath(_stat1,2)=""){
-					_stat2=dir_default+"\\se\\note\\"+_stat1+".wav"
-				}else{
-					_stat2=getpath(fname,32)+_stat1
-				}
-				exist _stat2
-				if(strsize>0){
-					se_ids(_stat1)=BASS_SampleLoad(0,_stat2,0,0,0,10,0)
-				}
-			}
-			if(HashCheckKey(se_ids,_stat1)){
-				notesej.notesejnum.2=se_ids(_stat1)
+			_stat1 = splitstat.0
+
+			loadKeySoundToLibrary _stat1, CURRENT_KSH_VERSION
+			if (keySoundExistsInLibrary(_stat1)) {
+				notesej.notesejnum.2 = getKeySoundFromLibrary(_stat1) // 再生するKeySoundへのポインタ
 				notesejnum++
 			}
 		}
@@ -16519,9 +16498,10 @@ stop
 					if((note.(notesej.cnt.0).2=0)&(notesej.cnt.1!=2)){
 						if((notet.(notesej.cnt.0)>=t-500)&(notet.(notesej.cnt.0)>=cnowft)){
 							if(notet.(notesej.cnt.0)<=t+((t-tp)/2+38)*(syncmode=0)){
-								stat2=BASS_SampleGetChannel(notesej.cnt.2,0)
-								BASS_ChannelSetAttribute stat2,2,double(notesej.cnt.3)/100*double(vol)/100
-								BASS_ChannelPlay stat2
+								if (notesej.cnt.2 != 0) {
+									// KeySoundのポインタがNULLでなければ再生
+									PlayKeySound notesej.cnt.2, double(notesej.cnt.3) / 100 * double(vol) / 100
+								}
 								notesej.cnt.1=2
 							}else{
 								break

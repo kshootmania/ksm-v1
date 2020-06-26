@@ -41,7 +41,7 @@
 	if (p1 >= 171) {
 		return 1
 	} else {
-		return 0
+		return 10
 	}
 
 //
@@ -63,7 +63,7 @@
 
 		// KeySoundの実体を生成
 		pKeySound = 0
-		if (CreateKeySound(soundFilePath, getKeySoundMaxForVersion(p2)/*キー音の同時再生数*/, varptr(pKeySound))) {
+		if (CreateKeySound@(soundFilePath, getKeySoundMaxForVersion(p2)/*キー音の同時再生数*/, varptr(pKeySound))) {
 			s_keySoundLibrary(p1) = pKeySound
 		} else {
 			dialog "Error: An error occurred while loading sound \"" + p1 + "\""
@@ -73,10 +73,17 @@
 	return
 
 //
+// キー音がライブラリに存在するかを調べる
+//
+//   p1: キー音の名前(例:"clap")
+//
+#defcfunc keySoundExistsInLibrary str p1
+	return HashCheckKey(s_keySoundLibrary, p1)
+
+//
 // キー音の名前をもとにライブラリ内のKeySoundへのポインタを取得
 //
 //   p1: キー音の名前(例:"clap")
-//   p2: ksh譜面の"ver"フィールドの整数部分(int型)
 //
 #defcfunc getKeySoundFromLibrary str p1
 	if (HashCheckKey(s_keySoundLibrary, p1) = 0) {
@@ -89,13 +96,27 @@
 //
 // ライブラリのキー音をクリア
 //
-#deffunc clearKeySoundLibrary
+#deffunc clearKeySoundLibrary onexit
 	foreach s_keySoundLibrary_keys
   		if (s_keySoundLibrary_keys(cnt) = "") : continue
   		if (s_keySoundLibrary_values.cnt = 0) : continue
 		DestroyKeySound@ s_keySoundLibrary_values.cnt
 	loop
 	HashClear s_keySoundLibrary
+	return
+
+//
+// プリセットのキー音をライブラリに読み込む
+//
+//   p1: ksh譜面の"ver"フィールドの整数部分(int型)
+//
+#deffunc loadKeySoundPresetsToLibrary int p1, local keySoundPaths, local keySoundPath
+	dirlist keySoundPaths, s_dirDefault + "\\se\\note\\*.wav"
+	notesel keySoundPaths
+	repeat notemax
+		noteget keySoundPath, cnt
+		loadKeySoundToLibrary strmid(keySoundPath, 0, strlen(keySoundPath) - 4/*".wav"の4文字*/), p1
+	loop
 	return
 
 #global
