@@ -2026,10 +2026,7 @@
 			}else{
 				_stat3=min(max(int(splitstat.1),0),100)
 			}
-			_stat1=splitstat.0
-			if(getpath(_stat1,2)=""){
-				_stat1=dir_default+"\\se\\note\\"+_stat1+".wav"
-			}
+			_stat1=getKeySoundFilePathByName(splitstat.0)
 			exist _stat1
 			if(strsize<=0){
 				dialog "Error: Cannot open sound \""+_stat1+"\""
