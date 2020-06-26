@@ -1,3 +1,6 @@
+#ifndef KSMCORE_AS
+#define KSMCORE_AS
+
 #uselib "ksmcore.dll"
 #cfunc CreateGameSystem "CreateGameSystem" sptr, double, int
 #func DestroyGameSystem "DestroyGameSystem" int
@@ -19,3 +22,5 @@
 	GetCurrentCamValue_@ pGameSystem, camParam, ret
 	return ret
 #global
+
+#endif

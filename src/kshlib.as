@@ -1,3 +1,6 @@
+#ifndef KSHLIB_AS
+#define KSHLIB_AS
+
 #uselib "kshlib.dll"
 #cfunc KSHLib_GetVersion "KSHLib_GetVersion"
 #func KSHLib_Init "KSHLib_Init" sptr
@@ -20,3 +23,5 @@
 	KSHLib_GetChartMetaDataValue_@ pChart, key, ret, defaultValue
 	return ret
 #global
+
+#endif

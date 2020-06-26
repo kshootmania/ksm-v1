@@ -296,9 +296,6 @@
 #include "third_party/jstick.as"
 #include "third_party/alib_hash.as"
 
-#define ctype se_ids(%1) HashElem( se_ids, %1 )
-HashInitInt se_ids
-
 #include "encode.as"
 #include "third_party/TsubuyakiSoup_mod.hsp"
 
