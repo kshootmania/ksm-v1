@@ -2034,10 +2034,10 @@
 			if(strsize<=0){
 				dialog "Error: Cannot open sound \""+_stat1+"\""
 			}
-			if(HashCheckKey(se_ids,_stat1)=0){
+			if(HashCheckKey(se_ids, _stat1)=0){
 				// ‚Ü‚¾“Ç‚Ýž‚ñ‚¾‚±‚Æ‚Ì‚È‚¢Œø‰Ê‰¹‚Ìê‡
 				pKeySound = 0
-				if (CreateKeySound(_stat1, 10, varptr(pKeySound))) {
+				if (CreateKeySound(_stat1, getKeySoundMaxForVersion(csongver_int)/*ƒm[ƒgSE‚Ì“¯ŽžÄ¶”*/, varptr(pKeySound))) {
 					se_ids(_stat1) = pKeySound
 				} else {
 					dialog "Error: An error occurred while loading sound \"" + _stat1 + "\""

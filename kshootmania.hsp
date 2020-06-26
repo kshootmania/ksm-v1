@@ -208,6 +208,8 @@
 #include "src/kshlib.as"
 #include "src/ksmcore.as"
 
+#include "src/key_sound.as"
+
 #uselib "bass.dll"
 #func BASS_Init "BASS_Init" int, int, int, int, int
 #cfunc BASS_GetVersion "BASS_GetVersion"
@@ -334,6 +336,9 @@ timestart=d3timer()
 confkey=-1
 
 dir_default=dir_cur
+
+// Šeíƒ‚ƒWƒ…[ƒ‹‚Ì‰Šú‰»
+initKeySoundModule dir_default
 
 ddim dstat,1
 ddim ct,1
