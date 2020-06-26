@@ -210,6 +210,9 @@
 
 #include "src/key_sound.as"
 
+#define FS_UTILS_REPLACE_CHDIR_WITH_SAFE_CHDIR
+#include "src/filesystem_utils.as"
+
 #uselib "bass.dll"
 #func BASS_Init "BASS_Init" int, int, int, int, int
 #cfunc BASS_GetVersion "BASS_GetVersion"
