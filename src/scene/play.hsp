@@ -2443,7 +2443,7 @@
 					np.(cnt+4)=notenum
 					notese.notenum=-1
 					// チップFXオブジェクトは効果音があれば鳴らす
-					if(nextKeySoundNamesLR.lcnt != ""){
+					if(nextKeySoundNamesLR.lcnt != "" & keySoundExistsInLibrary(nextKeySoundNamesLR.lcnt)){
 						notese.notenum = notesejnum
 						notesej.notesejnum.0 = notenum // キー音の元オブジェクト番号
 						notesej.notesejnum.1 = 0 // キー音の判定(0/1)
@@ -5819,7 +5819,10 @@
 			if((note.(notesej.cnt.0).2=0)&(notesej.cnt.1!=2)&(((auto_note_se=0)&&(notesej.cnt.1=1))|(((note.(notesej.cnt.0).0<4)&(shortmode=mode_auto))|((note.(notesej.cnt.0).0>=4)&(longmode=mode_auto)))|(auto_note_se!=0))){
 				if(note.(notesej.cnt.0).3>=t-500){
 					if(note.(notesej.cnt.0).3<=t+30){
-						PlayKeySound notesej.cnt.2, double(mastervol)/100*dirvol/100*notesej.cnt.3/100
+						if (notesej.cnt.2 != 0) {
+							// KeySoundのポインタがNULLでなければ再生
+							PlayKeySound notesej.cnt.2, double(mastervol) / 100 * dirvol / 100 * notesej.cnt.3 / 100
+						}
 						notesej.cnt.1=2
 					}else{
 						break
