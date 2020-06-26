@@ -2445,8 +2445,8 @@
 					// チップFXオブジェクトは効果音があれば鳴らす
 					if(nextKeySoundNamesLR.lcnt != ""){
 						notese.notenum = notesejnum
-						notesej.notesejnum.0 = notenum // ノートSEの元オブジェクト番号
-						notesej.notesejnum.1 = 0 // ノートSEの判定(0/1)
+						notesej.notesejnum.0 = notenum // キー音の元オブジェクト番号
+						notesej.notesejnum.1 = 0 // キー音の判定(0/1)
 						notesej.notesejnum.2 = getKeySoundFromLibrary(nextKeySoundNamesLR.lcnt) // 再生するKeySoundへのポインタ
 						notesej.notesejnum.3 = nextKeySoundVolumesLR.lcnt // 再生音量(%)
 						notesejnum++
@@ -5809,7 +5809,7 @@
 				}
 			}
 		loop
-		// ノートSEの再生
+		// キー音の再生
 		repeat notesejnum-notesejfcnt,notesejfcnt
 			if(note.(notesej.cnt.0).3<t-1000){
 				notesejfcnt=cnt

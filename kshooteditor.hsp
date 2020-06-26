@@ -16509,7 +16509,7 @@ stop
 			bassupdatefl=0
 			// FXエフェクトの適用
 			if(feffect=1){
-				// ノートSEの再生
+				// キー音の再生
 				repeat notesejnum-notesejfcnt,notesejfcnt
 					if(notet.(notesej.cnt.0)<t-1000){
 						notesejfcnt=cnt

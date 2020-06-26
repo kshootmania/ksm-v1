@@ -20,10 +20,10 @@
 	return
 
 //
-// ノートSEの名前から音声ファイルのパスを取得
+// キー音の名前から音声ファイルのパスを取得
 // (拡張子がない場合には"se\note"ディレクトリ内のファイルを使用)
 //
-//   p1: ノートSEの名前(例:"clap")
+//   p1: キー音の名前(例:"clap")
 //
 #defcfunc getFilePathByKeySoundName str p1, local name
 	if(getpath(p1, 2) = ""){
@@ -33,7 +33,7 @@
 	}
 
 //
-// 指定バージョンにおけるノートSEの最大同時発音数を取得
+// 指定バージョンにおけるキー音の最大同時発音数を取得
 //
 //   p1: ksh譜面の"ver"フィールドの整数部分(int型)
 //
@@ -45,10 +45,10 @@
 	}
 
 //
-// ノートSEをライブラリに読み込む
-// (同じノートSEが既に読み込まれている場合は何もしない)
+// キー音をライブラリに読み込む
+// (同じキー音が既に読み込まれている場合は何もしない)
 //
-//   p1: ノートSEの名前(例:"clap")
+//   p1: キー音の名前(例:"clap")
 //   p2: ksh譜面の"ver"フィールドの整数部分(int型)
 //
 #deffunc loadKeySoundToLibrary str p1, int p2, local soundFilePath, local pKeySound
@@ -63,7 +63,7 @@
 
 		// KeySoundの実体を生成
 		pKeySound = 0
-		if (CreateKeySound(soundFilePath, getKeySoundMaxForVersion(p2)/*ノートSEの同時再生数*/, varptr(pKeySound))) {
+		if (CreateKeySound(soundFilePath, getKeySoundMaxForVersion(p2)/*キー音の同時再生数*/, varptr(pKeySound))) {
 			s_keySoundLibrary(p1) = pKeySound
 		} else {
 			dialog "Error: An error occurred while loading sound \"" + p1 + "\""
@@ -73,9 +73,9 @@
 	return
 
 //
-// ノートSEの名前をもとにライブラリ内のKeySoundへのポインタを取得
+// キー音の名前をもとにライブラリ内のKeySoundへのポインタを取得
 //
-//   p1: ノートSEの名前(例:"clap")
+//   p1: キー音の名前(例:"clap")
 //   p2: ksh譜面の"ver"フィールドの整数部分(int型)
 //
 #defcfunc getKeySoundFromLibrary str p1
