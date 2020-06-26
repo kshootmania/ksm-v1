@@ -400,7 +400,6 @@ dim note,131072,6
 sdim notesefname,256,131072
 
 clearKeySoundLibrary
-loadKeySoundPresetsToLibrary CURRENT_KSH_VERSION
 
 dim analog,131072,6
 dim spin,131072,6
@@ -583,6 +582,8 @@ csonglevel=1
 csongtotal=0
 csongoftbpm=0
 csongvol=75
+csongver = "" + CURRENT_KSH_VERSION
+csongver_int = CURRENT_KSH_VERSION
 csongfile=".mp3"
 csongv=""
 csongvoffset=0
@@ -2544,7 +2545,6 @@ stop
 		sdim notesefname,256,131072
 
 		clearKeySoundLibrary
-		loadKeySoundPresetsToLibrary CURRENT_KSH_VERSION
 
 		dim analog,131072,6
 		dim spin,131072,6
@@ -3256,7 +3256,7 @@ stop
 				}else{
 					_stat3=min(max(int(splitstat.1),0),100)
 				}
-				loadKeySoundToLibrary _stat1, CURRENT_KSH_VERSION
+				loadKeySoundToLibrary _stat1, csongver_int
 				if (headcmp(d.cnt, 8, "fx-l_se=")) {
 					nextKeySoundStrsLR.0 = _stat1
 					if (_stat3 != 100) : nextKeySoundStrsLR.0 += ";" + _stat3
@@ -6989,10 +6989,10 @@ stop
 	}else:if(cmd=CMD_EDIT_SONGSETTINGS2){
 		if(pendfl=1):pendfl=-1
 		if(pendfl!=-1):pendfl=1:acmd=-1:return
-		sdim it,256,6
-		dim t,6
-		sdim r,1024,6
-		sdim opt,256,6
+		sdim it, 256, 7
+		dim t, 7
+		sdim r, 1024, 7
+		sdim opt, 256, 7
 		i=0
 		t.i=2 : it.i=lang.7.20/*"曲についての情報(information):"*/ : r.i=csonginfo : i++
 		stat2=str(double(csongoftbpm)/1000)
@@ -7003,6 +7003,7 @@ stop
 		t.i=0 : it.i=lang.9.10/*"LASER音声エフェクトの遅延[msec]:"*/ : r.i=str(laserdelay1) : i++
 		t.i=0 : it.i=lang.9.15/*"TOTAL値[0:自動,100-:手動指定]:"*/ : r.i=str(csongtotal) : i++
 		t.i=1 : it.i=lang.9.20/*"ｼﾞｬﾝﾙｱｲｺﾝ画像ﾌｧｲﾙ(比率2:1,PNG):"*/ : r.i=str(csongicon) : i++
+		t.i=1 : it.i = replace(lang.9.50, "%1", "" + CURRENT_KSH_VERSION)/*"KSH譜面ﾌｫｰﾏｯﾄのﾊﾞｰｼﾞｮﾝ(推奨値:%1):"*/ : r.i = csongver : i++
 		_input lang.9.0/*"譜面に関する設定 (詳細)"*/,it,t,opt,r,0,0
 		f11fl=0
 		if(stat!=-1){
@@ -7014,6 +7015,17 @@ stop
 			i++ : if(csongtotal!=r.i) : csongtotal=int(r.i) : e=e|1
 			if(csongtotal<100):csongtotal=0
 			i++ : if(csongicon!=r.i) : csongicon=r.i : e=e|1
+			i++ : if(csongver != r.i) : csongver = r.i : csongver_int = int(csongver) : clearKeySoundLibrary /* ←同時発音数が変化する可能性があるためキー音を初期化 */ : e = e | 1
+
+			// KSH譜面フォーマットのバージョンが範囲外の値をとっている場合は丸める
+			if (csongver_int <= 100) {
+				csongver = ""
+				csongver_int = 100
+			} else : if (csongver_int > CURRENT_KSH_VERSION) {
+				csongver = "" + CURRENT_KSH_VERSION
+				csongver_int = CURRENT_KSH_VERSION
+			}
+
 			gosub *refreshtitle
 			gosub *draw
 		}
@@ -14907,7 +14919,6 @@ stop
 	sdim notesefname,256,131072
 
 	clearKeySoundLibrary
-	loadKeySoundPresetsToLibrary CURRENT_KSH_VERSION
 
 	dim analog,131072,6
 	dim spin,131072,6
@@ -15134,7 +15145,7 @@ stop
 	if(laserdelay1!=40):buf+="pfilterdelay="+laserdelay1+"\n"
 	if(csonginfo!=""):buf+="information="+csonginfo+"\n"
 	if((csongicon!="")&(csongicon!=".png")):buf+="icon="+utf8enc(csongicon)+"\n"
-	buf += "ver=" + CURRENT_KSH_VERSION + "\n"
+	buf += "ver=" + csongver + "\n"
 	commentfcnt=0
 	repeat commentnum
 		if(comment.cnt<0){
@@ -16062,7 +16073,7 @@ stop
 			}
 			_stat1 = splitstat.0
 
-			loadKeySoundToLibrary _stat1, CURRENT_KSH_VERSION
+			loadKeySoundToLibrary _stat1, csongver_int
 			if (keySoundExistsInLibrary(_stat1)) {
 				notesej.notesejnum.2 = getKeySoundFromLibrary(_stat1) // 再生するKeySoundへのポインタ
 				notesejnum++

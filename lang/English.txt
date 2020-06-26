@@ -401,6 +401,7 @@ e09-009|Enable
 e09-010|Peaking filter delay[ms]:
 e09-015|Total [0:Auto 100-:Manual]:
 e09-020|Genre icon filename (2:1, PNG):
+e09-050|KSH format version (Recommended:%1):
 e10-000|   %0ms \t... Cursor position\n+) %1ms \t... Offset\n------------\n   %2ms \t... Cursor position (for "Sample start")
 e10-020|Are you sure?\n(BPM and time signature settings will not be cleared)
 e10-040|Please select the measures you want to remove.

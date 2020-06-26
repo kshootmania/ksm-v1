@@ -105,18 +105,4 @@
 	HashClear s_keySoundLibrary
 	return
 
-//
-// プリセットのキー音をライブラリに読み込む
-//
-//   p1: ksh譜面の"ver"フィールドの整数部分(int型)
-//
-#deffunc loadKeySoundPresetsToLibrary int p1, local keySoundPaths, local keySoundPath
-	dirlist keySoundPaths, s_dirDefault + "\\se\\note\\*.wav"
-	notesel keySoundPaths
-	repeat notemax
-		noteget keySoundPath, cnt
-		loadKeySoundToLibrary strmid(keySoundPath, 0, strlen(keySoundPath) - 4/*".wav"の4文字*/), p1
-	loop
-	return
-
 #global
