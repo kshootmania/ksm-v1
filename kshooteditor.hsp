@@ -259,7 +259,7 @@ HashInitInt se_ids
 #define TARGET_ZOOMSIDE 13
 #define TARGET_STOP 14
 
-#define atitle "K-Shoot Editor v1.70a"
+#define atitle "K-Shoot Editor v1.71beta"
 
 // 1小節あたりのカウント値
 #define UNIT_MEASURE	192
@@ -15145,7 +15145,7 @@ stop
 	if(laserdelay1!=40):buf+="pfilterdelay="+laserdelay1+"\n"
 	if(csonginfo!=""):buf+="information="+csonginfo+"\n"
 	if((csongicon!="")&(csongicon!=".png")):buf+="icon="+utf8enc(csongicon)+"\n"
-	buf+="ver=167\n"
+	buf+="ver=171\n"
 	commentfcnt=0
 	repeat commentnum
 		if(comment.cnt<0){
