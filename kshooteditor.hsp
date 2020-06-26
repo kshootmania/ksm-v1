@@ -11478,25 +11478,25 @@ stop
 					r.0="0"
 					repeat notemax
 						noteget stat1,cnt
-						stat1=strmid(stat1,0,strlen(stat1)-4)
-						stat3+="\n"+stat1
-						if(_stat1=stat1){
-							r.0=str(cnt+1)
+						stat1 = strmid(stat1, 0, strlen(stat1) - 4/*".wav"‚Ì•¶š”*/)
+						stat3 += "\n" + stat1
+						if(_stat1 = stat1){
+							r.0 = str(cnt + 1)
 						}
 					loop
-					preset_sfx_count=notemax
-					dirlist stat2, getpath(fname,32)+"*.wav"
+					preset_sfx_count = notemax
+					dirlist stat2, getpath(fname,32) + "*.wav"
 					notesel stat2
 					repeat notemax
-						noteget stat1,cnt
-						stat3+="\n"+stat1
-						if(_stat1=stat1){
-							r.0=str(preset_sfx_count+cnt+1)
+						noteget stat1, cnt
+						stat3 += "\n" + stat1
+						if(_stat1 = stat1){
+							r.0 = str(preset_sfx_count + cnt + 1)
 						}
 					loop
-					if((r.0="0")&(_stat1!="")){
-						stat3+="\n"+_stat1
-						r.0=str(notemax+1)
+					if((r.0 = "0") & (_stat1 != "")){
+						stat3 += "\n" + _stat1
+						r.0 = str(preset_sfx_count + notemax + 1)
 					}
 					t.i=1 : it.i=lang.8.91/*"Œø‰Ê‰¹‚Ìí—Ş:"*/ : opt.i=stat3 : i++
 					t.i=0 : it.i=lang.8.93/*"Ä¶‰¹—Ê[%]:"*/ : r.i=str(min(max(_stat3,0),100))
