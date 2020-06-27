@@ -631,8 +631,6 @@ clipzsidenum=0
 dim cliptilt,131072,3
 cliptiltnum=0
 
-syncmode=0
-syncfreq=180
 tate=164
 
 disabledd=0
@@ -853,12 +851,6 @@ if(strsize>0){
 	split confs,"\n",confstr
 	repeat notemax
 		/*
-		if(headcmp(confstr.cnt,9,"synctype=")){
-			syncmode=int(strmid(confstr.cnt,9,1))
-		}
-		if(headcmp(confstr.cnt,9,"syncfreq=")){
-			syncfreq=int(strmid(confstr.cnt,9,16))
-		}*//*
 		if(headcmp(confstr.cnt,7,"barmax=")){
 			stat1=int(strmid(confstr.cnt,7,3))
 			if(stat1>0):tate=stat1
@@ -16190,13 +16182,6 @@ stop
 				loop
 				t=BASS_ChannelGetPosition_ms(mid)+t_mo
 			}
-			if((syncmode=1)&(mfl=1)){
-				BASS_ChannelSetPosition_ms mid,d3timer()-ot+offset
-				repeat swaudionum*(feffect=1)
-					BASS_ChannelSetPosition_ms mid_sw.cnt,d3timer()-ot+offset
-				loop
-				t=d3timer()-ot
-			}
 			cnow=0
 			tt=0
 			if(bpmlnum>0){
@@ -16373,16 +16358,16 @@ stop
 				if(analog.cnt.1+analog.cnt.2<cnow):analogjfcnt.(analog.cnt.0)=cnt:continue
 				if(analogt.cnt.0=0):analogt.cnt.0=c2t(analog.cnt.1)
 				stat1=analogt.cnt.0
-				if(stat1-(t+((t-tp)/2+laserdelay0-laserdelay)*(syncmode=0))>0):break
+				if(stat1-(t+((t-tp)/2+laserdelay0-laserdelay))>0):break
 				if(analogt.cnt.1=0):analogt.cnt.1=c2t(analog.cnt.1+analog.cnt.2)
 				stat2=analogt.cnt.1
-				if((stat1<=t+((t-tp)/2+laserdelay0-laserdelay)*(syncmode=0))&(stat2>t+((t-tp)/2+laserdelay0-laserdelay)*(syncmode=0))){
+				if((stat1<=t+((t-tp)/2+laserdelay0-laserdelay))&(stat2>t+((t-tp)/2+laserdelay0-laserdelay))){
 					if(analog.cnt.2<=UNIT_MEASURE/32){
 						panalognow.(analog.cnt.0)=analog.cnt.4*20*(analogconnect.cnt=1)+1000*analog.cnt.0*(analogconnect.cnt=0)
 						if(analogconnect.cnt=1):panalognow2.(analog.cnt.0)=analog.cnt.4*20
 					}else{
-						panalognow.(analog.cnt.0)=analog.cnt.3*20+(analog.cnt.4-analog.cnt.3)*20*(stat2-stat1-(stat2-t-((t-tp)/2+laserdelay0-laserdelay)*(syncmode=0)))/(stat2-stat1)
-						panalognow2.(analog.cnt.0)=analog.cnt.3*20+(analog.cnt.4-analog.cnt.3)*20*(stat2-stat1-(stat2-t-((t-tp)/2+laserdelay0-laserdelay)*(syncmode=0)))/(stat2-stat1)
+						panalognow.(analog.cnt.0)=analog.cnt.3*20+(analog.cnt.4-analog.cnt.3)*20*(stat2-stat1-(stat2-t-((t-tp)/2+laserdelay0-laserdelay)))/(stat2-stat1)
+						panalognow2.(analog.cnt.0)=analog.cnt.3*20+(analog.cnt.4-analog.cnt.3)*20*(stat2-stat1-(stat2-t-((t-tp)/2+laserdelay0-laserdelay)))/(stat2-stat1)
 					}
 				}
 				if((stat1<=t+(t-tp)/2)&(stat2>t+(t-tp)/2)){
@@ -16402,7 +16387,7 @@ stop
 				canvol=0
 				if(anvolnum>0){
 					repeat anvolnum-anvolfcnt,anvolfcnt
-						if(anvol.cnt.2<=t+((t-tp)/2+38)*(syncmode=0)){
+						if(anvol.cnt.2<=t+(t-tp)/2+38){
 							canvol=anvol.cnt.1
 							anvolfcnt=cnt
 						}else:break
@@ -16413,7 +16398,7 @@ stop
 						if(analogt.(analoganj.cnt.1).0=0):analogt.(analoganj.cnt.1).0=c2t(analog.(analoganj.cnt.1).1)
 						stat1=analogt.(analoganj.cnt.1).0
 						if((stat1>=t-500)&(analog.(analoganj.cnt.1).1>=min(cnowf,cnowf+cnowflen)-cnowplus)&(chokkakup.(analoganj.cnt.0)<cnt)){
-							if(stat1<=t+((t-tp)/2+38)*(syncmode=0)){
+							if(stat1<=t+(t-tp)/2+38){
 								stat1=min(abs(analog.(analoganj.cnt.1).3-analog.(analoganj.cnt.1).4)*(1+(analogparentran.(analogparent.(analoganj.cnt.1))=2)),25)
 								if(disableautoanvol=1):stat1=25
 								if(cnt+1<analoganjnum){
@@ -16454,7 +16439,7 @@ stop
 					}
 					if((note.(notesej.cnt.0).2=0)&(notesej.cnt.1!=2)){
 						if((notet.(notesej.cnt.0)>=t-500)&(notet.(notesej.cnt.0)>=cnowft)){
-							if(notet.(notesej.cnt.0)<=t+((t-tp)/2+38)*(syncmode=0)){
+							if(notet.(notesej.cnt.0)<=t+(t-tp)/2+38){
 								if (notesej.cnt.2 != 0) {
 									// KeySound‚Ìƒ|ƒCƒ“ƒ^‚ªNULL‚Å‚È‚¯‚ê‚ÎÄ¶
 									PlayKeySound notesej.cnt.2, double(notesej.cnt.3) / 100 * double(vol) / 100
