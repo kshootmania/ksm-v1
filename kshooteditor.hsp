@@ -16182,6 +16182,7 @@ stop
 				loop
 				t=BASS_ChannelGetPosition_ms(mid)+t_mo
 			}
+			tfx_diff=d3timer()
 			cnow=0
 			tt=0
 			if(bpmlnum>0){
@@ -16433,6 +16434,8 @@ stop
 			bassupdatefl=0
 			// FXエフェクトの適用
 			if(feffect=1){
+				tfx_diff=d3timer()-tfx_diff
+
 				// キー音の再生
 				repeat notesejnum-notesejfcnt,notesejfcnt
 					if(notet.(notesej.cnt.0)<t-1000){
