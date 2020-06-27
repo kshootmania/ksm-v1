@@ -16238,6 +16238,8 @@ stop
 			if((t>=t_moex)&(mplayfl=1)&(mfl=0)){
 				stat1=c2t(min(cnowf,cnowf+cnowflen))-laserdelay0*((feffect=1)&(cnt_loop=0))-80*bpmhalf
 				if((feffect=1)&(cnt_loop=0)){
+					// 再生直後から音声エフェクトを適用するために、バッファサイズによるレイテンシ分だけ手前から再生する
+					// (ただしカーソルより手前の音声が聞こえるとまずいので、はじめはミュートしておく)
 					BASS_ChannelSetAttribute mid,2,0.0
 					repeat swaudionum*(feffect=1)
 						BASS_ChannelSetAttribute mid_sw.cnt,2,0.0
@@ -16261,6 +16263,7 @@ stop
 				mfl=1
 			}
 			if((delayfl=1)&(t+(t-tp)/2>=delayend)){
+				// 音声エフェクトのレイテンシ回避用の余分再生が終わったらミュートを解除
 				if(swaudionow<0){
 					BASS_ChannelSetAttribute mid,2,double(vol)/100
 				}else{
