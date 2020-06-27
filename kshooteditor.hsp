@@ -631,7 +631,6 @@ clipzsidenum=0
 dim cliptilt,131072,3
 cliptiltnum=0
 
-mplaytype=2
 syncmode=0
 syncfreq=180
 tate=164
@@ -854,9 +853,6 @@ if(strsize>0){
 	split confs,"\n",confstr
 	repeat notemax
 		/*
-		if(headcmp(confstr.cnt,9,"playtype=")){
-			mplaytype=int(strmid(confstr.cnt,9,1))
-		}
 		if(headcmp(confstr.cnt,9,"synctype=")){
 			syncmode=int(strmid(confstr.cnt,9,1))
 		}
@@ -4251,21 +4247,13 @@ stop
 				}
 			loop
 		loop
-		if(mplaytype=0){
-			//mid=vAudioLoad(getpath(fname,32)+csongflist.0)
-			//vAudioGetTotalTime mid,mlength
-		}
-		if(mplaytype=1){
-			mci "open \""+getpath(fname,32)+csongflist.0+"\" type mpegvideo alias m"
-			mci "status m length"
-			mlength=stat
-		}
-		if(mplaytype=2){
-			filepath=getpath(fname,32)+csongflist
-			if(mid!=-1):BASS_StreamFree mid
-			mid=BASS_StreamCreateFile(0,filepath,0,0,0,0,0x20000)
-			mlength=BASS_ChannelGetLength_ms(mid)
-		}
+
+		// ‹È‚Ì’·‚³(ms)‚ð’²‚×‚é
+		filepath=getpath(fname,32)+csongflist
+		if(mid!=-1):BASS_StreamFree mid
+		mid=BASS_StreamCreateFile(0,filepath,0,0,0,0,0x20000)
+		mlength=BASS_ChannelGetLength_ms(mid)
+
 		buf="<REAPER_PROJECT 0.1\n  RIPPLE 0\n  GROUPOVERRIDE 0\n  AUTOXFADE 1\n  ENVATTACH 0\n  MIXERUIFLAGS 11\n  PEAKGAIN 1.000000\n  FEEDBACK 0\n  AUTOMUTE 0 8.000000\n  PANLAW 1.000000\n  MAXPROJLEN 0 600.000000\n  GRID 127 20 1.000000 20 1.000000\n  TIMEMODE 0\n  CURSOR 0.000000\n  ZOOM 100.000000 0\n  VZOOMEX 2\n  AUTOMODE 0\n  RECMODE 1\n  LOOP 0\n  LOOPGRAN 0 4.000000\n  RECORD_PATH \"\"\n  <RECORD_CFG\n  >\n  RENDER_FILE \""
 		if(csongdifficulty=0){
 			stat1="_lt"
@@ -8748,11 +8736,6 @@ stop
 		repeat
 			gsel 0
 			redraw 0
-			stat1=0
-			if(mplaytype=1){
-				mci "status m position"
-				stat1=stat
-			}
 			stat1=BASS_ChannelGetPosition_ms(mid)
 			if((stat1>=poffset+plength-2000)&(fadeoutfl=0)):BASS_ChannelSlideAttribute mid,2,0.0,500:fadeoutfl=1
 			if((stat1>=poffset+plength+550)|(stat1>=mlength-1)|(pendfl=1)):break
@@ -8764,19 +8747,13 @@ stop
 		redraw 1
 		pendfl=-1
 		playingsample=0
-		if(mplaytype=1){
-			mci "stop m"
-			mci "close m"
+		if(mid!=-1){
+			BASS_StreamFree mid
+			mid=-1
 		}
-		if(mplaytype=2){
-			if(mid!=-1){
-				BASS_StreamFree mid
-				mid=-1
-			}
-			if(mid2!=-1){
-				BASS_StreamFree mid2
-				mid2=-1
-			}
+		if(mid2!=-1){
+			BASS_StreamFree mid2
+			mid2=-1
 		}
 		pendfl=-1
 	}else:if(cmd=CMD_PLAY_TESTPLAY){
@@ -14907,13 +14884,9 @@ stop
 	gosub *selinit
 	cnowf=0
 	cnowflen=0
-	if(mplaytype=1){
-		mci "stop m"
-		mci "close m"
-	}
-	if(mplaytype=2){
-		BASS_StreamFree mid
-	}
+
+	BASS_StreamFree mid
+
 	pendfl=-1
 	dim note,131072,6
 	sdim notesefname,256,131072
@@ -15833,127 +15806,119 @@ stop
 		dim user_now,max(userfxnum,1)
 		exist getpath(fname,32)+csongflist.stat1
 		if(strsize!=-1){
-			/*if(mplaytype=1){
-				mci "open \""+getpath(fname,32)+csongflist.(min(stat1,3))+"\" type MPEGVideo alias m"
-				mci "setaudio m volume to "+vol*10
-				mci "play m":mci "stop m"
-				mci "status m length"
-				mlength=stat
-			}*/
-			if(mplaytype=2){
-				filepath=getpath(fname,32)+csongflist.(min(stat1,3))
-				sdim mdata,strsize
-				bload filepath,mdata
-				mid=BASS_StreamCreateFile(1,varptr(mdata),0,0,strsize,0,0x20000+0x200000*(bpmhalf=1))
-				dim mid_sw,swaudionum
-				repeat swaudionum*(feffect=1)
-					exist getpath(fname,32)+swaudio.cnt
-					if(strsize>0){
-						filepath=getpath(fname,32)+swaudio.cnt
-					}else{
-						filepath=getpath(fname,32)+csongflist.(min(stat1,3))
-						filepath=getpath(filepath,32)+swaudio.cnt
-					}
-					mid_sw.cnt=BASS_StreamCreateFile(0,filepath,0,0,0,0,0x20000+0x200000*(bpmhalf=1))
-				loop
-				if(bpmhalf=1){
-					mid2=mid
-					mid=BASS_FX_TempoCreate(mid2,0)
-					BASS_ChannelSetAttribute mid,0x10000,-50.0f
-					dim mid_sw2,swaudionum
-					repeat swaudionum*(feffect=1)
-						mid_sw2.cnt=mid_sw.cnt
-						mid_sw.cnt=BASS_FX_TempoCreate(mid_sw2.cnt,0)
-						BASS_ChannelSetAttribute mid_sw.cnt,0x10000,-50.0f
-					loop
+			filepath=getpath(fname,32)+csongflist.(min(stat1,3))
+			sdim mdata,strsize
+			bload filepath,mdata
+			mid=BASS_StreamCreateFile(1,varptr(mdata),0,0,strsize,0,0x20000+0x200000*(bpmhalf=1))
+			dim mid_sw,swaudionum
+			repeat swaudionum*(feffect=1)
+				exist getpath(fname,32)+swaudio.cnt
+				if(strsize>0){
+					filepath=getpath(fname,32)+swaudio.cnt
+				}else{
+					filepath=getpath(fname,32)+csongflist.(min(stat1,3))
+					filepath=getpath(filepath,32)+swaudio.cnt
 				}
-				BASS_ChannelSetAttribute mid,2,double(vol)/100
+				mid_sw.cnt=BASS_StreamCreateFile(0,filepath,0,0,0,0,0x20000+0x200000*(bpmhalf=1))
+			loop
+			if(bpmhalf=1){
+				mid2=mid
+				mid=BASS_FX_TempoCreate(mid2,0)
+				BASS_ChannelSetAttribute mid,0x10000,-50.0f
+				dim mid_sw2,swaudionum
 				repeat swaudionum*(feffect=1)
-					BASS_ChannelSetAttribute mid_sw.cnt,2,double(vol)/100
+					mid_sw2.cnt=mid_sw.cnt
+					mid_sw.cnt=BASS_FX_TempoCreate(mid_sw2.cnt,0)
+					BASS_ChannelSetAttribute mid_sw.cnt,0x10000,-50.0f
 				loop
-				mlength=BASS_ChannelGetLength_ms(mid)*(1+bpmhalf)
-				hCompFX=BASS_ChannelSetFX(mid,0x10011,0)
-				dim compfx,6
-				compfx=tofloat(18.0f),tofloat(-24.0f),tofloat(100.0f),tofloat(1.0f),tofloat(0.01f),-1
-				BASS_FXSetParameters hCompFX,compfx
-				dim hCompFX_sw,swaudionum
-				repeat swaudionum*(feffect=1)
-					hCompFX_sw.cnt=BASS_ChannelSetFX(mid_sw.cnt,0x10011,0)
-					BASS_FXSetParameters hCompFX_sw.cnt,compfx
+			}
+			BASS_ChannelSetAttribute mid,2,double(vol)/100
+			repeat swaudionum*(feffect=1)
+				BASS_ChannelSetAttribute mid_sw.cnt,2,double(vol)/100
+			loop
+			mlength=BASS_ChannelGetLength_ms(mid)*(1+bpmhalf)
+			hCompFX=BASS_ChannelSetFX(mid,0x10011,0)
+			dim compfx,6
+			compfx=tofloat(18.0f),tofloat(-24.0f),tofloat(100.0f),tofloat(1.0f),tofloat(0.01f),-1
+			BASS_FXSetParameters hCompFX,compfx
+			dim hCompFX_sw,swaudionum
+			repeat swaudionum*(feffect=1)
+				hCompFX_sw.cnt=BASS_ChannelSetFX(mid_sw.cnt,0x10011,0)
+				BASS_FXSetParameters hCompFX_sw.cnt,compfx
+			loop
+			/*hCompFX=BASS_ChannelSetFX(mid,1,0)
+			dim compfx,6
+			compfx=tofloat(20.0f),tofloat(0.01f),tofloat(0.01f),tofloat(-20.0f),tofloat(100.0f),tofloat(0.0f)
+			BASS_FXSetParameters hCompFX,compfx*/
+			//dialog BASS_ErrorGetCode()
+			if(feffect=1){
+				dim hFX_Echo,2
+				repeat 2
+					hFX_Echo.cnt=BASS_VST_ChannelSetDSP(mid.0,dir_default+"\\lib\\regawo.dll",0,26)
+					BASS_VST_SetParam hFX_Echo.cnt,2,1.00f
 				loop
-				/*hCompFX=BASS_ChannelSetFX(mid,1,0)
-				dim compfx,6
-				compfx=tofloat(20.0f),tofloat(0.01f),tofloat(0.01f),tofloat(-20.0f),tofloat(100.0f),tofloat(0.0f)
-				BASS_FXSetParameters hCompFX,compfx*/
-				//dialog BASS_ErrorGetCode()
-				if(feffect=1){
-					dim hFX_Echo,2
-					repeat 2
-						hFX_Echo.cnt=BASS_VST_ChannelSetDSP(mid.0,dir_default+"\\lib\\regawo.dll",0,26)
-						BASS_VST_SetParam hFX_Echo.cnt,2,1.00f
+				hFX_Retr=BASS_VST_ChannelSetDSP(mid.0,dir_default+"\\lib\\regawo.dll",0,25)
+				BASS_VST_SetParam hFX_Retr,2,0.70f
+				hFX_Pitc=BASS_VST_ChannelSetDSP(mid.0,dir_default+"\\lib\\pitc.dll",0,20)
+				BASS_VST_SetParam hFX_Pitc,0,0.0f/48.0f/2.0f+0.50f
+				BASS_VST_SetParam hFX_Pitc,1,700.0f/44100.0f
+				BASS_VST_SetParam hFX_Pitc,2,0.40f*2.0f
+				BASS_VST_SetParam hFX_Pitc,3,0.0f
+				hFX_BitC=BASS_VST_ChannelSetDSP(mid.0,dir_default+"\\lib\\bitc.dll",0,19)
+				BASS_VST_SetParam hFX_BitC,0,0
+				dim hFX_TStp,2
+				hFX_TStp.0=BASS_VST_ChannelSetDSP(mid.0,dir_default+"\\lib\\tstp.dll",0,19)
+				hFX_TStp.1=BASS_VST_ChannelSetDSP(mid.0,dir_default+"\\lib\\tstp.dll",0,18)
+				hFX_Gate=BASS_VST_ChannelSetDSP(mid.0,dir_default+"\\lib\\regawo.dll",0,17)
+				BASS_VST_SetParam hFX_Gate,7,0.50f
+				BASS_VST_SetParam hFX_Gate,8,0.90f
+				BASS_VST_SetParam hFX_Gate,10,500.0f/22050.0f
+				BASS_VST_SetParam hFX_Gate,11,20000.0f/22050.0f
+				BASS_VST_SetParam hFX_Gate,12,1.414f/50.0f
+				BASS_VST_SetParam hFX_Gate,13,0.80f
+				hFX_Phas=BASS_VST_ChannelSetDSP(mid.0,dir_default+"\\lib\\phas.dll",0,16)
+				BASS_VST_SetParam hFX_Phas,0,0.25f
+				BASS_VST_SetParam hFX_Phas,1,0.0f
+				BASS_VST_SetParam hFX_Phas,2,1500.0f/22050.0f
+				BASS_VST_SetParam hFX_Phas,3,20000.0f/22050.0f
+				BASS_VST_SetParam hFX_Phas,4,0.707f/50.0f
+				BASS_VST_SetParam hFX_Phas,5,0.35f
+				BASS_VST_SetParam hFX_Phas,6,0.75f
+				BASS_VST_SetParam hFX_Phas,7,8.0f/20.0f
+				BASS_VST_SetParam hFX_Phas,8,0.0f
+				hFX_Flan=BASS_VST_ChannelSetDSP(mid.0,dir_default+"\\lib\\flan.dll",0,15)
+				BASS_VST_SetParam hFX_Flan,0,0.25f
+				BASS_VST_SetParam hFX_Flan,1,30.0f/44100.0f
+				BASS_VST_SetParam hFX_Flan,2,45.0f/44100.0f
+				BASS_VST_SetParam hFX_Flan,3,0.60f
+				BASS_VST_SetParam hFX_Flan,4,0.0f
+				BASS_VST_SetParam hFX_Flan,5,0.75f
+				BASS_VST_SetParam hFX_Flan,6,0.0f
+				hFX_SiCh=BASS_VST_ChannelSetDSP(mid.0,dir_default+"\\lib\\sich.dll",0,14)
+				BASS_VST_SetParam hFX_SiCh,1,0.0050f
+				BASS_VST_SetParam hFX_SiCh,2,0.0f
+				BASS_VST_SetParam hFX_SiCh,3,0.0010f
+				dim hFX_User,userfxnum+userfilternum
+				repeat userfxnum
+					if(fxdef_dllname.(int(userfx_params.cnt.0))=""):hFX_User.cnt=-1:continue
+					hFX_User.cnt=BASS_VST_ChannelSetDSP(mid.0,dir_default+"\\lib\\"+fxdef_dllname.(int(userfx_params.cnt.0)),0,fxdef_priority.(int(userfx_params.cnt.0)))
+					cnt2=cnt
+					repeat fxdef_prmnum.(int(userfx_params.cnt2.0)),1
+						if((userfx_params.cnt2.cnt<0.0f)&(fxdef_type.cnt.(int(userfx_params.cnt2.0))=FXDEF_LENGTH)){
+							BASS_VST_SetParam hFX_User.cnt2,fxdef_prmno.cnt.(int(userfx_params.cnt2.0)),minf(maxf(-userfx_params.cnt2.cnt/10.0f,0.0f),1.0f)*(1+bpmhalf)
+						}else:if(fxdef_max.cnt.(int(userfx_params.cnt2.0))>0.0f){
+							BASS_VST_SetParam hFX_User.cnt2,fxdef_prmno.cnt.(int(userfx_params.cnt2.0)),minf(maxf(fxdef_prmmax.cnt.(int(userfx_params.cnt2.0))*userfx_params.cnt2.cnt/fxdef_max.cnt.(int(userfx_params.cnt2.0)),0.0f),1.0f)
+						}else:if((userfx_params.cnt2.cnt>0.0f)&(fxdef_type.cnt.(int(userfx_params.cnt2.0))=FXDEF_LENGTH)&(fxdef_linkprm.(int(userfx_params.cnt2.0))=cnt)){
+							user_now.cnt2=int(1.0f/userfx_params.cnt2.cnt)
+						}else:if((fxdef_prmno.cnt.(int(userfx_params.cnt2.0))!=-1)&(fxdef_type.cnt.(int(userfx_params.cnt2.0))=FXDEF_PITCH)){
+							// PitchShift pitch
+							BASS_VST_SetParam hFX_User.cnt2,fxdef_prmno.cnt.(int(userfx_params.cnt2.0)),maxf(minf(absf(userfx_params.cnt2.cnt),1.0f),0.0f)
+						}
 					loop
-					hFX_Retr=BASS_VST_ChannelSetDSP(mid.0,dir_default+"\\lib\\regawo.dll",0,25)
-					BASS_VST_SetParam hFX_Retr,2,0.70f
-					hFX_Pitc=BASS_VST_ChannelSetDSP(mid.0,dir_default+"\\lib\\pitc.dll",0,20)
-					BASS_VST_SetParam hFX_Pitc,0,0.0f/48.0f/2.0f+0.50f
-					BASS_VST_SetParam hFX_Pitc,1,700.0f/44100.0f
-					BASS_VST_SetParam hFX_Pitc,2,0.40f*2.0f
-					BASS_VST_SetParam hFX_Pitc,3,0.0f
-					hFX_BitC=BASS_VST_ChannelSetDSP(mid.0,dir_default+"\\lib\\bitc.dll",0,19)
-					BASS_VST_SetParam hFX_BitC,0,0
-					dim hFX_TStp,2
-					hFX_TStp.0=BASS_VST_ChannelSetDSP(mid.0,dir_default+"\\lib\\tstp.dll",0,19)
-					hFX_TStp.1=BASS_VST_ChannelSetDSP(mid.0,dir_default+"\\lib\\tstp.dll",0,18)
-					hFX_Gate=BASS_VST_ChannelSetDSP(mid.0,dir_default+"\\lib\\regawo.dll",0,17)
-					BASS_VST_SetParam hFX_Gate,7,0.50f
-					BASS_VST_SetParam hFX_Gate,8,0.90f
-					BASS_VST_SetParam hFX_Gate,10,500.0f/22050.0f
-					BASS_VST_SetParam hFX_Gate,11,20000.0f/22050.0f
-					BASS_VST_SetParam hFX_Gate,12,1.414f/50.0f
-					BASS_VST_SetParam hFX_Gate,13,0.80f
-					hFX_Phas=BASS_VST_ChannelSetDSP(mid.0,dir_default+"\\lib\\phas.dll",0,16)
-					BASS_VST_SetParam hFX_Phas,0,0.25f
-					BASS_VST_SetParam hFX_Phas,1,0.0f
-					BASS_VST_SetParam hFX_Phas,2,1500.0f/22050.0f
-					BASS_VST_SetParam hFX_Phas,3,20000.0f/22050.0f
-					BASS_VST_SetParam hFX_Phas,4,0.707f/50.0f
-					BASS_VST_SetParam hFX_Phas,5,0.35f
-					BASS_VST_SetParam hFX_Phas,6,0.75f
-					BASS_VST_SetParam hFX_Phas,7,8.0f/20.0f
-					BASS_VST_SetParam hFX_Phas,8,0.0f
-					hFX_Flan=BASS_VST_ChannelSetDSP(mid.0,dir_default+"\\lib\\flan.dll",0,15)
-					BASS_VST_SetParam hFX_Flan,0,0.25f
-					BASS_VST_SetParam hFX_Flan,1,30.0f/44100.0f
-					BASS_VST_SetParam hFX_Flan,2,45.0f/44100.0f
-					BASS_VST_SetParam hFX_Flan,3,0.60f
-					BASS_VST_SetParam hFX_Flan,4,0.0f
-					BASS_VST_SetParam hFX_Flan,5,0.75f
-					BASS_VST_SetParam hFX_Flan,6,0.0f
-					hFX_SiCh=BASS_VST_ChannelSetDSP(mid.0,dir_default+"\\lib\\sich.dll",0,14)
-					BASS_VST_SetParam hFX_SiCh,1,0.0050f
-					BASS_VST_SetParam hFX_SiCh,2,0.0f
-					BASS_VST_SetParam hFX_SiCh,3,0.0010f
-					dim hFX_User,userfxnum+userfilternum
-					repeat userfxnum
-						if(fxdef_dllname.(int(userfx_params.cnt.0))=""):hFX_User.cnt=-1:continue
-						hFX_User.cnt=BASS_VST_ChannelSetDSP(mid.0,dir_default+"\\lib\\"+fxdef_dllname.(int(userfx_params.cnt.0)),0,fxdef_priority.(int(userfx_params.cnt.0)))
-						cnt2=cnt
-						repeat fxdef_prmnum.(int(userfx_params.cnt2.0)),1
-							if((userfx_params.cnt2.cnt<0.0f)&(fxdef_type.cnt.(int(userfx_params.cnt2.0))=FXDEF_LENGTH)){
-								BASS_VST_SetParam hFX_User.cnt2,fxdef_prmno.cnt.(int(userfx_params.cnt2.0)),minf(maxf(-userfx_params.cnt2.cnt/10.0f,0.0f),1.0f)*(1+bpmhalf)
-							}else:if(fxdef_max.cnt.(int(userfx_params.cnt2.0))>0.0f){
-								BASS_VST_SetParam hFX_User.cnt2,fxdef_prmno.cnt.(int(userfx_params.cnt2.0)),minf(maxf(fxdef_prmmax.cnt.(int(userfx_params.cnt2.0))*userfx_params.cnt2.cnt/fxdef_max.cnt.(int(userfx_params.cnt2.0)),0.0f),1.0f)
-							}else:if((userfx_params.cnt2.cnt>0.0f)&(fxdef_type.cnt.(int(userfx_params.cnt2.0))=FXDEF_LENGTH)&(fxdef_linkprm.(int(userfx_params.cnt2.0))=cnt)){
-								user_now.cnt2=int(1.0f/userfx_params.cnt2.cnt)
-							}else:if((fxdef_prmno.cnt.(int(userfx_params.cnt2.0))!=-1)&(fxdef_type.cnt.(int(userfx_params.cnt2.0))=FXDEF_PITCH)){
-								// PitchShift pitch
-								BASS_VST_SetParam hFX_User.cnt2,fxdef_prmno.cnt.(int(userfx_params.cnt2.0)),maxf(minf(absf(userfx_params.cnt2.cnt),1.0f),0.0f)
-							}
-						loop
-						// ByPass‚ÌÝ’è
-						BASS_VST_SetParam hFX_User.cnt,29,1.0f
-					loop
-				}
+					// ByPass‚ÌÝ’è
+					BASS_VST_SetParam hFX_User.cnt,29,1.0f
+				loop
+
 				//if(csongvol>100){
 					hVolFX=BASS_ChannelSetFX(mid.0,0x10003,5)
 					dim volfx,2
@@ -16219,30 +16184,17 @@ stop
 			if((mfl=0)|(mplayfl=0)){
 				t=(d3timer()-ot)/(1+bpmhalf)
 			}else{
-				stat1=0
-				/*if(mplaytype=1){
-					mci "status m position"
-					stat1=stat
-				}*/
-				if(mplaytype=2){
-					BASS_ChannelUpdate mid
-					repeat swaudionum*(feffect=1)
-						BASS_ChannelUpdate mid_sw.cnt
-					loop
-					stat1=BASS_ChannelGetPosition_ms(mid)
-				}
-				t=stat1+t_mo
+				BASS_ChannelUpdate mid
+				repeat swaudionum*(feffect=1)
+					BASS_ChannelUpdate mid_sw.cnt
+				loop
+				t=BASS_ChannelGetPosition_ms(mid)+t_mo
 			}
 			if((syncmode=1)&(mfl=1)){
-				/*if((mplaytype=1)&(cnt\syncfreq=0)){
-					mci "seek m to "+(d3timer()-ot+offset)
-				}*/
-				if(mplaytype=2){
-					BASS_ChannelSetPosition_ms mid,d3timer()-ot+offset
-					repeat swaudionum*(feffect=1)
-						BASS_ChannelSetPosition_ms mid_sw.cnt,d3timer()-ot+offset
-					loop
-				}
+				BASS_ChannelSetPosition_ms mid,d3timer()-ot+offset
+				repeat swaudionum*(feffect=1)
+					BASS_ChannelSetPosition_ms mid_sw.cnt,d3timer()-ot+offset
+				loop
 				t=d3timer()-ot
 			}
 			cnow=0
@@ -16300,34 +16252,28 @@ stop
 			if((bpmhalf=1)&((cnt=0)|(cnow<=min(cnowf,cnowf+cnowflen)))):tp=t
 			if((t>=t_moex)&(mplayfl=1)&(mfl=0)){
 				stat1=c2t(min(cnowf,cnowf+cnowflen))-laserdelay0*((feffect=1)&(cnt_loop=0))-80*bpmhalf
-				/*if(mplaytype=1){
-					mci "seek m to "+((stat1-t_moex)*(stat1>t_moex))
-				}*/
-				if(mplaytype=2){
-					if((feffect=1)&(cnt_loop=0)){
-						BASS_ChannelSetAttribute mid,2,0.0
-						repeat swaudionum*(feffect=1)
-							BASS_ChannelSetAttribute mid_sw.cnt,2,0.0
-						loop
-						delayfl=1
-						delayend=stat1+laserdelay0+80*bpmhalf
-					}
-					BASS_ChannelPlay(mid)
+				if((feffect=1)&(cnt_loop=0)){
+					BASS_ChannelSetAttribute mid,2,0.0
 					repeat swaudionum*(feffect=1)
-						BASS_ChannelPlay(mid_sw.cnt)
+						BASS_ChannelSetAttribute mid_sw.cnt,2,0.0
 					loop
-					//BASS_ChannelSetAttribute mid,2,double(vol)*double(min(csongvol,100))/10000
-					BASS_ChannelSetPosition_ms mid,(stat1-t_moex*(1+bpmhalf))*(stat1>t_moex*(1+bpmhalf))/(1+bpmhalf)
-					repeat swaudionum*(feffect=1)
-						BASS_ChannelSetPosition_ms mid_sw.cnt,(stat1-t_moex*(1+bpmhalf))*(stat1>t_moex*(1+bpmhalf))/(1+bpmhalf)
-					loop
-					//if((c2t(min(cnowf,cnowf+cnowflen))-t_moex)*(c2t(min(cnowf,cnowf+cnowflen))>t_moex)>0):tshift=1
+					delayfl=1
+					delayend=stat1+laserdelay0+80*bpmhalf
 				}
+				BASS_ChannelPlay(mid)
+				repeat swaudionum*(feffect=1)
+					BASS_ChannelPlay(mid_sw.cnt)
+				loop
+				//BASS_ChannelSetAttribute mid,2,double(vol)*double(min(csongvol,100))/10000
+				BASS_ChannelSetPosition_ms mid,(stat1-t_moex*(1+bpmhalf))*(stat1>t_moex*(1+bpmhalf))/(1+bpmhalf)
+				repeat swaudionum*(feffect=1)
+					BASS_ChannelSetPosition_ms mid_sw.cnt,(stat1-t_moex*(1+bpmhalf))*(stat1>t_moex*(1+bpmhalf))/(1+bpmhalf)
+				loop
+				//if((c2t(min(cnowf,cnowf+cnowflen))-t_moex)*(c2t(min(cnowf,cnowf+cnowflen))>t_moex)>0):tshift=1
 				if(stat1<=t_moex){
 					t_mo=t
 				}else:t_mo=t_moex
 				mfl=1
-				//if(mplaytype=1):mci "play m"
 			}
 			if((delayfl=1)&(t+(t-tp)/2>=delayend)){
 				if(swaudionow<0){
@@ -16337,7 +16283,7 @@ stop
 				}
 				delayfl=0
 			}
-			//if((mplaytype=2)&(t=tp)&(tp=tpp)&(tpp=tppp)&(t-t_mo>500)&(mfl=1)):stopcnt++
+			//if((t=tp)&(tp=tpp)&(tpp=tppp)&(t-t_mo>500)&(mfl=1)):stopcnt++
 			if((pendfl=1)|(t-t_mo>=mlength)|(stopcnt>30)):break
 			if((loopplayback=1)&(cnowflen!=0)&(t+(t-tp)/2+38>=t_end)):break
 			if((vzoom(cnow)/UNIT_MEASURE/vtate-vyk/2>posnow)&(synchro=1)):posnow=vzoom(cnow)/UNIT_MEASURE/vtate-vyk/2
@@ -16956,7 +16902,7 @@ stop
 						swaudionow_filter=userfx_swaudiomid.(filtertype_real-100)
 					}
 				}
-				if((mplaytype=2)&(filtertype=0)&(pefftype!=-1)&((cnt=0)|(pdstat!=pdstat2)|(filtertype!=filtertypep)|(pstat2!=pstat3)|(t-shuwat<=100)|(canagain!=canagainp))){
+				if((filtertype=0)&(pefftype!=-1)&((cnt=0)|(pdstat!=pdstat2)|(filtertype!=filtertypep)|(pstat2!=pstat3)|(t-shuwat<=100)|(canagain!=canagainp))){
 					if(filtertype!=filtertypep):shuwat=-50000
 					if(pstat2=1){
 						dim pfilter,7
@@ -17000,7 +16946,7 @@ stop
 						loop
 					loop
 					bassupdatefl=1
-				}else:if((mplaytype=2)&(filtertype!=0)&(pefftype!=-1)&((pdstat!=pdstat2)|(filtertype!=filtertypep)|(pstat2!=pstat3))){
+				}else:if((filtertype!=0)&(pefftype!=-1)&((pdstat!=pdstat2)|(filtertype!=filtertypep)|(pstat2!=pstat3))){
 					dim pfilter,7
 					if((filtertype<0)|(filtertype>=5)){
 						pfilter=6,tofloat(1000.0f),tofloat(0.0f),tofloat(1.2f),tofloat(0.0f),tofloat(0.0f),0
@@ -17299,17 +17245,11 @@ stop
 		BASS_ChannelRemoveFX mid,hPeakFX2
 		if((pendfl=1)|(t-t_mo>=mlength)|(stopcnt>30)){
 			if(mfl=1){
-				/*if(mplaytype=1){
-					mci "stop m"
-					mci "close m"
-				}*/
-				if(mplaytype=2){
-					BASS_StreamFree mid
-					mid=-1
-					if(mid2!=-1){
-						BASS_StreamFree mid2
-						mid2=-1
-					}
+				BASS_StreamFree mid
+				mid=-1
+				if(mid2!=-1){
+					BASS_StreamFree mid2
+					mid2=-1
 				}
 			}
 			break
