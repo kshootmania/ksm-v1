@@ -93,6 +93,7 @@
 #include "src/ksmcore.as"
 
 #include "src/audio/key_sound.as"
+#include "src/audio/laser_slam_sound.as"
 
 #define FS_UTILS_REPLACE_CHDIR_WITH_SAFE_CHDIR
 #include "src/filesystem_utils.as"
@@ -391,6 +392,7 @@ dir_default=dir_cur
 
 // ŠeŽíƒ‚ƒWƒ…[ƒ‹‚Ì‰Šú‰»
 initKeySoundModule dir_default
+initLaserSlamSoundModule dir_default
 
 sdim _kaigyobuf,768
 sdim _kaigyobuf2,768
@@ -1123,12 +1125,6 @@ InitCommonControls
 chdir "./se"
 tickid=BASS_SampleLoad(0,"tick.wav",0,0,0,40,0)
 tick2id=BASS_SampleLoad(0,"tick2.wav",0,0,0,30,0)
-dim chokkakuid,5
-chokkakuid.0=BASS_SampleLoad(0,"chokkaku.wav",0,0,0,50,0)
-chokkakuid.1=BASS_SampleLoad(0,"chokkaku_down.wav",0,0,0,50,0)
-chokkakuid.2=BASS_SampleLoad(0,"chokkaku_up.wav",0,0,0,50,0)
-chokkakuid.3=BASS_SampleLoad(0,"chokkaku_swing.wav",0,0,0,50,0)
-chokkakuid.4=BASS_SampleLoad(0,"chokkaku_mute.wav",0,0,0,50,0)
 
 // ‰æ‘œ‚Ì“Ç‚Ýž‚Ý
 chdir "../imgs/editor"
@@ -15776,6 +15772,10 @@ stop
 	peffect=0
 	feffect=0
 	mid2=-1
+
+	// ’¼Šp‰¹‚ð“Ç‚Ýž‚Þ
+	loadLaserSlamSounds csongver_int
+
 	if(fname!=""){
 		sdim csongflist,256,1
 		split csongfile,";",csongflist
@@ -16417,9 +16417,7 @@ stop
 										if(abs(analog.(analoganj.(cnt-1).1).3-analog.(analoganj.(cnt-1).1).4)>stat1):stat1=min(abs(analog.(analoganj.(cnt-1).1).3-analog.(analoganj.(cnt-1).1).4),25)
 									}
 								}
-								stat2=BASS_SampleGetChannel(chokkakuid.(analoganj.cnt.2),0)
-								BASS_ChannelSetAttribute stat2,2,double(canvol)/100*stat1/25*double(vol)/100
-								BASS_ChannelPlay stat2
+								playLaserSlamSound analoganj.cnt.2, double(canvol)/100*stat1/25*double(vol)/100
 								analoganflag=1
 								chokkakup.(analoganj.cnt.0)=cnt
 								chocnt++
