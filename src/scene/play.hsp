@@ -6788,6 +6788,7 @@
 				spinangle=0.0f
 			}else:if((spinnow.2>0)&(spinnow.1<=cnow+sttp*adj)){
 				if(spinnow.0<2){
+					// ’Êí‚Ì‰ñ“]
 					if(((cnow+sttp*adj-bgmouikkaic>bgmouikkai/2)|(bgmouikkai=0))&(spinnow.3>bgmouikkaicnt)){
 						bgmouikkaic=cnow+sttp*adj
 						bgmouikkai=spinnow.2*75/100
@@ -6815,6 +6816,7 @@
 					spinangles*=1-spinnow.0*2
 					spinanglepp=spinangle
 				}else{
+					// ”¼‰ñ“]
 					if(((cnow+sttp*adj-bgmouikkaic>bgmouikkai/2)|(bgmouikkai=0))&(spinnow.3>bgmouikkaicnt)){
 						bgmouikkaic=cnow+sttp*adj
 						bgmouikkai=spinnow.2*75/100
@@ -6830,7 +6832,7 @@
 						spinangle=(cos(double(spinangle-110)*1.8/110)-cos(1.8))/(1.0-cos(1.8))*60
 					}else:if(spinangle<310.0f){
 						spinangle=-sin(double(spinangle-220)*1.8/90)/sin(1.8)*15
-					}else:if(spinangle<400.0f){
+					}else{
 						spinangle=-(cos(double(spinangle-310)*1.8/90)-cos(1.8))/(1.0-cos(1.8))*15
 					}
 					spinangle*=1-(spinnow.0-2)*2
