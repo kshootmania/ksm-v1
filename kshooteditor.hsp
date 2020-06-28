@@ -6976,7 +6976,12 @@ stop
 		t.i=0 : it.i=lang.9.10/*"LASER音声エフェクトの遅延[msec]:"*/ : r.i=str(laserdelay1) : i++
 		t.i=0 : it.i=lang.9.15/*"TOTAL値[0:自動,100-:手動指定]:"*/ : r.i=str(csongtotal) : i++
 		t.i=1 : it.i=lang.9.20/*"ｼﾞｬﾝﾙｱｲｺﾝ画像ﾌｧｲﾙ(比率2:1,PNG):"*/ : r.i=str(csongicon) : i++
-		t.i=1 : it.i = replace(lang.9.50, "%1", "" + CURRENT_KSH_VERSION)/*"KSH譜面ﾌｫｰﾏｯﾄのﾊﾞｰｼﾞｮﾝ(推奨値:%1):"*/ : r.i = csongver : i++
+		if (csongver = "") {
+			csongver_ = "100"
+		} else {
+			csongver_ = csongver
+		}
+		t.i=1 : it.i = replace(lang.9.50, "%1", "" + CURRENT_KSH_VERSION)/*"KSH譜面ﾌｫｰﾏｯﾄのﾊﾞｰｼﾞｮﾝ(推奨値:%1):"*/ : r.i = csongver_ : i++
 		_input lang.9.0/*"譜面に関する設定 (詳細)"*/,it,t,opt,r,0,0
 		f11fl=0
 		if(stat!=-1){
@@ -6991,10 +6996,9 @@ stop
 			i++ : if(csongver != r.i) : csongver = r.i : csongver_int = int(csongver) : clearKeySoundLibrary /* ←同時発音数が変化する可能性があるためキー音を初期化 */ : e = e | 1
 
 			// KSH譜面フォーマットのバージョンが範囲外の値をとっている場合は丸める
-			if (csongver_int <= 100) {
+			if (csongver_int = 100) {
 				csongver = ""
-				csongver_int = 100
-			} else : if (csongver_int > CURRENT_KSH_VERSION) {
+			} else : if (csongver_int < 100 | csongver_int > CURRENT_KSH_VERSION) {
 				csongver = "" + CURRENT_KSH_VERSION
 				csongver_int = CURRENT_KSH_VERSION
 			}
