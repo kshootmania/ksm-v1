@@ -2425,7 +2425,7 @@
 				//if(minfo.selnow.levmn2.4>100){
 					hVolFX_p=BASS_ChannelSetFX(mpid,0x10003,0)
 					dim volfx,2
-					volfx=0,tofloat(double(minfo.selnow.levmn2.4)/100.0f)
+					volfx=0,tofloat(double(minfo.selnow.levmn2.4)/10.0f/100.0f)
 					BASS_FXSetParameters hVolFX_p,volfx
 				//}
 				hCompFX_p = BASS_ChannelSetFX(mpid,0x10011,0)
