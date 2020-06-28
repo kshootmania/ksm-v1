@@ -6,6 +6,7 @@
 	alphabetjump=0
 	ctrlCKeyPrev = 0
 	ctrlEKeyPrev = 0
+	ctrlIKeyPrev = 0
 	if(imeget()=1):imeset 0
 	dim note,1
 	dim notefx,1
@@ -2241,6 +2242,8 @@
 		// Ctrlキーを押しながらの処理
 		getkey ctrlKey, 17
 		if (ctrlKey) {
+			filePath = dir_default + "\\songs\\" + minfostr.selnow.levm.0 + "\\" + minfostr.selnow.levm.5
+
 			// Ctrl+C: 選択中の譜面のパスをコピー
 			getkey ctrlCKey, 'C'
 			if (ctrlCKey & (ctrlCKeyPrev = 0)) {
@@ -2255,14 +2258,31 @@
 			if (ctrlEKey & (ctrlEKeyPrev = 0)) {
 				if (minfo.selnow.0.0 = 0/*通常の譜面*/) {
 					if (fileExists(dir_default + "\\editor.exe")) {
-						exec dir_default + "\\editor.exe \"" + dir_default + "\\songs\\" + minfostr.selnow.levm.0 + "/" + minfostr.selnow.levm.5 + "\""
+						exec dir_default + "\\editor.exe \"" + filePath
 					}
 				}
 			}
 			ctrlEKeyPrev = ctrlEKey
+			
+			// Ctrl+I: 選択中の譜面のインターネットランキングページを開く
+			getkey ctrlIKey, 'I'
+			if (ctrlIKey & (ctrlIKeyPrev = 0)) {
+				if (minfo.selnow.0.0 = 0/*通常の譜面*/) {
+					if (fileExists(filePath)) {
+						notesel buf
+						noteload filePath, -1
+						if ((lpeek(buf, 0) & 0x00FFFFFF) == 0xBFBBEF) {
+							DeleteUTF8BOM buf
+						}
+						exec "https://ir.kshootmania.com/md5/" + getChartIRHash(buf), 16
+					}
+				}
+			}
+			ctrlIKeyPrev = ctrlIKey
 		} else {
 			ctrlCKeyPrev = 0
 			ctrlEKeyPrev = 0
+			ctrlIKeyPrev = 0
 		}
 
 		// ダイアログの処理
