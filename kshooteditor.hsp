@@ -4148,6 +4148,9 @@ stop
 			anvol.0.1=30
 			anvolnum=1
 		}
+		if(csongver=""){
+			csongvol=csongvol*6/10
+		}
 		sdim d,1
 		if(caution=1){
 			dialog lang.0.25/*"この譜面データには特殊な譜面配置が存在するため、上書き保存するとデータが破損する可能性があります。"*/,0,lang.0.10/*"注意"*/
@@ -8699,10 +8702,6 @@ stop
 			pendfl=1
 			acmd=-1:return
 		}
-
-		actualCsongvol = csongvol
-		if (csongver_int = 100) : actualCsongvol = actualCsongvol * 6 / 10
-
 		playingsample=1
 		if(fname!=""){
 			sdim csongflist,256,1
@@ -8712,11 +8711,11 @@ stop
 				filepath=getpath(fname,32)+csongflist.0
 				mid=BASS_StreamCreateFile(0,filepath,0,0,0,0,0x20000)
 				mlength=BASS_ChannelGetLength_ms(mid)
-				if(actualCsongvol > 100){
-					hVolFX=BASS_ChannelSetFX(mid, 0x10003, 0)
-					dim volfx, 2
-					volfx = 0, tofloat(double(actualCsongvol) / 100.0f)
-					BASS_FXSetParameters hVolFX, volfx
+				if(csongvol>100){
+					hVolFX=BASS_ChannelSetFX(mid,0x10003,0)
+					dim volfx,2
+					volfx=0,tofloat(double(csongvol)/100.0f)
+					BASS_FXSetParameters hVolFX,volfx
 				}
 			}
 		}
@@ -8724,7 +8723,7 @@ stop
 		BASS_ChannelSetAttribute mid,2,0.0f
 		BASS_ChannelPlay(mid)
 		BASS_ChannelSetPosition_ms mid,poffset
-		BASS_ChannelSlideAttribute mid,2,double(min(actualCsongvol,100))/100,500
+		BASS_ChannelSlideAttribute mid,2,double(min(csongvol,100))/100,500
 		fadeoutfl=0
 		repeat
 			gsel 0
@@ -15778,9 +15777,6 @@ stop
 	feffect=0
 	mid2=-1
 
-	actualCsongvol = csongvol
-	if (csongver_int = 100) : actualCsongvol = actualCsongvol * 6 / 10
-
 	// 直角音を読み込む
 	loadLaserSlamSounds csongver_int
 
@@ -15922,11 +15918,11 @@ stop
 				//if(csongvol>100){
 					hVolFX=BASS_ChannelSetFX(mid.0,0x10003,5)
 					dim volfx,2
-					volfx=0,tofloat(double(actualCsongvol)/10.0f/100.0f)
+					volfx=0,tofloat(double(csongvol)/10.0f/100.0f)
 					BASS_FXSetParameters hVolFX,volfx
 					dim hVolFX_sw,swaudionum
 					repeat swaudionum*(feffect=1)
-						volfx=0,tofloat(double(actualCsongvol)/10.0f/100.0f)
+						volfx=0,tofloat(double(csongvol)/10.0f/100.0f)
 						hVolFX_sw.cnt=BASS_ChannelSetFX(mid_sw.cnt,0x10003,5)
 						BASS_FXSetParameters hVolFX_sw.cnt,volfx
 					loop
@@ -16260,6 +16256,7 @@ stop
 				repeat swaudionum*(feffect=1)
 					BASS_ChannelPlay(mid_sw.cnt)
 				loop
+				//BASS_ChannelSetAttribute mid,2,double(vol)*double(min(csongvol,100))/10000
 				BASS_ChannelSetPosition_ms mid,(stat1-t_moex*(1+bpmhalf))*(stat1>t_moex*(1+bpmhalf))/(1+bpmhalf)
 				repeat swaudionum*(feffect=1)
 					BASS_ChannelSetPosition_ms mid_sw.cnt,(stat1-t_moex*(1+bpmhalf))*(stat1>t_moex*(1+bpmhalf))/(1+bpmhalf)
