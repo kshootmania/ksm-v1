@@ -2409,11 +2409,15 @@
 		}
 		if((minfo.selnow.0.0>=0)&(minfo.selnow.0.0<4)&(timenow-max(selplustp,selminustp)>=200)&(mfl=0)){
 			chdir dir_default+"\\songs\\"+minfostr.selnow.levmn2.0
-			exist minfostr.selnow.levmn2.7
-			csongfile_exist=1
-			if(strsize<=0):csongfile_exist=0:mfl=0
-			if(strmid(minfostr.selnow.levmn2.7,0,5)="http:"){
+			if (strmid(minfostr.selnow.levmn2.7,0,5)="http:") {
 				mpid=BASS_StreamCreateURL(minfostr.selnow.levmn2.7,0,0x20000,0,0)
+				mfl=1
+			} else : if (fileExists(minfostr.selnow.levmn2.7)) {
+				filepath=dir_default+"\\songs\\"+minfostr.selnow.levmn2.0+"\\"+minfostr.selnow.levmn2.7
+				mpid=BASS_StreamCreateFile(0,filepath,0,0,0,0,0x20000)
+				mfl=1
+			}
+			if (mfl = 1) {
 				mlength=max(BASS_ChannelGetLength_ms(mpid),1500)
 				csongfile_exist=1
 				BASS_ChannelSetPosition_ms mpid,minfo.selnow.levmn2.2
@@ -2424,26 +2428,13 @@
 					volfx=0,tofloat(double(minfo.selnow.levmn2.4)/100.0f)
 					BASS_FXSetParameters hVolFX_p,volfx
 				//}
+				/*hCompFX_p = BASS_ChannelSetFX(mpid,0x10011,0)
+				dim compfx,6
+				compfx=tofloat(18.0f),tofloat(-24.0f),tofloat(100.0f),tofloat(1.0f),tofloat(0.01f),-1
+				BASS_FXSetParameters hCompFX_p,compfx*/
 				BASS_ChannelSlideAttribute mpid,2,/*double(minfo.selnow.levmn2.4)/100*/double(mastervol)/100,500
 				BASS_ChannelSlideAttribute selbgmid,2,0.0,250
 				BASS_ChannelPlay mpid
-				mfl=1
-			}else:if(csongfile_exist=1){
-				filepath=dir_default+"\\songs\\"+minfostr.selnow.levmn2.0+"\\"+minfostr.selnow.levmn2.7
-				mpid=BASS_StreamCreateFile(0,filepath,0,0,0,0,0x20000)
-				mlength=BASS_ChannelGetLength_ms(mpid)
-				BASS_ChannelSetPosition_ms mpid,minfo.selnow.levmn2.2
-				BASS_ChannelSetAttribute mpid,2,0
-				BASS_ChannelSlideAttribute mpid,2,/*double(minfo.selnow.levmn2.4)/100*/double(mastervol)/100,500
-				//if(minfo.selnow.levmn2.4>100){
-					hVolFX_p=BASS_ChannelSetFX(mpid,0x10003,0)
-					dim volfx,2
-					volfx=0,tofloat(double(minfo.selnow.levmn2.4)/100.0f)
-					BASS_FXSetParameters hVolFX_p,volfx
-				//}
-				BASS_ChannelSlideAttribute selbgmid,2,0.0,250
-				BASS_ChannelPlay mpid
-				mfl=1
 			}
 		}
 		if((minfo.selnow.0.0>=0)&(minfo.selnow.0.0<4)&(timenow-max(selplustp,selminustp)>=250)&(mfl=2)){
