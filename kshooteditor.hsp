@@ -1688,8 +1688,8 @@ stop
 			if(ztop.cnt.0>anafil.cnt2.0):break
 		loop
 		repeat zsidenum-zsidefcnt,zsidefcnt
-			if(zside.cnt.0=tilt.cnt2.0):stat2++
-			if(zside.cnt.0>tilt.cnt2.0):break
+			if(zside.cnt.0=anafil.cnt2.0):stat2++
+			if(zside.cnt.0>anafil.cnt2.0):break
 		loop
 		repeat ansenum-ansefcnt,ansefcnt
 			if(anse.cnt.0=anafil.cnt2.0):stat2++
@@ -1732,8 +1732,8 @@ stop
 			if(ztop.cnt.0>anagain.cnt2.0):break
 		loop
 		repeat zsidenum-zsidefcnt,zsidefcnt
-			if(zside.cnt.0=tilt.cnt2.0):stat2++
-			if(zside.cnt.0>tilt.cnt2.0):break
+			if(zside.cnt.0=anagain.cnt2.0):stat2++
+			if(zside.cnt.0>anagain.cnt2.0):break
 		loop
 		repeat ansenum-ansefcnt,ansefcnt
 			if(anse.cnt.0=anagain.cnt2.0):stat2++
@@ -1771,8 +1771,8 @@ stop
 			if(ztop.cnt.0>anvol.cnt2.0):break
 		loop
 		repeat zsidenum-zsidefcnt,zsidefcnt
-			if(zside.cnt.0=tilt.cnt2.0):stat2++
-			if(zside.cnt.0>tilt.cnt2.0):break
+			if(zside.cnt.0=anvol.cnt2.0):stat2++
+			if(zside.cnt.0>anvol.cnt2.0):break
 		loop
 		repeat ansenum-ansefcnt,ansefcnt
 			if(anse.cnt.0=anvol.cnt2.0):stat2++
