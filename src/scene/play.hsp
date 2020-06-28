@@ -978,16 +978,8 @@
 	}
 	cmov=(cmovfile="")
 
-	// 譜面バージョンに基づいて直角音の最大同時発音数を決定
-	laserSlamMaxPoly = (csongver_int >= 171) * 1 + (csongver_int < 171) * 10
-
 	// 直角音を読み込む
-	dim laserSlamKeySounds, 5
-	_ = CreateKeySound(dir_default+"\\se\\chokkaku.wav", laserSlamMaxPoly, varptr(laserSlamKeySounds.0))
-	_ = CreateKeySound(dir_default+"\\se\\chokkaku_down.wav", laserSlamMaxPoly, varptr(laserSlamKeySounds.1))
-	_ = CreateKeySound(dir_default+"\\se\\chokkaku_up.wav", laserSlamMaxPoly, varptr(laserSlamKeySounds.2))
-	_ = CreateKeySound(dir_default+"\\se\\chokkaku_swing.wav", laserSlamMaxPoly, varptr(laserSlamKeySounds.3))
-	_ = CreateKeySound(dir_default+"\\se\\chokkaku_mute.wav", laserSlamMaxPoly, varptr(laserSlamKeySounds.4))
+	loadLaserSlamSounds csongver_int
 
 	// layer名をパース
 	if(csonglayerstr!=""){
@@ -5803,9 +5795,7 @@
 								if(abs(analog.(analoganj.(cnt-1).1).3-analog.(analoganj.(cnt-1).1).4)>stat1):stat1=min(abs(analog.(analoganj.(cnt-1).1).3-analog.(analoganj.(cnt-1).1).4),25)
 							}
 						}
-						if (laserSlamKeySounds.(analoganj.cnt.4) != 0) {
-							PlayKeySound laserSlamKeySounds.(analoganj.cnt.4), double(canvol)/100*stat1/25*mastervol/100*dirvol/100
-						}
+						playLaserSlamSound analoganj.cnt.4, double(canvol)/100*stat1/25*mastervol/100*dirvol/100
 						analoganflag=1
 						chokkakup.(analoganj.cnt.0)=cnt
 						chocnt++

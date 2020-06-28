@@ -209,6 +209,7 @@
 #include "src/ksmcore.as"
 
 #include "src/key_sound.as"
+#include "src/laser_slam_sound.as"
 
 #define FS_UTILS_REPLACE_CHDIR_WITH_SAFE_CHDIR
 #include "src/filesystem_utils.as"
@@ -339,6 +340,7 @@ dir_default=dir_cur
 
 // Šeíƒ‚ƒWƒ…[ƒ‹‚Ì‰Šú‰»
 initKeySoundModule dir_default
+initLaserSlamSoundModule dir_default
 
 ddim dstat,1
 ddim ct,1

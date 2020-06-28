@@ -37,7 +37,7 @@
 //
 //   p1: ksh譜面の"ver"フィールドの整数部分(int型)
 //
-#defcfunc getKeySoundMaxForVersion int p1
+#defcfunc local getMaxPolyphonyForVersion int p1
 	if (p1 >= 171) {
 		return 1
 	} else {
@@ -63,7 +63,7 @@
 
 		// KeySoundの実体を生成
 		pKeySound = 0
-		if (CreateKeySound@(soundFilePath, getKeySoundMaxForVersion(p2)/*キー音の同時再生数*/, varptr(pKeySound))) {
+		if (CreateKeySound@(soundFilePath, getMaxPolyphonyForVersion(p2), varptr(pKeySound))) {
 			s_keySoundLibrary(p1) = pKeySound
 		} else {
 			dialog "Error: An error occurred while loading sound \"" + p1 + "\""
