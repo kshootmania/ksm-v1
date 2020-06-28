@@ -590,11 +590,12 @@ mastervol=100
 
 vtiming=0
 
-globaloffset=0
-judgedelay=0
-analogdelayconf=0//-25
+globaloffset_config=0
+judgedelay_config=0
+analogdelay_config=0
+visual_offset=0
 
-soundfx_delay=0
+soundfx_delay_config=0
 
 disableime=3
 
@@ -855,7 +856,7 @@ repeat notemax
 		disableime=int(strmid(confstr.cnt,11,1))
 	}
 	if(headcmp(confstr.cnt,13,"globaloffset=")){
-		globaloffset=int(strmid(confstr.cnt,13,8))
+		globaloffset_config=int(strmid(confstr.cnt,13,8))
 	}
 	if(headcmp(confstr.cnt,16,"hidemousecursor=")){
 		hidem=int(strmid(confstr.cnt,16,1))
@@ -910,13 +911,16 @@ repeat notemax
 		}
 	}
 	if(headcmp(confstr.cnt,11,"inputdelay=")){
-		judgedelay=int(strmid(confstr.cnt,11,16))
+		judgedelay_config=int(strmid(confstr.cnt,11,16))
 	}
 	if(headcmp(confstr.cnt,11,"laserdelay=")){
-		analogdelayconf=int(strmid(confstr.cnt,11,16))
+		analogdelay_config=int(strmid(confstr.cnt,11,16))
 	}
 	if(headcmp(confstr.cnt,14,"soundfx_delay=")){
-		soundfx_delay=int(strmid(confstr.cnt,14,16))
+		soundfx_delay_config=int(strmid(confstr.cnt,14,16))
+	}
+	if(headcmp(confstr.cnt,14,"visual_offset=")){
+		visual_offset=int(strmid(confstr.cnt,14,16))
 	}
 	if(headcmp(confstr.cnt,13,"auto_play_se=")){
 		auto_chokkaku_se=int(strmid(confstr.cnt,13,1))
@@ -1035,8 +1039,8 @@ numkey_c=97,98,99,100,101,102,103,104,105
 numkey_k=103,104,105,100,101,102,97,98,99
 
 if(int(strmid(currentver2,0,3))<132){
-	judgedelay=globaloffset
-	globaloffset=0
+	judgedelay_config=globaloffset_config
+	globaloffset_config=0
 }
 
 gosub *refreshlang
@@ -1715,7 +1719,7 @@ end
 		}else:if((headcmp(confstr.cnt,11,"disableime="))|(cex=19)){
 			confs+="disableime="+disableime+stat1
 		}else:if((headcmp(confstr.cnt,13,"globaloffset="))|(cex=20)){
-			confs+="globaloffset="+globaloffset+stat1
+			confs+="globaloffset="+globaloffset_config+stat1
 		}else:if((headcmp(confstr.cnt,9,"synctype="))|(cex=21)){
 			//confs+="synctype="+syncmode+stat1
 		}else:if((headcmp(confstr.cnt,9,"syncfreq="))|(cex=22)){
@@ -1757,7 +1761,7 @@ end
 				confs+="mselview=level"+stat1
 			}
 		}else:if((headcmp(confstr.cnt,11,"laserdelay="))|(cex=39)){
-			confs+="laserdelay="+analogdelayconf+stat1
+			confs+="laserdelay="+analogdelay_config+stat1
 		}else:if((headcmp(confstr.cnt,10,"usenumpad="))|(cex=40)){
 			confs+="usenumpad="+usenumpad+stat1
 		}else:if((headcmp(confstr.cnt,12,"hispeedtype="))|(cex=41)){
@@ -1770,7 +1774,7 @@ end
 			if(vhstypestat=""):vhstypestat="x,O,"
 			confs+="hispeedtype="+strmid(vhstypestat,0,strlen(vhstypestat)-1)+stat1
 		}else:if((headcmp(confstr.cnt,11,"inputdelay="))|(cex=42)){
-			confs+="inputdelay="+judgedelay+stat1
+			confs+="inputdelay="+judgedelay_config+stat1
 		}else:if((headcmp(confstr.cnt,6,"vsync="))|(cex=43)){
 			confs+="vsync="+vsync+stat1
 		}else:if((headcmp(confstr.cnt,11,"esckey_bt3="))|(cex=44)){

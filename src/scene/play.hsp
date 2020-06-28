@@ -16,6 +16,13 @@
 	}else{
 		chdir getpath(cnotesfile,32)
 	}
+
+	// 判定タイミング調整のconfig上の値から実際の値を計算
+	judgedelay = judgedelay_config + visual_offset
+	globaloffset = globaloffset_config - visual_offset
+	analogdelay = judgedelay + analogdelay_config
+	soundfx_delay = soundfx_delay_config + visual_offset
+
 	fps=0
 	totalscore=0
 	totalscorep=0
@@ -3759,7 +3766,7 @@
 	mdelayt=0
 	mrepeat=0
 	minforefresh=1
-	analogdelay=analogdelayconf+judgedelay
+
 	bpmp=bpm
 	dim peffstatap,2
 	peffstat2p=0

@@ -795,10 +795,10 @@
 				hold_fxlr_time=50000
 			}
 			
-			if(globaloffset!=0){
+			if(globaloffset_config!=0){
 				stat1=""
 				if(globaloffset>0):stat1="+"
-				stat3+="globaloffset: "+stat1+globaloffset+"msec"
+				stat3+="globaloffset: "+stat1+globaloffset_config+"msec"
 			}
 			if(tweet_key=1){
 				if(stat3!=""):stat3+="\n"

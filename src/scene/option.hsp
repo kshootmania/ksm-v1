@@ -285,10 +285,9 @@
 				disableime--
 				if(disableime<0):disableime=0
 			}else:if(selnow=6){
-				//globaloffset--
-				judgedelay--
+				judgedelay_config--
 			}else:if(selnow=7){
-				analogdelayconf--
+				analogdelay_config--
 			}else:if(selnow=8){
 				mx=max(0,mx-1)
 			}else:if(selnow=9){
@@ -437,10 +436,9 @@
 				disableime++
 				if(disableime>3):disableime=3
 			}else:if(selnow=6){
-				//globaloffset++
-				judgedelay++
+				judgedelay_config++
 			}else:if(selnow=7){
-				analogdelayconf++
+				analogdelay_config++
 			}else:if(selnow=8){
 				mx=min(mx+1,1)
 			}else:if(selnow=9){
@@ -642,33 +640,33 @@
 		pos centersh+20*scrsize_w/640,getsize(40)+getsize(30)*6
 		gcopy 138,0,getsize(24)*6,getsize(300),getsize(24)
 		stat3=20*scrsize_w/640+getsize(300):stat4=40*scrsize_h/480+getsize(30)*6
-		if(judgedelay=0){
+		if(judgedelay_config=0){
 			stat1=""
 			stat2=lang.3.34/*" (調整なし)"*/
-		}else:if(judgedelay>0){
+		}else:if(judgedelay_config>0){
 			stat1="+"
 			stat2=lang.3.35/*" (判定位置を遅くします)"*/
 		}else{
 			stat1=""
 			stat2=lang.3.36/*" (判定位置を早くします)"*/
 		}
-		stat1=stat1+judgedelay+lang.3.37/*"msec"*/+stat2
+		stat1=stat1+judgedelay_config+lang.3.37/*"msec"*/+stat2
 		stat2=2
 		gosub *drawconfigitem
 		pos centersh+20*scrsize_w/640,getsize(40)+getsize(30)*7
 		gcopy 138,0,getsize(24)*7,getsize(300),getsize(24)
 		stat3=20*scrsize_w/640+getsize(300):stat4=40*scrsize_h/480+getsize(30)*7
-		if(analogdelayconf=0){
+		if(analogdelay_config=0){
 			stat1=""
 			stat2=lang.3.34/*" (調整なし)"*/
-		}else:if(analogdelayconf>0){
+		}else:if(analogdelay_config>0){
 			stat1="+"
 			stat2=lang.3.38/*" (鍵盤より判定位置を遅くします)"*/
 		}else{
 			stat1=""
 			stat2=lang.3.39/*" (鍵盤より判定位置を早くします)"*/
 		}
-		stat1=stat1+analogdelayconf+lang.3.37/*"msec"*/+stat2
+		stat1=stat1+analogdelay_config+lang.3.37/*"msec"*/+stat2
 		stat2=2
 		gosub *drawconfigitem
 		pos centersh+20*scrsize_w/640,getsize(40)+getsize(30)*8
