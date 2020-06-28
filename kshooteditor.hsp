@@ -15790,9 +15790,9 @@ stop
 	// ’¼Šp‰¹‚ğ“Ç‚İ‚Ş
 	loadLaserSlamSounds csongver_int
 
-	if(fname!=""){
-		sdim csongflist,256,1
-		split csongfile,";",csongflist
+	sdim csongflist,256,1
+	split csongfile,";",csongflist
+	if(fname != "" & fileExists(csongflist.0)){
 		stat1=min(max(stat-1,0),3)
 		repeat stat1
 			exist getpath(fname,32)+csongflist.stat1
