@@ -366,26 +366,14 @@
 	}
 
 	// IR用のファイルハッシュを計算
-	sdim buf_ir_chart,strlen(buf)
-	cnt3=-1
-	dim anagrcnt,2
+	csongmd5hash_ir_chart = getChartIRHash(buf)
+
+	// 譜面ファイルの内容を1行ずつ配列dに入れる
 	sdim d,256,notemax
-	ir_ignore="//","title=","title_img=","artist=","artist_img=","effect=","illustrator=","jacket=","level=","difficulty=","m=","o=","v=","vo=","mvol=","bg=","layer=","po=","plength=","pfiltergain=","filtertype=","chokkakuautovol=","chokkakuvol=","chokkakuse=","icon=","ver=","fx-l=","fx-r=","#define","information="
 	repeat notemax
 		noteget buf2,cnt
 		d.cnt=buf2
-		f=1
-		foreach ir_ignore
-			if(headcmp(buf2,strlen(ir_ignore.cnt),ir_ignore.cnt)){
-				f=0
-				break
-			}
-		loop
-		if(f=1){
-			buf_ir_chart+=buf2+"\n"
-		}
 	loop
-	varmd5 csongmd5hash_ir_chart, buf_ir_chart, strlen(buf_ir_chart)
 
 	// 譜面内容の読み込み
 	sp=notemax
@@ -1726,12 +1714,14 @@
 	fl_Echo=0
 	fl_SiCh=0
 	dim fxfl,2
+	dim anagrcnt,2
 
 	// 直後のノーツに適用されるキー音情報
 	sdim nextKeySoundNamesLR, 256, 2
 	nextKeySoundNamesLR = "", ""
 	nextKeySoundVolumesLR = 100, 100
 
+	// 譜面内容を読み込む
 	_csongtitle=csongtitle
 	if (lpeek(_csongtitle, 0) & 0x00FFFFFF) == 0xBFBBEF{
 		DeleteUTF8BOM _csongtitle

@@ -43,6 +43,30 @@ popup_text=""
 	// Note: ソースコード公開用に削除
 	return -1
 
+//
+// 譜面のIR用のMD5ハッシュ値を取得
+//
+//   p1: kshファイルの内容の文字列
+//
+#defcfunc getChartIRHash var p1, local buf, local p1Line, local ignoreList, local f, local ret
+	sdim buf, strlen(p1)
+	ignoreList = "//","title=","title_img=","artist=","artist_img=","effect=","illustrator=","jacket=","level=","difficulty=","m=","o=","v=","vo=","mvol=","bg=","layer=","po=","plength=","pfiltergain=","filtertype=","chokkakuautovol=","chokkakuvol=","chokkakuse=","icon=","ver=","fx-l=","fx-r=","#define","information="
+	repeat notemax
+		noteget p1Line, cnt
+		f=1
+		foreach ignoreList
+			if(headcmp(p1Line, strlen(ignoreList.cnt), ignoreList.cnt)){
+				f=0
+				break
+			}
+		loop
+		if(f=1){
+			buf += p1Line + "\n"
+		}
+	loop
+	varmd5 ret, buf, strlen(buf)
+	return ret
+
 #deffunc ir_popup_init
 	popup_startt=0
 	popup_endt=-10000
