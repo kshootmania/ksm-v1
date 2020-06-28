@@ -2428,10 +2428,10 @@
 					volfx=0,tofloat(double(minfo.selnow.levmn2.4)/100.0f)
 					BASS_FXSetParameters hVolFX_p,volfx
 				//}
-				/*hCompFX_p = BASS_ChannelSetFX(mpid,0x10011,0)
+				hCompFX_p = BASS_ChannelSetFX(mpid,0x10011,0)
 				dim compfx,6
 				compfx=tofloat(18.0f),tofloat(-24.0f),tofloat(100.0f),tofloat(1.0f),tofloat(0.01f),-1
-				BASS_FXSetParameters hCompFX_p,compfx*/
+				BASS_FXSetParameters hCompFX_p,compfx
 				BASS_ChannelSlideAttribute mpid,2,/*double(minfo.selnow.levmn2.4)/100*/double(mastervol)/100,500
 				BASS_ChannelSlideAttribute selbgmid,2,0.0,250
 				BASS_ChannelPlay mpid
