@@ -77,4 +77,11 @@
 	}
 	return
 
+#deffunc local destroyLaserSlamSounds onexit
+	foreach s_laserSlamKeySounds
+		if (s_laserSlamKeySounds.cnt = 0) : continue
+		DestroyKeySound@ s_laserSlamKeySounds.cnt
+	loop
+	return
+
 #global
