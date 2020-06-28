@@ -218,6 +218,7 @@ e02-049|모든 채보 데이터를 삭제(&H)...
 e02-050|채보 데이터 설정-전반(&T)...\tCtrl+T
 e02-051|채보 데이터 설정-상세(&M)...\tCtrl+Shift+T
 e02-052|Use cursor time for "&sample start"
+e02-054|S&witch color of selected LASER objects
 e02-055|Copy lane tilt effects &in selection
 e02-056|Remove lane tilt effects i&n selection
 e03-000|보기(&V)

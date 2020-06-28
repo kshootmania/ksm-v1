@@ -218,6 +218,7 @@ e02-049|清空譜面內容(&H)...
 e02-050|譜面相關設定 - 一般(&T)...\tCtrl+T
 e02-051|譜面相關設定 - 詳細(&M)...\tCtrl+Shift+T
 e02-052|Use cursor time for "&sample start"
+e02-054|S&witch color of selected LASER objects
 e02-055|Copy lane tilt effects &in selection
 e02-056|Remove lane tilt effects i&n selection
 e03-000|查看(&V)

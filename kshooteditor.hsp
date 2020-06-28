@@ -160,6 +160,7 @@
 #enum CMD_EDIT_CLEARSEL
 #enum CMD_EDIT_SELFLIP
 #enum CMD_EDIT_SELRANDOMIZE
+#enum CMD_EDIT_LASER_COLOR_SELFLIP
 #enum CMD_EDIT_REMOVEMEASURE
 #enum CMD_EDIT_COPY_TILT
 #enum CMD_EDIT_DELETE_TILT
@@ -995,6 +996,7 @@ addmenu heditmenu, lang.2.31/*"選択を解除(&L)\tCtrl+D"*/, CMD_EDIT_CLEARSEL, 0x0
 addmenu heditmenu, "", 0, 0x0800
 addmenu heditmenu, lang.2.40/*"選択ノーツを左右反転(&F)\tCtrl+R"*/, CMD_EDIT_SELFLIP, 0x00
 addmenu heditmenu, lang.2.41/*"選択ノーツのレーンをランダム入替(&R)\tCtrl+Shift+R"*/, CMD_EDIT_SELRANDOMIZE, 0x0
+addmenu heditmenu, lang.2.54/*"選択中のLASERオブジェクトの色を反転(&W)"*/, CMD_EDIT_LASER_COLOR_SELFLIP, 0x00
 addmenu heditmenu, "", 0, 0x0800
 addmenu heditmenu, lang.2.55/*"選択範囲の傾きエフェクトをコピー(&I)"*/, CMD_EDIT_COPY_TILT, 0x00
 addmenu heditmenu, lang.2.56/*"選択範囲の傾きエフェクトを削除(&N)"*/, CMD_EDIT_DELETE_TILT, 0x00
@@ -5986,6 +5988,18 @@ stop
 			}else{
 				note.(selnote.cnt).0=4+((note.(selnote.cnt).0-4)^pturnl)
 			}
+			en=1
+		loop
+		e=e|en
+		gosub *draw
+		gosub *refreshtitle
+	}else : if(cmd = CMD_EDIT_LASER_COLOR_SELFLIP) {
+		if(pendfl!=-1):pendfl=1:return
+		if(selnum>0):gosub *undokakuho
+		en=0
+		repeat selanalognum
+			if((selanalog.cnt<0)|(selanalog.cnt>=analognum)):break
+			analog.(selanalog.cnt).0=1-analog.(selanalog.cnt).0
 			en=1
 		loop
 		e=e|en

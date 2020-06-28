@@ -218,6 +218,7 @@ e02-049|Clear c&hart's contents...
 e02-050|Char&t metadata - General...\tCtrl+T
 e02-051|Chart &metadata - Detail...\tCtrl+Shift+T
 e02-052|Use cursor time for "&sample start"
+e02-054|S&witch color of selected LASER objects
 e02-055|Copy lane tilt effects &in selection
 e02-056|Remove lane tilt effects i&n selection
 e03-000|&View
