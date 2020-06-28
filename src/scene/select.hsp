@@ -2315,7 +2315,8 @@
 					f=0
 					repeat notemax
 						noteget stat2,cnt
-						if(stat2=replace(minfostr.selnow.levm.0,"\\\\","/")){
+						songPath = replace(minfostr.selnow.levm.0,"\\\\","/")
+						if(stat2 = songPath | stat2 = songPath + "/" + minfostr.selnow.levm.5){
 							notedel cnt
 							f=1
 							break
@@ -2413,8 +2414,8 @@
 				mpid=BASS_StreamCreateURL(minfostr.selnow.levmn2.7,0,0x20000,0,0)
 				mfl=1
 			} else : if (fileExists(minfostr.selnow.levmn2.7)) {
-				filepath=dir_default+"\\songs\\"+minfostr.selnow.levmn2.0+"\\"+minfostr.selnow.levmn2.7
-				mpid=BASS_StreamCreateFile(0,filepath,0,0,0,0,0x20000)
+				filePath=dir_default+"\\songs\\"+minfostr.selnow.levmn2.0+"\\"+minfostr.selnow.levmn2.7
+				mpid=BASS_StreamCreateFile(0,filePath,0,0,0,0,0x20000)
 				mfl=1
 			}
 			if (mfl = 1) {
@@ -2628,9 +2629,12 @@
 			repeat notemax
 				sortget stat3,cnt
 				notesel filelistdir
-				noteget stat1,stat3
-				if(stat1=""):f=1:continue
-				stat1+="\\"
+				noteget favLine, stat3
+				if (favLine = "") {
+					f=1
+					continue
+				}
+				stat1 = favLine + "\\"
 				sdim sndirstat,1
 				split stat1,"\\",sndirstat
 				dir=sndirstat.0
@@ -2665,24 +2669,39 @@
 					dirlist stat1,sndir,5
 					if(stat>0){
 						if(length(sndirstat)>=4){
-							chdir dir_default+"\\songs\\"+dir+"\\"+sndir
-							dirlist stat1,sndirstat.2,5
-							if(stat>0){
-								chdir dir_default+"\\songs\\"+dir+"\\"+sndir+"\\"+sndirstat.2
-								dirlist stat1,"*.ksh",1
-								notesel stat1
-								repeat notemax
-									noteget stat2,cnt
-									filelist+=dir_cur+"\\"+stat2+"\n"
+							if (strlowerf(strmid(sndirstat.2, -1, 4)) = ".ksh") {
+								// 譜面ファイルが指定されている場合
+								filePath = dir_default + "\\songs\\" + favLine
+								if (fileExists(filePath)) {
+									filelist += filePath + "\n"
 									fvol.filelistnum=dirvol
 									foffset.filelistnum=diroffset
 									filelistnum++
-								loop
-								if(notemax=0):f=1 // 削除フラグ
-							}else{
-								f=1
+								} else {
+									f=1
+								}
+							} else {
+								// サブフォルダの中の曲フォルダ("songs/[package]/[sub]/[song]")の場合
+								chdir dir_default+"\\songs\\"+dir+"\\"+sndir
+								dirlist stat1,sndirstat.2,5
+								if(stat>0){
+									chdir dir_default+"\\songs\\"+dir+"\\"+sndir+"\\"+sndirstat.2
+									dirlist stat1,"*.ksh",1
+									notesel stat1
+									repeat notemax
+										noteget stat2,cnt
+										filelist+=dir_cur+"\\"+stat2+"\n"
+										fvol.filelistnum=dirvol
+										foffset.filelistnum=diroffset
+										filelistnum++
+									loop
+									if(notemax=0):f=1 // 削除フラグ
+								}else{
+									f=1
+								}
 							}
 						}else{
+							// 通常の曲フォルダの場合
 							chdir dir_default+"\\songs\\"+dir+"\\"+sndir
 							dirlist stat1,"*.ksh",1
 							notesel stat1
@@ -2702,35 +2721,43 @@
 					f=1
 				}
 			loop
+
+			// favファイル内に読み込めなかった項目が1個でもあれば、favファイルからの削除処理を実行
 			if(f=1){
 				stat3=0
 				notesel filelistdir
 				repeat notemax
 					f=0
 					notesel filelistdir
-					noteget stat1,cnt-stat3
-					if(stat1=""){
+					noteget favLine, cnt - stat3
+					if(favLine = ""){
 						notedel cnt-stat3
 						stat3++
 						continue
 					}
-					stat1+="\\"
-					split stat1,"\\",sndirstat
-					chdir dir_default+"\\songs"
-					dirlist stat1,sndirstat.0,5
-					if(stat>0){
-						chdir dir_default+"\\songs\\"+sndirstat.0
-						dirlist stat1,sndirstat.1,5
+					if (strlowerf(strmid(favLine, -1, 4)) = ".ksh") {
+						// 譜面ファイルが指定されている場合
+						f = (fileExists(dir_default + "\\songs\\" + favLine) = 0)
+					} else {
+						// 曲のフォルダが指定されている場合
+						stat1 = favLine + "\\"
+						split stat1,"\\",sndirstat
+						chdir dir_default+"\\songs"
+						dirlist stat1,sndirstat.0,5
 						if(stat>0){
-							chdir dir_default+"\\songs\\"+sndirstat.0+"\\"+sndirstat.1
-							dirlist stat1,"*.ksh",1
-							notesel stat1
-							if(notemax=0):f=1
+							chdir dir_default+"\\songs\\"+sndirstat.0
+							dirlist stat1,sndirstat.1,5
+							if(stat>0){
+								chdir dir_default+"\\songs\\"+sndirstat.0+"\\"+sndirstat.1
+								dirlist stat1,"*.ksh",1
+								notesel stat1
+								if(notemax=0):f=1
+							}else{
+								f=1
+							}
 						}else{
 							f=1
 						}
-					}else{
-						f=1
 					}
 					if(f=1){
 						notedel cnt-stat3
