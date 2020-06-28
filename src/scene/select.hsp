@@ -2699,7 +2699,7 @@
 					dirlist stat1,sndir,5
 					if(stat>0){
 						if(length(sndirstat)>=4){
-							if (strlowerf(strmid(sndirstat.2, -1, 4)) = ".ksh") {
+							if (getpath(favLine, 2) = ".ksh") {
 								// 譜面ファイルが指定されている場合
 								filePath = dir_default + "\\songs\\" + favLine
 								if (fileExists(filePath)) {
@@ -2765,7 +2765,7 @@
 						stat3++
 						continue
 					}
-					if (strlowerf(strmid(favLine, -1, 4)) = ".ksh") {
+					if (getpath(favLine, 2) = ".ksh") {
 						// 譜面ファイルが指定されている場合
 						f = (fileExists(dir_default + "\\songs\\" + favLine) = 0)
 					} else {
