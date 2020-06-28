@@ -2612,8 +2612,8 @@ stop
 		csongtotal=0
 		csongoftbpm=0
 		csongvol=100
-		csongver=""
-		csongver_int=100
+		csongver="160"
+		csongver_int=160
 		csongfile=".mp3"
 		bgname="desert"
 		bgname_l="arrow"
@@ -6999,8 +6999,9 @@ stop
 			i++ : if(csongver != r.i) : csongver = r.i : csongver_int = int(csongver) : clearKeySoundLibrary /* ←同時発音数が変化する可能性があるためキー音を初期化 */ : e = e | 1
 
 			// KSH譜面フォーマットのバージョンが範囲外の値をとっている場合は丸める
-			if (csongver_int = 100) {
-				csongver = ""
+			if (csongver_int >= 100 & csongverint < 160) {
+				csongver = "160"
+				csongver_int = 160
 			} else : if (csongver_int < 100 | csongver_int > CURRENT_KSH_VERSION) {
 				csongver = "" + CURRENT_KSH_VERSION
 				csongver_int = CURRENT_KSH_VERSION
@@ -15081,7 +15082,16 @@ stop
 	if(csongvol!=100):buf+="mvol="+csongvol+"\n"
 	buf+="o="+offset+"\n"
 	buf+="bg="+utf8enc(bgname)+"\n"
-	buf+="layer="+utf8enc(bgname_l)+"\n"
+
+	// layer名の区切り文字置き換え(v1.67)
+	if (csongver_int < 167) {
+		bgname_l_ = bgname_l
+		strrep bgname_l_,";","/"
+		buf+="layer="+utf8enc(bgname_l_)+"\n"
+	} else {
+		buf+="layer="+utf8enc(bgname_l)+"\n"
+	}
+
 	buf+="po="+poffset+"\n"
 	buf+="plength="+plength+"\n"
 	if(csongv!=""){
