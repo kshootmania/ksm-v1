@@ -300,7 +300,13 @@
 	ztilton=0
 	csongtotal=0
 	randomize
-	if(turn=2){
+	pturnl = 0
+	pturna = 0
+	if (turn = 1) {
+		pturnl = 1
+		pturna = 1
+	}
+	if (turn=2) {
 		stat1=0
 		dim pturn,4
 		repeat 4
@@ -318,10 +324,6 @@
 				}
 			loop
 		loop
-		pturnl=rnd(2)
-		pturna=rnd(2)
-	}
-	if((turn=3)|(turn=4)){
 		pturnl=rnd(2)
 		pturna=rnd(2)
 	}
@@ -880,7 +882,7 @@
 			continue
 		}
 		if(headcmp(d.cnt,13,"laserrange_l=")){
-			anaran.anarannum.0=0^(pturna|(turn=1))
+			anaran.anarannum.0=0^pturna
 			if(cnt3<0){
 				anaran.anarannum.1=int(cbcnt)
 			}else{
@@ -894,7 +896,7 @@
 			continue
 		}
 		if(headcmp(d.cnt,13,"laserrange_r=")){
-			anaran.anarannum.0=1^(pturna|(turn=1))
+			anaran.anarannum.0=1^pturna
 			if(cnt3<0){
 				anaran.anarannum.1=int(cbcnt)
 			}else{
@@ -2425,13 +2427,7 @@
 			if(longmode=3):break
 			lcnt=cnt
 			if(strmid(d.cnt2a,cnt+5,1)="2"){
-				if(turn=1){
-					note.notenum.0=5-cnt
-				}else:if((turn=2)|(turn=3)|(turn=4)){
-					note.notenum.0=4+(cnt^pturnl)
-				}else{
-					note.notenum.0=cnt+4
-				}
+				note.notenum.0 = 4 + (cnt ^ pturnl)
 				note.notenum.1=int(cbcnt)+cnt2*UNIT_MEASURE*beatn/beatd/div.cnt3
 				if(note.notenum.1>=cmdline_from){
 					note.notenum.2=0
@@ -2502,13 +2498,7 @@
 						break
 					}
 				loop
-				if(turn=1){
-					note.notenum.0=5-cnt
-				}else:if((turn=2)|(turn=3)|(turn=4)){
-					note.notenum.0=4+(cnt^pturnl)
-				}else{
-					note.notenum.0=cnt+4
-				}
+				note.notenum.0 = 4 + (cnt ^ pturnl)
 				note.notenum.1=int(cbcnt)+cnt2*UNIT_MEASURE*beatn/beatd/div.cnt3
 				if(note.notenum.1>=cmdline_from){
 					note.notenum.2=int(lend)
@@ -2524,13 +2514,7 @@
 							stat2=UNIT_MEASURE_8
 						}
 						if(stat1=1){
-							if(turn=1){
-								longj.longjnum.0=1-cnt
-							}else:if((turn=2)|(turn=3)|(turn=4)){
-								longj.longjnum.0=(cnt^pturnl)
-							}else{
-								longj.longjnum.0=cnt
-							}
+							longj.longjnum.0 = (cnt ^ pturnl)
 							longj.longjnum.1=note.notenum.1
 							longj.longjnum.2=note.notenum.2
 							if(bpm<256000){
@@ -2556,15 +2540,9 @@
 							totalcombo++
 						}else{
 							for i,(note.notenum.1+stat2-1)/stat2*stat2+stat2,note.notenum.1+note.notenum.2-stat2,stat2
-								if(turn=1){
-									longj.longjnum.0=1-cnt
-								}else:if((turn=2)|(turn=3)|(turn=4)){
-									longj.longjnum.0=(cnt^pturnl)
-								}else{
-									longj.longjnum.0=cnt
-								}
-								longj.longjnum.1=i
-								longj.longjnum.2=0
+								longj.longjnum.0 = (cnt ^ pturnl)
+								longj.longjnum.1 = i
+								longj.longjnum.2 = 0
 								if(i>note.notenum.1+note.notenum.2-stat2*2){
 									longj.longjnum.2+=stat2*2
 								}else{
@@ -2632,13 +2610,7 @@
 						break
 					}
 				loop
-				if(turn=1){
-					notefx.notefxnum.0=5-cnt
-				}else:if((turn=2)|(turn=3)|(turn=4)){
-					notefx.notefxnum.0=4+(cnt^pturnl)
-				}else{
-					notefx.notefxnum.0=cnt+4
-				}
+				notefx.notefxnum.0 = 4 + (cnt ^ pturnl)
 				notefx.notefxnum.1=int(cbcnt)+cnt2*UNIT_MEASURE*beatn/beatd/div.cnt3
 				notefx.notefxnum.2=int(lend)
 				notefx.notefxnum.3=c2t(notefx.notefxnum.1)
@@ -2830,14 +2802,8 @@
 				// 異常がなければリストに追加
 				if(stat1!=-1){
 					// 対象のアナログデバイス(L:0,R:1)
-					if(turn=1){
-						analog.analognum.0=1-cnt
-					}else:if((turn=2)|(turn=3)|(turn=4)){
-						analog.analognum.0=cnt^pturna
-					}else{
-						analog.analognum.0=cnt
-					}
-					analog.analognum.1=int(cbcnt)+cnt2*UNIT_MEASURE*beatn/beatd/div.cnt3 // 変化の始点カウント値
+					analog.analognum.0 = cnt ^ pturna
+					analog.analognum.1 = int(cbcnt) + cnt2 * UNIT_MEASURE * beatn / beatd / div.cnt3 // 変化の始点カウント値
 					if(analog.analognum.1>=cmdline_from){
 						analog.analognum.2=int(lend) // 変化にかかる時間
 						analog.analognum.6=c2t(analog.analognum.1) // 変化の始点t
@@ -2853,7 +2819,7 @@
 						anaendstat.cnt=analognum
 						analog.analognum.3=a2p(strmid(d.cnt2a,cnt+8,1)) // 変化の初期値
 						analog.analognum.4=stat1 // 変化の目標値
-						if((turn=1)|(((turn=2)|(turn=3)|(turn=4))&(pturna=1))){
+						if (pturna) {
 							analog.analognum.3=50-analog.analognum.3
 							analog.analognum.4=50-analog.analognum.4
 						}
@@ -2872,15 +2838,9 @@
 							}
 							if((analog.analognum.2>UNIT_MEASURE_32)|(analog.analognum.3=analog.analognum.4)){
 								for i,(analog.analognum.1+stat1-1)/stat1*stat1/*+analog.analognum.5*stat1*/,analog.analognum.1+analog.analognum.2,stat1
-									if(turn=1){
-										analogj.analogjnum.0=1-cnt
-									}else:if((turn=2)|(turn=3)|(turn=4)){
-										analogj.analogjnum.0=cnt^pturna
-									}else{
-										analogj.analogjnum.0=cnt
-									}
-									analogj.analogjnum.1=i
-									analogj.analogjnum.3=max(laserrate,1)
+									analogj.analogjnum.0 = cnt ^ pturna
+									analogj.analogjnum.1 = i
+									analogj.analogjnum.3 = max(laserrate, 1)
 									analogjnum++
 									if(analogmode!=mode_off){
 										stat4+=laserrate
@@ -2888,17 +2848,11 @@
 									}
 								next
 							}else{
-								if(turn=1){
-									analoganj.analoganjnum.0=1-cnt
-								}else:if((turn=2)|(turn=3)|(turn=4)){
-									analoganj.analoganjnum.0=cnt^pturna
-								}else{
-									analoganj.analoganjnum.0=cnt
-								}
-								analoganj.analoganjnum.1=analognum
-								analoganj.analoganjnum.3=analog.analognum.4
-								analoganj.analoganjnum.4=0
-								analoganj.analoganjnum.5=max(laserrate,1)
+								analoganj.analoganjnum.0 = cnt ^ pturna
+								analoganj.analoganjnum.1 = analognum
+								analoganj.analoganjnum.3 = analog.analognum.4
+								analoganj.analoganjnum.4 = 0
+								analoganj.analoganjnum.5 = max(laserrate, 1)
 								analoganjnum++
 								if(analogmode!=mode_off){
 									stat4+=6*laserrate
@@ -2924,13 +2878,9 @@
 				spin.spinnum.0=3 // 反時計回り半回転
 			}else:f=0
 			if(f=1){
-				if(turn=1){
-					spin.spinnum.0=spin.spinnum.0/2*2+1-(spin.spinnum.0-spin.spinnum.0/2*2)
-				}else:if((turn=2)|(turn=3)|(turn=4)){
-					spin.spinnum.0=spin.spinnum.0/2*2+(spin.spinnum.0-spin.spinnum.0/2*2)^pturna
-				}
-				spin.spinnum.1=int(cbcnt)+cnt2*UNIT_MEASURE*beatn/beatd/div.cnt3 //位置
-				spin.spinnum.2=int(double(strmid(d.cnt2a,12,32))*625/12*145/100) //長さ(c)
+				spin.spinnum.0 = spin.spinnum.0 / 2 * 2 + (spin.spinnum.0 - spin.spinnum.0 / 2 * 2) ^ pturna
+				spin.spinnum.1 = int(cbcnt) + cnt2 * UNIT_MEASURE * beatn / beatd / div.cnt3 //位置
+				spin.spinnum.2 = int(double(strmid(d.cnt2a, 12, 32)) * 625 / 12 * 145 / 100) //長さ(c)
 				spinnum++
 			}
 		}
@@ -2946,11 +2896,7 @@
 				stat1=strmid(d.cnt2a,12,64)
 				sdim splitstat,64,1
 				split stat1,";",splitstat
-				if(turn=1){
-					spr.sprnum.0=spr.sprnum.0/2*2+1-(spr.sprnum.0-spr.sprnum.0/2*2)
-				}else:if((turn=2)|(turn=3)|(turn=4)){
-					spr.sprnum.0=spr.sprnum.0/2*2+(spr.sprnum.0-spr.sprnum.0/2*2)^pturna
-				}
+				spr.sprnum.0 = spr.sprnum.0 / 2 * 2 + (spr.sprnum.0 - spr.sprnum.0 / 2 * 2) ^ pturna
 				spr.sprnum.1=int(cbcnt)+cnt2*UNIT_MEASURE*beatn/beatd/div.cnt3 //位置
 				spr.sprnum.2=int(double(splitstat.0)*625/12) //長さ(c)
 				spr.sprnum.3=250 //揺れ幅
