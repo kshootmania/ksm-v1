@@ -1162,12 +1162,6 @@ resultbgmid=BASS_StreamCreateFile(0,"result_bgm.ogg",0,0,0,0,BASS_SAMPLE_LOOP)
 courseresultbgmid=BASS_StreamCreateFile(0,"courseresult_bgm.ogg",0,0,0,0,BASS_SAMPLE_LOOP)
 selbgmid=BASS_StreamCreateFile(0,"sel_bgm.ogg",0,0,0,0,BASS_SAMPLE_LOOP)
 selenterid=BASS_StreamCreateFile(0,"sel_enter.ogg",0,0,0,0,0)
-dim chokkakuid,5
-chokkakuid.0=BASS_SampleLoad(0,"chokkaku.wav",0,0,0,20,0)
-chokkakuid.1=BASS_SampleLoad(0,"chokkaku_down.wav",0,0,0,20,0)
-chokkakuid.2=BASS_SampleLoad(0,"chokkaku_up.wav",0,0,0,20,0)
-chokkakuid.3=BASS_SampleLoad(0,"chokkaku_swing.wav",0,0,0,20,0)
-chokkakuid.4=BASS_SampleLoad(0,"chokkaku_mute.wav",0,0,0,20,0)
 
 if(fullscr=1){
 	scrsize_w=fullscrsize.0
