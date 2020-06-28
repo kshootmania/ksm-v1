@@ -208,8 +208,8 @@
 #include "src/kshlib.as"
 #include "src/ksmcore.as"
 
-#include "src/key_sound.as"
-#include "src/laser_slam_sound.as"
+#include "src/audio/key_sound.as"
+#include "src/audio/laser_slam_sound.as"
 
 #define FS_UTILS_REPLACE_CHDIR_WITH_SAFE_CHDIR
 #include "src/filesystem_utils.as"

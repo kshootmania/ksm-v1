@@ -92,7 +92,7 @@
 
 #include "src/ksmcore.as"
 
-#include "src/key_sound.as"
+#include "src/audio/key_sound.as"
 
 #define FS_UTILS_REPLACE_CHDIR_WITH_SAFE_CHDIR
 #include "src/filesystem_utils.as"
