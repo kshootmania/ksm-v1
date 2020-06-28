@@ -5,6 +5,7 @@
 	keshukeypp=-1
 	alphabetjump=0
 	ctrlCKeyPrev = 0
+	ctrlEKeyPrev = 0
 	if(imeget()=1):imeset 0
 	dim note,1
 	dim notefx,1
@@ -2248,8 +2249,20 @@
 				}
 			}
 			ctrlCKeyPrev = ctrlCKey
+			
+			// Ctrl+E: 選択中の譜面をエディタで開く
+			getkey ctrlEKey, 'E'
+			if (ctrlEKey & (ctrlEKeyPrev = 0)) {
+				if (minfo.selnow.0.0 = 0/*通常の譜面*/) {
+					if (fileExists(dir_default + "\\editor.exe")) {
+						exec dir_default + "\\editor.exe \"" + dir_default + "\\songs\\" + minfostr.selnow.levm.0 + "/" + minfostr.selnow.levm.5 + "\""
+					}
+				}
+			}
+			ctrlEKeyPrev = ctrlEKey
 		} else {
 			ctrlCKeyPrev = 0
+			ctrlEKeyPrev = 0
 		}
 
 		// ダイアログの処理
