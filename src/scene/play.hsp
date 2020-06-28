@@ -7488,6 +7488,10 @@
 			ddim ztiltnow,1
 			ddim ztiltnow2,1
 			ztiltnow2 = GetCurrentCamValue(game_system, CAM_MANUAL_TILT) * romax
+			if (pturna) {
+				// LASER‚ªMIRROR‚Ìê‡‚Í”’lw’è‚ÌŒX‚«‚ğ”½“]
+				ztiltnow2 *= -1
+			}
 			if(cnt=0):ztiltnowp=ztiltnow2
 			ztiltnow=ztiltnow2*min(max(t_tp,1),ztilttime)/ztilttime+ztiltnowp*(ztilttime-min(max(t_tp,1),ztilttime))/ztilttime
 			ztiltrate=1.0f*ztilton*min(max(t_tp,1),ztiltontime)/ztiltontime+ztiltratep*(ztiltontime-min(max(t_tp,1),ztiltontime))/ztiltontime
@@ -7538,6 +7542,10 @@
 			zsidenow2 = GetCurrentCamValue(game_system, CAM_ZOOM_SIDE)
 			zsidenow2/=1.5f
 			zsidenow2/=2.0f
+			if (pturna) {
+				// LASER‚ªMIRROR‚Ìê‡‚Í”’lw’è‚ÌŒX‚«‚ğ”½“]
+				zsidenow2 *= -1
+			}
 			if(cnt=0):zsidenowp=zsidenow2
 			zsidenow=zsidenow2*min(max(t_tp,1),ztime)/ztime+zsidenowp*(ztime-min(max(t_tp,1),ztime))/ztime
 			sha+=zsidenow
