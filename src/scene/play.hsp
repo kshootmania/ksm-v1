@@ -18,10 +18,18 @@
 	}
 
 	// 判定タイミング調整のconfig上の値から実際の値を計算
-	judgedelay = judgedelay_config + visual_offset
-	globaloffset = globaloffset_config - visual_offset
-	analogdelay = judgedelay + analogdelay_config
-	soundfx_delay = soundfx_delay_config + visual_offset
+	if(auto=1){
+		// オートの場合は判定調整0として計算する
+		judgedelay = visual_offset
+		globaloffset = globaloffset_config - visual_offset
+		analogdelay = judgedelay + analogdelay_config
+		soundfx_delay = soundfx_delay_config + visual_offset
+	}else{
+		judgedelay = judgedelay_config + visual_offset
+		globaloffset = globaloffset_config - visual_offset
+		analogdelay = judgedelay + analogdelay_config
+		soundfx_delay = soundfx_delay_config + visual_offset
+	}
 
 	fps=0
 	totalscore=0
