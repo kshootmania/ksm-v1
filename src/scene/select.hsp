@@ -4,6 +4,7 @@
 	keshukeyp=-1
 	keshukeypp=-1
 	alphabetjump=0
+	ctrlCKeyPrev = 0
 	if(imeget()=1):imeset 0
 	dim note,1
 	dim notefx,1
@@ -2235,6 +2236,22 @@
 			_drawtxt players.cplayer,getsize(320),getsize(24),getsize(16),0,0
 		}
 		gmode 0
+
+		// Ctrlキーを押しながらの処理
+		getkey ctrlKey, 17
+		if (ctrlKey) {
+			// Ctrl+C: 選択中の譜面のパスをコピー
+			getkey ctrlCKey, 'C'
+			if (ctrlCKey & (ctrlCKeyPrev = 0)) {
+				if (minfo.selnow.0.0 = 0/*通常の譜面*/ | minfo.selnow.0.0 = 4/*コースモード*/) {
+					clipset replace(minfostr.selnow.levm.0, "\\\\", "/") + "/" + minfostr.selnow.levm.5
+				}
+			}
+			ctrlCKeyPrev = ctrlCKey
+		} else {
+			ctrlCKeyPrev = 0
+		}
+
 		// ダイアログの処理
 		if(dialognow=1){
 			// お気に入り追加ダイアログ

@@ -285,6 +285,7 @@
 #include "hspinet.as"
 #include "hspmath.as"
 #include "hspda.as"
+#include "hspext.as"
 #include "mod_regexp.as"
 //#include "kernel32.as"
 #include "mod_joystick.as"
