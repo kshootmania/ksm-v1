@@ -6999,7 +6999,7 @@ stop
 			i++ : if(csongver != r.i) : csongver = r.i : csongver_int = int(csongver) : clearKeySoundLibrary /* ←同時発音数が変化する可能性があるためキー音を初期化 */ : e = e | 1
 
 			// KSH譜面フォーマットのバージョンが範囲外の値をとっている場合は丸める
-			if (csongver_int >= 100 & csongverint < 160) {
+			if (csongver_int >= 100 & csongver_int < 160) {
 				csongver = "160"
 				csongver_int = 160
 			} else : if (csongver_int < 100 | csongver_int > CURRENT_KSH_VERSION) {
