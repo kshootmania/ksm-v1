@@ -1122,8 +1122,6 @@ dirlist buf,"songs",5
 if(buf=""):mkdir "songs"
 chdir dir_default
 
-chdir "../"
-
 ; èâä˙âª
 netinit
 if(proxy_host!=""):netproxy proxy_host, proxy_port
@@ -1189,7 +1187,7 @@ mod_lane=-1
 mod_lane_s=-1
 mod_judgel=-1
 
-chdir "../songs"
+chdir dir_default + "\\songs"
 
 prev_scene=SCENE_OPTION
 imgrefresh=1

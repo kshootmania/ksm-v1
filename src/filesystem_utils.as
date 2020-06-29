@@ -23,6 +23,11 @@
 	path = strtrim(path, 2/*右端のみ*/, '/')
 	path = strtrim(path, 2/*右端のみ*/, '\\')
 
+	// 相対パスのみの場合は存在チェックを省略
+	if (path = "." | path = ".." | path = "../.." | path = "..\\..") {
+		return 1
+	}
+
 	// 存在をチェック
 	dirlist fileListStr, path, 5/*ディレクトリのみ*/
 
