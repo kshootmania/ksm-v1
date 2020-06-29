@@ -913,13 +913,13 @@ if(strsize=-1){
 	clang="Japanese"
 	exist clang+".txt"
 	if((strsize=-1)&(length(langlist)=0)){
-		dialog "Langauge file does not exist.",0,"Error"
+		dialog "Language file does not exist.",0,"Error"
 		end
 	}else{
 		clang=langlist.0
 		exist clang+".txt"
 		if(strsize=-1){
-			dialog "Langauge file does not exist.",0,"Error"
+			dialog "Language file does not exist.",0,"Error"
 			end
 		}
 	}
