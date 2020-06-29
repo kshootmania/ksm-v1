@@ -3242,7 +3242,7 @@ stop
 				}else{
 					_stat3=min(max(int(splitstat.1),0),100)
 				}
-				loadKeySoundToLibrary _stat1, csongver_int
+				loadKeySoundToLibrary _stat1, getpath(fname, 32), csongver_int
 				if (headcmp(d.cnt, 8, "fx-l_se=")) {
 					nextKeySoundStrsLR.0 = _stat1
 					if (_stat3 != 100) : nextKeySoundStrsLR.0 += ";" + _stat3
@@ -16058,7 +16058,7 @@ stop
 			}
 			_stat1 = splitstat.0
 
-			loadKeySoundToLibrary _stat1, csongver_int
+			loadKeySoundToLibrary _stat1, getpath(fname, 32), csongver_int
 			if (keySoundExistsInLibrary(_stat1)) {
 				notesej.notesejnum.2 = getKeySoundFromLibrary(_stat1) // Ä¶‚·‚éKeySound‚Ö‚Ìƒ|ƒCƒ“ƒ^
 				notesejnum++

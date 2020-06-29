@@ -24,12 +24,13 @@
 // (拡張子がない場合には"se\note"ディレクトリ内のファイルを使用)
 //
 //   p1: キー音の名前(例:"clap")
+//   p2: 譜面ファイルのディレクトリ絶対パス(末尾の\は不要)
 //
-#defcfunc getFilePathByKeySoundName str p1, local name
+#defcfunc getFilePathByKeySoundName str p1, str p2, local name
 	if(getpath(p1, 2) = ""){
 		return s_dirDefault + "\\se\\note\\" + p1 + ".wav"
 	} else {
-		return p1
+		return p2 + p1
 	}
 
 //
@@ -49,13 +50,14 @@
 // (同じキー音が既に読み込まれている場合は何もしない)
 //
 //   p1: キー音の名前(例:"clap")
-//   p2: ksh譜面の"ver"フィールドの整数部分(int型)
+//   p2: 譜面ファイルのディレクトリ絶対パス(末尾の\は不要)
+//   p3: ksh譜面の"ver"フィールドの整数部分(int型)
 //
-#deffunc loadKeySoundToLibrary str p1, int p2, local soundFilePath, local pKeySound
+#deffunc loadKeySoundToLibrary str p1, str p2, int p3, local soundFilePath, local pKeySound
 	// まだ読み込んだことがない効果音の場合は読み込む
 	if (HashCheckKey(s_keySoundLibrary, p1) = 0) {
 		// 音声ファイルのパスを取得して存在チェック
-		soundFilePath = getFilePathByKeySoundName(p1)
+		soundFilePath = getFilePathByKeySoundName(p1, p2)
 		exist soundFilePath
 		if(strsize <= 0){
 			dialog "Error: Cannot open sound \"" + soundFilePath + "\""
@@ -63,7 +65,7 @@
 
 		// KeySoundの実体を生成
 		pKeySound = 0
-		if (CreateKeySound@(soundFilePath, getMaxPolyphonyForVersion(p2), varptr(pKeySound))) {
+		if (CreateKeySound@(soundFilePath, getMaxPolyphonyForVersion(p3), varptr(pKeySound))) {
 			s_keySoundLibrary(p1) = pKeySound
 		} else {
 			dialog "Error: An error occurred while loading sound \"" + p1 + "\""

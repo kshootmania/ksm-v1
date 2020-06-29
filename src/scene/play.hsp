@@ -2039,7 +2039,7 @@
 			}else{
 				_stat3=min(max(int(splitstat.1),0),100)
 			}
-			loadKeySoundToLibrary _stat1, csongver_int
+			loadKeySoundToLibrary _stat1, getpath(cnotesfile,32), csongver_int
 			if(headcmp(d.cnt,8,"fx-l_se=")){
 				nextKeySoundNamesLR.0=_stat1
 				nextKeySoundVolumesLR.0=_stat3
