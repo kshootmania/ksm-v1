@@ -2614,8 +2614,8 @@ stop
 		csongtotal=0
 		csongoftbpm=0
 		csongvol=100
-		csongver="160"
-		csongver_int=160
+		csongver=""
+		csongver_int=100
 		csongfile=".mp3"
 		bgname="desert"
 		bgname_l="arrow"
@@ -4100,6 +4100,11 @@ stop
 
 		// layer名の区切り文字置き換え(v1.67)
 		if(csongver_int<167):strrep bgname_l,"/",";"
+
+		if (csongver_int < 160) {
+			csongver="160"
+			csongver_int = 160
+		}
 
 		// レーザー移動幅の適用
 		stat1=0
