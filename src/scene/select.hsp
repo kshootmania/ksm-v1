@@ -6,6 +6,7 @@
 	alphabetjump=0
 	ctrlCKeyPrev = 0
 	ctrlEKeyPrev = 0
+	ctrlOKeyPrev = 0
 	ctrlIKeyPrev = 0
 	if(imeget()=1):imeset 0
 	dim note,1
@@ -279,11 +280,20 @@
 				if (ctrlEKey & (ctrlEKeyPrev = 0)) {
 					if (minfo.selnow.0.0 = 0/*通常の譜面*/) {
 						if (fileExists(dir_default + "\\editor.exe")) {
-							exec dir_default + "\\editor.exe \"" + filePath
+							exec dir_default + "\\editor.exe \"" + filePath + "\""
 						}
 					}
 				}
 				ctrlEKeyPrev = ctrlEKey
+				
+				// Ctrl+O: 選択中の譜面のディレクトリをエクスプローラで開く
+				getkey ctrlOKey, 'O'
+				if (ctrlOKey & (ctrlOKeyPrev = 0)) {
+					if (minfo.selnow.0.0 = 0/*通常の譜面*/ | minfo.selnow.0.0 = 4/*コースモード*/) {
+						exec "explorer /select,\"" + filepath + "\""
+					}
+				}
+				ctrlOKeyPrev = ctrlOKey
 				
 				// Ctrl+I: 選択中の譜面のインターネットランキングページを開く
 				getkey ctrlIKey, 'I'
@@ -303,6 +313,7 @@
 			} else {
 				ctrlCKeyPrev = 0
 				ctrlEKeyPrev = 0
+				ctrlOKeyPrev = 0
 				ctrlIKeyPrev = 0
 			}
 
