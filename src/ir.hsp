@@ -55,12 +55,12 @@ popup_text=""
 		noteget p1Line, cnt
 		f=1
 		foreach ignoreList
-			if(headcmp(p1Line, strlen(ignoreList.cnt), ignoreList.cnt)){
+			if (StartsWith@(p1Line, ignoreList.cnt)) {
 				f=0
 				break
 			}
 		loop
-		if(f=1){
+		if (f = 1) {
 			buf += p1Line + "\n"
 		}
 	loop
