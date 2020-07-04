@@ -375,7 +375,6 @@ sr=double(14*vh2/vh)*13/20
 slr=double(vh2)*13/20
 
 sdim _strmid_buf,512
-sdim _headcmpstr,64
 
 sdim bom,4
 poke bom,0,0xEF
@@ -2797,11 +2796,6 @@ end
 	px=px<<1:loop
 	return px
 #global
-
-#defcfunc headcmp var a,int num,str b
-	memcpy _headcmpstr,a,num,0,0
-	poke _headcmpstr,num
-	return _headcmpstr=b
 
 #defcfunc strmid2 var a,int _ofs,int num
 	memcpy _strmid_buf,a,num,0,_ofs
