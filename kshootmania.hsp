@@ -712,23 +712,23 @@ notesel confs
 noteload "config.ini"
 split confs,"\n",confstr
 repeat notemax
-	if(headcmp(confstr.cnt,4,"key=")){
+	if(StartsWith(confstr.cnt, "key=")){
 		stat1=strmid(confstr.cnt,4,128)
 		split stat1,",",keystr
 	}
-	if(headcmp(confstr.cnt,5,"key2=")){
+	if(StartsWith(confstr.cnt, "key2=")){
 		stat1=strmid(confstr.cnt,5,128)
 		split stat1,",",keystr2
 	}
-	if(headcmp(confstr.cnt,4,"joy=")){
+	if(StartsWith(confstr.cnt, "joy=")){
 		stat1=strmid(confstr.cnt,4,128)
 		split stat1,",",joystr
 	}
-	if(headcmp(confstr.cnt,5,"joy2=")){
+	if(StartsWith(confstr.cnt, "joy2=")){
 		stat1=strmid(confstr.cnt,5,128)
 		split stat1,",",joystr2
 	}
-	if(headcmp(confstr.cnt,12,"hispeedtype=")){
+	if(StartsWith(confstr.cnt, "hispeedtype=")){
 		stat1=strmid(confstr.cnt,12,128)
 		split stat1,",",vhstypestr
 		dim vhstype,5
@@ -740,10 +740,10 @@ repeat notemax
 			if(vhstypestr.cnt="O"):vhstype.4=1
 		loop
 	}
-	if(headcmp(confstr.cnt,11,"laserinput=")){
+	if(StartsWith(confstr.cnt, "laserinput=")){
 		analoginput=int(strmid(confstr.cnt,11,1))
 	}
-	if(headcmp(confstr.cnt,8,"hispeed=")){
+	if(StartsWith(confstr.cnt, "hispeed=")){
 		if(strmid(confstr.cnt,8,1)="x"){
 			stat1=strmid(confstr.cnt,9,2)
 			hsr=int(stat1)
@@ -781,53 +781,53 @@ repeat notemax
 			hsa=-1
 		}
 	}
-	if(headcmp(confstr.cnt,8,"fullscr=")){
+	if(StartsWith(confstr.cnt, "fullscr=")){
 		fullscr=int(strmid(confstr.cnt,8,1))
 	}
-	if(headcmp(confstr.cnt,11,"windowsize=")){
+	if(StartsWith(confstr.cnt, "windowsize=")){
 		stat1=strmid(confstr.cnt,11,64)
 		split stat1,",",windowsizestr
 		windowsize=int(windowsizestr.0),int(windowsizestr.1)
 	}
-	if(headcmp(confstr.cnt,12,"fullscrsize=")){
+	if(StartsWith(confstr.cnt, "fullscrsize=")){
 		stat1=strmid(confstr.cnt,12,64)
 		split stat1,",",fullscrsizestr
 		fullscrsize=int(fullscrsizestr.0),int(fullscrsizestr.1)
 	}
-	if(headcmp(confstr.cnt,10,"frameskip=")){
+	if(StartsWith(confstr.cnt, "frameskip=")){
 		frameskip=int(strmid(confstr.cnt,10,1))
 	}
-	if(headcmp(confstr.cnt,11,"lowquality=")){
+	if(StartsWith(confstr.cnt, "lowquality=")){
 		lowquality=int(strmid(confstr.cnt,11,1))
 	}
-	if(headcmp(confstr.cnt,11,"assisttick=")){
+	if(StartsWith(confstr.cnt, "assisttick=")){
 		assisttick=int(strmid(confstr.cnt,11,1))
 	}
-	if(headcmp(confstr.cnt,8,"bt_mode=")){
+	if(StartsWith(confstr.cnt, "bt_mode=")){
 		shortmode=max(int(strmid(confstr.cnt,10,1)),0)
 		shortmodedef=max(int(strmid(confstr.cnt,10,1)),0)
 	}
-	if(headcmp(confstr.cnt,8,"fx_mode=")){
+	if(StartsWith(confstr.cnt, "fx_mode=")){
 		longmode=max(int(strmid(confstr.cnt,9,1)),0)
 		longmodedef=max(int(strmid(confstr.cnt,9,1)),0)
 	}
-	if(headcmp(confstr.cnt,11,"laser_mode=")){
+	if(StartsWith(confstr.cnt, "laser_mode=")){
 		analogmode=max(int(strmid(confstr.cnt,11,1)),0)
 		analogmodedef=max(int(strmid(confstr.cnt,11,1)),0)
 	}
-	if(headcmp(confstr.cnt,12,"effratetype=")){
+	if(StartsWith(confstr.cnt, "effratetype=")){
 		effratetype2=int(strmid(confstr.cnt,12,1))
 	}
-	if(headcmp(confstr.cnt,11,"background=")){
+	if(StartsWith(confstr.cnt, "background=")){
 		bg=int(strmid(confstr.cnt,11,1))
 	}
-	if(headcmp(confstr.cnt,16,"backgroundmovie=")){
+	if(StartsWith(confstr.cnt, "backgroundmovie=")){
 		vmov=int(strmid(confstr.cnt,16,1))
 	}
-	if(headcmp(confstr.cnt,11,"viewtiming=")){
+	if(StartsWith(confstr.cnt, "viewtiming=")){
 		vtiming=int(strmid(confstr.cnt,11,1))
 	}
-	if(headcmp(confstr.cnt,9,"noteskin=")){
+	if(StartsWith(confstr.cnt, "noteskin=")){
 		stat1=strmid(confstr.cnt,9,16)
 		if((stat1="note")|(stat1="NOTE")){
 			coloring=1
@@ -835,7 +835,7 @@ repeat notemax
 			coloring=0
 		}
 	}
-	if(headcmp(confstr.cnt,14,"currentplayer=")){
+	if(StartsWith(confstr.cnt, "currentplayer=")){
 		stat1=strmid(confstr.cnt,14,64)
 		repeat playersnum
 			if(players.cnt=stat1){
@@ -843,112 +843,112 @@ repeat notemax
 			}
 		loop
 	}
-	if(headcmp(confstr.cnt,7,"output=")){
+	if(StartsWith(confstr.cnt, "output=")){
 		output=int(strmid(confstr.cnt,7,1))
 	}
-	if(headcmp(confstr.cnt,12,"output_path=")){
+	if(StartsWith(confstr.cnt, "output_path=")){
 		outputpath=strmid(confstr.cnt,12,512)
 	}
-	if(headcmp(confstr.cnt,17,"output_downscale=")){
+	if(StartsWith(confstr.cnt, "output_downscale=")){
 		outputds=int(strmid(confstr.cnt,17,2))
 	}
-	if(headcmp(confstr.cnt,11,"disableime=")){
+	if(StartsWith(confstr.cnt, "disableime=")){
 		disableime=int(strmid(confstr.cnt,11,1))
 	}
-	if(headcmp(confstr.cnt,13,"globaloffset=")){
+	if(StartsWith(confstr.cnt, "globaloffset=")){
 		globaloffset_config=int(strmid(confstr.cnt,13,8))
 	}
-	if(headcmp(confstr.cnt,16,"hidemousecursor=")){
+	if(StartsWith(confstr.cnt, "hidemousecursor=")){
 		hidem=int(strmid(confstr.cnt,16,1))
 	}
-	if(headcmp(confstr.cnt,10,"mastervol=")){
+	if(StartsWith(confstr.cnt, "mastervol=")){
 		mastervol=int(strmid(confstr.cnt,10,3))
 	}
-	if(headcmp(confstr.cnt,17,"mouse_directionx=")){
+	if(StartsWith(confstr.cnt, "mouse_directionx=")){
 		mx=max(int(strmid(confstr.cnt,17,1)),0)
 	}
-	if(headcmp(confstr.cnt,17,"mouse_directiony=")){
+	if(StartsWith(confstr.cnt, "mouse_directiony=")){
 		my=max(int(strmid(confstr.cnt,17,1)),0)
 	}
-	if(headcmp(confstr.cnt,18,"mouse_sensitivity=")){
+	if(StartsWith(confstr.cnt, "mouse_sensitivity=")){
 		msen=int(strmid(confstr.cnt,18,64))
 	}
-	if(headcmp(confstr.cnt,12,"switchlaser=")){
+	if(StartsWith(confstr.cnt, "switchlaser=")){
 		analogsw=int(strmid(confstr.cnt,12,1))
 	}
-	if(headcmp(confstr.cnt,12,"currentlang=")){
+	if(StartsWith(confstr.cnt, "currentlang=")){
 		clang=strmid(confstr.cnt,12,64)
 	}
-	if(headcmp(confstr.cnt,11,"currentdir=")){
+	if(StartsWith(confstr.cnt, "currentdir=")){
 		dirp=strmid(confstr.cnt,11,256)
 		dir_confsave=dirp
 	}
-	if(headcmp(confstr.cnt,12,"currentitem=")){
+	if(StartsWith(confstr.cnt, "currentitem=")){
 		selp=int(strmid(confstr.cnt,12,64))
 		selnow_confsave=selp
 	}
-	if(headcmp(confstr.cnt,13,"currentlevel=")){
+	if(StartsWith(confstr.cnt, "currentlevel=")){
 		levnow=int(strmid(confstr.cnt,13,64))
 	}
-	if(headcmp(confstr.cnt,15,"viewfoldername=")){
+	if(StartsWith(confstr.cnt, "viewfoldername=")){
 		vfoldername=int(strmid(confstr.cnt,15,1))
 	}
-	if(headcmp(confstr.cnt,11,"showalldir=")){
+	if(StartsWith(confstr.cnt, "showalldir=")){
 		valldir=int(strmid(confstr.cnt,11,1))
 	}
-	if(headcmp(confstr.cnt,11,"currentver=")){
+	if(StartsWith(confstr.cnt, "currentver=")){
 		currentver2=strmid(confstr.cnt,11,64)
 	}
-	if(headcmp(confstr.cnt,9,"closekey=")){
+	if(StartsWith(confstr.cnt, "closekey=")){
 		closekey=int(strmid(confstr.cnt,9,1))
 	}
-	if(headcmp(confstr.cnt,11,"esckey_bt3=")){
+	if(StartsWith(confstr.cnt, "esckey_bt3=")){
 		esc_bt3=int(strmid(confstr.cnt,11,1))
 	}
-	if(headcmp(confstr.cnt,9,"mselview=")){
+	if(StartsWith(confstr.cnt, "mselview=")){
 		if(strmid(confstr.cnt,9,16)="level"){
 			sorttype=1
 		}
 	}
-	if(headcmp(confstr.cnt,11,"inputdelay=")){
+	if(StartsWith(confstr.cnt, "inputdelay=")){
 		judgedelay_config=int(strmid(confstr.cnt,11,16))
 	}
-	if(headcmp(confstr.cnt,11,"laserdelay=")){
+	if(StartsWith(confstr.cnt, "laserdelay=")){
 		analogdelay_config=int(strmid(confstr.cnt,11,16))
 	}
-	if(headcmp(confstr.cnt,14,"soundfx_delay=")){
+	if(StartsWith(confstr.cnt, "soundfx_delay=")){
 		soundfx_delay_config=int(strmid(confstr.cnt,14,16))
 	}
-	if(headcmp(confstr.cnt,14,"visual_offset=")){
+	if(StartsWith(confstr.cnt, "visual_offset=")){
 		visual_offset=int(strmid(confstr.cnt,14,16))
 	}
-	if(headcmp(confstr.cnt,13,"auto_play_se=")){
+	if(StartsWith(confstr.cnt, "auto_play_se=")){
 		auto_chokkaku_se=int(strmid(confstr.cnt,13,1))
 		auto_note_se=int(strmid(confstr.cnt,13,1))
 	}
-	if(headcmp(confstr.cnt,10,"usenumpad=")){
+	if(StartsWith(confstr.cnt, "usenumpad=")){
 		usenumpad=int(strmid(confstr.cnt,10,1))
 	}
-	if(headcmp(confstr.cnt,14,"automaticmute=")){
+	if(StartsWith(confstr.cnt, "automaticmute=")){
 		automute=int(strmid(confstr.cnt,14,1))
 	}
-	if(headcmp(confstr.cnt,6,"vsync=")){
+	if(StartsWith(confstr.cnt, "vsync=")){
 		vsync=int(strmid(confstr.cnt,6,1))
 	}
-	if(headcmp(confstr.cnt,13,"effrate_zoom=")){
+	if(StartsWith(confstr.cnt, "effrate_zoom=")){
 		errate2=int(strmid(confstr.cnt,13,3))
 	}
-	if(headcmp(confstr.cnt,15,"effrate_shiftx=")){
+	if(StartsWith(confstr.cnt, "effrate_shiftx=")){
 		erxsh2=int(strmid(confstr.cnt,15,6))
 	}
-	if(headcmp(confstr.cnt,15,"effrate_shifty=")){
+	if(StartsWith(confstr.cnt, "effrate_shifty=")){
 		erysh2=int(strmid(confstr.cnt,15,6))
 	}
 	// Note: ソースコード公開用にTwitter連携関連のコードを削除
-	if(headcmp(confstr.cnt,13,"hideitem_all=")){
+	if(StartsWith(confstr.cnt, "hideitem_all=")){
 		hidealldir=int(strmid(confstr.cnt,13,1))
 	}
-	if(headcmp(confstr.cnt,18,"ir_sign_in_cursor=")){
+	if(StartsWith(confstr.cnt, "ir_sign_in_cursor=")){
 		ir_selnow=int(strmid(confstr.cnt,18,1))
 	}
 	if(strmid(confstr.cnt,0,17)="#peakingfilter:on"){
@@ -1269,7 +1269,7 @@ repeat
 			}
 			repeat notemax
 				noteget stat1,cnt
-				if(headcmp(stat1,6,"title=")){
+				if(StartsWith(stat1, "title=")){
 					ccoursetitle=strmid(stat1,6,128)
 					if(is_course_utf8=1):ccoursetitle=bom+strmid(stat1,6,128)
 				}else:if(stat1="--"){
@@ -1595,56 +1595,56 @@ end
 	dir_curp=dir_cur
 	dim confex,51
 	repeat length(confstr)
-		if(headcmp(confstr.cnt,4,"key=")):confex.0=1
-		if(headcmp(confstr.cnt,5,"key2=")):confex.1=1
-		if(headcmp(confstr.cnt,8,"fullscr=")):confex.2=1
-		if(headcmp(confstr.cnt,11,"windowsize=")):confex.3=1
-		if(headcmp(confstr.cnt,12,"fullscrsize=")):confex.4=1
-		if(headcmp(confstr.cnt,11,"assisttick=")):confex.5=1
-		if(headcmp(confstr.cnt,12,"highquality=")):confex.6=1
-		if(headcmp(confstr.cnt,11,"lowquality=")):confex.7=1
-		if(headcmp(confstr.cnt,8,"bt_mode=")):confex.8=1
-		if(headcmp(confstr.cnt,8,"fx_mode=")):confex.9=1
-		if(headcmp(confstr.cnt,11,"laser_mode=")):confex.10=1
-		if(headcmp(confstr.cnt,8,"hispeed=")):confex.11=1
-		if(headcmp(confstr.cnt,11,"viewtiming=")):confex.13=1
-		if(headcmp(confstr.cnt,14,"currentplayer=")):confex.14=1
-		if(headcmp(confstr.cnt,11,"background=")):confex.15=1
-		if(headcmp(confstr.cnt,16,"backgroundmovie=")):confex.16=1
-		if(headcmp(confstr.cnt,9,"noteskin=")):confex.17=1
-		if(headcmp(confstr.cnt,11,"laserinput=")):confex.18=1
-		if(headcmp(confstr.cnt,11,"disableime=")):confex.19=1
-		if(headcmp(confstr.cnt,13,"globaloffset=")):confex.20=1
-		if(headcmp(confstr.cnt,9,"synctype=")):confex.21=1
-		if(headcmp(confstr.cnt,9,"syncfreq=")):confex.22=1
-		if(headcmp(confstr.cnt,16,"hidemousecursor=")):confex.23=1
-		if(headcmp(confstr.cnt,10,"mastervol=")):confex.24=1
-		if(headcmp(confstr.cnt,17,"mouse_directionx=")):confex.25=1
-		if(headcmp(confstr.cnt,17,"mouse_directiony=")):confex.26=1
-		if(headcmp(confstr.cnt,18,"mouse_sensitivity=")):confex.27=1
-		if(headcmp(confstr.cnt,12,"switchlaser=")):confex.28=1
-		if(headcmp(confstr.cnt,4,"joy=")):confex.29=1
-		if(headcmp(confstr.cnt,5,"joy2=")):confex.30=1
-		if(headcmp(confstr.cnt,12,"currentlang=")):confex.31=1
-		if(headcmp(confstr.cnt,11,"currentdir=")):confex.32=1
-		if(headcmp(confstr.cnt,12,"currentitem=")):confex.33=1
-		if(headcmp(confstr.cnt,13,"currentlevel=")):confex.34=1
-		if(headcmp(confstr.cnt,11,"showalldir=")):confex.35=1
-		if(headcmp(confstr.cnt,11,"currentver=")):confex.36=1
-		if(headcmp(confstr.cnt,9,"closekey=")):confex.37=1
-		if(headcmp(confstr.cnt,9,"mselview=")):confex.38=1
-		if(headcmp(confstr.cnt,11,"laserdelay=")):confex.39=1
-		if(headcmp(confstr.cnt,10,"usenumpad=")):confex.40=1
-		if(headcmp(confstr.cnt,12,"hispeedtype=")):confex.41=1
-		if(headcmp(confstr.cnt,11,"inputdelay=")):confex.42=1
-		if(headcmp(confstr.cnt,6,"vsync=")):confex.43=1
-		if(headcmp(confstr.cnt,11,"esckey_bt3=")):confex.44=1
-		if(headcmp(confstr.cnt,14,"twitter_token=")):confex.45=1
-		if(headcmp(confstr.cnt,22,"twitter_token_secret1=")):confex.46=1
-		if(headcmp(confstr.cnt,22,"twitter_token_secret2=")):confex.47=1
-		if(headcmp(confstr.cnt,22,"twitter_token_secret3=")):confex.48=1
-		if(headcmp(confstr.cnt,13,"hideitem_all=")):confex.49=1
-		if(headcmp(confstr.cnt,18,"ir_sign_in_cursor=")):confex.50=1
+		if(StartsWith(confstr.cnt, "key=")):confex.0=1
+		if(StartsWith(confstr.cnt, "key2=")):confex.1=1
+		if(StartsWith(confstr.cnt, "fullscr=")):confex.2=1
+		if(StartsWith(confstr.cnt, "windowsize=")):confex.3=1
+		if(StartsWith(confstr.cnt, "fullscrsize=")):confex.4=1
+		if(StartsWith(confstr.cnt, "assisttick=")):confex.5=1
+		if(StartsWith(confstr.cnt, "highquality=")):confex.6=1
+		if(StartsWith(confstr.cnt, "lowquality=")):confex.7=1
+		if(StartsWith(confstr.cnt, "bt_mode=")):confex.8=1
+		if(StartsWith(confstr.cnt, "fx_mode=")):confex.9=1
+		if(StartsWith(confstr.cnt, "laser_mode=")):confex.10=1
+		if(StartsWith(confstr.cnt, "hispeed=")):confex.11=1
+		if(StartsWith(confstr.cnt, "viewtiming=")):confex.13=1
+		if(StartsWith(confstr.cnt, "currentplayer=")):confex.14=1
+		if(StartsWith(confstr.cnt, "background=")):confex.15=1
+		if(StartsWith(confstr.cnt, "backgroundmovie=")):confex.16=1
+		if(StartsWith(confstr.cnt, "noteskin=")):confex.17=1
+		if(StartsWith(confstr.cnt, "laserinput=")):confex.18=1
+		if(StartsWith(confstr.cnt, "disableime=")):confex.19=1
+		if(StartsWith(confstr.cnt, "globaloffset=")):confex.20=1
+		if(StartsWith(confstr.cnt, "synctype=")):confex.21=1
+		if(StartsWith(confstr.cnt, "syncfreq=")):confex.22=1
+		if(StartsWith(confstr.cnt, "hidemousecursor=")):confex.23=1
+		if(StartsWith(confstr.cnt, "mastervol=")):confex.24=1
+		if(StartsWith(confstr.cnt, "mouse_directionx=")):confex.25=1
+		if(StartsWith(confstr.cnt, "mouse_directiony=")):confex.26=1
+		if(StartsWith(confstr.cnt, "mouse_sensitivity=")):confex.27=1
+		if(StartsWith(confstr.cnt, "switchlaser=")):confex.28=1
+		if(StartsWith(confstr.cnt, "joy=")):confex.29=1
+		if(StartsWith(confstr.cnt, "joy2=")):confex.30=1
+		if(StartsWith(confstr.cnt, "currentlang=")):confex.31=1
+		if(StartsWith(confstr.cnt, "currentdir=")):confex.32=1
+		if(StartsWith(confstr.cnt, "currentitem=")):confex.33=1
+		if(StartsWith(confstr.cnt, "currentlevel=")):confex.34=1
+		if(StartsWith(confstr.cnt, "showalldir=")):confex.35=1
+		if(StartsWith(confstr.cnt, "currentver=")):confex.36=1
+		if(StartsWith(confstr.cnt, "closekey=")):confex.37=1
+		if(StartsWith(confstr.cnt, "mselview=")):confex.38=1
+		if(StartsWith(confstr.cnt, "laserdelay=")):confex.39=1
+		if(StartsWith(confstr.cnt, "usenumpad=")):confex.40=1
+		if(StartsWith(confstr.cnt, "hispeedtype=")):confex.41=1
+		if(StartsWith(confstr.cnt, "inputdelay=")):confex.42=1
+		if(StartsWith(confstr.cnt, "vsync=")):confex.43=1
+		if(StartsWith(confstr.cnt, "esckey_bt3=")):confex.44=1
+		if(StartsWith(confstr.cnt, "twitter_token=")):confex.45=1
+		if(StartsWith(confstr.cnt, "twitter_token_secret1=")):confex.46=1
+		if(StartsWith(confstr.cnt, "twitter_token_secret2=")):confex.47=1
+		if(StartsWith(confstr.cnt, "twitter_token_secret3=")):confex.48=1
+		if(StartsWith(confstr.cnt, "hideitem_all=")):confex.49=1
+		if(StartsWith(confstr.cnt, "ir_sign_in_cursor=")):confex.50=1
 	loop
 	ex=0
 	cex=-1
@@ -1661,30 +1661,31 @@ end
 			repeat length(confex)-cex-1,cex+1
 				if(confex.cnt=0):cex=cnt:break
 			loop
+			confstr.cnt=""
 		}
-		if((headcmp(confstr.cnt,4,"key="))|(cex=0)){
+		if(StartsWith(confstr.cnt, "key=") | (cex = 0)){
 			confs+="key="+key.0+","+key.1+","+key.2+","+key.3+","+key.4+","+key.5+","+key.6+","+key.7+","+key.8+","+key.9+","+key.10+","+key.11+","+key.12+","+key.13+stat1
-		}else:if((headcmp(confstr.cnt,5,"key2="))|(cex=1)){
+		}else:if(StartsWith(confstr.cnt, "key2=") | (cex = 1)){
 			confs+="key2="+key2.0+","+key2.1+","+key2.2+","+key2.3+","+key2.4+","+key2.5+","+key2.6+","+key2.7+","+key2.8+","+key2.9+","+key2.10+","+key2.11+","+key2.12+","+key2.13+stat1
-		}else:if((headcmp(confstr.cnt,8,"fullscr="))|(cex=2)){
+		}else:if(StartsWith(confstr.cnt, "fullscr=") | (cex = 2)){
 			confs+="fullscr="+fullscr+stat1
-		}else:if((headcmp(confstr.cnt,11,"windowsize="))|(cex=3)){
+		}else:if(StartsWith(confstr.cnt, "windowsize=") | (cex = 3)){
 			confs+="windowsize="+windowsize.0+","+windowsize.1+stat1
-		}else:if((headcmp(confstr.cnt,12,"fullscrsize="))|(cex=4)){
+		}else:if(StartsWith(confstr.cnt, "fullscrsize=") | (cex = 4)){
 			confs+="fullscrsize="+fullscrsize.0+","+fullscrsize.1+stat1
-		}else:if((headcmp(confstr.cnt,11,"assisttick="))|(cex=5)){
+		}else:if(StartsWith(confstr.cnt, "assisttick=") | (cex = 5)){
 			confs+="assisttick="+assisttick+stat1
-		}else:if((headcmp(confstr.cnt,12,"highquality="))|(cex=6)){
+		}else:if(StartsWith(confstr.cnt, "highquality=") | (cex = 6)){
 			confs+="highquality="+highquality+stat1
-		}else:if((headcmp(confstr.cnt,11,"lowquality="))|(cex=7)){
+		}else:if(StartsWith(confstr.cnt, "lowquality=") | (cex = 7)){
 			confs+="lowquality="+lowquality+stat1
-		}else:if((headcmp(confstr.cnt,8,"bt_mode="))|(cex=8)){
+		}else:if(StartsWith(confstr.cnt, "bt_mode=") | (cex = 8)){
 			confs+="bt_mode="+shortmodedef+stat1
-		}else:if((headcmp(confstr.cnt,8,"fx_mode="))|(cex=9)){
+		}else:if(StartsWith(confstr.cnt, "fx_mode=") | (cex = 9)){
 			confs+="fx_mode="+longmodedef+stat1
-		}else:if((headcmp(confstr.cnt,11,"laser_mode="))|(cex=10)){
+		}else:if(StartsWith(confstr.cnt, "laser_mode=") | (cex = 10)){
 			confs+="laser_mode="+analogmodedef+stat1
-		}else:if((headcmp(confstr.cnt,8,"hispeed="))|(cex=11)){
+		}else:if(StartsWith(confstr.cnt, "hispeed=") | (cex = 11)){
 			if((hsc=-1)&(hsm=-1)&(hsa=-1)&(hso=-1)){
 				confs+="hispeed=x"+hsr+stat1
 			}else:if(hsc!=-1){
@@ -1696,73 +1697,73 @@ end
 			}else{
 				confs+="hispeed="+hso+stat1
 			}
-		}else:if((headcmp(confstr.cnt,11,"viewtiming="))|(cex=13)){
+		}else:if(StartsWith(confstr.cnt, "viewtiming=") | (cex = 13)){
 			confs+="viewtiming="+vtiming+stat1
-		}else:if((headcmp(confstr.cnt,14,"currentplayer="))|(cex=14)){
+		}else:if(StartsWith(confstr.cnt, "currentplayer=") | (cex = 14)){
 			confs+="currentplayer="+players.cplayer+stat1
-		}else:if((headcmp(confstr.cnt,11,"background="))|(cex=15)){
+		}else:if(StartsWith(confstr.cnt, "background=") | (cex = 15)){
 			confs+="background="+bg+stat1
-		}else:if((headcmp(confstr.cnt,16,"backgroundmovie="))|(cex=16)){
+		}else:if(StartsWith(confstr.cnt, "backgroundmovie=") | (cex = 16)){
 			confs+="backgroundmovie="+vmov+stat1
-		}else:if((headcmp(confstr.cnt,9,"noteskin="))|(cex=17)){
+		}else:if(StartsWith(confstr.cnt, "noteskin=") | (cex = 17)){
 			if(coloring=1){
 				confs+="noteskin=note"+stat1
 			}else{
 				confs+="noteskin=default"+stat1
 			}
-		}else:if((headcmp(confstr.cnt,11,"laserinput="))|(cex=18)){
+		}else:if(StartsWith(confstr.cnt, "laserinput=") | (cex = 18)){
 			confs+="laserinput="+analoginput+stat1
-		}else:if(headcmp(confstr.cnt,12,"analoginput=")){
+		}else:if(StartsWith(confstr.cnt, "analoginput=")){
 			confs+="laserinput="+analoginput+stat1
-		}else:if((headcmp(confstr.cnt,11,"disableime="))|(cex=19)){
+		}else:if(StartsWith(confstr.cnt, "disableime=") | (cex = 19)){
 			confs+="disableime="+disableime+stat1
-		}else:if((headcmp(confstr.cnt,13,"globaloffset="))|(cex=20)){
+		}else:if(StartsWith(confstr.cnt, "globaloffset=") | (cex = 20)){
 			confs+="globaloffset="+globaloffset_config+stat1
-		}else:if((headcmp(confstr.cnt,9,"synctype="))|(cex=21)){
+		}else:if(StartsWith(confstr.cnt, "synctype=") | (cex = 21)){
 			//confs+="synctype="+syncmode+stat1
-		}else:if((headcmp(confstr.cnt,9,"syncfreq="))|(cex=22)){
+		}else:if(StartsWith(confstr.cnt, "syncfreq=") | (cex = 22)){
 			//confs+="syncfreq="+syncfreq+stat1
-		}else:if((headcmp(confstr.cnt,16,"hidemousecursor="))|(cex=23)){
+		}else:if(StartsWith(confstr.cnt, "hidemousecursor=") | (cex = 23)){
 			confs+="hidemousecursor="+hidem+stat1
-		}else:if((headcmp(confstr.cnt,10,"mastervol="))|(cex=24)){
+		}else:if(StartsWith(confstr.cnt, "mastervol=") | (cex = 24)){
 			confs+="mastervol="+mastervol+stat1
-		}else:if((headcmp(confstr.cnt,17,"mouse_directionx="))|(cex=25)){
+		}else:if(StartsWith(confstr.cnt, "mouse_directionx=") | (cex = 25)){
 			confs+="mouse_directionx="+mx+stat1
-		}else:if((headcmp(confstr.cnt,17,"mouse_directiony="))|(cex=26)){
+		}else:if(StartsWith(confstr.cnt, "mouse_directiony=") | (cex = 26)){
 			confs+="mouse_directiony="+my+stat1
-		}else:if((headcmp(confstr.cnt,18,"mouse_sensitivity="))|(cex=27)){
+		}else:if(StartsWith(confstr.cnt, "mouse_sensitivity=") | (cex = 27)){
 			confs+="mouse_sensitivity="+msen+stat1
-		}else:if((headcmp(confstr.cnt,12,"switchlaser="))|(cex=28)){
+		}else:if(StartsWith(confstr.cnt, "switchlaser=") | (cex = 28)){
 			confs+="switchlaser="+analogsw+stat1
-		}else:if((headcmp(confstr.cnt,4,"joy="))|(cex=29)){
+		}else:if(StartsWith(confstr.cnt, "joy=") | (cex = 29)){
 			confs+="joy="+joykey.0.0+","+joykey.0.1+","+joykey.0.2+","+joykey.0.3+","+joykey.0.4+","+joykey.0.5+","+joykey.0.6+","+joykey.0.7+","+joykey.0.8+","+joykey.0.9+","+joykey.0.10+","+joykey.0.11+","+joykey.0.12+","+joykey.0.13+stat1
-		}else:if((headcmp(confstr.cnt,5,"joy2="))|(cex=30)){
+		}else:if(StartsWith(confstr.cnt, "joy2=") | (cex = 30)){
 			confs+="joy2="+joykey.1.0+","+joykey.1.1+","+joykey.1.2+","+joykey.1.3+","+joykey.1.4+","+joykey.1.5+","+joykey.1.6+","+joykey.1.7+","+joykey.1.8+","+joykey.1.9+","+joykey.1.10+","+joykey.1.11+","+joykey.1.12+","+joykey.1.13+stat1
-		}else:if((headcmp(confstr.cnt,12,"currentlang="))|(cex=31)){
+		}else:if(StartsWith(confstr.cnt, "currentlang=") | (cex = 31)){
 			confs+="currentlang="+clang+stat1
-		}else:if((headcmp(confstr.cnt,11,"currentdir="))|(cex=32)){
+		}else:if(StartsWith(confstr.cnt, "currentdir=") | (cex = 32)){
 			confs+="currentdir="+dir_confsave+stat1
-		}else:if((headcmp(confstr.cnt,12,"currentitem="))|(cex=33)){
+		}else:if(StartsWith(confstr.cnt, "currentitem=") | (cex = 33)){
 			confs+="currentitem="+selnow_confsave+stat1
-		}else:if((headcmp(confstr.cnt,13,"currentlevel="))|(cex=34)){
+		}else:if(StartsWith(confstr.cnt, "currentlevel=") | (cex = 34)){
 			confs+="currentlevel="+levnow+stat1
-		}else:if((headcmp(confstr.cnt,11,"showalldir="))|(cex=35)){
+		}else:if(StartsWith(confstr.cnt, "showalldir=") | (cex = 35)){
 			confs+="showalldir="+valldir+stat1
-		}else:if((headcmp(confstr.cnt,11,"currentver="))|(cex=36)){
+		}else:if(StartsWith(confstr.cnt, "currentver=") | (cex = 36)){
 			confs+="currentver="+currentver+stat1
-		}else:if((headcmp(confstr.cnt,9,"closekey="))|(cex=37)){
+		}else:if(StartsWith(confstr.cnt, "closekey=") | (cex = 37)){
 			confs+="closekey="+closekey+stat1
-		}else:if((headcmp(confstr.cnt,9,"mselview="))|(cex=38)){
+		}else:if(StartsWith(confstr.cnt, "mselview=") | (cex = 38)){
 			if(sorttype=0){
 				confs+="mselview=directory"+stat1
 			}else{
 				confs+="mselview=level"+stat1
 			}
-		}else:if((headcmp(confstr.cnt,11,"laserdelay="))|(cex=39)){
+		}else:if(StartsWith(confstr.cnt, "laserdelay=") | (cex = 39)){
 			confs+="laserdelay="+analogdelay_config+stat1
-		}else:if((headcmp(confstr.cnt,10,"usenumpad="))|(cex=40)){
+		}else:if(StartsWith(confstr.cnt, "usenumpad=") | (cex = 40)){
 			confs+="usenumpad="+usenumpad+stat1
-		}else:if((headcmp(confstr.cnt,12,"hispeedtype="))|(cex=41)){
+		}else:if(StartsWith(confstr.cnt, "hispeedtype=") | (cex = 41)){
 			vhstypestat=""
 			if(vhstype.0=1):vhstypestat+="x,"
 			if(vhstype.1=1):vhstypestat+="C,"
@@ -1771,19 +1772,19 @@ end
 			if(vhstype.4=1):vhstypestat+="O,"
 			if(vhstypestat=""):vhstypestat="x,O,"
 			confs+="hispeedtype="+strmid(vhstypestat,0,strlen(vhstypestat)-1)+stat1
-		}else:if((headcmp(confstr.cnt,11,"inputdelay="))|(cex=42)){
+		}else:if(StartsWith(confstr.cnt, "inputdelay=") | (cex = 42)){
 			confs+="inputdelay="+judgedelay_config+stat1
-		}else:if((headcmp(confstr.cnt,6,"vsync="))|(cex=43)){
+		}else:if(StartsWith(confstr.cnt, "vsync=") | (cex = 43)){
 			confs+="vsync="+vsync+stat1
-		}else:if((headcmp(confstr.cnt,11,"esckey_bt3="))|(cex=44)){
+		}else:if(StartsWith(confstr.cnt, "esckey_bt3=") | (cex = 44)){
 			if(confex.44<2){
 				confs+="esckey_bt3="+esc_bt3+stat1
 				confex.44=2
 			}
 		// Note: ソースコード公開用にTwitter連携関連の処理を削除
-		}else:if((headcmp(confstr.cnt,13,"hideitem_all="))|(cex=49)){
+		}else:if(StartsWith(confstr.cnt, "hideitem_all=") | (cex = 49)){
 			confs+="hideitem_all="+hidealldir+stat1
-		}else:if((headcmp(confstr.cnt,18,"ir_sign_in_cursor="))|(cex=50)){
+		}else:if(StartsWith(confstr.cnt, "ir_sign_in_cursor=") | (cex = 50)){
 			confs+="ir_sign_in_cursor="+ir_selnow+stat1
 		}else{
 			confs+=confstr.cnt+stat1

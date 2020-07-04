@@ -854,44 +854,44 @@ if(strsize>0){
 	split confs,"\n",confstr
 	repeat notemax
 		/*
-		if(headcmp(confstr.cnt,7,"barmax=")){
+		if(StartsWith(confstr.cnt, "barmax=")){
 			stat1=int(strmid(confstr.cnt,7,3))
 			if(stat1>0):tate=stat1
 		}*/
-		if(headcmp(confstr.cnt,12,"currentlang=")){
+		if(StartsWith(confstr.cnt, "currentlang=")){
 			clang=strmid(confstr.cnt,12,64)
 		}
-		if(headcmp(confstr.cnt,13,"globaloffset=")){
+		if(StartsWith(confstr.cnt, "globaloffset=")){
 			globaloffset=int(strmid(confstr.cnt,13,16))
 		}
-		if(headcmp(confstr.cnt,14,"soundfx_delay=")){
+		if(StartsWith(confstr.cnt, "soundfx_delay=")){
 			soundfx_delay=int(strmid(confstr.cnt,14,16))
 		}
-		if(headcmp(confstr.cnt,17,"editor_disabledd=")){
+		if(StartsWith(confstr.cnt, "editor_disabledd=")){
 			disabledd=int(strmid(confstr.cnt,17,1))
 		}
-		if(headcmp(confstr.cnt,18,"editor_assisttick=")){
+		if(StartsWith(confstr.cnt, "editor_assisttick=")){
 			assisttick=int(strmid(confstr.cnt,18,1))
 		}
-		if(headcmp(confstr.cnt,21,"editor_reducespacing=")){
+		if(StartsWith(confstr.cnt, "editor_reducespacing=")){
 			reducespacing=int(strmid(confstr.cnt,21,2))
 		}
-		if(headcmp(confstr.cnt,17,"editor_zoomlanex=")){
+		if(StartsWith(confstr.cnt, "editor_zoomlanex=")){
 			vzoomx=int(strmid(confstr.cnt,17,1))
 		}
-		if(headcmp(confstr.cnt,23,"editor_increasewinsize=")){
+		if(StartsWith(confstr.cnt, "editor_increasewinsize=")){
 			maximize=int(strmid(confstr.cnt,23,1))
 		}
-		if(headcmp(confstr.cnt,24,"editor_measurepercolumn=")){
+		if(StartsWith(confstr.cnt, "editor_measurepercolumn=")){
 			vtate=int(strmid(confstr.cnt,24,1))
 		}/*
-		if(headcmp(confstr.cnt,12,"pfiltermode=")){
+		if(StartsWith(confstr.cnt, "pfiltermode=")){
 			pefftype=int(strmid(confstr.cnt,12,1))
 		}*/
-		if(headcmp(confstr.cnt,22,"editor_linebrightness=")){
+		if(StartsWith(confstr.cnt, "editor_linebrightness=")){
 			linebright=int(strmid(confstr.cnt,22,1))
 		}
-		if(headcmp(confstr.cnt,20,"editor_loopplayback=")){
+		if(StartsWith(confstr.cnt, "editor_loopplayback=")){
 			loopplayback=int(strmid(confstr.cnt,20,1))
 		}
 		if(strmid(confstr.cnt,0,14)="#bufferlength:"){
@@ -2919,52 +2919,52 @@ stop
 				cnt2=-1
 				continue
 			}
-			if(headcmp(d.cnt,3,"bg=")){
+			if(StartsWith(d.cnt, "bg=")){
 				bgname=strmid(d.cnt,3,128)
 				_sjis_ bgname
 				continue
 			}
-			if(headcmp(d.cnt,6,"layer=")){
+			if(StartsWith(d.cnt, "layer=")){
 				bgname_l=strmid(d.cnt,6,128)
 				_sjis_ bgname_l
 				continue
 			}
-			if(headcmp(d.cnt,6,"title=")){
+			if(StartsWith(d.cnt, "title=")){
 				csongtitle=strmid(d.cnt,6,128)
 				_utf8_ csongtitle
 				continue
 			}
-			if(headcmp(d.cnt,10,"title_img=")){
+			if(StartsWith(d.cnt, "title_img=")){
 				csongtitleimg=strmid(d.cnt,10,128)
 				_sjis_ csongtitleimg
 				continue
 			}
-			if(headcmp(d.cnt,7,"artist=")){
+			if(StartsWith(d.cnt, "artist=")){
 				csongartist=strmid(d.cnt,7,128)
 				_utf8_ csongartist
 				continue
 			}
-			if(headcmp(d.cnt,11,"artist_img=")){
+			if(StartsWith(d.cnt, "artist_img=")){
 				csongartistimg=strmid(d.cnt,11,128)
 				_sjis_ csongartistimg
 				continue
 			}
-			if(headcmp(d.cnt,7,"effect=")){
+			if(StartsWith(d.cnt, "effect=")){
 				csongeffect=strmid(d.cnt,7,128)
 				_utf8_ csongeffect
 				continue
 			}
-			if(headcmp(d.cnt,7,"jacket=")){
+			if(StartsWith(d.cnt, "jacket=")){
 				csongjacket=strmid(d.cnt,7,128)
 				_sjis_ csongjacket
 				continue
 			}
-			if(headcmp(d.cnt,12,"illustrator=")){
+			if(StartsWith(d.cnt, "illustrator=")){
 				csongillustrator=strmid(d.cnt,12,128)
 				_utf8_ csongillustrator
 				continue
 			}
-			if(headcmp(d.cnt,11,"difficulty=")){
+			if(StartsWith(d.cnt, "difficulty=")){
 				stat2=strmid(d.cnt,11,16)
 				if(stat2="light"){
 					csongdifficulty=0
@@ -2975,30 +2975,30 @@ stop
 				}else:csongdifficulty=3
 				continue
 			}
-			if(headcmp(d.cnt,6,"total=")){
+			if(StartsWith(d.cnt, "total=")){
 				csongtotal=int(strmid(d.cnt,6,16))
 				if(csongtotal<100):csongtotal=0
 				continue
 			}
-			if(headcmp(d.cnt,4,"ver=")){
+			if(StartsWith(d.cnt, "ver=")){
 				csongver=strmid(d.cnt,4,128)
 				csongver_int=int(strmid(csongver,0,3))
 				continue
 			}
-			if(headcmp(d.cnt,5,"mvol=")){
+			if(StartsWith(d.cnt, "mvol=")){
 				csongvol=max(int(strmid(d.cnt,5,3)),0)
 				continue
 			}
-			if(headcmp(d.cnt,6,"level=")){
+			if(StartsWith(d.cnt, "level=")){
 				csonglevel=int(strmid(d.cnt,6,16))
 				if(csonglevel<1):csonglevel=1
 				continue
 			}
-			if(headcmp(d.cnt,16,"chokkakuautovol=")){
+			if(StartsWith(d.cnt, "chokkakuautovol=")){
 				disableautoanvol=1-int(strmid(d.cnt,16,1))
 				continue
 			}
-			if(headcmp(d.cnt,10,"chiprate=")){
+			if(StartsWith(d.cnt, "chiprate=")){
 				if(cnt3<0){
 					chiprate.chipratenum.0=cbcnt
 				}else{
@@ -3014,7 +3014,7 @@ stop
 				chipratenum++
 				continue
 			}
-			if(headcmp(d.cnt,9,"longrate=")){
+			if(StartsWith(d.cnt, "longrate=")){
 				if(cnt3<0){
 					longrate.laserratenum.0=cbcnt
 				}else{
@@ -3030,7 +3030,7 @@ stop
 				longratenum++
 				continue
 			}
-			if(headcmp(d.cnt,10,"laserrate=")){
+			if(StartsWith(d.cnt, "laserrate=")){
 				if(cnt3<0){
 					laserrate.laserratenum.0=cbcnt
 				}else{
@@ -3210,7 +3210,7 @@ stop
 				}
 			loop
 			if(continuefl=1):continue
-			if(headcmp(d.cnt,12,"fx-l_param1=")){
+			if(StartsWith(d.cnt, "fx-l_param1=")){
 				fxparams.fxparamsnum.0=0
 				if(cnt3<0){
 					fxparams.fxparamsnum.1=cbcnt
@@ -3221,7 +3221,7 @@ stop
 				fxparamsnum++
 				continue
 			}
-			if(headcmp(d.cnt,12,"fx-r_param1=")){
+			if(StartsWith(d.cnt, "fx-r_param1=")){
 				fxparams.fxparamsnum.0=1
 				if(cnt3<0){
 					fxparams.fxparamsnum.1=cbcnt
@@ -3232,7 +3232,7 @@ stop
 				fxparamsnum++
 				continue
 			}
-			if(headcmp(d.cnt,8,"fx-l_se=")|headcmp(d.cnt,8,"fx-r_se=")){
+			if(StartsWith(d.cnt, "fx-l_se=")|StartsWith(d.cnt, "fx-r_se=")){
 				_stat1=strmid(d.cnt,8,256)
 				sdim splitstat,1
 				split _stat1,";",splitstat
@@ -3243,17 +3243,17 @@ stop
 					_stat3=min(max(int(splitstat.1),0),100)
 				}
 				loadKeySoundToLibrary _stat1, getpath(fname, 32), csongver_int
-				if (headcmp(d.cnt, 8, "fx-l_se=")) {
+				if (StartsWith(d.cnt, "fx-l_se=")) {
 					nextKeySoundStrsLR.0 = _stat1
 					if (_stat3 != 100) : nextKeySoundStrsLR.0 += ";" + _stat3
 				}
-				if (headcmp(d.cnt, 8, "fx-r_se=")) {
+				if (StartsWith(d.cnt, "fx-r_se=")) {
 					nextKeySoundStrsLR.1 = _stat1
 					if (_stat3 != 100) : nextKeySoundStrsLR.1 += ";" + _stat3
 				}
 				continue
 			}
-			if((headcmp(d.cnt,3,"fx:")&(instr(d.cnt,3,"="))!=-1)){
+			if((StartsWith(d.cnt, "fx:")&(instr(d.cnt,3,"="))!=-1)){
 				if(cnt3<0){
 					comment.commentnum=cbcnt
 				}else{
@@ -3310,7 +3310,7 @@ stop
 				}
 				continue
 			}
-			if((headcmp(d.cnt,7,"filter:")&(instr(d.cnt,7,"="))!=-1)){
+			if((StartsWith(d.cnt, "filter:")&(instr(d.cnt,7,"="))!=-1)){
 				if(cnt3<0){
 					comment.commentnum=cbcnt
 				}else{
@@ -3380,7 +3380,7 @@ stop
 				}
 				continue
 			}
-			if(headcmp(d.cnt,2,"t=")){
+			if(StartsWith(d.cnt, "t=")){
 				if((sm=0)&(int(double(strmid(d.cnt,2,64))*1000)>0)&(strmid(d.cnt,2,64)=replace(strmid(d.cnt,2,64),"-",""))){
 					bpm=int(double(strmid(d.cnt,2,64))*1000)
 					if(cnt3<0){
@@ -3394,13 +3394,13 @@ stop
 				}
 				continue
 			}
-			if(headcmp(d.cnt,3,"to=")){
+			if(StartsWith(d.cnt, "to=")){
 				csongoftbpm=int(double(strmid(d.cnt,3,16))*1000)
 				if(csongoftbpm<1):csongoftbpm=0
 				if(csongoftbpm>65535000):csongoftbpm=0
 				continue
 			}
-			if(headcmp(d.cnt,5,"beat=")){
+			if(StartsWith(d.cnt, "beat=")){
 				sdim beatstat,16,2
 				stat1=strmid(d.cnt,5,33)
 				split stat1,"/",beatstat
@@ -3420,7 +3420,7 @@ stop
 				}
 				continue
 			}
-			if(headcmp(d.cnt,5,"stop=")){
+			if(StartsWith(d.cnt, "stop=")){
 				if(cnt3<0){
 					stp.stpnum.0=cbcnt+stpsh
 				}else{
@@ -3437,7 +3437,7 @@ stop
 				}
 				continue
 			}
-			if(headcmp(d.cnt,11,"filtertype=")){
+			if(StartsWith(d.cnt, "filtertype=")){
 				if(cnt3<0){
 					anafil.anafilnum.0=int(cbcnt)
 				}else{
@@ -3477,7 +3477,7 @@ stop
 				anafilnum++
 				continue
 			}
-			if(headcmp(d.cnt,12,"chokkakuvol=")){
+			if(StartsWith(d.cnt, "chokkakuvol=")){
 				if(cnt3<0){
 					anvol.anvolnum.0=cbcnt+stpsh
 				}else{
@@ -3490,7 +3490,7 @@ stop
 				}
 				continue
 			}
-			if(headcmp(d.cnt,9,"zoom_top=")){
+			if(StartsWith(d.cnt, "zoom_top=")){
 				if(cnt3<0){
 					ztop.ztopnum.0=int(cbcnt)
 				}else{
@@ -3507,7 +3507,7 @@ stop
 				}
 				continue
 			}
-			if(headcmp(d.cnt,12,"zoom_bottom=")){
+			if(StartsWith(d.cnt, "zoom_bottom=")){
 				if(cnt3<0){
 					zbot.zbotnum.0=int(cbcnt)
 				}else{
@@ -3524,7 +3524,7 @@ stop
 				}
 				continue
 			}
-			if(headcmp(d.cnt,10,"zoom_side=")){
+			if(StartsWith(d.cnt, "zoom_side=")){
 				if(cnt3<0){
 					zside.zsidenum.0=int(cbcnt)
 				}else{
@@ -3541,7 +3541,7 @@ stop
 				}
 				continue
 			}
-			if(headcmp(d.cnt,13,"laserrange_l=")){
+			if(StartsWith(d.cnt, "laserrange_l=")){
 				anaran.anarannum.0=0
 				if(cnt3<0){
 					anaran.anarannum.1=int(cbcnt)
@@ -3554,7 +3554,7 @@ stop
 				}//else:anaran.anarannum.2=1
 				continue
 			}
-			if(headcmp(d.cnt,13,"laserrange_r=")){
+			if(StartsWith(d.cnt, "laserrange_r=")){
 				anaran.anarannum.0=1
 				if(cnt3<0){
 					anaran.anarannum.1=int(cbcnt)
@@ -3567,7 +3567,7 @@ stop
 				}//else:anaran.anarannum.2=1
 				continue
 			}
-			if(headcmp(d.cnt,12,"pfiltergain=")){
+			if(StartsWith(d.cnt, "pfiltergain=")){
 				if(cnt3<0){
 					anagain.anagainnum.0=cbcnt+stpsh
 				}else{
@@ -3580,13 +3580,13 @@ stop
 				}
 				continue
 			}
-			if(headcmp(d.cnt,13,"pfilterdelay=")){
+			if(StartsWith(d.cnt, "pfilterdelay=")){
 				laserdelay1=int(strmid(d.cnt,13,16))
 				if(laserdelay1<0):laserdelay1=40
 				if(laserdelay1>160):laserdelay1=160
 				continue
 			}
-			if(headcmp(d.cnt,11,"chokkakuse=")){
+			if(StartsWith(d.cnt, "chokkakuse=")){
 				if(cnt3<0){
 					anse.ansenum.0=cbcnt+stpsh
 				}else{
@@ -3612,7 +3612,7 @@ stop
 				if(f=1):ansenum++
 				continue
 			}
-			if(headcmp(d.cnt,5,"tilt=")){
+			if(StartsWith(d.cnt, "tilt=")){
 				if(cnt3<0){
 					tilt.tiltnum.0=cbcnt+stpsh
 				}else{
@@ -3653,38 +3653,38 @@ stop
 				}
 				continue
 			}
-			if(headcmp(d.cnt,2,"m=")){
+			if(StartsWith(d.cnt, "m=")){
 				csongfile=strmid(d.cnt,2,1024)
 				_sjis_ csongfile
 				continue
 			}
-			if(headcmp(d.cnt,2,"o=")){
+			if(StartsWith(d.cnt, "o=")){
 				offset=int(strmid(d.cnt,2,64))
 				continue
 			}
-			if(headcmp(d.cnt,3,"po=")){
+			if(StartsWith(d.cnt, "po=")){
 				poffset=int(strmid(d.cnt,3,64))
 				continue
 			}
-			if(headcmp(d.cnt,8,"plength=")){
+			if(StartsWith(d.cnt, "plength=")){
 				plength=int(strmid(d.cnt,8,64))
 				continue
 			}
-			if(headcmp(d.cnt,2,"v=")){
+			if(StartsWith(d.cnt, "v=")){
 				csongv=strmid(d.cnt,2,128)
 				continue
 			}
-			if(headcmp(d.cnt,3,"vo=")){
+			if(StartsWith(d.cnt, "vo=")){
 				csongvoffset=int(strmid(d.cnt,3,64))
 				_sjis_ csongv
 				continue
 			}
-			if(headcmp(d.cnt,12,"information=")){
+			if(StartsWith(d.cnt, "information=")){
 				csonginfo=strmid(d.cnt,12,128)
 				_utf8_ csonginfo
 				continue
 			}
-			if(headcmp(d.cnt,5,"icon=")){
+			if(StartsWith(d.cnt, "icon=")){
 				csongicon=strmid(d.cnt,5,64)
 				_sjis_ csongicon
 				if(csongicon=""):csongicon=".png"
@@ -3773,7 +3773,7 @@ stop
 							excd++
 							continue
 						}
-						if(headcmp(d.(cnt2a+cnt+1),5,"beat=")){
+						if(StartsWith(d.(cnt2a+cnt+1), "beat=")){
 							sdim beatstat,16,2
 							stat1=strmid(d.(cnt2a+cnt+1),5,33)
 							split stat1,"/",beatstat
@@ -3844,7 +3844,7 @@ stop
 						if((csongver_int>=160)&(headcmp(d.(cnt2a+cnt+1),5,"fx-"+str_lr.lcnt+"="))){
 							break
 						}
-						if(headcmp(d.(cnt2a+cnt+1),5,"beat=")){
+						if(StartsWith(d.(cnt2a+cnt+1), "beat=")){
 							sdim beatstat,16,2
 							stat1=strmid(d.(cnt2a+cnt+1),5,33)
 							split stat1,"/",beatstat
@@ -4016,7 +4016,7 @@ stop
 							excd++
 							continue
 						}
-						if(headcmp(d.(cnt2a+cnt+1),5,"beat=")){
+						if(StartsWith(d.(cnt2a+cnt+1), "beat=")){
 							sdim beatstat,16,2
 							stat1=strmid(d.(cnt2a+cnt+1),5,33)
 							split stat1,"/",beatstat
@@ -6746,7 +6746,7 @@ stop
 		if(commentnum>0){
 			gosub *undokakuho
 			repeat commentnum
-				if(headcmp(commentstr.cnt,2,"//")){
+				if(StartsWith(commentstr.cnt, "//")){
 					ardel comment,commentnum,cnt
 					ardel commentstr,commentnum,cnt
 					commentnum--
@@ -7473,7 +7473,7 @@ stop
 				cnt2=-1
 				continue
 			}
-			if(headcmp(d.cnt,4,"ver=")){
+			if(StartsWith(d.cnt, "ver=")){
 				t_csongver_int=int(strmid(d.cnt,4,3))
 				continue
 			}
@@ -7635,7 +7635,7 @@ stop
 				}
 			loop
 			if(continuefl=1):continue
-			if(headcmp(d.cnt,2,"t=")){
+			if(StartsWith(d.cnt, "t=")){
 				if((sm=0)&(int(double(strmid(d.cnt,2,64))*1000)>0)&(strmid(d.cnt,2,64)=replace(strmid(d.cnt,2,64),"-",""))){
 					bpm=int(double(strmid(d.cnt,2,64))*1000)
 					if(cnt3<0){
@@ -7649,7 +7649,7 @@ stop
 				}
 				continue
 			}
-			if(headcmp(d.cnt,5,"beat=")){
+			if(StartsWith(d.cnt, "beat=")){
 				sdim beatstat,16,2
 				stat1=strmid(d.cnt,5,33)
 				split stat1,"/",beatstat
@@ -7669,7 +7669,7 @@ stop
 				}
 				continue
 			}
-			if(headcmp(d.cnt,5,"stop=")){
+			if(StartsWith(d.cnt, "stop=")){
 				if(cnt3<0){
 					t_stp.t_stpnum.0=cbcnt+t_stpsh
 				}else{
@@ -7686,7 +7686,7 @@ stop
 				}
 				continue
 			}
-			if(headcmp(d.cnt,12,"chokkakuvol=")){
+			if(StartsWith(d.cnt, "chokkakuvol=")){
 				if(cnt3<0){
 					t_anvol.t_anvolnum.0=cbcnt+t_stpsh
 				}else{
@@ -7699,7 +7699,7 @@ stop
 				}
 				continue
 			}
-			if(headcmp(d.cnt,12,"pfiltergain=")){
+			if(StartsWith(d.cnt, "pfiltergain=")){
 				if(cnt3<0){
 					t_anagain.t_anagainnum.0=cbcnt+stpsh
 				}else{
@@ -7712,7 +7712,7 @@ stop
 				}
 				continue
 			}/*
-			if(headcmp(d.cnt,11,"filtertype=")){
+			if(StartsWith(d.cnt, "filtertype=")){
 				if(cnt3<0){
 					t_anafil.t_anafilnum.0=cbcnt+stpsh
 				}else{
@@ -7730,7 +7730,7 @@ stop
 				t_anafilnum++
 				continue
 			}*/
-			if(headcmp(d.cnt,11,"chokkakuse=")){
+			if(StartsWith(d.cnt, "chokkakuse=")){
 				if(cnt3<0){
 					t_anse.t_ansenum.0=int(cbcnt)+t_stpsh
 				}else{
@@ -7756,7 +7756,7 @@ stop
 				if(f=1):t_ansenum++
 				continue
 			}
-			if(headcmp(d.cnt,5,"tilt=")){
+			if(StartsWith(d.cnt, "tilt=")){
 				if(cnt3<0){
 					t_tilt.t_tiltnum.0=cbcnt+t_stpsh
 				}else{
@@ -7792,7 +7792,7 @@ stop
 				if((t_tilt.t_tiltnum.0!=0)|(t_tilt.t_tiltnum.1!=0)):t_tiltnum++
 				continue
 			}
-			if(headcmp(d.cnt,12,"fx-l_param1=")){
+			if(StartsWith(d.cnt, "fx-l_param1=")){
 				fxparams.fxparamsnum.0=0
 				if(cnt3<0){
 					fxparams.fxparamsnum.1=cbcnt
@@ -7803,7 +7803,7 @@ stop
 				fxparamsnum++
 				continue
 			}
-			if(headcmp(d.cnt,12,"fx-r_param1=")){
+			if(StartsWith(d.cnt, "fx-r_param1=")){
 				fxparams.fxparamsnum.0=1
 				if(cnt3<0){
 					fxparams.fxparamsnum.1=cbcnt
@@ -7869,7 +7869,7 @@ stop
 							excd++
 							continue
 						}
-						if(headcmp(d.(cnt2a+cnt+1),5,"beat=")){
+						if(StartsWith(d.(cnt2a+cnt+1), "beat=")){
 							sdim beatstat,16,2
 							stat1=strmid(d.(cnt2a+cnt+1),5,33)
 							split stat1,"/",beatstat
@@ -7938,7 +7938,7 @@ stop
 						if((t_csongver_int>=160)&(headcmp(d.(cnt2a+cnt+1),5,"fx-"+str_lr.lcnt+"="))){
 							break
 						}
-						if(headcmp(d.(cnt2a+cnt+1),5,"beat=")){
+						if(StartsWith(d.(cnt2a+cnt+1), "beat=")){
 							sdim beatstat,16,2
 							stat1=strmid(d.(cnt2a+cnt+1),5,33)
 							split stat1,"/",beatstat
@@ -8109,7 +8109,7 @@ stop
 							excd++
 							continue
 						}
-						if(headcmp(d.(cnt2a+cnt+1),5,"beat=")){
+						if(StartsWith(d.(cnt2a+cnt+1), "beat=")){
 							sdim beatstat,16,2
 							stat1=strmid(d.(cnt2a+cnt+1),5,33)
 							split stat1,"/",beatstat
@@ -11289,7 +11289,7 @@ stop
 			stat2_=0
 			stat7=commentnum
 			repeat commentnum
-				if((comment.cnt=cc)&(headcmp(commentstr.cnt,2,"//"))){
+				if((comment.cnt=cc)&(StartsWith(commentstr.cnt, "//"))){
 					stat7=cnt
 					stat2_=1
 					stat1=strmid(commentstr.cnt,2,strlen(commentstr.cnt)-2)
@@ -13391,7 +13391,7 @@ stop
 			}
 		}else:if((edittarget=TARGET_POS)&(ctrl_key=1)&(shift_key=1)){
 			repeat commentnum
-				if((comment.cnt=cc)&(headcmp(commentstr.cnt,2,"//"))){
+				if((comment.cnt=cc)&(StartsWith(commentstr.cnt, "//"))){
 					gosub *undokakuho
 					ardel comment,commentnum,cnt
 					ardel commentstr,commentnum,cnt
@@ -15728,15 +15728,15 @@ stop
 	dir_curp=dir_cur
 	dim confex,9
 	repeat length(confstr)
-		if(headcmp(confstr.cnt,12,"currentlang=")):confex.0=1
-		if(headcmp(confstr.cnt,17,"editor_disabledd=")):confex.1=1
-		if(headcmp(confstr.cnt,18,"editor_assisttick=")):confex.2=1
-		if(headcmp(confstr.cnt,21,"editor_reducespacing=")):confex.3=1
-		if(headcmp(confstr.cnt,17,"editor_zoomlanex=")):confex.4=1
-		if(headcmp(confstr.cnt,23,"editor_increasewinsize=")):confex.5=1
-		if(headcmp(confstr.cnt,24,"editor_measurepercolumn=")):confex.6=1
-		if(headcmp(confstr.cnt,22,"editor_linebrightness=")):confex.7=1
-		if(headcmp(confstr.cnt,20,"editor_loopplayback=")):confex.8=1
+		if(StartsWith(confstr.cnt, "currentlang=")):confex.0=1
+		if(StartsWith(confstr.cnt, "editor_disabledd=")):confex.1=1
+		if(StartsWith(confstr.cnt, "editor_assisttick=")):confex.2=1
+		if(StartsWith(confstr.cnt, "editor_reducespacing=")):confex.3=1
+		if(StartsWith(confstr.cnt, "editor_zoomlanex=")):confex.4=1
+		if(StartsWith(confstr.cnt, "editor_increasewinsize=")):confex.5=1
+		if(StartsWith(confstr.cnt, "editor_measurepercolumn=")):confex.6=1
+		if(StartsWith(confstr.cnt, "editor_linebrightness=")):confex.7=1
+		if(StartsWith(confstr.cnt, "editor_loopplayback=")):confex.8=1
 	loop
 	ex=0
 	cex=-1
@@ -15754,27 +15754,27 @@ stop
 				if(confex.cnt=0):cex=cnt:break
 			loop
 		}
-		if((headcmp(confstr.cnt,12,"currentlang="))|(cex=0)){
+		if((StartsWith(confstr.cnt, "currentlang="))|(cex=0)){
 			confs+="currentlang="+clang+stat1
-		}else:if((headcmp(confstr.cnt,17,"editor_disabledd="))|(cex=1)){
+		}else:if((StartsWith(confstr.cnt, "editor_disabledd="))|(cex=1)){
 			confs+="editor_disabledd="+disabledd+stat1
-		}else:if((headcmp(confstr.cnt,18,"editor_assisttick="))|(cex=2)){
+		}else:if((StartsWith(confstr.cnt, "editor_assisttick="))|(cex=2)){
 			confs+="editor_assisttick="+assisttick+stat1
-		}else:if((headcmp(confstr.cnt,21,"editor_reducespacing="))|(cex=3)){
+		}else:if((StartsWith(confstr.cnt, "editor_reducespacing="))|(cex=3)){
 			stat2=0
 			if(vsep=24):stat2=0
 			if(vsep=72):stat2=-1
 			if(vsep=7):stat2=1
 			confs+="editor_reducespacing="+stat2+stat1
-		}else:if((headcmp(confstr.cnt,17,"editor_zoomlanex="))|(cex=4)){
+		}else:if((StartsWith(confstr.cnt, "editor_zoomlanex="))|(cex=4)){
 			confs+="editor_zoomlanex="+vzoomx+stat1
-		}else:if((headcmp(confstr.cnt,23,"editor_increasewinsize="))|(cex=5)){
+		}else:if((StartsWith(confstr.cnt, "editor_increasewinsize="))|(cex=5)){
 			confs+="editor_increasewinsize="+maximize+stat1
-		}else:if((headcmp(confstr.cnt,24,"editor_measurepercolumn="))|(cex=6)){
+		}else:if((StartsWith(confstr.cnt, "editor_measurepercolumn="))|(cex=6)){
 			confs+="editor_measurepercolumn="+vtate+stat1
-		}else:if((headcmp(confstr.cnt,22,"editor_linebrightness="))|(cex=7)){
+		}else:if((StartsWith(confstr.cnt, "editor_linebrightness="))|(cex=7)){
 			confs+="editor_linebrightness="+linebright+stat1
-		}else:if((headcmp(confstr.cnt,20,"editor_loopplayback="))|(cex=8)){
+		}else:if((StartsWith(confstr.cnt, "editor_loopplayback="))|(cex=8)){
 			confs+="editor_loopplayback="+loopplayback+stat1
 		}else{
 			confs+=confstr.cnt+stat1

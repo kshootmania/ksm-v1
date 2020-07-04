@@ -9,6 +9,7 @@
 #cfunc CreateKeySound "CreateKeySound" sptr, int, int
 #func DestroyKeySound "DestroyKeySound" int
 #func PlayKeySound "PlayKeySound" int, double
+#cfunc StartsWith "StartsWith" sptr, sptr
 
 #enum CAM_ZOOM_TOP = 0
 #enum CAM_ZOOM_BOTTOM
