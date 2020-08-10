@@ -15943,27 +15943,26 @@ stop
 					// ByPass‚ÌÝ’è
 					BASS_VST_SetParam hFX_User.cnt,29,1.0f
 				loop
-
-				//if(csongvol>100){
-					hVolFX=BASS_ChannelSetFX(mid.0,0x10003,5)
-					dim volfx,2
-					volfx=0,tofloat(double(csongvol)/10.0f/100.0f)
-					BASS_FXSetParameters hVolFX,volfx
-					dim hVolFX_sw,swaudionum
-					repeat swaudionum*(feffect=1)
-						volfx=0,tofloat(double(csongvol)/10.0f/100.0f)
-						hVolFX_sw.cnt=BASS_ChannelSetFX(mid_sw.cnt,0x10003,5)
-						BASS_FXSetParameters hVolFX_sw.cnt,volfx
-					loop
-				//}
-				hBitCFX=BASS_VST_ChannelSetDSP(mid,dir_default+"\\lib\\bitc.dll",0,0)
-				BASS_VST_SetParam hBitCFX,0,0.0f
-				dim hBitCFX_sw,swaudionum
-				repeat swaudionum*(feffect=1)
-					hBitCFX_sw.cnt=BASS_VST_ChannelSetDSP(mid_sw.cnt,dir_default+"\\lib\\bitc.dll",0,0)
-					BASS_VST_SetParam hBitCFX_sw.cnt,0,0.0f
-				loop
 			}
+			//if(csongvol>100){
+				hVolFX=BASS_ChannelSetFX(mid.0,0x10003,5)
+				dim volfx,2
+				volfx=0,tofloat(double(csongvol)/10.0f/100.0f)
+				BASS_FXSetParameters hVolFX,volfx
+				dim hVolFX_sw,swaudionum
+				repeat swaudionum*(feffect=1)
+					volfx=0,tofloat(double(csongvol)/10.0f/100.0f)
+					hVolFX_sw.cnt=BASS_ChannelSetFX(mid_sw.cnt,0x10003,5)
+					BASS_FXSetParameters hVolFX_sw.cnt,volfx
+				loop
+			//}
+			hBitCFX=BASS_VST_ChannelSetDSP(mid,dir_default+"\\lib\\bitc.dll",0,0)
+			BASS_VST_SetParam hBitCFX,0,0.0f
+			dim hBitCFX_sw,swaudionum
+			repeat swaudionum*(feffect=1)
+				hBitCFX_sw.cnt=BASS_VST_ChannelSetDSP(mid_sw.cnt,dir_default+"\\lib\\bitc.dll",0,0)
+				BASS_VST_SetParam hBitCFX_sw.cnt,0,0.0f
+			loop
 			mplayfl=1
 		}
 	}
