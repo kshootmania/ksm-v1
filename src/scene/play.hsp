@@ -1842,7 +1842,7 @@
 		continuefl=0
 		_cnt=cnt
 		repeat 2
-			if(headcmp(d._cnt,5,"fx-"+str_lr.cnt+"=")){
+			if (startsWith(d._cnt, "fx-" + str_lr.cnt + "=")) {
 				fx.fxnum.0=cnt
 				if(cnt3<0){
 					fx.fxnum.1=cbcnt
