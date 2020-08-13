@@ -2559,14 +2559,3 @@ end
 	GetTextExtentPoint32 hdc,varptr(tBuf),txtLen,varptr(tSize)
 	return
 #global
-
-#deffunc BASS_VST_SetParam_R  int vst_a,int vst_b,double vst_c
-	if(vst_a!=-1){
-		repeat 5
-			BASS_VST_SetParam vst_a,vst_b,vst_c
-			if(BASS_ErrorGetCode()=0){
-				break
-			}
-		loop
-	}
-	return
