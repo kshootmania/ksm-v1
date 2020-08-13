@@ -131,34 +131,7 @@
 #define global picload(%1,%2=0) picload_@__picload__ %1,%2
 #global
 
-#uselib "user32"
-#func IsIconic "IsIconic" sptr
-#func ShowWindow "ShowWindow" sptr,sptr
-#func EnableWindow "EnableWindow" int, int
-#func ScreenToClient "ScreenToClient" int, int
-#func f_SetWindowPos "SetWindowPos" int , int , int , int , int , int , int
-#func SetWindowTextW "SetWindowTextW" wptr,wptr
-#func GetWindowTextW "GetWindowTextW" wptr,wptr,wptr
-
-#uselib "kernel32"
-#cfunc c_LoadLibrary "LoadLibraryA" str
-#func  f_FreeLibrary "FreeLibrary" int
-
-#uselib "gdi32"
-#func CreateFontIndirect "CreateFontIndirectA" sptr
-#func DeleteObject "DeleteObject" sptr
-
-#const WS_CHILD		$40000000
-#const WS_VISIBLE		$10000000
-#const WS_BORDER		$800000
-#const WS_TABSTOP		$10000
-#const ES_AUTOHSCROLL	$80
-#const STYLE			WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_AUTOHSCROLL
-#const WM_SETFONT    0x0030
-
-#uselib "msvcrt"
-#func ren "rename" str, str
-
+#include "src/winapi.as"
 #include "src/kshlib.as"
 #include "src/ksmcore.as"
 
@@ -173,18 +146,6 @@
 #include "src/bassconv.as"
 #include "src/bass_fx.as"
 #include "src/bass_vst.as"
-
-#uselib "kernel32"
-#define GetTempPath GetTempPathA
-#func GetTempPathA "GetTempPathA" sptr,sptr
-#define GetLongPathName GetLongPathNameA
-#func GetLongPathNameA "GetLongPathNameA" sptr,sptr,sptr
-#define DeleteFile DeleteFileA
-#func DeleteFileA "DeleteFileA" sptr
-#define RemoveDirectory RemoveDirectoryA
-#func RemoveDirectoryA "RemoveDirectoryA" sptr
-#define MoveFile MoveFileA
-#func MoveFileA "MoveFileA" sptr,sptr
 
 #include "d3m.hsp"
 #include "hgimg3.as"

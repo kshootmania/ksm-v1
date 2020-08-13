@@ -4,41 +4,12 @@
 #packopt runtime "hsp3mt.hrt"
 #packopt name "editor"
 
-#uselib "user32"
-#func CheckMenuItem "CheckMenuItem" int,int,int
-#func EnableMenuItem "EnableMenuItem" int,int,int
-#func IsIconic "IsIconic" sptr
-#func SetWindowTextW "SetWindowTextW" wptr,wptr
-#func GetWindowTextW "GetWindowTextW" wptr,wptr,wptr
-
-#func TrackPopupMenuEx   "TrackPopupMenuEx"   int,int,int,int,int,int
-#func DestroyMenu        "DestroyMenu"        int
-#func ClientToScreen     "ClientToScreen"     int,int
-
-#define ctype LOWORD(%1) (%1 & 0xFFFF)
-
-#uselib "comctl32.dll"
-#func InitCommonControls "InitCommonControls"
-
 #include "src/bass.as"
 #include "src/bassconv.as"
 #include "src/bass_fx.as"
 #include "src/bass_vst.as"
 
-//#include "user32.as"
-#include "gdi32.as"
-#define DT_WORDBREAK		0x00000010
-#define DT_EDITCONTROL		0x00002000
-// http://hsp.tv/play/pforum.php?mode=pastwch&num=41339
-#define WS_CHILD		$40000000
-#define WS_VISIBLE		$10000000
-#define WS_BORDER		$800000
-#define WS_TABSTOP		$10000
-#define ES_AUTOHSCROLL	$80
-#define STYLE			WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_AUTOHSCROLL
-#define UNKNOWN			$200 ; HSPのインプットボックスに設定されていたEXスタイルの値
-#define  WM_SETFONT    0x0030
-
+#include "src/winapi.as"
 #include "src/ksmcore.as"
 
 #include "src/audio/key_sound.as"
@@ -68,22 +39,6 @@
 #include "mod_regexp.as"
 #include "encode.as"
 //#include "vAudio.as"
-
-#define MF_POPUP            0x0010
-#define MF_SEPARATOR        0x0800
-
-#define WM_NOTIFY           0x004E
-
-#define TBN_DROPDOWN          -710
-
-#define TB_BUTTONSTRUCTSIZE 0x041E
-#define TB_ADDBITMAP        0x0413
-#define TB_AUTOSIZE         0x0421
-#define TB_ADDBUTTONS       0x0414
-#define TB_SETEXTENDEDSTYLE 0x0454
-#define TB_GETRECT          0x0433
-
-#define TBSTYLE_EX_DRAWDDARROWS  1
 
 #const TBNUM	(3+14+7) // ツールバーの画像数
 
