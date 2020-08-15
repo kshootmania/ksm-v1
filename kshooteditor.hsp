@@ -14693,6 +14693,8 @@ stop
 	csongtotal=0
 	csongoftbpm=0
 	csongvol=75
+	csongver = "" + CURRENT_KSH_VERSION
+	csongver_int = CURRENT_KSH_VERSION
 	csongfile=".mp3"
 	bgname="desert"
 	bgname_l="arrow"
