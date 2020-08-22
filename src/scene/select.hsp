@@ -1781,6 +1781,7 @@
 		loop
 		optionfl=0
 		if((dialognow=0)&(btkey.0=1)&(btkey.0+btkey.1+btkey.2+btkey.3=1)){
+			// BT-Aを押している間表示されるオプション画面
 			getkey stat1,37
 			getkey stat1_,key.(6+analogsw*2)
 			stat1=stat1|stat1_
@@ -1872,6 +1873,7 @@
 			alDrawText lang.1.1+"\n\n"+stat2,getsize(30),getsize(20),getsize(260),getsize(140),0,1
 			optionfl=1
 		}else:if((dialognow=0)&(btkey.1=1)&(btkey.0+btkey.1+btkey.2+btkey.3=1)){
+			// BT-Bを押している間表示されるオプション画面
 			getkey keystat1,37
 			getkey stat1_,key.(6+analogsw*2)
 			keystat1=keystat1|stat1_
@@ -1932,6 +1934,7 @@
 			alDrawText stat2,getsize(35),getsize(20),getsize(250),getsize(140),0,1
 			optionfl=1
 		}else:if((dialognow=0)&(btkey.2=1)&(btkey.0+btkey.1+btkey.2+btkey.3=1)){
+			// BT-Cを押している間表示されるオプション画面
 			getkey stat1,37
 			getkey stat1_,key.(6+analogsw*2)
 			stat1=stat1|stat1_
@@ -2050,6 +2053,7 @@
 			alDrawText stat2,getsize(20),getsize(20),getsize(280),getsize(140),0,1
 			optionfl=1
 		}else:if((dialognow=0)&(btkey.3=1)&(btkey.0+btkey.1+btkey.2+btkey.3=1)){
+			// BT-Dを押している間表示されるオプション画面
 			gosub *refreshhs
 			if(hstypenow=0){
 				stat2=bpm*hsr/10
