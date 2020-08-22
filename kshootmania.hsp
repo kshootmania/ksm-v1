@@ -119,6 +119,8 @@
 #define GATE_PATH		""
 #define GATE_GLIST_FNAME	"glist164.lst"
 
+// picload命令の修正: ファイルが見つからなかった場合に内部エラー前にファイル名を表示
+// ( 参考: https://mz-kb.com/blog/2018/10/22/hsp3-picload-show-filename/ )
 #undef picload
 #module __picload__
 #deffunc local picload_ str filename, int mode
@@ -129,6 +131,17 @@
 	picload@hsp filename,mode
 	return
 #define global picload(%1,%2=0) picload_@__picload__ %1,%2
+#global
+
+// instr関数の修正: マルチバイト文字の途中で終わった場合に前の変数の内容が検索対象になるバグの回避
+// ( 参考: http://hsp.tv/play/pforum.php?mode=all&num=91178 )
+#undef instr
+#module __instr__
+#defcfunc local instr_ var p1, int p2, str p3, local ret
+	ret = instr@hsp(p1, p2, p3)
+	if (ret >= strlen(p1)) : return -1
+	return ret
+#define global ctype instr(%1,%2=0,%3) instr_@__instr__(%1,%2,%3)
 #global
 
 #include "src/winapi.as"
