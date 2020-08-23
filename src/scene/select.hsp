@@ -1773,7 +1773,6 @@
 		ts+=max(timenow-timep,1)
 		ts2+=max(timenow-timep,1)
 		ts3+=max(timenow-timep,1)
-		if(s=0):s=1
 		repeat 4
 			getkey stat1,key.cnt
 			getkey stat1_,key2.cnt
@@ -1947,7 +1946,6 @@
 			getkey stat1_,key2.(7+analogsw*2)
 			stat2=stat2|stat1_
 			stat2=stat2|(stickstat.(analogsw)>min(timenow-timep,80)/8)
-			if(s=0):s=1
 			if(sselnow=0){
 				if((stat1=1)&(ts>80)&(assisttick>0)):assisttick--
 				if((stat2=1)&(ts>80)&(assisttick<1)):assisttick++
