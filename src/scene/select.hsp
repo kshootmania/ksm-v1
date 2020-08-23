@@ -1944,7 +1944,7 @@
 			getkey_a stat2,39
 			getkey stat1_,key.(7+analogsw*2)
 			stat2=stat2|stat1_
-			getkey stat1_,key2.(7+nalogsw*2)
+			getkey stat1_,key2.(7+analogsw*2)
 			stat2=stat2|stat1_
 			stat2=stat2|(stickstat.(analogsw)>min(timenow-timep,80)/8)
 			if(s=0):s=1
