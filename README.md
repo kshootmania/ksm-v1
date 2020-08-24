@@ -1,4 +1,10 @@
 # K-Shoot MANIA v1.xx
+Windows用の音楽ゲームです。  
+https://kshootmania.com
+
+プログラムは基本的にHot Soup Processor(HSP)製ですが、一部はC++で実装されたDLLファイルを呼び出しています。  
+→ ksmcore.dll (C++): https://github.com/m4saka/ksmcore-dll
+
 - ソースコード公開にあたって、下記機能に該当する箇所のコードは削除されています
     - INPUT GATE
     - Twitter連携機能
