@@ -1,9 +1,15 @@
 # K-Shoot MANIA v1.xx
 Windows用の音楽ゲームです。  
-https://kshootmania.com
+公式サイト: https://kshootmania.com
 
-プログラムは基本的にHot Soup Processor(HSP)製ですが、一部はC++で実装されたDLLファイルを呼び出しています。  
-→ ksmcore.dll (C++): https://github.com/m4saka/ksmcore-dll
+## 動作環境
+- Hot Soup Processor 3.51 (Windows版, x86, ANSI版)
+    - HSPのUTF-8版は開発当時(2013年)の段階で存在しなかったため使用していません(おそらく移植も困難です)。
+
+## ソースコードについて
+- プログラムは基本的にHot Soup Processor(HSP)製ですが、一部はC++で実装されたDLLファイルを呼び出しています。
+    - ksmcore.dll (C++): https://github.com/m4saka/ksmcore-dll
+        - 現状、視点変更の現在値取得・キー音の再生管理などはこちらへ移植されています
 
 - ソースコード公開にあたって、下記機能に該当する箇所のコードは削除されています
     - INPUT GATE
@@ -29,6 +35,10 @@ https://kshootmania.com
     - ただし、ランキング機能等を含む公式サイトで配布されているバイナリはその利用規約に準拠します
 
 -------
+
+- The program is basically written in Hot Soup Processor (HSP), but some parts call DLLs written in C++.
+    - ksmcore.dll (C++): https://github.com/m4saka/ksmcore-dll
+        - Camera value calculation and keysound management were ported to this library.
 
 - To make source codes public, these features are deleted:
     - Input Gate (In-game chart downloader)
