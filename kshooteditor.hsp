@@ -3468,7 +3468,7 @@ stop
 							break
 						}
 						if(d.(cnt2a+cnt+1)=""){
-							break
+							continue
 						}
 						if(strmid(d.(cnt2a+cnt+1),0,2)="--"){
 							excd++
@@ -3536,7 +3536,7 @@ stop
 							break
 						}
 						if(d.(cnt2a+cnt+1)=""){
-							break
+							continue
 						}
 						if(strmid(d.(cnt2a+cnt+1),0,2)="--"){
 							excd++
@@ -7564,7 +7564,7 @@ stop
 							break
 						}
 						if(d.(cnt2a+cnt+1)=""){
-							break
+							continue
 						}
 						if(strmid(d.(cnt2a+cnt+1),0,2)="--"){
 							excd++
@@ -7630,7 +7630,7 @@ stop
 							break
 						}
 						if(d.(cnt2a+cnt+1)=""){
-							break
+							continue
 						}
 						if(strmid(d.(cnt2a+cnt+1),0,2)="--"){
 							excd++
