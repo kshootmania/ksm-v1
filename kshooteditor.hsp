@@ -3396,6 +3396,9 @@ stop
 				sharpstr=sharpstr+d.cnt+"\n"
 				continue
 			}
+			if(d.cnt=""){
+				continue
+			}
 			if((strmid(d.cnt,7,1)!="|")|(d.cnt!=replace(d.cnt,"=",""))){
 				if(cnt3<0){
 					comment.commentnum=-1
