@@ -76,8 +76,8 @@
 #define	defx			ginfo_dispx/2
 #define defy			ginfo_dispy/2
 #define siteurl			"https://www.kshootmania.com/"
-#define atitle			"K-Shoot MANIA v1.71a"
-#define currentver		"171a"
+#define atitle			"K-Shoot MANIA v1.71b"
+#define currentver		"171b"
 
 #const  T_MOEX_DELAY			0
 #const  GLOBAL_SOUNDFX_DELAY	0
