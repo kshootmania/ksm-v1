@@ -279,35 +279,6 @@ dim anse,131072,2
 dim beatl,131072,3
 dim comment,512
 sdim commentstr,512,1024
-/*
-dim undonote,131072,6
-dim undoanalog,131072,7
-dim undospin,131072,6
-dim undotilt,131072,2
-dim undoztop,131072,3
-dim undozbot,131072,3
-dim undozside,131072,3
-dim undobpml,131072,2
-dim undoanagain,131072,2
-dim undoanafil,131072,2
-dim undoanvol,131072,2
-dim undoanse,131072,2
-dim undobeatl,131072,3
-dim undostp,131072,2
-dim undo2note,131072,6
-dim undo2analog,131072,7
-dim undo2spin,131072,6
-dim undo2tilt,131072,2
-dim undo2ztop,131072,3
-dim undo2zbot,131072,3
-dim undo2zside,131072,3
-dim undo2bpml,131072,2
-dim undo2anagain,131072,2
-dim undo2anafil,131072,2
-dim undo2anvol,131072,2
-dim undo2anse,131072,2
-dim undo2beatl,131072,3
-dim undo2stp,131072,2*/
 
 ud_cnt=0
 ud_cur=0
@@ -5012,20 +4983,7 @@ stop
 					for i,1,dn
 						buf+="\n        PT "+str((double(c2ta(refp.cnt.0))+double(c2ta(refp.(cnt+1).0)-c2ta(refp.cnt.0))*i/dn)/1000)+" "+str((0.35-cos(double(refp.cnt.1-(refp.cnt.1-refp.(cnt+1).1)*i/dn)*M_PI/2000)*0.25)*(double(refp.cnt.1)-(refp.cnt.1-refp.(cnt+1).1)*i/dn)/1000*(4000+double(refp.cnt.1)-(refp.cnt.1-refp.(cnt+1).1)*i/dn)/5000)+" 0"
 					next
-				}/*
-				if((refp.cnt.1=0)&(refp.(cnt+1).1=0)&(refp.cnt.0!=refp.(cnt+1).0)&(c2ta(refp.(cnt+1).0)-c2ta(refp.cnt.0)>200)){
-					pichu.pichunum.0=0
-					pichu.pichunum.1=c2ta(refp.cnt.0)
-					pichunum++
-					pichu.pichunum.0=2
-					pichu.pichunum.1=c2ta(refp.(cnt+1).0)
-					pichunum++
-				}*/
-				//if((refp.cnt.0=refp.(cnt+1).0)&(refp.cnt.1!=refp.(cnt+1).1)){
-				//	pichu.pichunum.0=1
-				//	pichu.pichunum.1=c2ta(refp.cnt.0)
-				//	pichunum++
-				//}
+				}
 			}else{
 				pichu.pichunum.0=0
 				pichu.pichunum.1=c2ta(refp.cnt.0)
@@ -5051,27 +5009,14 @@ stop
 			f=0
 			if(f=1):continue
 			shuu=0
-			cnt2=cnt/*
-			repeat shunum
-				if(shu.cnt.0=-1):continue
-				if((c2ta(shu.cnt.1)-600<=c2ta(refp.cnt2.0))&(c2ta(shu.cnt.1)>c2ta(refp.cnt2.0))){
-					shuu+=c2ta(shu.cnt.1)-c2ta(refp.cnt2.0)
-				}
-			loop*/
-			buf+="\n        PT "+str(double(c2ta(refp.cnt.0))/1000)+" "+str(minf(0.68/*+double(shuu)/2000*/-(double(refp.cnt.1-800)/2000)*(refp.cnt.1>800)-(double(400-refp.cnt.1)/8000)*(refp.cnt.1<400),0.68))+" 0"
+			cnt2=cnt
+			buf+="\n        PT "+str(double(c2ta(refp.cnt.0))/1000)+" "+str(minf(0.68-(double(refp.cnt.1-800)/2000)*(refp.cnt.1>800)-(double(400-refp.cnt.1)/8000)*(refp.cnt.1<400),0.68))+" 0"
 			if(cnt!=refpnum-1){
 				if((refp.cnt.0!=refp.(cnt+1).0)&(refp.cnt.1!=refp.(cnt+1).1)){
 					dn=6+(refp.(cnt+1).0-refp.cnt.0)*4/UNIT_MEASURE
 					for i,1,dn
 						cnt2=cnt
 						shuu=0
-						/*
-						repeat shunum
-							if(shu.cnt.0=-1):continue
-							if((c2ta(shu.cnt.1)-600<=c2ta(refp.cnt2.0-(refp.cnt2.0-refp.(cnt2+1).0)*i/dn))&(c2ta(shu.cnt.1)>c2ta(refp.cnt2.0-(refp.cnt2.0-refp.(cnt2+1).0)*i/dn))){
-								shuu+=c2ta(shu.cnt.1)-c2ta(refp.cnt2.0-(refp.cnt2.0-refp.(cnt2+1).0)*i/dn)
-							}
-						loop*/
 						buf+="\n        PT "+str((double(c2ta(refp.cnt.0))+double(c2ta(refp.(cnt+1).0)-c2ta(refp.cnt.0))*i/dn)/1000)+" "+str(minf(0.68+double(shuu)/2000-(double(refp.cnt.1-(refp.cnt.1-refp.(cnt+1).1)*i/dn-800)/2000)*(refp.cnt.1-(refp.cnt.1-refp.(cnt+1).1)*i/dn>800)-(double(400-refp.cnt.1+(refp.cnt.1-refp.(cnt+1).1)*i/dn)/8000)*(refp.cnt.1-(refp.cnt.1-refp.(cnt+1).1)*i/dn<400),0.68))+" 0"
 					next
 				}
@@ -10870,8 +10815,6 @@ stop
 					}
 				}
 			loop
-		}else:if(edittarget=TARGET_ROTATE){
-			/*******************************/
 		}else:if(edittarget=TARGET_STOP){
 			if(ctrl_key+shift_key=0):gosub *selinit
 			repeat stpnum
@@ -11165,7 +11108,6 @@ stop
 					sdim opt,128,2
 					i=0
 					stat3=lang.8.92
-					//dirlist stat2, dir_default+"\\se\\note\\*.wav"
 					stat2="clap.wav\nclap_impact.wav\nclap_punchy.wav\nsnare.wav\nsnare_lo.wav" // ユーザーによるseフォルダへの誤追加を防止するために追加されても選択肢に加えない
 					notesel stat2
 					r.0="0"
@@ -11339,8 +11281,6 @@ stop
 				cc2_=b2c(c2b(cc2))
 				cc2=cc2_+((cc2-cc2_)/(UNIT_MEASURE/editdiv)+1)*(UNIT_MEASURE/editdiv)
 				if(cc2-cc<0){
-					/*note.stat_1.1=cc2
-					note.stat_1.2=cc-cc2*/
 					note.stat_1.1=cc
 					note.stat_1.2=UNIT_MEASURE/editdiv
 				}else{
@@ -11718,8 +11658,6 @@ stop
 				cc2_=b2c(c2b(cc2))
 				cc2=cc2_+((cc2-cc2_)/(UNIT_MEASURE/editdiv)+1)*(UNIT_MEASURE/editdiv)
 				if(cc2-cc<0){
-					/*note.stat_1.1=cc2
-					note.stat_1.2=cc-cc2*/
 					note.stat_1.1=cc
 					note.stat_1.2=UNIT_MEASURE/editdiv
 				}else{
@@ -12099,18 +12037,7 @@ stop
 					e=1:gosub *refreshtitle
 				}
 			}
-			stat1=0/*
-			repeat max(tiltnum-1,0)
-				if(tilt.(cnt+stat1).1=tilt.(cnt+1+stat1).1){
-					ardel2 tilt,tiltnum,2,cnt+1+stat1
-					tiltnum--
-					stat1--
-				}
-			loop
-			if((tilt.0.0=0)&(tilt.0.1=0)&(tiltnum>=1)){
-				ardel2 tilt,tiltnum,2,0
-				tiltnum--
-			}*/
+			stat1=0
 		}
 		if((edittarget=TARGET_ROTATE)&(ctrl_key=1)){
 			gosub *selinit
@@ -12357,15 +12284,7 @@ stop
 					anvol.stat7.1=int(r.0)
 					e=1:gosub *refreshtitle
 				}
-			}/*
-			stat1=0
-			repeat max(anvolnum-1,0)
-				if(anvol.(cnt+stat1).1=anvol.(cnt+1+stat1).1){
-					ardel2 anvol,anvolnum,2,cnt+1+stat1
-					anvolnum--
-					stat1--
-				}
-			loop*/
+			}
 		}
 		if((edittarget=TARGET_ANALOGL)|(edittarget=TARGET_ANALOGR)){
 			stat0=edittarget-TARGET_ANALOGL
@@ -12461,15 +12380,12 @@ stop
 				if(analog.cnt.0=stat0){
 					if(analog.cnt.1+analog.cnt.2=cc){
 						f2=1
-						//if((ctrl_key=1)&(shift_key=1)&(vsep>=72)){
-						//}
 						if((analogparentran.(analogparent.cnt)=2)&(vsep>=72)){
 							if(analogdetail=0){
 								capos=anadetail1.(min(max(((mousex-6*(2+vzoomx)/2-(vsep/2-(41+9*2)/2*(vzoomx=0)-(41+9*2)*3/4*(vzoomx=1)))\(41+9*2+vsp))*(3-vzoomx)/3/2,0),50))
 							}else{
 								capos=((mousex-6*(2+vzoomx)/2-(vsep/2-(41+9*2)/2*(vzoomx=0)-(41+9*2)*3/4*(vzoomx=1)))\(41+9*2+vsp))*(3-vzoomx)/3/2
 							}
-							//if(((mousex-2*(2+vzoomx)/2-vsep/2)\(41+9*2+vsp))*(3-vzoomx)/3>=94):capos=0
 						}else{
 							if(analogdetail+(analogparentran.(analogparent.cnt)=2)=0){
 								capos=((mousex-vsep/2)\(41+9*2+vsp))*(3-vzoomx)/3/5*5
@@ -12489,14 +12405,7 @@ stop
 			if((f2=0)&((capos!=12*((ctrl_key=1)&(shift_key=1))+stat0*50/(1+((ctrl_key=1)&(shift_key=1))))&((disableanmin=0)|(abs(12*((ctrl_key=1)&(shift_key=1)&(anaranadjpos=1))+stat0*50/(1+((ctrl_key=1)&(shift_key=1)&(anaranadjpos=1)))-capos)*(1+((ctrl_key=1)&(shift_key=1)))>11)))&(f3=0)&((shift_key=1)|(ctrl_key=0))){
 				f=stat0*50
 				if((ctrl_key=1)&(shift_key=1)&(anaranadjpos=1)):f=12+f/2
-			}/*
-			if(f2=1){
-				if((analogparentran.(analogparent.f2_cnt)=0)&((mousex<vsep/2)|(mousex-vsep/2)\(41+9*2+vsp)>41+9*2)&((ctrl_key=0)|(shift_key=0)|(vsep<72))){
-					gosub *draw
-					dialog "c"
-					return
-				}
-			}*/
+			}
 			if((shift_key=1)&(ctrl_key=0)):f=-1:f2=0:f3=0
 			if(f=-1){
 				shiftfl=0
@@ -12546,14 +12455,7 @@ stop
 						gosub *draw
 						return
 					}
-				}/*
-				if((f2=0)&(shiftfl=0)){
-					if(((mousex<vsep/2)|(mousex-vsep/2)\(41+9*2+vsp)>41+9*2)&((ctrl_key=0)|(shift_key=0)|(vsep<72))){
-						gosub *draw
-						dialog "b"
-						return
-					}
-				}*/
+				}
 				for i,analognum,stat1-1,-1
 					analog.(i+1).0=analog.i.0
 					analog.(i+1).1=analog.i.1
@@ -12570,14 +12472,7 @@ stop
 				analog.stat1.4=caposp
 				analog.stat1.5=1-shiftfl
 				analogparentran.stat1=((ctrl_key=1)&(shift_key=1))*2
-			}else{/*
-				if((f2=0)&(shiftfl=0)){
-					if(((mousex<vsep/2)|(mousex-vsep/2)\(41+9*2+vsp)>41+9*2)&((ctrl_key=0)|(shift_key=0)|(vsep<72))){
-						//gosub *draw
-						//dialog "a"
-						//return
-					}
-				}*/
+			}else{
 				ifstat=(editdiv<=16)&((analog.(max(stat1-1,0)).0!=stat0)|(analog.(max(stat1-1,0)).1+analog.(max(stat1-1,0)).2!=cc)|(analog.(max(stat1-1,0)).2>UNIT_MEASURE/32)|(stat1<=0)|(disableanan=0))
 				for i,analognum,stat1-1,-1
 					analog.(i+1+ifstat).0=analog.i.0
@@ -12693,20 +12588,7 @@ stop
 				await 0
 			loop
 			e=1:gosub *refreshtitle
-			stat3=((shift_key2=1)&(ctrl_key2=0))/*
-			repeat analognum
-				if((analog.st1.1<=analog.cnt.1)&(analog.st1.1+analog.st1.2>=analog.cnt.1+analog.cnt.2)&(cnt!=st1)&(analog.cnt.0=analog.st1.0)){
-					repeat analognum-st1-1,st1
-						cnt2=cnt
-						repeat 6
-							analog.cnt2.cnt=analog.(cnt2+1).cnt
-						loop
-					loop
-					analognum--
-					stat2=1
-					break
-				}
-			loop*/
+			stat3=((shift_key2=1)&(ctrl_key2=0))
 			f3=0
 			if((stat2=0)&(st1>=0)){
 				if(analog.st1.2=0){
@@ -13335,15 +13217,7 @@ stop
 						gosub *selinit
 					}
 				loop
-			}/*
-			stat1=0
-			repeat max(anvolnum-1,0)
-				if(anvol.(cnt+stat1).1=anvol.(cnt+1+stat1).1){
-					ardel2 anvol,anvolnum,2,cnt+1+stat1
-					anvolnum--
-					stat1--
-				}
-			loop*/
+			}
 		}
 		if((edittarget=TARGET_ANALOGL)|(edittarget=TARGET_ANALOGR)){
 			stat0=edittarget-TARGET_ANALOGL
@@ -15369,51 +15243,6 @@ stop
 						buf2+="fx-"+str_lr.(cnt-4)+"="+fxcur+"\n"
 						fxp.(cnt-4)=fxcur
 					}
-					/*
-					}else:if(n.cnt=3){
-						ns.cnt="S"
-					}else:if(n.cnt=4){
-						ns.cnt="V"
-					}else:if(n.cnt=5){
-						ns.cnt="T"
-					}else:if(n.cnt=6){
-						ns.cnt="W"
-					}else:if(n.cnt=7){
-						ns.cnt="U"
-					}else:if(n.cnt=8){
-						ns.cnt="G"
-					}else:if(n.cnt=9){
-						ns.cnt="H"
-					}else:if(n.cnt=10){
-						ns.cnt="K"
-					}else:if(n.cnt=11){
-						ns.cnt="I"
-					}else:if(n.cnt=12){
-						ns.cnt="L"
-					}else:if(n.cnt=13){
-						ns.cnt="J"
-					}else:if(n.cnt=14){
-						ns.cnt="F"
-					}else:if(n.cnt=15){
-						ns.cnt="P"
-					}else:if(n.cnt=16){
-						ns.cnt="B"
-						if((cnt=4)&(fxvalue.0!=-1)):buf2+="fx-l_param1="+fxvalue.0+"\n"
-						if((cnt=5)&(fxvalue.1!=-1)):buf2+="fx-r_param1="+fxvalue.1+"\n"
-					}else:if(n.cnt=17){
-						ns.cnt="Q"
-					}else:if(n.cnt=18){
-						ns.cnt="X"
-					}else:if(n.cnt=19){
-						ns.cnt="A"
-						if((cnt=4)&(fxvalue.0!=-1)):buf2+="fx-l_param1="+fxvalue.0+"\n"
-						if((cnt=5)&(fxvalue.1!=-1)):buf2+="fx-r_param1="+fxvalue.1+"\n"
-					}else:if(n.cnt=20){
-						ns.cnt="D"
-					}else{
-						ns.cnt=str(n.cnt)
-						if(strlen(ns.cnt)>1):ns.cnt="1"
-					}*/
 				}
 			loop
 			buf2+=""+ns.0+ns.1+ns.2+ns.3+"|"+ns.4+ns.5+"|"+nl+nr+stat3+"\n"
@@ -15577,11 +15406,6 @@ stop
 				hCompFX_sw.cnt=BASS_ChannelSetFX(mid_sw.cnt,0x10011,0)
 				BASS_FXSetParameters hCompFX_sw.cnt,compfx
 			loop
-			/*hCompFX=BASS_ChannelSetFX(mid,1,0)
-			dim compfx,6
-			compfx=tofloat(20.0f),tofloat(0.01f),tofloat(0.01f),tofloat(-20.0f),tofloat(100.0f),tofloat(0.0f)
-			BASS_FXSetParameters hCompFX,compfx*/
-			//dialog BASS_ErrorGetCode()
 			if(feffect=1){
 				dim hFX_Echo,2
 				repeat 2
