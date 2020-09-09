@@ -13417,7 +13417,7 @@ stop
 *OnWheel
 	if(playingsample=1):pendfl=1:return
 	if(inputnow=1):return
-	if(d3timer()-wheeltp<5):return
+	if((0 <= d3timer() - wheeltp) & (d3timer() - wheeltp < 5)) : return
 	if(pendfl!=-1){
 		acmd=CMD_PLAY_STOP
 		gosub *OnCommand
@@ -13589,7 +13589,7 @@ stop
 *OnWheel_H
 	if(playingsample=1):pendfl=1:return
 	if(inputnow=1):return
-	if(d3timer()-wheeltp<40):return
+	if((0 <= d3timer() - wheeltp) & (d3timer() - wheeltp < 40)) : return
 	if(pendfl!=-1){
 		acmd=CMD_PLAY_STOP
 		gosub *OnCommand
