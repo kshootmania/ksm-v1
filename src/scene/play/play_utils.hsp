@@ -1,0 +1,587 @@
+*minfoprepare
+	// Šy‹Èî•ñ‚Ì€”õ
+	alCreateImage 142,getsize(240),getsize(66)
+	alCopyImageToImage 141,142
+	alCreateImage 53,getsize(240),getsize(44)
+	alCopyImageToImage 51,53
+	alColor 0,32,8,255
+	if(csongtitleimg=""){
+		alFont lang.0.0,18
+		alDrawText_CalcRect_ tsize,csongtitle
+		if(tsize.2/9>50){
+			alFont lang.0.0,getsize(9),1
+		}else:if(tsize.2/9>40){
+			alFont lang.0.0,getsize(10),1
+		}else:if(tsize.2/9>38){
+			alFont lang.0.0,getsize(11),1
+		}else:if(tsize.2/9>34){
+			alFont lang.0.0,getsize(12),1
+		}else:if(tsize.2/9>30){
+			alFont lang.0.0,getsize(13),1
+		}else:if(tsize.2/9>26){
+			alFont lang.0.0,getsize(14),1
+		}else{
+			alFont lang.0.0,getsize(15),1
+		}
+		alDrawText csongtitle,getsize(8),getsize(3),getsize(224),getsize(26),1,1
+	}else{
+		alCreateImageByFile 85,dir_default+"\\songs\\"+csongdir+"\\"+csongtitleimg
+		alCopyModeColorMatrix colmatrix2
+		alStretchImageToImage 85,53,0,0,alGetWidth(),alGetHeight(),getsize(120)-alGetWidth()*(getsize(20))/alGetHeight()/2,getsize(6),alGetWidth()*(getsize(20))/alGetHeight(),getsize(20)
+		alSelectImage 53
+		alResetCopyMode
+	}
+	if(csongartistimg=""){
+		alFont lang.0.0,18
+		alDrawText_CalcRect_ tsize,csongartist
+		if(tsize.2/9>48){
+			alFont lang.0.0,getsize(9)
+		}else:if(tsize.2/9>36){
+			alFont lang.0.0,getsize(10)
+		}else{
+			alFont lang.0.0,getsize(11)
+		}
+		alDrawText csongartist,getsize(8),getsize(28),getsize(224),getsize(14),1,1
+	}else{
+		alCreateImageByFile 85,dir_default+"\\songs\\"+csongdir+"\\"+csongartistimg
+		alCopyModeColorMatrix colmatrix2
+		alStretchImageToImage 85,53,0,0,alGetWidth(),alGetHeight(),(8+112)*scrsize_h/480-alGetWidth()*(getsize(14))/alGetHeight()/2,getsize(28),alGetWidth()*(getsize(14))/alGetHeight(),getsize(14)
+		alSelectImage 53
+		alResetCopyMode
+	}
+	alSelectImage 142
+	alCopyImageToImage IMG_RESULT_DIFFICULTY,142,getsize(13),getsize(3),getsize(42),getsize(12),0,getsize(12)*csongdifficulty
+	stat1=csonglevel
+	if(stat1>20):stat1=20
+	if(stat1<1):stat1=1
+	stat1=str(stat1)
+	repeat strlen(stat1)
+		alCopyImageToImage 52,142,getsize(79)+getsize(10)*cnt,getsize(4),getsize(10),getsize(9),0,getsize(9)*int(strmid(stat1,cnt,1))
+	loop
+	alSelectImage 53
+	alSaveFile dir_default+"\\cache\\minfo_label.png",,0,0,two(getsize(240)),two(getsize(44))
+	alSelectImage 142
+	alSaveFile dir_default+"\\cache\\minfo_detail.png",,0,0,two(getsize(240)),two(getsize(66))
+	return
+
+*pl_minfoprepare
+	// Šy‹Èî•ñ(ƒvƒŒƒC‘O‚Ì‰æ–Ê)‚Ì€”õ
+	alCreateImage 53,getsize(360),getsize(90)
+	alCopyImageToImage 62,53
+	alColor 0,32,8,255
+	if(csongtitleimg=""){
+		alFont lang.0.0,18
+		alDrawText_CalcRect_ tsize,csongtitle
+		if(tsize.2/9>50){
+			alFont lang.0.0,16*3/4*scrsize_h/480,1
+		}else:if(tsize.2/9>40){
+			alFont lang.0.0,18*3/4*scrsize_h/480,1
+		}else:if(tsize.2/9>38){
+			alFont lang.0.0,20*3/4*scrsize_h/480,1
+		}else:if(tsize.2/9>34){
+			alFont lang.0.0,22*3/4*scrsize_h/480,1
+		}else:if(tsize.2/9>30){
+			alFont lang.0.0,24*3/4*scrsize_h/480,1
+		}else:if(tsize.2/9>26){
+			alFont lang.0.0,26*3/4*scrsize_h/480,1
+		}else{
+			alFont lang.0.0,28*3/4*scrsize_h/480,1
+		}
+		alDrawText csongtitle,16*3/4*scrsize_h/480,9*3/4*scrsize_h/480,448*3/4*scrsize_h/480,52*3/4*scrsize_h/480,1,1
+	}else{
+		alCreateImageByFile 85,dir_default+"\\songs\\"+csongdir+"\\"+csongtitleimg
+		alCopyModeColorMatrix colmatrix2
+		alStretchImageToImage 85,53,0,0,alGetWidth(),alGetHeight(),240*3/4*scrsize_h/480-alGetWidth()*(40*3/4*scrsize_h/480)/alGetHeight()/2,12*3/4*scrsize_h/480,alGetWidth()*(40*3/4*scrsize_h/480)/alGetHeight(),40*3/4*scrsize_h/480
+		alSelectImage 53
+		alResetCopyMode
+	}
+	if(csongartistimg=""){
+		alFont lang.0.0,18
+		alDrawText_CalcRect_ tsize,csongartist
+		if(tsize.2/9>48){
+			alFont lang.0.0,18*3/4*scrsize_h/480
+		}else:if(tsize.2/9>36){
+			alFont lang.0.0,20*3/4*scrsize_h/480
+		}else{
+			alFont lang.0.0,22*3/4*scrsize_h/480
+		}
+		alDrawText csongartist,16*3/4*scrsize_h/480,57*3/4*scrsize_h/480,448*3/4*scrsize_h/480,28*3/4*scrsize_h/480,1,1
+	}else{
+		alCreateImageByFile 85,dir_default+"\\songs\\"+csongdir+"\\"+csongartistimg
+		alCopyModeColorMatrix colmatrix2
+		alStretchImageToImage 85,53,0,0,alGetWidth(),alGetHeight(),(16+224)*3/4*scrsize_h/480-alGetWidth()*(28*3/4*scrsize_h/480)/alGetHeight()/2,56*3/4*scrsize_h/480,alGetWidth()*(28*3/4*scrsize_h/480)/alGetHeight(),28*3/4*scrsize_h/480
+		alSelectImage 53
+		alResetCopyMode
+	}
+	alCopyImageToImage 89,53,getsize(40),47*3/2*scrsize_h/480,getsize(63),getsize(18),0,getsize(18)*csongdifficulty
+	stat1=csonglevel
+	if(stat1>20):stat1=20
+	if(stat1<1):stat1=1
+	stat1=str(stat1)
+	repeat strlen(stat1)
+		alCopyImageToImage 88,53,getsize(139)+getsize(15)*cnt,48*3/2*scrsize_h/480,getsize(15),int(12.5*scrsize_h/480),0,int(12.5*scrsize_h/480)*int(strmid(stat1,cnt,1))
+	loop
+	stat1=str(bpml.0.1)
+	stat1=strmid(stat1,0,strlen(stat1)-3)+"."+strmid(stat1,-1,3)
+	stat1=strtrim(stat1,2,'0')
+	stat1=strtrim(stat1,2,'.')
+	stat2=0
+	repeat strlen(stat1)
+		if(strmid(stat1,cnt,1)="."):stat2-=5*scrsize_h/480
+		alCopyImageToImage 88,53,getsize(259)+getsize(15)*cnt+stat2,48*3/2*scrsize_h/480,getsize(15),int(12.5*scrsize_h/480),0,int(12.5*scrsize_h/480)*(int(strmid(stat1,cnt,1))+(strmid(stat1,cnt,1)=".")*10)
+	loop
+	return
+
+*joyinit
+	if(length_joylist>0){
+		dim joystatp,joylist.(length_joylist-1)+1,32
+		dim joystat,joylist.(length_joylist-1)+1,32
+	}else{
+		dim joystat,1,32
+		dim joystatp,1,32
+	}
+
+*getjoystat
+	if(length_joylist>0){
+		dim joystatp,joylist.(length_joylist-1)+1,32
+		if(length2(joystat)=32){
+			repeat length_joylist
+				cnt2_=joylist.cnt
+				if(length(joystat)>cnt2_){
+					repeat 32
+						joystatp.cnt2_.cnt=joystat.cnt2_.cnt
+					loop
+				}
+			loop
+		}else{
+			repeat length_joylist
+				cnt2_=joylist.cnt
+				if(length(joystat)>cnt2_){
+					repeat 32
+						joystatp.cnt2_.cnt=1
+					loop
+				}
+			loop
+		}
+		dim joystat,joylist.(length_joylist-1)+1,32
+		repeat length_joylist
+			cnt2_=joylist.cnt
+			joyGetPosEx joydata, joylist.cnt
+			repeat 32
+				if(((joydata.8)&(pow(2,cnt)))>0){
+					joystat.cnt2_.cnt=1
+				}
+			loop
+		loop
+	}
+	return
+
+#defcfunc getsttp
+	if(nowsttp!=-1){
+		return nowsttp
+	}else:if(bpmlnum<=1){
+		nowsttp=int(ttp*bpml.0.1/6000/beat)
+		return nowsttp
+	}else{
+		s1=cnow
+		s3=int(double(ttp)*bpml.bpmlsttpfcnt.1/6000/beat)
+		repeat bpmlnum-bpmlsttpfcnt,bpmlsttpfcnt
+			if(bpml.cnt.2>=t+ttp):break
+			if(bpml.cnt.0<=s1){
+				bpmlsttpfcnt=cnt
+				continue
+			}
+			if((bpml.cnt.0>s1)&(bpml.cnt.2<t+ttp)){
+				s3=bpml.cnt.0+int(double(t+ttp-bpml.cnt.2)*bpml.cnt.1/6000/beat)-cnow
+			}
+		loop
+		nowsttp=s3
+		return nowsttp
+	}
+
+#defcfunc b2c int b1
+	_cbcnt=0
+	b2=0
+	repeat beatlnum
+		if(cnt=beatlnum-1){
+			_cbcnt+=UNIT_MEASURE*beatl.cnt.1/beatl.cnt.2*(b1-b2)
+		}else{
+			_cbcnt+=UNIT_MEASURE*beatl.cnt.1/beatl.cnt.2*min((beatl.(cnt+1).0-beatl.cnt.0)/(UNIT_MEASURE*beatl.cnt.1/beatl.cnt.2),b1-b2)
+			b2+=min((beatl.(cnt+1).0-beatl.cnt.0)/(UNIT_MEASURE*beatl.cnt.1/beatl.cnt.2),b1-b2)
+		}
+		if(b1<=b2):break
+	loop
+	return _cbcnt
+	
+#defcfunc c2b int c1
+	cb=0
+	cb2=0
+	repeat
+		repeat beatlnum
+			if(beatl.cnt.0<=cb){
+				beatn=beatl.cnt.1
+				beatd=beatl.cnt.2
+				beatlfcnt=cnt+1
+			}
+		loop
+		if(cb+UNIT_MEASURE*beatn/beatd>c1):break
+		cb+=UNIT_MEASURE*beatn/beatd
+		cb2++
+	loop
+	return cb2
+	
+#defcfunc c2t int c
+	if(c<0){
+		return int(double(c)*24000/bpml.0.1)
+	}
+	c2=c
+	ct=0.0f
+	cnt2_=0
+	repeat bpmlnum
+		cbpm=bpml.cnt.1
+		if(cnt=bpmlnum-1):break
+		if(bpml.(cnt+1).0<c2){
+			ct+=double(bpml.(cnt+1).0-bpml.cnt.0)*24000/cbpm
+		}else:break
+		cnt2_++
+	loop
+	ct+=double(c2-bpml.cnt2_.0)*24000/cbpm
+	return int(ct)
+
+#defcfunc c2tf int c
+	if(c<0){
+		return double(c)*24000/bpml.0.1
+	}
+	c2=c
+	ct=0.0f
+	cnt2_=0
+	repeat bpmlnum
+		cbpm=bpml.cnt.1
+		if(cnt=bpmlnum-1):break
+		if(bpml.(cnt+1).0<c2){
+			ct+=double(bpml.(cnt+1).0-bpml.cnt.0)*24000/cbpm
+		}else:break
+		cnt2_++
+	loop
+	ct+=double(c2-bpml.cnt2_.0)*24000/cbpm
+	return ct
+
+#defcfunc hsrc int c, int t1
+	if(hsc=-1){
+		if(stpnum=0):return c-cnow-sttp
+		if(c>cnow){
+			stpsh=cnowstpsh
+			repeat stpnum-cstp,cstp
+				if((cnow<stp.cnt.0+stp.cnt.1)&(cnow>=stp.cnt.0)){
+					// ’âŽ~’†
+					stpsh+=stp.cnt.0+stp.cnt.1-cnow
+				}else:if((c>stp.cnt.0)&(c<stp.cnt.0+stp.cnt.1)){
+					// ƒm[ƒc‚ª’âŽ~’†‚É‚ ‚é
+					stpsh+=c-stp.cnt.0
+				}else:if((cnow<stp.cnt.0)&(c>stp.cnt.0)){
+					// ƒm[ƒc‚ª’âŽ~Œã‚É‚ ‚é
+					stpsh+=stp.cnt.1
+				}else:if(stp.cnt.0>=c):break
+			loop
+			return c-cnow-sttp-stpsh
+		}
+		return c-cnow-sttp
+	}else{
+		if(t1!=-1):return (t1-t-ttp*adj)*hsc/24
+		return (c2t(c)-t-ttp*adj)*hsc/24
+	}
+
+#defcfunc getstpsh int c
+	if(stpnum=0):return 0
+	cstpsh=0
+	repeat stpnum
+		if((c<stp.cnt.0+stp.cnt.1)&(c>=stp.cnt.0)){
+			cstpsh+=stp.cnt.0+stp.cnt.1-c
+			cstp=cnt+1
+		}
+	loop
+	return cstpsh
+
+#defcfunc anarannow int c
+	if(arstat.(6+c).0=1){
+		return anagrran.c.(analoggr.(arstat.(6+c).1))
+	}else:return 1
+
+#defcfunc anarannowp int c
+	if(arstatp.(6+c).0=1){
+		return anagrran.c.(analoggr.(arstatp.(6+c).1))
+	}else:return 1
+
+#deffunc addgauge int a,int b
+	if(iscourse=0){
+		if(effratetype=0){
+			gauge+=a*50
+			unlimited_gauge+=a*50
+			if(gauge>gaugemax):gauge=gaugemax
+		}else:if(effratetype=-1){
+			gauge+=a*55
+			unlimited_gauge+=a*55
+			if(gauge>gaugemax):gauge=gaugemax
+		}else:if(b=0){
+			gauge+=a*30
+			unlimited_gauge+=a*30
+			if(gauge>100000):gauge=100000
+		}
+	}else{
+		if(effratetype=0){
+			gauge+=100000*(a*50)/2/gaugemax
+			unlimited_gauge+=100000*(a*50)/2/gaugemax
+			if(gauge>100000):gauge=100000
+		}else:if(effratetype=-1){
+			gauge+=100000*(a*55)/2/gaugemax
+			unlimited_gauge+=100000*(a*55)/2/gaugemax
+			if(gauge>100000):gauge=100000
+		}else:if(b=0){
+			gauge+=a*20
+			unlimited_gauge+=a*20
+			if(gauge>100000):gauge=100000
+		}else:if(b=1){
+			gauge-=int(a*3037.5f*(100-41*(gauge/1000<=30))/100)
+			unlimited_gauge-=int(a*3037.5f*(100-41*(gauge/1000<=30))/100)
+			if((gauge/1000<=0)&(mendt=-1)){
+				endfl=1
+				mendt=t
+				mendc=cnow
+				mendat=d3timer()
+				stat1=BASS_SampleGetChannel(hardfailedid,0)
+				BASS_ChannelSetAttribute stat1,2,double(mastervol)/100
+				BASS_ChannelPlay stat1
+			}
+		}
+	}
+	return
+
+#deffunc subgauge double a
+	if(iscourse=0){
+		if(effratetype=0){
+			gauge-=int(a*gaugemax/200)
+			unlimited_gauge-=int(a*gaugemax/200)
+			if(gauge<0):gauge=0
+		}else:if(effratetype=-1){
+			gauge-=int(double(gaugemax)*a*0.375/100)
+			unlimited_gauge-=int(double(gaugemax)*a*0.375/100)
+			if(gauge<0):gauge=0
+		}else{
+			gauge-=int(a*2250f*(100-41*(gauge/1000<=30))/100)
+			unlimited_gauge-=int(a*2250f*(100-41*(gauge/1000<=30))/100)
+			if((gauge/1000<=0)&(mendt=-1)){
+				endfl=1
+				mendt=t
+				mendc=cnow
+				mendat=d3timer()
+				stat1=BASS_SampleGetChannel(hardfailedid,0)
+				BASS_ChannelSetAttribute stat1,2,double(mastervol)/100
+				BASS_ChannelPlay stat1
+			}
+		}
+	}else{
+		if(effratetype=0){
+			gauge-=int(a*100000*(17-7*(gauge/1000<=30))/10/200)
+			unlimited_gauge-=int(a*100000*(17-7*(gauge/1000<=30))/10/200)
+		}else:if(effratetype=-1){
+			gauge-=int(a*100000*(17-7*(gauge/1000<=30))/10*0.375/100)
+			unlimited_gauge-=int(a*100000*(17-7*(gauge/1000<=30))/10*0.375/100)
+		}else{
+			gauge-=int(a*3037.5f*(100-41*(gauge/1000<=30))/100)
+			unlimited_gauge-=int(a*3037.5f*(100-41*(gauge/1000<=30))/100)
+		}
+		if((gauge/1000<=0)&(mendt=-1)){
+			endfl=1
+			mendt=t
+			mendc=cnow
+			mendat=d3timer()
+			stat1=BASS_SampleGetChannel(hardfailedid,0)
+			BASS_ChannelSetAttribute stat1,2,double(mastervol)/100
+			BASS_ChannelPlay stat1
+		}
+	}
+	return
+
+#deffunc spincheck int a
+	if(analog.a.9=-1):return
+	if(analog.a.9>=0){
+		scnt=analog.a.9
+		if((cnow<spin.scnt.1+spin.scnt.2)&(spin.scnt.0!=-1)){
+			spinnow.0=spin.scnt.0
+			spinnow0p=spin.scnt.0
+			spinnow.1=cnowp+sttp*adj
+			spinnow.2=spin.scnt.2
+			spinnow.3=scnt
+		}
+	}else{
+		sprcnt=-analog.a.9-2
+		if((cnow<spr.sprcnt.1+spr.sprcnt.2)&(spr.sprcnt.0!=-1)){
+			shake2c=cnowp
+			shake2len=spr.sprcnt.2
+			shake2n=spr.sprcnt.4
+			shake2width=spr.sprcnt.3*(spr.sprcnt.0*2-1)
+			shake2type=spr.sprcnt.5
+		}
+	}
+	return
+
+#defcfunc fxdef_str2param str a, int p1
+	a2=a
+	if(p1=FXDEF_INT){
+		return double(a)
+	}else:if(p1=FXDEF_RATE){
+		if(strmid(a2,-1,1)="%"){
+			return double(a)/100.0f
+		}else{
+			return double(a)
+		}
+	}else:if(p1=FXDEF_SAMPLE){
+		if(strmid(a2,-1,7)="samples"){
+			return double(int(a))
+		}else:return 0.0f
+	}else:if(p1=FXDEF_LENGTH){
+		if(strmid(a2,-1,2)="ms"){
+			return -double(a)/1000.0f
+		}else:if((strmid(a2,-1,1)="s")&(strmid(a2,-1,2)!="es")){
+			return -double(a)
+		}else:if(strmid(a2,0,2)="1/"){
+			if(int(strmid(a2,2,16))>0){
+				return 1.0f/int(strmid(a2,2,16))
+			}else:return 0.0f
+		}else:return double(a)
+	}else:if(p1=FXDEF_SWITCH){
+		if(a="on"){
+			return 1.0f
+		}else:return 0.0f
+	}else:if(p1=FXDEF_FREQ){
+		if(strmid(a2,-1,3)="kHz"){
+			return double(a)*1000.0f
+		}else:if((strmid(a2,-1,2)="Hz")){
+			return double(a)
+		}else:return 0.0f
+	}else:if(p1=FXDEF_FLOAT){
+		return maxf(double(a),0.01f)
+	}else:if(p1=FXDEF_NEGDB){
+		if(strmid(a2,-1,2)="dB"){
+			return maxf(-double(a),0.0f)
+		}
+	}else:if(p1=FXDEF_PITCH){
+		if(instr(a2,1,".")!=-1){
+			return minf(maxf(double(a),-48.0f),48.0f)/48.0f/2.0f+0.50f
+		}else:return -(minf(maxf(double(a),-48.0f),48.0f)/48.0f/2.0f+0.50f)
+	}else:if(p1=FXDEF_FILENAME){
+		swaudio.swaudionum=strtrim(a2,0,'"')
+		swaudionum++
+	}
+	return 0.0f
+
+#defcfunc divconv int divconvval
+	_divconvval=divconvval
+	if((_divconvval>=2)&(_divconvval<4)):_divconvval=2
+	if((_divconvval>=4)&(_divconvval<6)):_divconvval=4
+	if((_divconvval>=6)&(_divconvval<8)):_divconvval=6
+	if((_divconvval>=8)&(_divconvval<12)):_divconvval=8
+	if((_divconvval>=12)&(_divconvval<16)):_divconvval=12
+	if((_divconvval>=16)&(_divconvval<24)):_divconvval=16
+	if((_divconvval>=24)&(_divconvval<32)):_divconvval=24
+	if((_divconvval>=32)&(_divconvval<48)):_divconvval=32
+	if((_divconvval>=48)&(_divconvval<64)):_divconvval=48
+	if((_divconvval>=64)&(_divconvval<96)):_divconvval=64
+	if((_divconvval>=96)&(_divconvval<128)):_divconvval=96
+	if((_divconvval>=128)&(_divconvval<192)):_divconvval=128
+	if(_divconvval>=192):_divconvval=192
+	return _divconvval
+
+#defcfunc divconv2 int divconvval
+	if(divconvval=0){
+		return 0
+	}else:if(divconvval=2){
+		return 1
+	}else:if(divconvval=4){
+		return 2
+	}else:if(divconvval=6){
+		return 3
+	}else:if(divconvval=8){
+		return 4
+	}else:if(divconvval=12){
+		return 5
+	}else:if(divconvval=16){
+		return 6
+	}else:if(divconvval=24){
+		return 7
+	}else:if(divconvval=32){
+		return 8
+	}else:if(divconvval=48){
+		return 9
+	}else:if(divconvval=64){
+		return 10
+	}else:if(divconvval=96){
+		return 11
+	}else:if(divconvval=128){
+		return 12
+	}else:if(divconvval=192){
+		return 13
+	}else:return 0
+
+#defcfunc divconv3 int divconvval
+	if(divconvval=0){
+		return 0
+	}else:if(divconvval=1){
+		return 2
+	}else:if(divconvval=2){
+		return 4
+	}else:if(divconvval=3){
+		return 6
+	}else:if(divconvval=4){
+		return 8
+	}else:if(divconvval=5){
+		return 12
+	}else:if(divconvval=6){
+		return 16
+	}else:if(divconvval=7){
+		return 24
+	}else:if(divconvval=8){
+		return 32
+	}else:if(divconvval=9){
+		return 48
+	}else:if(divconvval=10){
+		return 64
+	}else:if(divconvval=11){
+		return 96
+	}else:if(divconvval=12){
+		return 128
+	}else:if(divconvval=13){
+		return 192
+	}else:return 0
+
+#defcfunc a2p str a
+	a2=a
+	p=peek(a2,0)
+	if((p>='0')&(p<='9')){
+		return int(a)
+	}else:if((p>='A')&(p<='Z')){
+		return p-'A'+10
+	}else:if((p>='a')&(p<='o')){
+		return p-'a'+36
+	}else:return -1
+
+#defcfunc x20 int p1
+	p1_=p1
+	if(p1_=12){
+		p1_=250
+	}else:if(p1_=37){
+		p1_=750
+	}else:p1_*=20
+	return p1_
+
+#defcfunc yure double yureval,double yuremax,int yuretimes
+	if((yureval>yuremax)|(yureval<0)):return 0.0
+	return sin(M_PI*yuretimes*yureval/yuremax)
+
+#defcfunc yure2 double yureval,double yuremax,int yuretimes
+	if((yureval>yuremax)|(yureval<0)):return 0.0
+	return sin(M_PI*yuretimes*yureval/yuremax)*(1.0f-double(yureval)/yuremax)
+
+#defcfunc yure2_pow2 double yureval,double yuremax,int yuretimes
+	if((yureval>yuremax)|(yureval<0)):return 0.0
+	return sin(M_PI*yuretimes*yureval/yuremax)*powf(1.0f-yureval/yuremax,2)
