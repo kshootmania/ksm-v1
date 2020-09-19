@@ -92,13 +92,13 @@
 				repeat notemax
 					noteget stat1,cnt
 					if(strmid(stat1,0,2)="--"):break
-					if(headcmp(stat1,6,"title=")){
+					if(startsWith(stat1, "title=")){
 						course_songtitle=strmid(stat1,6,128)
 						if(isutf8=0):course_songtitle=utf8enc(course_songtitle)
-					}else:if(headcmp(stat1,7,"artist=")){
+					}else:if(startsWith(stat1, "artist=")){
 						course_songartist=strmid(stat1,7,128)
 						if(isutf8=0):course_songartist=utf8enc(course_songartist)
-					}else:if(headcmp(stat1,11,"difficulty=")){
+					}else:if(startsWith(stat1, "difficulty=")){
 						stat2_=strmid(stat1,11,16)
 						if(stat2_="light"){
 							course_songdifficulty=0
@@ -107,18 +107,18 @@
 						}else:if(stat2_="extended"){
 							course_songdifficulty=2
 						}else:course_songdifficulty=3
-					}else:if(headcmp(stat1,6,"level=")){
+					}else:if(startsWith(stat1, "level=")){
 						course_songlevel=max(int(strmid(stat1,6,2)),1)
-					}else:if(headcmp(stat1,7,"jacket=")){
+					}else:if(startsWith(stat1, "jacket=")){
 						course_songjacket=strmid(stat1,7,128)
 						_sjis_ course_songjacket
 						if(instr(course_songjacket,0,".")=-1){
 							course_songjacket=dir_default+"\\imgs\\jacket\\"+course_songjacket+".jpg"
 						}else:course_songjacket=getpath(_fname,32)+course_songjacket
-					}/*else:if(headcmp(stat1,10,"title_img=")){
+					}/*else:if(startsWith(stat1, "title_img=")){
 						minfonowstr.10=strmid(stat1,10,128)
 						_sjis_ minfonowstr.10
-					}else:if(headcmp(stat1,12,"information=")){// ※minfonowstr.5はファイル名
+					}else:if(startsWith(stat1, "information=")){// ※minfonowstr.5はファイル名
 						minfonowstr.6=strmid(stat1,12,128)
 						if(isutf8=1):minfonowstr.6=bom+minfonowstr.6
 					}*/

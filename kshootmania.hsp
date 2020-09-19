@@ -967,7 +967,7 @@ repeat
 	case SCENE_SELECT
 		start_select
 		swbreak
-	case SCENE_BEFORE_PLAY
+	case SCENE_BEFORE_PLAY // コースモードの場合、1曲目の直前にだけ呼ばれる
 		courselist=""
 		courselistnum=0
 		coursenow=0
@@ -1039,6 +1039,8 @@ repeat
 			refreshsonglistoff=1
 			scene=SCENE_SELECT
 		}
+		swbreak
+	case SCENE_PLAY
 		if((courseend!=1)&(cmdline_from=0)){
 			whiteout 250
 		}
@@ -1087,8 +1089,6 @@ repeat
 		}
 		gsel 0
 		redraw 0
-		swbreak
-	case SCENE_PLAY
 		start_play
 		swbreak
 	case SCENE_RESULT
