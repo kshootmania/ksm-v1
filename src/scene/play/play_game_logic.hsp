@@ -1,0 +1,114 @@
+#deffunc initGamePlayVariables
+	fps=0
+	totalscore=0
+	totalscorep=0
+	totalscore_disp_base=0
+	totalscore_disp_baset=-50000
+	c2tcnt=0
+	hsrccnt=0
+	notecnt=0
+	analogcnt=0
+	chocnt=0
+	mfl=0
+	mflp=0
+	vfl=0
+	vflp=0
+	mstop=0
+	mshift=0
+	mtotalshift=0
+	mendt=-1
+	mendc=-1
+	mendat=-1
+	fadeoutfl=0
+	ldelayresett=-5000
+	at=0
+	bpm=120000
+	beatn=4
+	beatd=4
+	stpsh=0
+	hs=70
+	offset=diroffset
+	endfl=0
+	tochu=1
+	tochu_esc=0
+	tickfl=0
+	dim tickp,6
+	tickp=-1,-1,-1,-1,-1,-1
+	tickcp0=-50000
+	tickcp1=-50000
+	dim chokkakup,2
+	chokkakup=-1,-1
+	notesejfcnt=0
+	ddim ttp_,1
+	ttp_=16.6f
+	laserdelay0_orig=bufferlength/*233-ttp*/-soundfx_delay-GLOBAL_SOUNDFX_DELAY
+	t_mo=-50000
+	t_mop=-50000
+	t_moex=0
+	chainvt=-1
+	chainefft=-1
+	chainnow_song=0
+	chainmax_song=0
+	noerror_song=1
+	if((iscourse=0)|(coursenow=0)){
+		chainmax=0
+		chainnow=0
+		noerror=1
+		if((effratetype<=0)&(iscourse=0)){
+			gauge=0
+			unlimited_gauge=0
+		}else{
+			gauge=100000
+			unlimited_gauge=100000
+		}
+	}
+	no_hstype_c=1
+	return
+
+#deffunc prepareTurnOptions
+	randomize
+	pturnl = 0
+	pturna = 0
+	if (turn = 1) {
+		pturnl = 1
+		pturna = 1
+	}
+	if (turn=2) {
+		stat1=0
+		dim pturn,4
+		repeat 4
+			cnt2=cnt
+			repeat
+				pturn.cnt2=rnd(4)
+				repeat cnt2
+					if(pturn.cnt=pturn.cnt2){
+						stat1=1
+						break
+					}else:stat1=0
+				loop
+				if(stat1=0){
+					break
+				}
+			loop
+		loop
+		pturnl=rnd(2)
+		pturna=rnd(2)
+	}
+	return
+
+#deffunc prepareModeOptions
+	if(auto=1){
+		dim kmode,3
+		kmode=shortmode,longmode,analogmode
+		if(shortmode=mode_on):shortmode=mode_auto
+		if(longmode=mode_on):longmode=mode_auto
+		if(analogmode=mode_on):analogmode=mode_auto
+	}
+	if(adjmode=1){
+		dim kmode,3
+		kmode=shortmode,longmode,analogmode
+		shortmode=mode_on
+		longmode=mode_hide
+		analogmode=mode_hide
+	}
+	return

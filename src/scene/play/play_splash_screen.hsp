@@ -1,0 +1,387 @@
+#deffunc startSplashScreen
+	imgbufload_bg "bg3.jpg",149,"image/jpeg",1
+	BASS_ChannelSlideAttribute selbgmid,2,0.0,50
+	timestart=d3timer()
+	if((courseend!=1)&(cmdline_from=0)){
+		BASS_ChannelSetAttribute selenterid,2,double(mastervol)/100
+		BASS_ChannelSetPosition_ms selenterid,0
+		BASS_ChannelPlay selenterid
+	}
+	alDeleteImage 35
+	if(iscmdline=0){
+		alCreateImageByFile 35,dir_default+"\\songs\\"+csongdir+"\\"+csongjacket
+	}else{
+		if(instr(csongjacket,0,".")=-1){
+			alCreateImageByFile 35,dir_default+"\\imgs\\jacket\\"+csongjacket+".jpg"
+		}else{
+			alCreateImageByFile 35,getpath(cnotesfile,32)+"\\"+csongjacket
+		}
+	}
+	buffer 129,getsize(320),getsize(320)
+	alStretchImageToScreen 35,129,0,0,alGetWidth(),alGetHeight(),0,0,getsize(300),getsize(300)
+	endfl2=0
+	gosub *pl_minfoprepare
+	enterkeyp=0
+	enterfl=0
+	lastkeyt=1200
+	if((analoginput=2)&(analogmode=mode_on)&(ts3>30)){
+		if(hidem=1):mouse -1,-1
+		mouse defx,defy
+	}
+	dim sliderp,2
+	if(analoginput=4){
+		repeat 2
+			cnt0=cnt
+			sliderp.cnt=0
+			repeat length_joylist
+				joyGetPosEx joystat2,joylist.cnt
+				sliderp.cnt0+=joystat2.(4+(cnt0^analogsw))
+			loop
+		loop
+	}
+	slider=0
+	repeat
+		if(courseend=1):break
+		if(cmdline_from>0):break
+		gosub *getjoystat
+		timenow=d3timer()-timestart
+		if(ts>120):ts=0
+		if(ts2>60):ts2=0
+		if(ts3>30):ts3=0
+		ts+=max(timenow-timep,1)
+		ts2+=max(timenow-timep,1)
+		ts3+=max(timenow-timep,1)
+		dim stickstat,2
+		if(analoginput=2){
+			repeat 2
+				cnt0=cnt
+				ddim dstat1,1
+				if(cnt0=0):dstat1=(ginfo_mx-defx)*2*(mx*2-1)
+				if(cnt0=1):dstat1=(ginfo_my-defy)*2*(my*2-1)
+				stat1=int(round(dstat1*msen*2))
+				if(abs(stat1)<10){
+					stickstat.cnt=0
+				}else{
+					stickstat.cnt=sgn(stat1)*min(abs(int(double(sgn(stat1)*(abs(stat1)-10))))/120,22000*max(timenow-timep,2)/16/300)
+				}
+			loop
+		}
+		if(analoginput=4){
+			repeat 2
+				cnt0=cnt
+				slider=0
+				repeat length_joylist
+					joyGetPosEx joystat2,joylist.cnt
+					slider+=joystat2.(4+(cnt0^analogsw))
+				loop
+				stat1=slider-sliderp.cnt0
+				sliderp.cnt0=slider
+				if(abs(stat1)>32768):stat1-=sgn(stat1)*65536
+				stat1=stat1*msen/400
+				if(abs(stat1)<25){
+					stickstat.cnt=0
+				}else{
+					stickstat.cnt=sgn(stat1)*min(abs(int(double(sgn(stat1)*(abs(stat1)-25))*max(timenow-timep,2)/150)),max(timenow-timep,2))
+				}
+			loop
+		}
+		if(analoginput=5){
+			repeat 2
+				cnt0=cnt
+				slider=0
+				repeat length_joylist
+					joyGetPosEx joystat2,joylist.cnt
+					slider+=joystat2.(2+(cnt0^analogsw))
+				loop
+				stat1=slider-sliderp.cnt0
+				sliderp.cnt0=slider
+				if(abs(stat1)>32768):stat1-=sgn(stat1)*65536
+				stat1=stat1*msen/400
+				if(abs(stat1)<25){
+					stickstat.cnt=0
+				}else{
+					stickstat.cnt=sgn(stat1)*min(abs(int(double(sgn(stat1)*(abs(stat1)-25))*max(timenow-timep,2)/150)),max(timenow-timep,2))
+				}
+			loop
+		}
+		if(analoginput=3){
+			repeat 2
+				cnt0=cnt
+				stat1=0
+				repeat length_joylist
+					joyGetPosEx joystat2,joylist.cnt
+					stat1+=joystat2.(2+(cnt0^analogsw)*2)-32768
+				loop
+				if(abs(stat1)<12000){
+					stickstat.cnt=0
+				}else{
+					stickstat.cnt=sgn(stat1)*min(abs(int(double(sgn(stat1)*(abs(stat1)-12000))*max(timenow-timep,2)/16/300)),18000*max(timenow-timep,2)/16/300)
+				}
+			loop
+		}
+		getkey enter_key,13
+		enter_key=enter_key|getjoykeystat(11)
+		if(ginfo2()=0){
+			gosub *refreshhs
+			getkey_a stat1,38
+			getkey stat2,key.(7+2*analogsw)
+			getkey stat3,key.(9-2*analogsw)
+			stat1=stat1|((stat2|stat3)&(enter_key=1))
+			getkey stat2,key2.(7+2*analogsw)
+			getkey stat3,key2.(9-2*analogsw)
+			stat1=stat1|((stat2|stat3|getjoykeystat(7+2*analogsw)|getjoykeystat(9-2*analogsw)|(stickstat.0>0)|(stickstat.1>0))&(enter_key=1))
+			if((stat1=1)&(ts2>60)){
+				if((hstypenow=0)&(hsr<99)){
+					hsr++
+				}else:if((hstypenow=1)&(hso<2000)){
+					hso+=25
+				}else:if((hstypenow=2)&(hsc<2000)){
+					hsc+=25
+				}else:if((hstypenow=3)&(hsm<2000)){
+					hsm+=25
+				}else:if((hstypenow=4)&(hsa<2000)){
+					hsa+=25
+				}
+				enterfl=1
+				if(timenow<lastkeyt+1700):lastkeyt=max(timenow,lastkeyt)
+			}
+			getkey_a stat1,40
+			getkey stat2,key.(6+2*analogsw)
+			getkey stat3,key.(8-2*analogsw)
+			stat1=stat1|((stat2|stat3)&(enter_key=1))
+			getkey stat2,key2.(6+2*analogsw)
+			getkey stat3,key2.(8-2*analogsw)
+			stat1=stat1|((stat2|stat3|getjoykeystat(6+2*analogsw)|getjoykeystat(8-2*analogsw)|(stickstat.0<0)|(stickstat.1<0))&(enter_key=1))
+			if((stat1=1)&(ts2>60)){
+				if((hstypenow=0)&(hsr>5)){
+					hsr--
+				}else:if((hstypenow=1)&(hso>25)){
+					hso-=25
+				}else:if((hstypenow=2)&(hsc>25)){
+					hsc-=25
+				}else:if((hstypenow=3)&(hsm>25)){
+					hsm-=25
+				}else:if((hstypenow=4)&(hsa>25)){
+					hsa-=25
+				}
+				enterfl=1
+				if(timenow<lastkeyt+1700):lastkeyt=max(timenow,lastkeyt)
+			}
+			getkey stat1,37
+			getkey stat2,key.4
+			stat1=stat1|(stat2&(enter_key=1))
+			getkey stat2,key2.4
+			stat1=stat1|((stat2|getjoykeystat(4))&(enter_key=1))
+			if((stat1=1)&(ts>120)){
+				gosub *refreshhs
+				if(hstypenow=0){
+					stat2=bpm*hsr/10
+				}else:if(hstypenow=1){
+					stat2=int(double(hso)*bpm*1000f/oftbpm)
+				}else:if(hstypenow=2){
+					stat2=hsc*1000
+				}else:if(hstypenow=3){
+					stat2=int(double(hsm)*bpm*1000f/maxbpm)
+				}else:if(hstypenow=4){
+					stat2=int(double(hsa)*bpm*1000f/avebpm)
+				}
+				hsr=10
+				hsc=-1
+				hsm=-1
+				hsa=-1
+				hso=-1
+				repeat 5
+					hstypenow--
+					if(hstypenow<0):hstypenow=4
+					if(vhstype.hstypenow=1):break
+				loop
+				if(hstypenow=0){
+					hsr=max(min(int(round(double(stat2)/bpm*10)),99),5)
+				}else:if(hstypenow=1){
+					hso=ran(int(round(double(stat2)*oftbpm/bpm/25/1000))*25,25,2000)
+				}else:if(hstypenow=2){
+					hsc=ran(int(round(double(stat2)/25/1000))*25,25,2000)
+				}else:if(hstypenow=3){
+					hsm=ran(int(round(double(stat2)*maxbpm/bpm/25/1000))*25,25,2000)
+				}else:if(hstypenow=4){
+					hsa=ran(int(round(double(stat2)*avebpm/bpm/25/1000))*25,25,2000)
+				}
+				enterfl=1
+				if(timenow<lastkeyt+1700):lastkeyt=max(timenow,lastkeyt)
+			}
+			getkey_a stat1,39
+			getkey stat2,key.5
+			stat1=stat1|(stat2&(enter_key=1))
+			getkey stat2,key2.5
+			stat1=stat1|((stat2|getjoykeystat(5))&(enter_key=1))
+			if((stat1=1)&(ts>120)){
+				gosub *refreshhs
+				if(hstypenow=0){
+					stat2=bpm*hsr/10
+				}else:if(hstypenow=1){
+					stat2=int(double(hso)*bpm*1000f/oftbpm)
+				}else:if(hstypenow=2){
+					stat2=hsc*1000
+				}else:if(hstypenow=3){
+					stat2=int(double(hsm)*bpm*1000f/maxbpm)
+				}else:if(hstypenow=4){
+					stat2=int(double(hsa)*bpm*1000f/avebpm)
+				}
+				hsr=10
+				hsc=-1
+				hsm=-1
+				hsa=-1
+				hso=-1
+				repeat 5
+					hstypenow++
+					if(hstypenow>4):hstypenow=0
+					if(vhstype.hstypenow=1):break
+				loop
+				if(hstypenow=0){
+					hsr=max(min(int(round(double(stat2)/bpm*10)),99),5)
+				}else:if(hstypenow=1){
+					hso=ran(int(round(double(stat2)*oftbpm/bpm/25/1000))*25,25,2000)
+				}else:if(hstypenow=2){
+					hsc=ran(int(round(double(stat2)/25/1000))*25,25,2000)
+				}else:if(hstypenow=3){
+					hsm=ran(int(round(double(stat2)*maxbpm/bpm/25/1000))*25,25,2000)
+				}else:if(hstypenow=4){
+					hsa=ran(int(round(double(stat2)*avebpm/bpm/25/1000))*25,25,2000)
+				}
+				enterfl=1
+				if(timenow<lastkeyt+1700):lastkeyt=max(timenow,lastkeyt)
+			}
+		}
+		gosub *refreshhs
+		if(hstypenow=0){
+			hs=108*hsr/10/2
+		}else:if(hstypenow=1){
+			hs=108*hso*1000/oftbpm/2
+		}else:if(hstypenow=2){
+			hs=108/2
+		}else:if(hstypenow=3){
+			hs=108*hsm*1000/maxbpm/2
+		}else{
+			hs=108*hsa*1000/avebpm/2
+		}
+		if(hs<1):hs=1
+		gsel 0
+		redraw 0
+		pos 0,0
+		gcopy 149,0,0,scrsize_w,scrsize_h
+		alResetCopyMode
+		alCopyImageToScreen 53,0,scrsize_w/2-getsize(180),scrsize_h/2+getsize(100)
+		pos scrsize_w/2-(300-int(double(60)*sin(double(min(timenow,3000))*M_PI/2/3000)))*scrsize_h/480/2,scrsize_h/2-(300-int(double(60)*sin(double(min(timenow,3000))*M_PI/2/3000)))*scrsize_h/480/2-getsize(60)
+		gzoom (300-int(double(60)*sin(double(min(timenow,3000))*M_PI/2/3000)))*scrsize_h/480,(300-int(double(60)*sin(double(min(timenow,3000))*M_PI/2/3000)))*scrsize_h/480,129,0,0,getsize(300),getsize(300),1
+		alCopyImageToScreen 97,0,scrsize_w-getsize(226),scrsize_h-getsize(27)
+		if((hsc=-1)&(hsm=-1)&(hsa=-1)&(hso=-1)){
+			if(strlen(str(hsr))=1){
+				stat1="x0."+hsr
+			}else{
+				stat1=str(hsr)
+				stat1="x"+strmid(stat1,0,1)+"."+strmid(stat1,1,1)
+			}
+		}else:if(hsc!=-1){
+			stat1="C"
+		}else:if(hsm!=-1){
+			stat1="m"+hsm
+		}else:if(hsa!=-1){
+			stat1="a"+hsa
+		}else{
+			stat1=""+hso
+		}
+		stat3=0
+		stat4=0
+		repeat strlen(stat1)
+			if(strmid(stat1,cnt,1)="."){
+				stat3+=5*scrsize_h/480
+			}
+		loop
+		repeat strlen(stat1)
+			if(int(strmid(stat1,cnt,1))=0){
+				if(strmid(stat1,cnt,1)="x"){
+					stat2=11
+				}else:if(strmid(stat1,cnt,1)="C"){
+					stat2=12
+				}else:if(strmid(stat1,cnt,1)="m"){
+					stat2=13
+				}else:if(strmid(stat1,cnt,1)="a"){
+					stat2=14
+				}else:if(strmid(stat1,cnt,1)="."){
+					stat2=10
+					stat4+=5*scrsize_h/480
+				}else:if(strmid(stat1,cnt,1)=" "){
+					continue
+				}else{
+					stat2=0
+				}
+			}else{
+				stat2=int(strmid(stat1,cnt,1))
+			}
+			alCopyImageToScreen 52,0,scrsize_w-getsize(92)-getsize(10)*strlen(stat1)/2+stat3/2+getsize(10)*cnt-stat4,scrsize_h-getsize(17),getsize(10),getsize(9),0,getsize(9)*stat2
+		loop
+		if((hsc=-1)&(hsm=-1)&(hsa=-1)&(hso=-1)){
+			stat1=int(double(bpml.0.1)*hsr/10000)
+		}else:if(hsc!=-1){
+			stat1=hsc
+		}else:if(hsm!=-1){
+			stat1=int(double(bpml.0.1/100)*hsm/maxbpm*100)
+		}else:if(hsa!=-1){
+			stat1=int(double(bpml.0.1/100)*hsa/avebpm*100)
+		}else{
+			stat1=int(double(bpml.0.1/100)*hso/oftbpm*100)
+		}
+		stat1=str(stat1)
+		repeat strlen(stat1)
+			if(int(strmid(stat1,cnt,1))=0){
+				if(strmid(stat1,cnt,1)="x"){
+					stat2=11
+				}else:if(strmid(stat1,cnt,1)="C"){
+					stat2=12
+				}else:if(strmid(stat1,cnt,1)="m"){
+					stat2=13
+				}else:if(strmid(stat1,cnt,1)="a"){
+					stat2=14
+				}else:if(strmid(stat1,cnt,1)=" "){
+					continue
+				}else{
+					stat2=0
+				}
+			}else{
+				stat2=int(strmid(stat1,cnt,1))
+			}
+			alCopyImageToScreen 52,0,scrsize_w-getsize(35)-getsize(10)*strlen(stat1)/2+getsize(10)*cnt,scrsize_h-getsize(17),getsize(10),getsize(9),getsize(10),getsize(9)*stat2
+		loop
+		getkey f11_key,122
+		esc_key=getesckey()
+		enter_key=enter_key|f11_key
+		enter_key=enter_key|getjoykeystat(11)|getjoykeystat(13)
+		if((timenow>lastkeyt+1800)|((enterfl=0)&(timenow>1200)&(enter_key=0)&(enter_keyp=1)&(ginfo2()=0))|((esc_key=1)&(ginfo2()=0))){
+			if((esc_key=1)&(ginfo2()=0)):endfl2=1:autodemo=0
+			break
+		}else{
+			gmode 3,,,max(256-(d3timer()-timestart)*256/1200,0)
+			color 255,255,255
+			gsquare -1,sx_a,sy_a
+			gmode 3,,,max((d3timer()-timestart-(lastkeyt+1500))*256/300,0)
+			color 0,0,0
+			gsquare -1,sx_a,sy_a
+			gmode 0
+			enter_keyp=enter_key
+		}
+		if((ts2>60)&(analoginput=2)){
+			if(hidem=1):mouse -1,-1
+			mouse defx,defy
+		}
+		redraw 1
+		timep=timenow
+		await 7
+		if(analoginput=1){
+			keshucnt=0:onkey 1
+		}
+	loop
+
+	// ”wŒi‰æ‘œ‚Ì‰ğ•ú(ƒƒ‚ƒŠ‚ğH‚¤‚Ì‚Å)
+	buffer 149,1,1
+
+	return

@@ -1,0 +1,230 @@
+#deffunc loadUIGraphics
+	texload2 dir_default+"\\cache\\laser_p.png"
+	tex_laser_p=stat
+	texload2 dir_default+"\\imgs\\score_header.png",480,48
+	tex_score_header=stat
+	dim tex_num2,2
+	texload2 dir_default+"\\cache\\num2_0.png",two(getsize(10)),two(getsize(9)*16*2)
+	tex_num2.0=stat
+	texload2 dir_default+"\\cache\\num2_1.png",two(getsize(10)),two(getsize(9)*16*2)
+	tex_num2.1=stat
+	texload2 dir_default+"\\cache\\result_scorenum.png",two(getsize(24)),two(getsize(24)*10)
+	tex_result_scorenum=stat
+	texload2 dir_default+"\\cache\\er.png"
+	tex_er=stat
+	texload2 dir_default+"\\cache\\er_p.png"
+	tex_er_p=stat
+	texload2 dir_default+"\\imgs\\num0.png",136,1200
+	tex_num0=stat
+	texload2 dir_default+"\\imgs\\playresult.png",540,600
+	tex_playresult=stat
+	texload2 dir_default+"\\cache\\minfo_label.png"
+	tex_minfo_label=stat
+	texload2 dir_default+"\\cache\\minfo_detail.png"
+	tex_minfo_detail=stat
+	texload2 dir_default+"\\cache\\minfo_cur.png"
+	tex_minfo_cur=stat
+	texload2 dir_default+"\\cache\\fps.png"
+	tex_fps=stat
+	texload2 dir_default+"\\cache\\timingadjust_ms.png"
+	tex_timingadjust_ms=stat
+	texload2 dir_default+"\\cache\\timingadjust.png"
+	tex_timingadjust=stat
+	texload2 dir_default+"\\cache\\timingadjust_sign.png"
+	tex_timingadjust_sign=stat
+
+	// bufferからテクスチャ生成
+	// (ロード時間短縮のため、これらのbufferの画像読込はタイトル画面で行っている)
+	gsel 21
+	settex2 -1
+	tex_combonum=stat
+	gsel 23
+	settex2 -1
+	tex_er_g=stat
+	gsel 147
+	settex2 -1
+	tex_er_g_pattern=stat
+
+	return
+
+#deffunc loadBGGraphics
+	if(bg>=1){
+		stat3=0
+		exist dir_default+"\\imgs\\bg\\"+bgname+"0.jpg"
+		stat1=strsize
+		exist dir_default+"\\imgs\\bg\\"+bgname+"1.jpg"
+		stat2=strsize
+		if((stat1<=0)|(stat2<=0)){
+			sdim bgname2,64,1
+			split bgname,";",bgname2
+			if(length(bgname2)=1){
+				exist bgname2.0
+				stat1=strsize
+				stat2=strsize
+				stat4=bgname2.0
+				bgname2=stat4,stat4
+			}else:if(length(bgname2)>=2){
+				exist bgname2.0
+				stat1=strsize
+				exist bgname2.1
+				stat2=strsize
+			}
+			if((stat1<=0)|(stat2<=0)){
+				bgname="desert"
+			}else:stat3=1
+		}
+
+		// "cache/bg"ディレクトリが存在しなければ作成
+		dirlist buf,dir_default+"\\cache\\bg",5
+		if(buf=""):mkdir dir_default+"\\cache\\bg"
+
+		if(stat3=0){
+			exist dir_default+"\\cache\\bg\\"+bgname+"0.jpg"
+			if(strsize=-1){
+				gsel 2
+				picload dir_default+"\\imgs\\bg\\"+bgname+"0.jpg"
+				alCreateImage 2,two(getsize(900)),two(getsize(800))
+				alStretchScreenToImage 2,2,0,0,720,640,0,0,getsize(900),getsize(800)
+				alSaveFile dir_default+"\\cache\\bg\\"+bgname+"0.jpg","image/jpeg",0,0,two(getsize(900)),two(getsize(800))
+				alDeleteImage 2
+			}
+			texload dir_default+"\\cache\\bg\\"+bgname+"0.jpg"
+			addspr mod_bg0,0,0,0,getsize(900)-1,getsize(800)-1,stat
+			exist dir_default+"\\cache\\bg\\"+bgname+"1.jpg"
+			if(strsize=-1){
+				gsel 2
+				picload dir_default+"\\imgs\\bg\\"+bgname+"1.jpg"
+				alCreateImage 2,two(getsize(900)),two(getsize(800))
+				alStretchScreenToImage 2,2,0,0,720,640,0,0,getsize(900),getsize(800)
+				alSaveFile dir_default+"\\cache\\bg\\"+bgname+"1.jpg","image/jpeg",0,0,two(getsize(900)),two(getsize(800))
+				alDeleteImage 2
+			}
+			texload dir_default+"\\cache\\bg\\"+bgname+"1.jpg"
+			addspr mod_bg1,0,0,0,getsize(900)-1,getsize(800)-1,stat
+		}else{
+			gsel 2
+			picload bgname2.0
+			alCreateImage 2,two(getsize(900)),two(getsize(800))
+			alStretchScreenToImage 2,2,0,0,720,640,0,0,getsize(900),getsize(800)
+			alSaveFile dir_default+"\\cache\\playbg0.jpg","image/jpeg",0,0,two(getsize(900)),two(getsize(800))
+			alDeleteImage 2
+			texload dir_default+"\\cache\\playbg0.jpg"
+			addspr mod_bg0,0,0,0,getsize(900)-1,getsize(800)-1,stat
+			gsel 2
+			picload bgname2.1
+			alCreateImage 2,two(getsize(900)),two(getsize(800))
+			alStretchScreenToImage 2,2,0,0,720,640,0,0,getsize(900),getsize(800)
+			alSaveFile dir_default+"\\cache\\playbg1.jpg","image/jpeg",0,0,two(getsize(900)),two(getsize(800))
+			alDeleteImage 2
+			texload dir_default+"\\cache\\playbg1.jpg"
+			addspr mod_bg1,0,0,0,getsize(900)-1,getsize(800)-1,stat
+		}
+		regobj obj_bg,mod_bg0
+	}
+	return
+
+#deffunc loadLayerGraphics
+	if(bg>=2){
+		exist dir_default+"\\imgs\\bg\\"+bgname_l+".gif"
+		stat1=strsize
+		stat3=0
+		if(stat1<=0){
+			exist bgname_l
+			stat1=strsize
+			if(stat1<=0){
+				bgname_l="arrow"
+			}else:stat3=1
+		}
+		buffer 2
+		if(stat3=1){
+			picload bgname_l
+		}else{
+			picload dir_default+"\\imgs\\bg\\"+bgname_l+".gif"
+		}
+		layermax=ginfo_winx/600
+		dim mod_layer,layermax/3
+		buffer 159,two(min(getsize(880),600)*3),two(min(getsize(704),480)*2)
+		repeat layermax/3+1
+			pos 0,0
+			gmode 0
+			gzoom min(getsize(880),600)*3,min(getsize(704),480)*2,2,600*3*cnt,0,600*3,480*2
+			addspr mod_layer.cnt,0,0,0,min(getsize(880),600)-1,min(getsize(704),480)-1
+			settex min(getsize(880),600)*3,min(getsize(704),480)*2,0,-1
+		loop
+		buffer 2,1,1
+		buffer 159,1,1
+		regobj obj_layer,mod_layer.0
+		setscale obj_layer,880.0f*scrsize_h/480/min(getsize(880),600),880.0f*scrsize_h/480/min(getsize(880),600),880.0f*scrsize_h/480/min(getsize(880),600)
+		setefx obj_layer,767
+		setpos obj_layer,0.0f,-34.0f*scrsize_h/480/(880.0f*scrsize_h/480/min(getsize(880),600)),0.0f
+		dim ev_layeruv,2,3
+		repeat 2
+			cnt2=cnt
+			repeat 3
+				newevent ev_layeruv(cnt2,cnt)
+				event_uv ev_layeruv(cnt2,cnt),min(getsize(880),600)*cnt,min(getsize(704),480)*cnt2
+			loop
+		loop
+	}
+	return
+
+#deffunc loadLaneGraphics
+	buffer 129,int(38.5f*scrsize_h/480),int(38.5f*scrsize_h/480)
+	alSelectImage 35
+	alStretchImageToScreen 35,129,0,0,alGetWidth(),alGetHeight(),0,0,int(38.5f*scrsize_h/480),int(38.5f*scrsize_h/480)
+	settex2 -1
+	tex_jacket=stat
+	gsel 51+118*(anaranfl=2)
+	settex vw/ra*anaranfl,vh/ra,0,tex_lane_s
+	tex_lane_s=stat
+	gsel 5+163*(anaranfl=2)
+	settex vw/ra*anaranfl,vh/ra,0,tex_lane
+	tex_lane=stat
+	return
+
+#deffunc initLaneObject
+	addmesh mod_lane_s,1,1,0,double(vw2)*2/13,double(vh2)*13/20,tex_lane_s
+	regobj obj_lane_s,mod_lane_s
+	setefx obj_lane_s,1279,0,0
+	sellambient
+	objsetf3 256.0f,256.0f,256.0f
+	addmesh mod_lane,1,1,0,double(vw2)*2/13,double(vh2)*13/20,tex_lane
+	regobj obj_lane,mod_lane
+	setefx obj_lane,767-512*(bg=0),0,0
+	return
+
+#deffunc loadJudgmentLineGraphics
+	texload2 dir_default+"\\imgs\\cline.png",344,26
+	tex_cline=stat
+	return
+
+#deffunc initJudgmentLineObject
+	addplate mod_cline,1,344.0f/8,26.0f/8,0,0,343,25,tex_cline
+	regobj obj_cline,mod_cline
+	setpos obj_cline,0.0f,-2.6f,double(vh2)*13/20/2+0.4f
+	setang obj_cline,-M_PI/6,0.0f,0.0f
+	return
+
+#deffunc loadJudgmentAnimGraphics
+	gsel 155
+	settex judgel_winx*anaranfl,judgel_winy,0,tex_judgel
+	tex_judgel=stat
+	addplate mod_judgel,0,452.0f*0.95f/8,140.0f*0.95f/8,0,0,judgel_winx-1,judgel_winy-1,tex_judgel
+	gsel 155+15
+	settex judgel_winx*anaranfl,judgel_winy,0,tex_judgel2x
+	tex_judgel2x=stat
+	return
+
+#deffunc initJudgmentAnimObject
+	addplate mod_judgel2x,0,452.0f*0.95f/8*2,140.0f*0.95f/8,0,0,judgel_winx*2-1,judgel_winy-1,tex_judgel2x
+	regobj obj_judgel,mod_judgel,OBJ_XFRONT
+	setpos obj_judgel,0.0f,-2.4f*1.5f,double(vh2)*13/20/2+1.2f*1.5f
+	setefx obj_judgel,767,0,0
+	return
+
+#deffunc initCamera
+	getpos HGOBJ_CAMERA, camx, camy, camz
+	fvset fv1,0.0f,-2.6f,double(vh2)*13/20/2+0.4f
+	fvface fv1,camx,camy,camz
+	fv2str fv1
+	return

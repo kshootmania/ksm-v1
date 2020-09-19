@@ -1,0 +1,314 @@
+#deffunc initCustomAudioEffects
+	if(feffect=0){
+		userfxnum=0
+		swaudionum=0
+	}
+	if(feffect=1){
+		notesel fxdefbuf_fx
+		repeat notemax
+			notesel fxdefbuf_fx
+			noteget stat1,cnt
+			stat1=strmid(stat1,11,1024)
+			stat1=strtrim(stat1,0,' ')
+			if(stat1=""):continue
+			sdim fxdefstat,,2
+			fxdefstat.0=strmid(stat1,0,instr(stat1,0," "))
+			fxdefstat.1=strmid(stat1,instr(stat1,0," ")+1,strlen(stat1)-instr(stat1,0," ")-1)
+			if(length(fxdefstat)>=2){
+				f2=1
+				sdim fxdefstat2,1
+				split fxdefstat.1,";",fxdefstat2
+				foreach fxdefstat2
+					fxdefstat2.cnt=strtrim(fxdefstat2.cnt,0,' ')
+				loop
+				// 一致するエフェクト名があるか調べる
+				repeat FXDEF_FXTYPEMAX+1
+					if(fxdef_name.0.cnt=""):continue
+					if(fxdefstat2.0="type="+fxdef_name.0.cnt){
+						userfx_name.userfxnum=fxdefstat.0
+						userfx_params.userfxnum.0=double(cnt)
+						// まずはデフォルト値を流し込む
+						repeat fxdef_prmnum.cnt,1
+							userfx_params.userfxnum.cnt=fxdef_default.cnt.(int(userfx_params.userfxnum.0))
+							userfx_params_enable.userfxnum.cnt=fxdef_enable.cnt.(int(userfx_params.userfxnum.0))
+						loop
+						// 各パラメータ設定を反復処理
+						repeat max(length(fxdefstat2)-1,0),1
+							f=1
+							sdim fxdefstat3,1
+							split fxdefstat2.cnt,"=",fxdefstat3
+							if(length(fxdefstat3)<=1){
+								dialog "Warning: Unknown format (\""+fxdefstat2.cnt+"\")"
+							}else{
+								f=1
+								// 一致するパラメータ名があるか調べる
+								repeat fxdef_prmnum.(int(userfx_params.userfxnum.0)),1
+									if(fxdefstat3.0=fxdef_name.cnt.(int(userfx_params.userfxnum.0))){
+										if(fxdef_type.cnt.(int(userfx_params.userfxnum.0))=FXDEF_FILENAME){
+											if(swaudionum>=31){
+												dialog "Error: Too many \"Switch Audio\" Effects"
+											}else{
+												userfx_swaudiomid.userfxnum=swaudionum
+												userfx_params.userfxnum.cnt=fxdef_str2param(fxdefstat3.1,fxdef_type.cnt.(int(userfx_params.userfxnum.0)))
+											}
+										}else{
+											if(instr(fxdefstat3.1,0,">")=-1){
+												userfx_params.userfxnum.cnt=fxdef_str2param(fxdefstat3.1,fxdef_type.cnt.(int(userfx_params.userfxnum.0)))
+												userfx_params_enable.userfxnum.cnt=fxdef_str2param(fxdefstat3.1,fxdef_type.cnt.(int(userfx_params.userfxnum.0)))
+											}else{
+												userfx_params.userfxnum.cnt=fxdef_str2param(strmid(fxdefstat3.1,0,instr(fxdefstat3.1,0,">")),fxdef_type.cnt.(int(userfx_params.userfxnum.0)))
+												userfx_params_enable.userfxnum.cnt=fxdef_str2param(strmid(fxdefstat3.1,instr(fxdefstat3.1,0,">")+1,256),fxdef_type.cnt.(int(userfx_params.userfxnum.0)))
+											}
+										}
+										f=0
+										break
+									}
+								loop
+								if(f=1):dialog "Warning: Unknown paramater (\""+fxdefstat3.0+"\")"
+							}
+						loop
+						userfxnum++
+						f2=0
+						break
+					}
+				loop
+				if(f2=1):dialog "Error: Unknown effect type (\""+fxdefstat2.0+"\")"
+			}
+		loop
+		notesel fxdefbuf_filter
+		repeat notemax
+			notesel fxdefbuf_filter
+			noteget stat1,cnt
+			stat1=strmid(stat1,15,1024)
+			stat1=strtrim(stat1,0,' ')
+			if(stat1=""):continue
+			sdim fxdefstat,,2
+			fxdefstat.0=strmid(stat1,0,instr(stat1,0," "))
+			fxdefstat.1=strmid(stat1,instr(stat1,0," ")+1,strlen(stat1)-instr(stat1,0," ")-1)
+			if(length(fxdefstat)>=2){
+				f2=1
+				sdim fxdefstat2,1
+				split fxdefstat.1,";",fxdefstat2
+				foreach fxdefstat2
+					fxdefstat2.cnt=strtrim(fxdefstat2.cnt,0,' ')
+				loop
+				// 一致するエフェクト名があるか調べる
+				repeat FXDEF_FXTYPEMAX+1
+					if(fxdef_name.0.cnt=""):continue
+					if(fxdefstat2.0="type="+fxdef_name.0.cnt){
+						userfilter_name.userfilternum=fxdefstat.0
+						userfilter_params.userfilternum.0=double(cnt)
+						userfx_name.userfxnum=""
+						userfx_params.userfxnum.0=double(cnt)
+						// まずはデフォルト値を流し込む
+						repeat fxdef_prmnum.cnt,1
+							userfilter_params.userfilternum.cnt=fxdef_default.cnt.(int(userfilter_params.userfilternum.0))
+							userfilter_params_min.userfilternum.cnt=fxdef_enable.cnt.(int(userfilter_params.userfilternum.0))
+							userfilter_params_max.userfilternum.cnt=fxdef_enable.cnt.(int(userfilter_params.userfilternum.0))
+							userfx_params.userfxnum.cnt=fxdef_default.cnt.(int(userfx_params.userfxnum.0))
+							userfx_params_enable.userfxnum.cnt=fxdef_enable.cnt.(int(userfx_params.userfxnum.0))
+						loop
+						// 各パラメータ設定を反復処理
+						repeat max(length(fxdefstat2)-1,0),1
+							f=1
+							sdim fxdefstat3,1
+							split fxdefstat2.cnt,"=",fxdefstat3
+							if(length(fxdefstat3)<=1){
+								dialog "Warning: Unknown format (\""+fxdefstat2.cnt+"\")"
+							}else{
+								f=1
+								// 一致するパラメータ名があるか調べる
+								repeat fxdef_prmnum.(int(userfilter_params.userfilternum.0)),1
+									if(fxdefstat3.0=fxdef_name.cnt.(int(userfilter_params.userfilternum.0))){
+										if(fxdef_type.cnt.(int(userfx_params.userfxnum.0))=FXDEF_FILENAME){
+											if(swaudionum>=31){
+												dialog "Error: Too many \"Switch Audio\" Effects"
+											}else{
+												userfx_swaudiomid.userfxnum=swaudionum
+												userfx_params.userfxnum.cnt=fxdef_str2param(fxdefstat3.1,fxdef_type.cnt.(int(userfx_params.userfxnum.0)))
+											}
+										}else{
+											if(instr(fxdefstat3.1,0,">")=-1){
+												if(instr(fxdefstat3.1,1,"-")=-1){
+													userfilter_params.userfilternum.cnt=fxdef_str2param(fxdefstat3.1,fxdef_type.cnt.(int(userfilter_params.userfilternum.0)))
+													userfilter_params_min.userfilternum.cnt=fxdef_str2param(fxdefstat3.1,fxdef_type.cnt.(int(userfilter_params.userfilternum.0)))
+													userfilter_params_max.userfilternum.cnt=fxdef_str2param(fxdefstat3.1,fxdef_type.cnt.(int(userfilter_params.userfilternum.0)))
+													userfx_params.userfxnum.cnt=fxdef_str2param(fxdefstat3.1,fxdef_type.cnt.(int(userfx_params.userfxnum.0)))
+													userfx_params_enable.userfxnum.cnt=fxdef_str2param(fxdefstat3.1,fxdef_type.cnt.(int(userfx_params.userfxnum.0)))
+												}else{
+													userfilter_params.userfilternum.cnt=fxdef_str2param(strmid(fxdefstat3.1,0,instr(fxdefstat3.1,1,"-")+1),fxdef_type.cnt.(int(userfilter_params.userfilternum.0)))
+													userfilter_params_min.userfilternum.cnt=fxdef_str2param(strmid(fxdefstat3.1,0,instr(fxdefstat3.1,1,"-")+1),fxdef_type.cnt.(int(userfilter_params.userfilternum.0)))
+													userfilter_params_max.userfilternum.cnt=fxdef_str2param(strmid(fxdefstat3.1,instr(fxdefstat3.1,1,"-")+2,256),fxdef_type.cnt.(int(userfilter_params.userfilternum.0)))
+													userfx_params.userfxnum.cnt=fxdef_str2param(strmid(fxdefstat3.1,0,instr(fxdefstat3.1,1,"-")+1),fxdef_type.cnt.(int(userfx_params.userfxnum.0)))
+													userfx_params_enable.userfxnum.cnt=fxdef_str2param(strmid(fxdefstat3.1,0,instr(fxdefstat3.1,1,"-")+1),fxdef_type.cnt.(int(userfx_params.userfxnum.0)))
+												}
+											}else{
+												if(instr(fxdefstat3.1,instr(fxdefstat3.1,0,">")+2,"-")=-1){
+													userfilter_params.userfilternum.cnt=fxdef_str2param(strmid(fxdefstat3.1,0,instr(fxdefstat3.1,0,">")),fxdef_type.cnt.(int(userfilter_params.userfilternum.0)))
+													userfilter_params_min.userfilternum.cnt=fxdef_str2param(strmid(fxdefstat3.1,instr(fxdefstat3.1,0,">")+1,256),fxdef_type.cnt.(int(userfilter_params.userfilternum.0)))
+													userfilter_params_max.userfilternum.cnt=fxdef_str2param(strmid(fxdefstat3.1,instr(fxdefstat3.1,0,">")+1,256),fxdef_type.cnt.(int(userfilter_params.userfilternum.0)))
+													userfx_params.userfxnum.cnt=fxdef_str2param(strmid(fxdefstat3.1,0,instr(fxdefstat3.1,0,">")),fxdef_type.cnt.(int(userfx_params.userfxnum.0)))
+													userfx_params_enable.userfxnum.cnt=fxdef_str2param(strmid(fxdefstat3.1,instr(fxdefstat3.1,0,">")+1,256),fxdef_type.cnt.(int(userfx_params.userfxnum.0)))
+												}else{
+													userfilter_params.userfilternum.cnt=fxdef_str2param(strmid(fxdefstat3.1,0,instr(fxdefstat3.1,0,">")),fxdef_type.cnt.(int(userfilter_params.userfilternum.0)))
+													userfilter_params_min.userfilternum.cnt=fxdef_str2param(strmid(fxdefstat3.1,instr(fxdefstat3.1,0,">")+1,instr(fxdefstat3.1,instr(fxdefstat3.1,0,">")+2,"-")+1),fxdef_type.cnt.(int(userfilter_params.userfilternum.0)))
+													userfilter_params_max.userfilternum.cnt=fxdef_str2param(strmid(fxdefstat3.1,instr(fxdefstat3.1,instr(fxdefstat3.1,0,">")+2,"-")+instr(fxdefstat3.1,0,">")+2+1,256),fxdef_type.cnt.(int(userfilter_params.userfilternum.0)))
+													userfx_params.userfxnum.cnt=fxdef_str2param(strmid(fxdefstat3.1,0,instr(fxdefstat3.1,0,">")),fxdef_type.cnt.(int(userfx_params.userfxnum.0)))
+													userfx_params_enable.userfxnum.cnt=fxdef_str2param(strmid(fxdefstat3.1,instr(fxdefstat3.1,0,">")+1,instr(fxdefstat3.1,instr(fxdefstat3.1,0,">")+2,"-")+1),fxdef_type.cnt.(int(userfx_params.userfxnum.0)))
+												}
+											}
+										}
+										f=0
+										break
+									}
+								loop
+								if(f=1):dialog "Warning: Unknown paramater (\""+fxdefstat3.0+"\")"
+							}
+						loop
+						userfilternum++
+						userfxnum++
+						f2=0
+						break
+					}
+				loop
+				if(f2=1):dialog "Error: Unknown effect type (\""+fxdefstat2.0+"\")"
+			}
+		loop
+		dim userfx_fl,userfxnum
+	}
+
+	// SwitchAudioエフェクトの音声ファイル読み込み
+	loadAudioFilesForSwitchAudio
+
+	return
+
+#deffunc loadAudioFilesForSwitchAudio /*private*/
+	dim mid_sw,swaudionum
+	repeat swaudionum
+		exist swaudio.cnt
+		if(strsize>0){
+			mid_sw.cnt=KSHLib_SwitchAudioOpen(cnt,swaudio.cnt,0x20000)
+		}else{
+			exist getpath(ccsongfile,32)+swaudio.cnt
+			if(strsize>0){
+				mid_sw.cnt=KSHLib_SwitchAudioOpen(cnt,getpath(ccsongfile,32)+swaudio.cnt,0x20000)
+			}else:dialog "Error: Could not find SwitchAudio file (\""+swaudio.cnt+"\")"
+		}
+
+		// メインの楽曲音声と再生コマンド等をリンクできる場合はリンクする
+		BASS_ChannelSetLink mid.0,mid_sw.cnt
+		if(BASS_ErrorGetCode()!=0){
+			mlinkfailed=1
+		}
+
+		// SwitchAudio用の各種エフェクトを用意
+		// (パフォーマンスを重視してSwitchAudioにはユーザー定義エフェクトを適用しない)
+		hPeakFX_sw.cnt=BASS_ChannelSetFX(mid_sw.cnt,0x10013,2)
+		hPeakFX2_sw.cnt=BASS_ChannelSetFX(mid_sw.cnt,0x10013,3)
+		hBitCFX_sw.cnt=BASS_VST_ChannelSetDSP(mid_sw.cnt,dir_default+"\\lib\\bitc.dll",0,8)
+		BASS_VST_SetParam_R hBitCFX_sw.cnt,0,0.0f
+		hCompFX_sw.cnt=-1
+		hVolFX2_sw.cnt=-1
+	loop
+	return
+
+#deffunc applyVSTEffects
+	dim user_now,max(userfxnum,1)
+	if(feffect=1){
+		dim hFX_Echo,2
+		hFX_Echo=-1,-1
+		if(fl_Echo=1){
+			repeat 2
+				hFX_Echo.cnt=BASS_VST_ChannelSetDSP(mid.0,dir_default+"\\lib\\regawo.dll",0,26)
+				BASS_VST_SetParam_R hFX_Echo.cnt,1,0.0f
+				BASS_VST_SetParam_R hFX_Echo.cnt,2,1.00f
+				BASS_VST_SetParam_R hFX_Echo.cnt,29,1.0f
+			loop
+		}
+		if(fl_Retr=1){
+			hFX_Retr=BASS_VST_ChannelSetDSP(mid.0,dir_default+"\\lib\\regawo.dll",0,25)
+			BASS_VST_SetParam_R hFX_Retr,1,0.0f
+			BASS_VST_SetParam_R hFX_Retr,2,0.70f
+			BASS_VST_SetParam_R hFX_Retr,29,1.0f
+		}
+		if(fl_Pitc=1){
+			hFX_Pitc=BASS_VST_ChannelSetDSP(mid.0,dir_default+"\\lib\\pitc.dll",0,20)
+			BASS_VST_SetParam_R hFX_Pitc,0,0.0f/48.0f/2.0f+0.50f
+			BASS_VST_SetParam_R hFX_Pitc,1,700.0f/44100.0f
+			BASS_VST_SetParam_R hFX_Pitc,2,0.40f*2.0f
+			BASS_VST_SetParam_R hFX_Pitc,3,0.0f
+		}
+		if(fl_BitC=1){
+			hFX_BitC=BASS_VST_ChannelSetDSP(mid.0,dir_default+"\\lib\\bitc.dll",0,19)
+			BASS_VST_SetParam_R hFX_BitC,0,0
+		}
+		dim hFX_TStp,2
+		hFX_TStp=-1,-1
+		if(fl_TStp=1){
+			hFX_TStp.0=BASS_VST_ChannelSetDSP(mid.0,dir_default+"\\lib\\tstp.dll",0,19)
+			hFX_TStp.1=BASS_VST_ChannelSetDSP(mid.0,dir_default+"\\lib\\tstp.dll",0,18)
+		}
+		if(fl_Gate=1){
+			hFX_Gate=BASS_VST_ChannelSetDSP(mid.0,dir_default+"\\lib\\regawo.dll",0,17)
+			BASS_VST_SetParam_R hFX_Gate,1,0.0f
+			BASS_VST_SetParam_R hFX_Gate,7,0.50f
+			BASS_VST_SetParam_R hFX_Gate,8,0.90f
+			BASS_VST_SetParam_R hFX_Gate,10,500.0f/22050.0f
+			BASS_VST_SetParam_R hFX_Gate,11,20000.0f/22050.0f
+			BASS_VST_SetParam_R hFX_Gate,12,1.414f/50.0f
+			BASS_VST_SetParam_R hFX_Gate,13,0.80f
+			BASS_VST_SetParam_R hFX_Gate,29,0.0f // GateとWobbleがあるためByPassにすると処理がややこしい
+		}
+		if(fl_Phas=1){
+			hFX_Phas=BASS_VST_ChannelSetDSP(mid.0,dir_default+"\\lib\\phas.dll",0,16)
+			BASS_VST_SetParam_R hFX_Phas,0,0.25f
+			BASS_VST_SetParam_R hFX_Phas,1,0.0f
+			BASS_VST_SetParam_R hFX_Phas,2,1500.0f/22050.0f
+			BASS_VST_SetParam_R hFX_Phas,3,20000.0f/22050.0f
+			BASS_VST_SetParam_R hFX_Phas,4,0.707f/50.0f
+			BASS_VST_SetParam_R hFX_Phas,5,0.35f
+			BASS_VST_SetParam_R hFX_Phas,6,0.75f
+			BASS_VST_SetParam_R hFX_Phas,7,8.0f/20.0f
+			BASS_VST_SetParam_R hFX_Phas,8,0.0f
+		}
+		if(fl_Flan=1){
+			hFX_Flan=BASS_VST_ChannelSetDSP(mid.0,dir_default+"\\lib\\flan.dll",0,15)
+			BASS_VST_SetParam_R hFX_Flan,0,0.25f
+			BASS_VST_SetParam_R hFX_Flan,1,30.0f/44100.0f
+			BASS_VST_SetParam_R hFX_Flan,2,45.0f/44100.0f
+			BASS_VST_SetParam_R hFX_Flan,3,0.60f
+			BASS_VST_SetParam_R hFX_Flan,4,0.0f
+			BASS_VST_SetParam_R hFX_Flan,5,0.75f
+			BASS_VST_SetParam_R hFX_Flan,6,0.0f
+		}
+		if(fl_SiCh=1){
+			hFX_SiCh=BASS_VST_ChannelSetDSP(mid.0,dir_default+"\\lib\\sich.dll",0,14)
+			BASS_VST_SetParam_R hFX_SiCh,1,0.0050f
+			BASS_VST_SetParam_R hFX_SiCh,2,0.0f
+			BASS_VST_SetParam_R hFX_SiCh,3,0.0010f
+		}
+		dim hFX_User,userfxnum+userfilternum
+		repeat userfxnum
+			if(userfx_fl.cnt=0){
+				hFX_User.cnt=-1
+				continue
+			}
+			hFX_User.cnt=BASS_VST_ChannelSetDSP(mid.0,dir_default+"\\lib\\"+fxdef_dllname.(int(userfx_params.cnt.0)),0,fxdef_priority.(int(userfx_params.cnt.0)))
+			cnt2=cnt
+			repeat fxdef_prmnum.(int(userfx_params.cnt2.0)),1
+				if((userfx_params.cnt2.cnt<0.0f)&(fxdef_type.cnt.(int(userfx_params.cnt2.0))=FXDEF_LENGTH)){
+					BASS_VST_SetParam_R hFX_User.cnt2,fxdef_prmno.cnt.(int(userfx_params.cnt2.0)),minf(maxf(-userfx_params.cnt2.cnt/10.0f,0.0f),1.0f)
+				}else:if(fxdef_max.cnt.(int(userfx_params.cnt2.0))>0.0f){
+					BASS_VST_SetParam_R hFX_User.cnt2,fxdef_prmno.cnt.(int(userfx_params.cnt2.0)),minf(maxf(fxdef_prmmax.cnt.(int(userfx_params.cnt2.0))*userfx_params.cnt2.cnt/fxdef_max.cnt.(int(userfx_params.cnt2.0)),0.0f),1.0f)
+				}else:if((userfx_params.cnt2.cnt>0.0f)&(fxdef_type.cnt.(int(userfx_params.cnt2.0))=FXDEF_LENGTH)&(fxdef_linkprm.(int(userfx_params.cnt2.0))=cnt)){
+					user_now.cnt2=int(1.0f/userfx_params.cnt2.cnt)
+				}else:if((fxdef_prmno.cnt.(int(userfx_params.cnt2.0))!=-1)&(fxdef_type.cnt.(int(userfx_params.cnt2.0))=FXDEF_PITCH)){
+					// PitchShift pitch
+					BASS_VST_SetParam_R hFX_User.cnt2,fxdef_prmno.cnt.(int(userfx_params.cnt2.0)),maxf(minf(absf(userfx_params.cnt2.cnt),1.0f),0.0f)
+				}
+			loop
+			// ByPassの設定
+			BASS_VST_SetParam_R hFX_User.cnt,29,1.0f
+		loop
+	}
+	return
