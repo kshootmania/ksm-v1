@@ -176,29 +176,6 @@
 	}
 	return
 
-#defcfunc getsttp
-	if(nowsttp!=-1){
-		return nowsttp
-	}else:if(bpmlnum<=1){
-		nowsttp=int(ttp*bpml.0.1/6000/beat)
-		return nowsttp
-	}else{
-		s1=cnow
-		s3=int(double(ttp)*bpml.bpmlsttpfcnt.1/6000/beat)
-		repeat bpmlnum-bpmlsttpfcnt,bpmlsttpfcnt
-			if(bpml.cnt.2>=t+ttp):break
-			if(bpml.cnt.0<=s1){
-				bpmlsttpfcnt=cnt
-				continue
-			}
-			if((bpml.cnt.0>s1)&(bpml.cnt.2<t+ttp)){
-				s3=bpml.cnt.0+int(double(t+ttp-bpml.cnt.2)*bpml.cnt.1/6000/beat)-cnow
-			}
-		loop
-		nowsttp=s3
-		return nowsttp
-	}
-
 #defcfunc b2c int b1
 	_cbcnt=0
 	b2=0
@@ -268,7 +245,7 @@
 
 #defcfunc hsrc int c, int t1
 	if(hsc=-1){
-		if(stpnum=0):return c-cnow-sttp
+		if(stpnum=0):return c-cnow
 		if(c>cnow){
 			stpsh=cnowstpsh
 			repeat stpnum-cstp,cstp
@@ -283,12 +260,12 @@
 					stpsh+=stp.cnt.1
 				}else:if(stp.cnt.0>=c):break
 			loop
-			return c-cnow-sttp-stpsh
+			return c-cnow-stpsh
 		}
-		return c-cnow-sttp
+		return c-cnow
 	}else{
-		if(t1!=-1):return (t1-t-ttp*adj)*hsc/24
-		return (c2t(c)-t-ttp*adj)*hsc/24
+		if(t1!=-1):return (t1-t)*hsc/24
+		return (c2t(c)-t)*hsc/24
 	}
 
 #defcfunc getstpsh int c
@@ -409,7 +386,7 @@
 		if((cnow<spin.scnt.1+spin.scnt.2)&(spin.scnt.0!=-1)){
 			spinnow.0=spin.scnt.0
 			spinnow0p=spin.scnt.0
-			spinnow.1=cnowp+sttp*adj
+			spinnow.1=cnowp
 			spinnow.2=spin.scnt.2
 			spinnow.3=scnt
 		}

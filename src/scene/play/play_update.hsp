@@ -8,26 +8,6 @@
 	// 現在のカウント値(cnow)を計算
 	calculateCurrentTick
 
-	// 譜面停止中か判定
-	stat1=0
-	repeat max(stpnum-stpfcnt,0),stpfcnt
-		if(cnow>=stp.cnt.0+stp.cnt.1):stpfcnt=cnt:continue
-		if(cnow<stp.cnt.0):break
-		if((cnow<stp.cnt.0+stp.cnt.1)&(cnow>=stp.cnt.0)){
-			stat1=1
-		}
-	loop
-
-	if((mstop=0)&(mshift=0)&(stat1=0)){
-		if(cnt<12){
-			ttp_=(ttp_+double(t_tp))/2
-		}else:if(cnt<24){
-			ttp_=(ttp_*3+double(t_tp))/4
-		}else{
-			ttp_=(ttp_*7+double(t_tp))/8
-		}
-		ttp=0
-	}
 	laserdelay0=laserdelay0_orig
 	if(ts>120):ts=0
 	if(ts2>60):ts2=0

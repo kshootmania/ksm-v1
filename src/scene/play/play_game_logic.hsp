@@ -41,7 +41,7 @@
 	notesejfcnt=0
 	ddim ttp_,1
 	ttp_=16.6f
-	laserdelay0_orig=bufferlength/*233-ttp*/-soundfx_delay-GLOBAL_SOUNDFX_DELAY
+	laserdelay0_orig=bufferlength-soundfx_delay-GLOBAL_SOUNDFX_DELAY
 	t_mo=-50000
 	t_mop=-50000
 	t_moex=0
@@ -170,7 +170,7 @@
 #deffunc specifyJudgmentTargetOfLaserNotes
 	repeat analognum-min(analogjfcnt.0,analogjfcnt.1),min(analogjfcnt.0,analogjfcnt.1)
 		if(analog.cnt.6-max(t,t-analogdelay)>=2100):break
-		if(min(min(min(t+ttp2+30,t+ttp*adj),t+ttp*adj-analogdelay),t)>analog.cnt.7){
+		if(min(min(min(t+ttp2+30,t),t-analogdelay),t)>analog.cnt.7){
 			analogjfcnt.(analog.cnt.0)=cnt
 			continue
 		}
@@ -191,21 +191,21 @@
 	spinangle=0.0f
 	spinangles=0.0f
 	if(spinnow.0>=0){
-		if(spinnow.1+spinnow.2<cnow+sttp*adj){
+		if(spinnow.1+spinnow.2<cnow){
 			spinnow.0=-1
 			spinangle=0.0f
-		}else:if((spinnow.2>0)&(spinnow.1<=cnow+sttp*adj)){
+		}else:if((spinnow.2>0)&(spinnow.1<=cnow)){
 			if(spinnow.0<2){
 				// ’Êí‚Ì‰ñ“]
-				if(((cnow+sttp*adj-bgmouikkaic>bgmouikkai/2)|(bgmouikkai=0))&(spinnow.3>bgmouikkaicnt)){
-					bgmouikkaic=cnow+sttp*adj
+				if(((cnow-bgmouikkaic>bgmouikkai/2)|(bgmouikkai=0))&(spinnow.3>bgmouikkaicnt)){
+					bgmouikkaic=cnow
 					bgmouikkai=spinnow.2*75/100
 					bgmouikkaia=1-spinnow.0*2
 					bgmouikkaicnt=spinnow.3
 					bgmouikkaikaisu=2
 				}
-				spinangle=675.0f*(cnow+sttp*adj-spinnow.1)/spinnow.2
-				spinangles=520.0f*(cnow+sttp*adj-spinnow.1)/spinnow.2
+				spinangle=675.0f*(cnow-spinnow.1)/spinnow.2
+				spinangles=520.0f*(cnow-spinnow.1)/spinnow.2
 				if(spinangle<360.0f){
 					spinangle=sin(double(spinangle)*0.75f/360.0f)*360.0f/sin(0.75f)
 				}else:if(spinangle<440.0f){
@@ -225,15 +225,15 @@
 				spinanglepp=spinangle
 			}else{
 				// ”¼‰ñ“]
-				if(((cnow+sttp*adj-bgmouikkaic>bgmouikkai/2)|(bgmouikkai=0))&(spinnow.3>bgmouikkaicnt)){
-					bgmouikkaic=cnow+sttp*adj
+				if(((cnow-bgmouikkaic>bgmouikkai/2)|(bgmouikkai=0))&(spinnow.3>bgmouikkaicnt)){
+					bgmouikkaic=cnow
 					bgmouikkai=spinnow.2*75/100
 					bgmouikkaia=1-(spinnow.0-2)*2
 					bgmouikkaicnt=spinnow.3
 					bgmouikkaikaisu=1
 				}
-				spinangle=400.0f*(cnow+sttp*adj-spinnow.1)/spinnow.2
-				spinangles=520.0f*(cnow+sttp*adj-spinnow.1)/spinnow.2
+				spinangle=400.0f*(cnow-spinnow.1)/spinnow.2
+				spinangles=520.0f*(cnow-spinnow.1)/spinnow.2
 				if(spinangle<110.0f){
 					spinangle=sin(double(spinangle)*1.8/110)/sin(1.8)*60
 				}else:if(spinangle<220.0f){
@@ -248,8 +248,8 @@
 				spinanglepp=spinangle
 			}
 		}
-		spintp=t+ttp*adj+75*adj3
-		spincp=cnow+sttp*adj
+		spintp=t+75*adj3
+		spincp=cnow
 	}
 	return
 

@@ -308,13 +308,13 @@
 			if(analog.i.0!=cnt0){
 				_continue
 			}else:if(colfl=0):analogfcnt.cnt0=i:colfl=1
-			hsrc12=hsrc(analog.i.1+analog.i.2+(analog.i.2<=UNIT_MEASURE_32)+sttp*(adj=0),analog.i.7+ttp*(adj=0)+75*adj3)
+			hsrc12=hsrc(analog.i.1+analog.i.2+(analog.i.2<=UNIT_MEASURE_32),analog.i.7+75*adj3)
 			analogcnt++
 			if(hsrc12<-UNIT_MEASURE_2){
 				analogfcnt.(analog.i.0)=i+1
 				_continue
 			}
-			hsrc1=hsrc(analog.i.1+sttp*(adj=0),analog.i.6+ttp*(adj=0)+75*adj3)
+			hsrc1=hsrc(analog.i.1,analog.i.6+75*adj3)
 			if((hsrc1>UNIT_MEASURE*(vh+200)/(10*hs))&(colfl=1)){
 				_break
 			}
@@ -485,8 +485,8 @@
 	loop
 
 	// ”»’è‚Ì•`‰æ2
-	if((cnow+sttp*adj-spincp<spinnow.2*75/200)&(cnow+sttp*adj-spincp>0)&(spinnow.2>0)){
-		dstat=sin(deg2rad(180*(cnow+sttp*adj-spincp)/(spinnow.2*75/200)))*sin(deg2rad(180*(cnow+sttp*adj-spincp)/(spinnow.2*75/200)))*7
+	if((cnow-spincp<spinnow.2*75/200)&(cnow-spincp>0)&(spinnow.2>0)){
+		dstat=sin(deg2rad(180*(cnow-spincp)/(spinnow.2*75/200)))*sin(deg2rad(180*(cnow-spincp)/(spinnow.2*75/200)))*7
 		mouikkai=int(dstat)*((1-spinnow0p*2)*(spinnow0p/2=0)+(1-(spinnow0p-2)*2)*(spinnow0p/2=1))
 	}else{
 		mouikkai=0
@@ -639,7 +639,7 @@
 	if(bg>=1):setang obj_bg,0.0f,0.0f,deg2rad(ror*minf(tiltrnow,14.0f)/1000/3)
 	if(bg>=2){
 		stat1=0
-		if((bgmouikkai!=0)&(cnow+sttp*adj-bgmouikkaic<bgmouikkai)):stat1=int(sin(double(cnow+sttp*adj-bgmouikkaic)/bgmouikkai*1.1)/sin(1.1)*360*bgmouikkaikaisu*bgmouikkaia)
+		if((bgmouikkai!=0)&(cnow-bgmouikkaic<bgmouikkai)):stat1=int(sin(double(cnow-bgmouikkaic)/bgmouikkai*1.1)/sin(1.1)*360*bgmouikkaikaisu*bgmouikkaia)
 		// ƒAƒjƒ[ƒVƒ‡ƒ“•`‰æ
 		if(bgspeed=0){
 			layernow=(cnow-cnowstart)/350\layermax
@@ -759,8 +759,8 @@
 	loop
 	lanesubfl=1
 	lanesubflp=lanesubfl
-	if((cnow+sttp*adj-spincp<spinnow.2*75/200)&(cnow+sttp*adj-spincp>0)&(spinnow.2>0)){
-		dstat=sin(deg2rad(180*(cnow+sttp*adj-spincp)/(spinnow.2*75/200)))*sin(deg2rad(180*(cnow+sttp*adj-spincp)/(spinnow.2*75/200)))*7
+	if((cnow-spincp<spinnow.2*75/200)&(cnow-spincp>0)&(spinnow.2>0)){
+		dstat=sin(deg2rad(180*(cnow-spincp)/(spinnow.2*75/200)))*sin(deg2rad(180*(cnow-spincp)/(spinnow.2*75/200)))*7
 		mouikkai=dstat*((1-spinnow0p*2)*(spinnow0p/2=0)+(1-(spinnow0p-2)*2)*(spinnow0p/2=1))
 	}else{
 		mouikkai=0.0f

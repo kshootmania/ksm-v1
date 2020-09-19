@@ -743,7 +743,6 @@
 	ts_bass=0
 	ddim timingdif,1
 	timingdif=-50000f
-	ddim ttp,1
 	
 	if(cmdline_from>0){
 		hgsettime max(c2t(cmdline_from)-1000,0),INT_MAX
