@@ -1,3 +1,134 @@
+#deffunc processEscKeyInput
+	stat1=getesckey()
+	isendbyesckey=((stat1=1)&(ginfo2()=0))
+	if((courseendfl=1)|(courseend=1)|((stat1=1)&(ginfo2()=0))|(((endfl=1)&(mendt=-1))|((endfl=1)&(mendt!=-1)&(d3timer()-mendat>2400+2400*((mendtype=0)&(((effratetype<=0)&(iscourse=0))|(gauge/1000>0))))))){
+		tochu_esc=isendbyesckey
+		if(((auto=1)|(adjmode=1))&(length(kmode)=3)){
+			shortmode=kmode.0
+			longmode=kmode.1
+			analogmode=kmode.2
+		}
+		alDeleteImage 53
+		alDeleteImage 54
+		tex_lane=-1
+		tex_lane_s=-1
+		tex_judgel=-1
+		tex_judgel2x=-1
+		mod_lane=-1
+		mod_lane_s=-1
+		mod_judgel=-1
+		if((stat1=1)&(ginfo2()=0)&(autodemo>=1)):autodemo=-1
+		scene=SCENE_RESULT
+		hgreset
+		foreach mid
+			BASS_StreamFree mid.cnt
+		loop
+		repeat swaudionum
+			BASS_StreamFree mid_sw.cnt
+			KSHLib_SwitchAudioFree cnt
+		loop
+		clearKeySoundLibrary
+		DestroyGameSystem game_system
+		game_system = 0
+
+		gosub *mdatafree
+		BASS_SetConfig 1,updateperiod
+		if((cmov=0)&(vmov=1)&(output=0)):mci "close v"
+		confs=""
+		repeat length(confstr)
+			if(cnt=length(confstr)-1){
+				stat1=""
+			}else{
+				stat1="\n"
+			}
+			if(StartsWith(confstr.cnt, "hispeed=")){
+				if((hsm=-1)&(hsc=-1)&(hsa=-1)&(hso=-1)){
+					confs+="hispeed=x"+hsr+stat1
+				}else:if(hsm!=-1){
+					confs+="hispeed=m"+hsm+stat1
+				}else:if(hsc!=-1){
+					confs+="hispeed=C"+hsc+stat1
+				}else:if(hsa!=-1){
+					confs+="hispeed=a"+hsa+stat1
+				}else{
+					confs+="hispeed="+hso+stat1
+				}
+			}else{
+				confs+=confstr.cnt+stat1
+			}
+		loop
+		notesel confs
+		split confs,"\n",confstr
+		chdir dir_default
+		notesave "config.ini"
+		chdir "songs"
+		gsel 0
+		if(int(sync)!=0){
+			selnow=1
+			repeat
+				gosub *getjoystat
+				redraw 0
+				color 0,0,0
+				pos 0,0
+				boxf
+				pos 90*scrsize_h/480,getsize(220)
+				color 255,255,255
+				getkey stat1,37
+				getkey stat2,key.(6+2*analogsw)
+				getkey stat3,key.(8-2*analogsw)
+				stat1=stat1|stat2|stat3|getjoykeystat(6+2*analogsw)|getjoykeystat(8-2*analogsw)
+				if((stat1=1)&(selnow=1)&(ginfo2()=0)):selnow=0
+				getkey_a stat1,39
+				getkey stat2,key.(7+2*analogsw)
+				getkey stat3,key.(9-2*analogsw)
+				stat1=stat1|stat2|stat3|getjoykeystat(7+2*analogsw)|getjoykeystat(9-2*analogsw)
+				if((stat1=1)&(selnow=0)&(ginfo2()=0)):selnow=1
+				stat3=""
+				if(sync<0):stat3="+"
+				stat1=lang.2.50/*"曲のタイミング修正を譜面ファイルに保存しますか?\n(曲のオフセットのずれ: "*/+stat3+(-int(sync))+lang.2.51/*"msec)"*/+"\n"
+				if(selnow=0){
+					stat1+=lang.2.52/*"[  はい  ]    いいえ   "*/
+				}else:stat1+=lang.2.53/*"   はい     [ いいえ ] "*/
+				gsel 0
+				pos scrsize_w/2-getsize(640)/2,scrsize_h/2-getsize(240)/2
+				color 255,255,255
+				font lang.0.1,getsize(16)
+				drawtxt stat1,getsize(640),getsize(240),getsize(16)
+				getkey stat1,13
+				stat1=stat1|getjoykeystat(11)
+				if((stat1=1)&(ginfo2()=0)){
+					break
+				}
+				redraw 1
+				await 7
+			loop
+			redraw 0
+			color 0,0,0
+			pos 0,0
+			boxf
+			if(selnow=0){
+				color 255,255,255
+				pos 190*scrsize_h/480,getsize(220)
+				mes lang.2.55/*"保存しています..."*/
+				redraw 1
+				notesel buf
+				if(iscmdline=0){
+					chdir dir_default+"\\songs\\"+csongdir
+				}
+				noteload cnotesfile,-1
+				repeat notemax
+					noteget stat1,cnt
+					if(StartsWith(stat1, "o=")):noteadd "o="+str(offset-int(sync)),cnt,1:break
+				loop
+				notesave cnotesfile
+			}
+			redraw 1
+		}
+		chdir dir_default+"\\songs"
+		return 1
+	}
+	return 0
+
 #deffunc processKeyInput
 	gosub *getjoystat
 	dim keystat,7,11
