@@ -1,0 +1,45 @@
+#deffunc processKeyInput
+	gosub *getjoystat
+	dim keystat,7,11
+	if((ginfo2()=0)&(enter_key=0)){
+		repeat 6
+			cnt2=cnt
+			repeat 11
+				stat1=0
+				if(cnt2=0):getkey stat1,key.cnt
+				if(cnt2=1):getkey stat1,key2.cnt
+				keystat.cnt2.cnt=stat1
+			loop
+			if((keystat.cnt2.10=1)|(longmode=2)){
+				keystat.6.4=1
+				keystat.6.5=1
+			}
+		loop
+		repeat 2
+			cnt2=cnt
+			repeat 11
+				if((joykey.cnt2.cnt/32<length(joystat))&(joykey.cnt2.cnt>=0)){
+					keystat.(cnt2+2).cnt=joystat.(joykey.cnt2.cnt/32).(joykey.cnt2.cnt\32)
+				}
+			loop
+			if(keystat.(cnt2+2).10=1){
+				keystat.6.4=1
+				keystat.6.5=1
+			}
+		loop
+	}
+	if(analogsw=1){
+		repeat 7
+			stat1=keystat.cnt.6
+			stat2=keystat.cnt.7
+			keystat.cnt.6=keystat.cnt.8
+			keystat.cnt.7=keystat.cnt.9
+			keystat.cnt.8=stat1
+			keystat.cnt.9=stat2
+		loop
+	}
+	dim keystator,11
+	repeat 11
+		keystator.cnt=keystat.0.cnt|keystat.1.cnt|keystat.2.cnt|keystat.3.cnt|keystat.4.cnt|keystat.5.cnt|keystat.6.cnt
+	loop
+	return

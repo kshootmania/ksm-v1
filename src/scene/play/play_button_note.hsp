@@ -1,0 +1,513 @@
+#deffunc processButtonNoteJudgment
+	dim shljudge,4
+	dim ljudge,2
+	foreach keystat
+		cntkey=cnt
+		repeat 6
+			if(((effratetype>0)|(iscourse=1))&(gauge/1000<=0)):break
+			if((keystat.cntkey.cnt=1)&(keystatp.cntkey.cnt=0)&(cnt<=3)){ // BTショートオブジェクト
+				if(arstat.cnt.2!=-1){
+					if(note.(arstat.cnt.2).2=0){
+						if((noteresult.(arstat.cnt.2)=0)&(shortmode!=mode_off)){
+							if((shortmode!=mode_auto)&(shortmode!=mode_off)){
+								dis=abs(arstat.cnt.0)
+								tar=arstat.cnt.2
+								if((dis<43)|((arstat.cnt.0>=0)&&(arstat.cnt.0<113)&&(notese.(arstat.cnt.2)!=-1))){
+									sync+=double(arstat.cnt.0)*(autosync*(adjmode=0)+adjmode)/90
+									zure+=arstat.cnt.0 : zuremax++
+									if(notese.(arstat.cnt.2)!=-1){
+										if(notesej.(notese.(arstat.cnt.2)).1=0):notesej.(notese.(arstat.cnt.2)).1=1
+									}
+									noteresult.tar=3
+									chainnow++:chainnow_song++
+									critical++
+									nscore+=2
+									if(chainnow>chainmax):chainmax=chainnow
+									if(chainnow_song>chainmax_song):chainmax_song=chainnow_song
+									if(chainnow\100=0):chainefft=t
+									chainvt=t
+									ngauge+=200*note.(arstat.cnt.2).7
+									if(ngauge>gaugemax):ngauge=gaugemax
+									addgauge 4*note.(arstat.cnt.2).7,0
+									judge.cnt.0=t-(t_tp)
+									judge.cnt.1=3
+									judgel.cnt.(judgelnext.cnt).0=t
+									judgel.cnt.(judgelnext.cnt).1=3
+									judgelnext.cnt=(judgelnext.cnt+1)\judgelmax
+								}else:if(dis<113){
+									sync+=double(arstat.cnt.0)*(autosync*(adjmode=0)+adjmode)/90
+									zure+=arstat.cnt.0 : zuremax++
+									if(notese.(arstat.cnt.2)!=-1){
+										if(notesej.(notese.(arstat.cnt.2)).1=0):notesej.(notese.(arstat.cnt.2)).1=1
+									}
+									noteresult.tar=2
+									chainnow++:chainnow_song++
+									near++
+									nscore++
+									if(arstat.cnt.0<0){
+										slow++
+									}else{
+										fast++
+									}
+									if(chainnow>chainmax):chainmax=chainnow
+									if(chainnow_song>chainmax_song):chainmax_song=chainnow_song
+									if(chainnow\100=0):chainefft=t
+									chainvt=t
+									ngauge+=50*note.(arstat.cnt.2).7
+									if(ngauge>gaugemax):ngauge=gaugemax
+									addgauge note.(arstat.cnt.2).7,1
+									judge.cnt.0=t-(t_tp)
+									judge.cnt.1=2
+									if(vtiming=1){
+										if(arstat.cnt.0<0){
+											judge.cnt.1=4
+										}else{
+											judge.cnt.1=5
+										}
+									}
+									judgel.cnt.(judgelnext.cnt).0=t
+									judgel.cnt.(judgelnext.cnt).1=2
+									if(vtiming=1){
+										if(arstat.cnt.0>0){
+											judgel.cnt.(judgelnext.cnt).1=4
+										}
+									}
+									judgelnext.cnt=(judgelnext.cnt+1)\judgelmax
+								}else:if(dis<260-100*(effratetype=-1)){
+									noteresult.tar=-1
+									judgel.cnt.(judgelnext.cnt).0=t
+									judgel.cnt.(judgelnext.cnt).1=1
+									judge.cnt.0=t-(t_tp)
+									judge.cnt.1=1
+									if(vtiming=1){
+										judge.cnt.1=6
+									}
+									judgelnext.cnt=(judgelnext.cnt+1)\judgelmax
+								}else:if((judge.cnt.1<=1)|((t-judgedelay)-de-judge.cnt.0>175)){
+									judge.cnt.0=t-(t_tp)
+									judge.cnt.1=1
+								}
+							}
+						}
+					}
+				}else:if(shortmode!=mode_off){
+					judge.cnt.0=t
+					judge.cnt.1=1
+				}
+			}
+			if((cnt<=3)&(shljudge.(min(cnt,3))=0)&(cntkey=0)){ // BTロングオブジェクト
+				cnt2=cnt
+				stat1=0
+				foreach keystat
+					stat1=stat1|(((keystatp.cnt.cnt2=0)|((keystatp.cnt.cnt2=1)&(shlstatpp.cnt2=1)))&(keystat.cnt.cnt2=1))
+				loop
+				if(arstat.cnt.2=-1):shlstat.cnt=0
+				if(((stat1=1)|(shortmode=2))&(arstat.cnt.2!=-1)){
+					dim astat,5
+					astat=note.(arstat.cnt.2).0,note.(arstat.cnt.2).1,note.(arstat.cnt.2).2,note.(arstat.cnt.2).3,note.(arstat.cnt.2).4
+					if((shlstatpp.cnt=0)|(shortmode=2)){ // 押した瞬間
+						// 今現在被っているor被る予定のSHLがあるか調べる → ①
+						if(note.(arstat.cnt.2).2>0){
+							shlstat.cnt=1
+							shljudge.cnt=1
+							shlcritical.cnt=arstat.cnt.2
+							if(shortmode=2){
+								shlstartt.cnt=astat.3
+							}else:shlstartt.cnt=max(t,astat.3)
+						}
+					}
+					// ①で該当なら現在SHLに被っているかを調べる → 判定
+					if(((shortmode=2)&(shlcritical.cnt=arstat.cnt.2)&(shlstat.cnt=1))|((shlstat.cnt=1)&(shlcritical.cnt=arstat.cnt.2)&(arstat.cnt.1=1))){
+						stat1=cnt
+						repeat shljnum-shljfcnt.stat1,shljfcnt.stat1
+							if((shlj.cnt.0=stat1)&((shlj.cnt.3=0)|(shlj.cnt.3=2))){
+								if((shlj.cnt.4<=(t-judgedelay)-de)/*&(shlj.cnt.5>(t-judgedelay)-de)*/){
+									shlj.cnt.3=1
+									//shljfcnt.(shlj.cnt.0)=cnt
+									chainnow++:chainnow_song++
+									critical++
+									nscore+=2
+									if(chainnow>chainmax):chainmax=chainnow
+									if(chainnow_song>chainmax_song):chainmax_song=chainnow_song
+									if(chainnow\100=0):chainefft=t
+									chainvt=t
+									ngauge+=50*shlj.cnt.7
+									if(ngauge>gaugemax):ngauge=gaugemax
+									addgauge shlj.cnt.7,0
+								}
+							}
+							if((shlj.cnt.4-((t-judgedelay)-de)>0)&(shlj.cnt.0=stat1)):break
+						loop
+						shljudge.cnt=1
+					}
+					shlstatpp.cnt=1
+				}else{
+					shlstatpp.cnt=0
+				}
+			}
+			if((keystat.cntkey.cnt=1)&(keystatp.cntkey.cnt=0)&(cnt>3)&(cnt<=5)){ // FXショートオブジェクト
+				if(arstat.cnt.2!=-1){
+					if(note.(arstat.cnt.2).2=0){
+						if((noteresult.(arstat.cnt.2)=0)&(longmode!=mode_off)){
+							if((longmode!=mode_auto)&(longmode!=mode_off)){
+								dis=abs(arstat.cnt.0)
+								tar=arstat.cnt.2
+								if((dis<43)|((arstat.cnt.0>=0)&&(arstat.cnt.0<113)&&(notese.(arstat.cnt.2)!=-1))){
+									sync+=double(arstat.cnt.0)*(autosync*(adjmode=0)+adjmode)/90
+									zure+=arstat.cnt.0 : zuremax++
+									if(notese.(arstat.cnt.2)!=-1){
+										if(notesej.(notese.(arstat.cnt.2)).1=0):notesej.(notese.(arstat.cnt.2)).1=1
+									}
+									noteresult.tar=3
+									chainnow++:chainnow_song++
+									critical++
+									lscore+=2
+									if(chainnow>chainmax):chainmax=chainnow
+									if(chainnow_song>chainmax_song):chainmax_song=chainnow_song
+									if(chainnow\100=0):chainefft=t
+									chainvt=t
+									ngauge+=200*note.(arstat.cnt.2).7
+									if(ngauge>gaugemax):ngauge=gaugemax
+									addgauge 4*note.(arstat.cnt.2).7,0
+									judge.cnt.0=t-(t_tp)
+									judge.cnt.1=3
+									judgel.cnt.(judgelnext.cnt).0=t
+									judgel.cnt.(judgelnext.cnt).1=3
+									judgelnext.cnt=(judgelnext.cnt+1)\judgelmax
+								}else:if(dis<113){
+									sync+=double(arstat.cnt.0)*(autosync*(adjmode=0)+adjmode)/90
+									zure+=arstat.cnt.0 : zuremax++
+									if(notese.(arstat.cnt.2)!=-1){
+										if(notesej.(notese.(arstat.cnt.2)).1=0):notesej.(notese.(arstat.cnt.2)).1=1
+									}
+									noteresult.tar=2
+									chainnow++:chainnow_song++
+									near++
+									lscore++
+									if(arstat.cnt.0<0){
+										slow++
+									}else{
+										fast++
+									}
+									if(chainnow>chainmax):chainmax=chainnow
+									if(chainnow_song>chainmax_song):chainmax_song=chainnow_song
+									if(chainnow\100=0):chainefft=t
+									chainvt=t
+									ngauge+=50*note.(arstat.cnt.2).7
+									if(ngauge>gaugemax):ngauge=gaugemax
+									addgauge note.(arstat.cnt.2).7,1
+									judge.cnt.0=t-(t_tp)
+									judge.cnt.1=2
+									if(vtiming=1){
+										if(arstat.cnt.0<0){
+											judge.cnt.1=4
+										}else{
+											judge.cnt.1=5
+										}
+									}
+									judgel.cnt.(judgelnext.cnt).0=t
+									judgel.cnt.(judgelnext.cnt).1=2
+									if(vtiming=1){
+										if(arstat.cnt.0>0){
+											judgel.cnt.(judgelnext.cnt).1=4
+										}
+									}
+									judgelnext.cnt=(judgelnext.cnt+1)\judgelmax
+								}else:if(dis<250-100*(effratetype=-1)){
+									noteresult.tar=-1
+									judgel.cnt.(judgelnext.cnt).0=t
+									judgel.cnt.(judgelnext.cnt).1=1
+									judge.cnt.0=t-(t_tp)
+									judge.cnt.1=1
+									if(vtiming=1){
+										judge.cnt.1=6
+									}
+									judgelnext.cnt=(judgelnext.cnt+1)\judgelmax
+								}else:if((judge.cnt.1<=1)|((t-judgedelay)-de-judge.cnt.0>175)){
+									judge.cnt.0=t-(t_tp)
+									judge.cnt.1=1
+								}
+							}
+						}
+					}
+				}else:if(longmode!=mode_off){
+					if(cnt>0){
+						judge.cnt.0=t
+						judge.cnt.1=1
+					}
+				}
+			}
+			if((cnt>3)&(cnt<=5)&(cntkey=0)){
+				cnt2=cnt
+				stat1=0
+				foreach keystat
+					stat1=stat1|(((keystatp.cnt.cnt2=0)|((keystatp.cnt.cnt2=1)&(longstatpp.(max(cnt2-4,0))=1)))&(keystat.cnt.cnt2=1))
+				loop
+				if(arstat.cnt.2=-1){
+					longstat.(cnt-4)=0
+					longstatpp.(cnt-4)=0
+				}else:if((stat1=1)|(longmode=2)){ // FXロングオブジェクト
+					dim astat,5
+					astat=note.(arstat.cnt.2).0,note.(arstat.cnt.2).1,note.(arstat.cnt.2).2,note.(arstat.cnt.2).3,note.(arstat.cnt.2).4
+					if((longstatpp.(cnt-4)=0)|(longmode=mode_auto)){ // 押した瞬間
+						// 今現在被っているor被る予定のLOがあるか調べる → ①
+						if(note.(arstat.cnt.2).2>0){
+							longstat.(cnt-4)=1
+							ljudge.(cnt-4)=1
+							longcritical.(cnt-4)=arstat.cnt.2
+							if(longmode=mode_auto){
+								lstartt.(cnt-4)=astat.3
+							}else:lstartt.(cnt-4)=max(t,astat.3)
+						}else{
+							longstat.(cnt-4)=0
+						}
+					}
+					// ①で該当なら現在LOに被っているかを調べる → 判定
+					if(((longmode=2)&(longcritical.(cnt-4)=arstat.cnt.2)&(longstat.(cnt-4)=1))|((longstat.(cnt-4)=1)&(longcritical.(cnt-4)=arstat.cnt.2)&(arstat.cnt.1=1))){
+						stat1=cnt-4
+						repeat longjnum-longjfcnt.stat1,longjfcnt.stat1
+							if((longj.cnt.0=stat1)&((longj.cnt.3=0)|(longj.cnt.3=2))){
+								if(longj.cnt.4<=(t-judgedelay)-de){
+									longj.cnt.3=1
+									chainnow++:chainnow_song++
+									critical++
+									lscore+=2
+									if(chainnow>chainmax):chainmax=chainnow
+									if(chainnow_song>chainmax_song):chainmax_song=chainnow_song
+									if(chainnow\100=0):chainefft=t
+									chainvt=t
+									ngauge+=50*longj.cnt.7
+									if(ngauge>gaugemax):ngauge=gaugemax
+									addgauge longj.cnt.7,0
+								}
+							}
+							if((longj.cnt.4>(t-judgedelay)-de)&(longj.cnt.0=stat1)):break
+						loop
+						ljudge.(cnt-4)=1
+					}
+					longstatpp.(cnt-4)=1
+				}else{
+					longstatpp.(cnt-4)=0
+				}
+			}
+		loop
+	loop
+	if(((effratetype<=0)&(iscourse=0))|(gauge/1000>0)){
+		// ASSIST TICKの再生
+		repeat notenum-notetickfcnt,notetickfcnt
+			if(note.cnt.3>t+t_tp+30):break
+			if(note.cnt.0<=3){
+				if((assisttick=1)&(tickcp1<note.cnt.1)&(note.cnt.3<=t+t_tp+30)&(tickp.(note.cnt.0)<cnt)){
+					stat1=BASS_SampleGetChannel(tickid,0)
+					BASS_ChannelSetAttribute stat1,2,double(mastervol)/100
+					BASS_ChannelPlay stat1
+					tickp.(note.cnt.0)=cnt
+					tickcp1=note.cnt.1
+				}
+			}
+			if((note.cnt.0>3)&(note.cnt.2=0)){
+				if((assisttick=1)&(tickcp1<note.cnt.1)&(note.cnt.3<=t+t_tp+30)&(tickp.(note.cnt.0)<cnt)){
+					stat1=BASS_SampleGetChannel(tick2id,0)
+					BASS_ChannelSetAttribute stat1,2,double(mastervol)/100
+					BASS_ChannelPlay stat1
+					tickp.(note.cnt.0)=cnt
+					tickcp2=note.cnt.1
+				}
+			}
+			if(note.cnt.3<=t+t_tp+30):notetickfcnt=cnt
+		loop
+
+		// チップノーツのオートプレイ判定・見逃し判定を処理
+		repeat notenum-notejfcnt,notejfcnt
+			if((note.cnt.0<=3)&(note.cnt.2=0)){
+				if(((t-judgedelay)-note.cnt.3>=110)&(t>=0)){
+					notejfcnt=max(cnt,notejfcnt)
+				}
+				if(shortmode=mode_auto){
+					if((note.cnt.3<=t)&(noteresult.cnt=0)&(t>=0)){
+						if(notese.cnt!=-1){
+							if(notesej.(notese.cnt).1=0):notesej.(notese.cnt).1=1
+						}
+						noteresult.cnt=3
+						chainnow++:chainnow_song++
+						critical++
+						nscore+=2
+						if(chainnow>chainmax):chainmax=chainnow
+						if(chainnow_song>chainmax_song):chainmax_song=chainnow_song
+						if(chainnow\100=0):chainefft=t
+						chainvt=t
+						ngauge+=200*note.cnt.7
+						if(ngauge>gaugemax):ngauge=gaugemax
+						addgauge 4*note.cnt.7,0
+						judge.(note.cnt.0).0=t-(t_tp)
+						judge.(note.cnt.0).1=3
+						judgel.(note.cnt.0).(judgelnext.(note.cnt.0)).0=t
+						judgel.(note.cnt.0).(judgelnext.(note.cnt.0)).1=3
+						judgelnext.(note.cnt.0)=(judgelnext.(note.cnt.0)+1)\judgelmax
+					}
+				}else:if(shortmode!=mode_off){
+					if(((t-judgedelay)-note.cnt.3>=110)&(noteresult.cnt<=0)&(t>=0)){
+						noteresult.cnt=1
+						judgel.(note.cnt.0).(judgelnext.(note.cnt.0)).0=t
+						judgel.(note.cnt.0).(judgelnext.(note.cnt.0)).1=1
+						judgelnext.(note.cnt.0)=(judgelnext.(note.cnt.0)+1)\judgelmax
+						chainnow=0:chainnow_song=0
+						errorn++
+						ngauge-=gaugemax*2/100*(10+(note.cnt.7-1)*5)/10
+						if(ngauge<0):ngauge=0
+						subgauge 4.0f*(1.0f+double(note.cnt.7-1)/2)
+						noerror=0
+						noerror_song=0
+					}
+				}
+			}
+			if((note.cnt.0>3)&(note.cnt.2=0)){
+				if(((t-judgedelay)-note.cnt.3>=110)&(t>=0)){
+					notejfcnt=max(cnt,notejfcnt)
+				}
+				if(longmode=mode_auto){
+					if((note.cnt.3<=t+(t_tp))&(noteresult.cnt=0)&(t>=0)){
+						if(notese.cnt!=-1){
+							if(notesej.(notese.cnt).1=0):notesej.(notese.cnt).1=1
+						}
+						noteresult.cnt=3
+						chainnow++:chainnow_song++
+						critical++
+						lscore+=2
+						if(chainnow>chainmax):chainmax=chainnow
+						if(chainnow_song>chainmax_song):chainmax_song=chainnow_song
+						if(chainnow\100=0):chainefft=t
+						chainvt=t
+						ngauge+=200*note.cnt.7
+						if(ngauge>gaugemax):ngauge=gaugemax
+						addgauge 4*note.cnt.7,0
+						judge.(note.cnt.0).0=t-(t_tp)
+						judge.(note.cnt.0).1=3
+						judgel.(note.cnt.0).(judgelnext.(note.cnt.0)).0=note.cnt.3-80
+						judgel.(note.cnt.0).(judgelnext.(note.cnt.0)).1=3
+						judgelnext.(note.cnt.0)=(judgelnext.(note.cnt.0)+1)\judgelmax
+					}
+				}else:if(longmode!=mode_off){
+					if(((t-judgedelay)-note.cnt.3>=110)&(noteresult.cnt<=0)&(t>=0)){
+						noteresult.cnt=1
+						judgel.(note.cnt.0).(judgelnext.(note.cnt.0)).0=t
+						judgel.(note.cnt.0).(judgelnext.(note.cnt.0)).1=1
+						judgelnext.(note.cnt.0)=(judgelnext.(note.cnt.0)+1)\judgelmax
+						chainnow=0:chainnow_song=0
+						errorn++
+						ngauge-=gaugemax*2/100*(10+(note.cnt.7-1)*5)/10
+						if(ngauge<0):ngauge=0
+						subgauge 4.0f*(1.0f+double(note.cnt.7-1)/2)
+						noerror=0
+						noerror_song=0
+					}
+				}
+			}
+			if(note.cnt.1-cnow>UNIT_MEASURE_2):break
+		loop
+
+		// ロングFXノーツのオートプレイ判定・継続判定を処理
+		repeat 2
+			cnt0=cnt
+			colfl=0
+			repeat longjnum-longjfcnt.cnt0,longjfcnt.cnt0
+				if(longj.cnt.0!=cnt0):continue
+				if(colfl=0):longjfcnt.cnt0=max(longjfcnt.cnt0,cnt):colfl=1
+				if((longj.cnt.4<(t-judgedelay)-de)&(longj.cnt.3=2)){
+					longj.cnt.3=1
+					chainnow++:chainnow_song++
+					critical++
+					lscore+=2
+					if(chainnow>chainmax):chainmax=chainnow
+					if(chainnow_song>chainmax_song):chainmax_song=chainnow_song
+					if(chainnow\100=0):chainefft=t
+					chainvt=t
+					ngauge+=50*longj.cnt.7
+					if(ngauge>gaugemax):ngauge=gaugemax
+					addgauge longj.cnt.7,0
+					longjfcnt.cnt0=max(longjfcnt.cnt0,cnt+1)
+				}
+				if((longj.cnt.4<(t-judgedelay)-de)&(longj.cnt.3=0)){
+					if((((ljudge.cnt0=1)|(0&(arstatp.(4+longj.cnt.0).2=longj.cnt.6)&(arstat.(4+longj.cnt.0).2!=longj.cnt.6)&(ljudgep.(longj.cnt.0)=1)&(keystator.(4+longj.cnt.0)=1)))&(longcritical.cnt0=longj.cnt.6))|(longmode=mode_auto)){
+						longj.cnt.3=1
+						chainnow++:chainnow_song++
+						critical++
+						lscore+=2
+						if(chainnow>chainmax):chainmax=chainnow
+						if(chainnow_song>chainmax_song):chainmax_song=chainnow_song
+						if(chainnow\100=0):chainefft=t
+						chainvt=t
+						ngauge+=50*longj.cnt.7
+						if(ngauge>gaugemax):ngauge=gaugemax
+						addgauge longj.cnt.7,0
+						longjfcnt.cnt0=max(longjfcnt.cnt0,cnt+1)
+					}else:if(longj.cnt.5<(t-judgedelay)-de){
+						longj.cnt.3=-1
+						chainnow=0:chainnow_song=0
+						errorn++
+						ngauge-=gaugemax/200*(10+(longj.cnt.7-1)*5)/10
+						if(ngauge<0):ngauge=0
+						subgauge 1.0f+double(longj.cnt.7-1)/2
+						noerror=0
+						noerror_song=0
+						longjfcnt.cnt0=max(longjfcnt.cnt0,cnt+1)
+					}
+				}
+				if(longj.cnt.5<(t-judgedelay)-de):longjfcnt.cnt0=max(longjfcnt.cnt0,cnt+1)
+				if(longj.cnt.4>=(t-judgedelay)-de):break
+			loop
+		loop
+
+		// ロングBTノーツのオートプレイ判定・継続判定を処理
+		repeat 4
+			cnt0=cnt
+			colfl=0
+			repeat shljnum-shljfcnt.cnt0,shljfcnt.cnt0
+				if(shlj.cnt.0!=cnt0):continue
+				if(colfl=0):shljfcnt.cnt0=max(shljfcnt.cnt0,cnt):colfl=1
+				if((shlj.cnt.4<(t-judgedelay)-de)&(shlj.cnt.3=2)){
+					shlj.cnt.3=1
+					chainnow++:chainnow_song++
+					critical++
+					nscore+=2
+					if(chainnow>chainmax):chainmax=chainnow
+					if(chainnow_song>chainmax_song):chainmax_song=chainnow_song
+					if(chainnow\100=0):chainefft=t
+					chainvt=t
+					ngauge+=50*shlj.cnt.7
+					if(ngauge>gaugemax):ngauge=gaugemax
+					addgauge shlj.cnt.7,0
+					shljfcnt.(shlj.cnt.0)=cnt+1
+				}
+				if((shlj.cnt.4<(t-judgedelay)-de)&(shlj.cnt.3=0)){
+					if(((shljudge.(shlj.cnt.0)=1)&(shlcritical.(shlj.cnt.0)=shlj.cnt.6))|(shortmode=mode_auto)){
+						shlj.cnt.3=1
+						chainnow++:chainnow_song++
+						critical++
+						nscore+=2
+						if(chainnow>chainmax):chainmax=chainnow
+						if(chainnow_song>chainmax_song):chainmax_song=chainnow_song
+						if(chainnow\100=0):chainefft=t
+						chainvt=t
+						ngauge+=50*shlj.cnt.7
+						if(ngauge>gaugemax):ngauge=gaugemax
+						addgauge shlj.cnt.7,0
+						shljfcnt.(shlj.cnt.0)=cnt+1 
+					}else:if(shlj.cnt.5<(t-judgedelay)-de){
+						shlj.cnt.3=-1
+						chainnow=0:chainnow_song=0
+						errorn++
+						ngauge-=gaugemax/200*(10+(shlj.cnt.7-1)*5)/10
+						if(ngauge<0):ngauge=0
+						subgauge 1.0f+double(shlj.cnt.7-1)/2
+						noerror=0
+						noerror_song=0
+						shljfcnt.(shlj.cnt.0)=cnt+1
+					}
+				}
+				if(shlj.cnt.5<(t-judgedelay)-de):shljfcnt.(shlj.cnt.0)=cnt+1 
+				if(shlj.cnt.4>=(t-judgedelay)-de):break
+			loop
+		loop
+	}
+	return
