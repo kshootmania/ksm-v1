@@ -7,8 +7,12 @@
 
 	// 現在のカウント値(cnow)を計算
 	calculateCurrentTick
+	if(cnt=0):cnowstart=cnow
 
+	// 音声エフェクトのずれ時間(ms)
 	laserdelay0=laserdelay0_orig
+
+	// 定期的に初期化される各種タイマー
 	if(ts>120):ts=0
 	if(ts2>60):ts2=0
 	if(ts3>30):ts3=0
@@ -19,84 +23,19 @@
 	ts3+=max(ts_timer-ts_timerp,1)
 	ts_bass+=max(ts_timer-ts_timerp,1)
 	ts_timerp=ts_timer
+
+	// 譜面停止によるずらし幅計算
 	cstp=0
 	if(hsc=-1){
 		cnowstpsh=getstpsh(cnow)
 	}
-	if(ginfo2()=0){
-		getkey shift_key,16
-		getkey ctrl_key,17
-		getkey alt_key,18
-		getkey_a stat2,39
-		if((ctrl_key+stat2+alt_key+shift_key=4)&(ts>120)&(ginfo2()=0)){
-			sync+=1.0
-		}else:if((ctrl_key+stat2+alt_key=3)&(ts>120)&(ginfo2()=0)){
-			sync+=5.0
-		}
-		getkey stat2,37
-		if((ctrl_key+stat2+alt_key+shift_key=4)&(ts>120)&(ginfo2()=0)){
-			sync-=1.0
-		}else:if((ctrl_key+stat2+alt_key=3)&(ts>120)&(ginfo2()=0)){
-			sync-=5.0
-		}
-	}
-	if((t_moex<=rt)&(mfl=0)&(output=0)&(mendt=-1)&(mplayfl=1)){
-		if((csongfile_empty=0)&(csongfile_exist=1)){
-			if(rt>t_moex){
-				foreach mid
-					BASS_ChannelSetPosition_ms mid.cnt,rt-t_moex
-				loop
-				repeat swaudionum
-					BASS_ChannelSetPosition_ms mid_sw.cnt,rt-t_moex
-				loop
-			}else{
-				foreach mid
-					BASS_ChannelSetPosition_ms mid.cnt,0
-				loop
-				repeat swaudionum
-					BASS_ChannelSetPosition_ms mid_sw.cnt,0
-				loop
-			}
-			foreach mid
-				BASS_ChannelSetAttribute mid.cnt,2,0.0
-			loop
-			repeat swaudionum
-				BASS_ChannelSetAttribute mid_sw.cnt,2,0.0
-			loop
-			foreach mid
-				BASS_ChannelPlay mid.cnt
-				if(mlinkfailed=0):break
-			loop
-			if(mlinkfailed!=0){
-				repeat swaudionum
-					BASS_ChannelPlay mid_sw.cnt
-				loop
-			}
-			if(length(mid)=2){
-				foreach mid
-					BASS_ChannelUpdate mid.cnt
-				loop
-			}
-			t_mo=t_moex
-			mfl=1
-		}
-	}
-	if(cnt=0):cnowstart=cnow
-	if((-voffset-T_MOEX_DELAY-globaloffset<=t)&(vfl=0)&(vmov>=1)){
-		if((cmovfile!="")&(output=0)){
-			stat1=-voffset-T_MOEX_DELAY-globaloffset
-			if(vmov=1){
-				if(t>stat1):mci "seek v to "+(t-stat1)
-				mci "play v"
-			}
-			if(t<=stat1){
-				t_vo=t
-			}else:t_vo=stat1
-			vfl=1
-		}
-	}
-	vflp=vfl
-	mflp=mfl
+
+	// Ctrl+Alt+矢印キーでのタイミング変更のキー入力を処理
+	processSyncValueManualChangeInput
+
+	// オフセットに達したら曲/動画を再生開始
+	playSongIfTimeReachesOffset
+	playVideoIfTimeReachesOffset
 
 	// GameSystemを更新
 	UpdateGameSystem game_system, double(t)
@@ -251,10 +190,13 @@
 		keystatorp.cnt=keystator.cnt
 	loop
 
+	// パフォーマンス計測用カウンタ(不使用)
 	c2tcnt=0
 	hsrccnt=0
 	notecnt=0
 	analogcnt=0
+
+	// 次フレーム用に各種値を保管
 	rop=ro.0,ro.1
 	rorp=ror
 	tiltrnowp=tiltrnow

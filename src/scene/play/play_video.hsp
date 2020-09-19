@@ -1,0 +1,29 @@
+#deffunc loadChartVideo
+	if((cmovfile!="")&(output=0)){
+		if(vmov=1){
+			mci "open \""+cmovfile+"\" type MPEGVideo alias v"
+			mci "set v audio all off"
+			mci "set v time format ms"
+			gsel 0
+			mci "window v handle "+hwnd
+			mci "put v destination at "+(scrsize_w/2-getsize(302))+" "+getsize(140)+" "+getsize(160)+" "+getsize(120)
+		}
+    }
+    return
+
+#deffunc playVideoIfTimeReachesOffset
+	if((-voffset-T_MOEX_DELAY-globaloffset<=t)&(vfl=0)&(vmov>=1)){
+		if((cmovfile!="")&(output=0)){
+			stat1=-voffset-T_MOEX_DELAY-globaloffset
+			if(vmov=1){
+				if(t>stat1):mci "seek v to "+(t-stat1)
+				mci "play v"
+			}
+			if(t<=stat1){
+				t_vo=t
+			}else:t_vo=stat1
+			vfl=1
+		}
+	}
+    vflp=vfl
+    return

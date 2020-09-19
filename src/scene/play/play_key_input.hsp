@@ -88,6 +88,26 @@
 	}
 	return
 
+#deffunc processSyncValueManualChangeInput
+	if(ginfo2()=0){
+		getkey shift_key,16
+		getkey ctrl_key,17
+		getkey alt_key,18
+		getkey_a stat2,39
+		if((ctrl_key+stat2+alt_key+shift_key=4)&(ts>120)&(ginfo2()=0)){
+			sync+=1.0
+		}else:if((ctrl_key+stat2+alt_key=3)&(ts>120)&(ginfo2()=0)){
+			sync+=5.0
+		}
+		getkey stat2,37
+		if((ctrl_key+stat2+alt_key+shift_key=4)&(ts>120)&(ginfo2()=0)){
+			sync-=1.0
+		}else:if((ctrl_key+stat2+alt_key=3)&(ts>120)&(ginfo2()=0)){
+			sync-=5.0
+		}
+	}
+	return
+
 #deffunc processEscKeyInput
 	stat1=getesckey()
 	isendbyesckey=((stat1=1)&(ginfo2()=0))

@@ -144,16 +144,7 @@
 	}
 
 	// 譜面に指定された動画ファイルの読み込み(MCI)
-	if((cmovfile!="")&(output=0)){
-		if(vmov=1){
-			mci "open \""+cmovfile+"\" type MPEGVideo alias v"
-			mci "set v audio all off"
-			mci "set v time format ms"
-			gsel 0
-			mci "window v handle "+hwnd
-			mci "put v destination at "+(scrsize_w/2-getsize(302))+" "+getsize(140)+" "+getsize(160)+" "+getsize(120)
-		}
-	}
+	loadChartVideo
 
 	// ユーザー定義エフェクトの初期化
 	initCustomAudioEffects

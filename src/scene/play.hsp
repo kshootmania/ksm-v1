@@ -9,5 +9,6 @@
 #include "src/scene/play/play_graphics.hsp"
 #include "src/scene/play/play_audio.hsp"
 #include "src/scene/play/play_audio_effects.hsp"
+#include "src/scene/play/play_video.hsp"
 #include "src/scene/play/play_utils.hsp"
 #include "src/scene/play/play_splash_screen.hsp"

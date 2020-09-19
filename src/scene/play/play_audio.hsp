@@ -95,6 +95,51 @@
 
 	return
 
+#deffunc playSongIfTimeReachesOffset
+	if((t_moex<=rt)&(mfl=0)&(output=0)&(mendt=-1)&(mplayfl=1)){
+		if((csongfile_empty=0)&(csongfile_exist=1)){
+			if(rt>t_moex){
+				foreach mid
+					BASS_ChannelSetPosition_ms mid.cnt,rt-t_moex
+				loop
+				repeat swaudionum
+					BASS_ChannelSetPosition_ms mid_sw.cnt,rt-t_moex
+				loop
+			}else{
+				foreach mid
+					BASS_ChannelSetPosition_ms mid.cnt,0
+				loop
+				repeat swaudionum
+					BASS_ChannelSetPosition_ms mid_sw.cnt,0
+				loop
+			}
+			foreach mid
+				BASS_ChannelSetAttribute mid.cnt,2,0.0
+			loop
+			repeat swaudionum
+				BASS_ChannelSetAttribute mid_sw.cnt,2,0.0
+			loop
+			foreach mid
+				BASS_ChannelPlay mid.cnt
+				if(mlinkfailed=0):break
+			loop
+			if(mlinkfailed!=0){
+				repeat swaudionum
+					BASS_ChannelPlay mid_sw.cnt
+				loop
+			}
+			if(length(mid)=2){
+				foreach mid
+					BASS_ChannelUpdate mid.cnt
+				loop
+			}
+			t_mo=t_moex
+			mfl=1
+		}
+	}
+	mflp=mfl
+	return
+
 #deffunc fixPlaybackDelay
 	stat1=BASS_ChannelGetPosition_ms(mid.0)
 	repeat max(length(mid)-1,0),1
