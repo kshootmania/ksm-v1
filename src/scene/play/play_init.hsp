@@ -690,23 +690,13 @@
 	loadLaneGraphics
 	loadJudgmentLineGraphics
 	loadJudgmentAnimGraphics
-	//loadLaserCursorGraphics
+	loadLaserCursorGraphics
 
 	// 各種オブジェクトの生成
 	initLaneObject
 	initJudgmentLineObject
 	initJudgmentAnimObject
-	//initLaserCursorObjects
-
-	dim mod_analogcur,2
-	dim obj_analogcur,2
-	repeat 2
-		addplate mod_analogcur.cnt,1,4.5f,4.5f,0,64*cnt,63,64*cnt+63
-		texload2 dir_default+"\\imgs\\laser_cur.png",64,64*2
-		regobj obj_analogcur.cnt,mod_analogcur.cnt,OBJ_XFRONT
-		setpos obj_analogcur.cnt,0.0f,-2.8f,double(vh2)*13/20/2+1.0f
-		setang obj_analogcur.cnt,-M_PI/3,0.0f,0.0f
-	loop
+	initLaserCursorObjects
 
 	// カメラの生成
 	initCamera
