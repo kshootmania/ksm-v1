@@ -1,3 +1,93 @@
+#deffunc processPlaybackControlInput
+	if(ginfo2()=0){
+		getkey enter_key,13
+		enter_key=enter_key|getjoykeystat(11)
+		getkey ctrl_key,17
+		getkey alt_key,18
+		getkey stat1,179
+		if(((stat1=1)|(ctrl_key+enter_key=2))&(t>1500)&(stat179p=0)&(ginfo2()=0)){
+			if(mstop=0){
+				stoppos=BASS_ChannelGetPosition_ms(mid.0)
+				foreach mid
+					BASS_ChannelStop mid.cnt
+					if(mlinkfailed=0):break
+				loop
+				if(mlinkfailed!=0){
+					repeat swaudionum
+						BASS_ChannelStop mid_sw.cnt
+					loop
+				}
+				mstop=1
+			}else{
+				foreach mid
+					BASS_ChannelSetAttribute mid.cnt,2,0.0
+				loop
+				repeat swaudionum
+					BASS_ChannelSetAttribute mid_sw.cnt,2,0.0
+				loop
+				foreach mid
+					BASS_ChannelPlay mid.cnt
+					if(mlinkfailed=0):break
+				loop
+				if(mlinkfailed!=0){
+					repeat swaudionum
+						BASS_ChannelPlay mid_sw.cnt
+					loop
+				}
+				if(length(mid)=2){
+					foreach mid
+						BASS_ChannelUpdate mid.cnt
+					loop
+					repeat swaudionum
+						BASS_ChannelUpdate mid_sw.cnt
+					loop
+					//BASS_Update
+				}
+				stat0=0
+				repeat 10
+					foreach mid
+						BASS_ChannelSetPosition_ms mid.cnt,stoppos-stat0*cnt/max(length(mid)-1,1)
+					loop
+					repeat swaudionum
+						BASS_ChannelSetPosition_ms mid_sw.cnt,stoppos-stat0
+					loop
+					stat0+=BASS_ChannelGetPosition_ms(mid.(max(length(mid)-1,0)))-BASS_ChannelGetPosition_ms(mid.0)
+					stat1=BASS_ChannelGetPosition_ms(mid.(max(length(mid)-1,0)))-BASS_ChannelGetPosition_ms(mid.0)
+					if(abs(stat1)<3+cnt/2):break
+				loop
+				hgsettime t_mo+stoppos,INT_MAX
+				mstop=0
+			}
+		}
+		if((stat1=1)|(ctrl_key+enter_key=2)){
+			stat179p=1
+		}else{
+			stat179p=0
+		}
+		getkey stat1,176
+		getkey_a stat2,39
+		if((mstop=0)&((stat1=1)|((ctrl_key+stat2=2)&(alt_key=0)))&(t>1500)&(ginfo2()=0)){
+			if(ts2>60):mshift+=1000
+		}else:if((tadj=1)|(tadj=2)){
+			stat0=stat0tp
+			stat2=t
+			repeat 2+8*(tadj=1)
+				foreach mid
+					BASS_ChannelSetPosition_ms mid.cnt,stat2-stat0*cnt/max(length(mid)-1,1)+offset
+				loop
+				repeat swaudionum
+					BASS_ChannelSetPosition_ms mid_sw.cnt,stat2-stat0+offset
+				loop
+				stat0+=BASS_ChannelGetPosition_ms(mid.(max(length(mid)-1,0)))-BASS_ChannelGetPosition_ms(mid.0)
+				stat1=BASS_ChannelGetPosition_ms(mid.(max(length(mid)-1,0)))-BASS_ChannelGetPosition_ms(mid.0)
+				if(abs(stat1)<3+cnt/2):break
+			loop
+			stat0tp=stat0
+			tadj=0
+		}
+	}
+	return
+
 #deffunc processEscKeyInput
 	stat1=getesckey()
 	isendbyesckey=((stat1=1)&(ginfo2()=0))
@@ -173,4 +263,160 @@
 	repeat 11
 		keystator.cnt=keystat.0.cnt|keystat.1.cnt|keystat.2.cnt|keystat.3.cnt|keystat.4.cnt|keystat.5.cnt|keystat.6.cnt
 	loop
+	return
+
+#deffunc processHiSpeedChangeInput
+	if((ginfo2()=0)&(((effratetype<=0)&(iscourse=0))|(gauge/1000>0))){
+		gosub *refreshhs
+		if(hstypenow=0){
+			stat2=bpm*hsr/10
+		}else:if(hstypenow=1){
+			stat2=hso*bpm/oftbpm
+		}else:if(hstypenow=2){
+			stat2=hsc
+		}else:if(hstypenow=3){
+			stat2=hsm*bpm/maxbpm
+		}else:if(hstypenow=4){
+			stat2=hsa*bpm/avebpm
+		}
+		getkey ctrl_key,17
+		getkey_a stat1,38
+		getkey stat2,key.(7+2*analogsw)
+		getkey stat3,key.(9-2*analogsw)
+		stat1=stat1|((stat2|stat3)&(enter_key=1))
+		getkey stat2,key2.(7+2*analogsw)
+		getkey stat3,key2.(9-2*analogsw)
+		stat1=stat1|((stat2|stat3|getjoykeystat(7+2*analogsw)|getjoykeystat(9-2*analogsw)|(stickstat.0>0)|(stickstat.1>0))&(enter_key=1))
+		if((stat1=1)&(ts2>60)&(ctrl_key=0)){
+			if((hstypenow=0)&(hsr<99)){
+				hsr++
+			}else:if((hstypenow=1)&(hso<2000)){
+				hso+=25
+			}else:if((hstypenow=2)&(hsc<2000)){
+				hsc+=25
+			}else:if((hstypenow=3)&(hsm<2000)){
+				hsm+=25
+			}else:if((hstypenow=4)&(hsa<2000)){
+				hsa+=25
+			}
+			minforefresh=1
+		}
+		getkey_a stat1,40
+		getkey stat2,key.(6+2*analogsw)
+		getkey stat3,key.(8-2*analogsw)
+		stat1=stat1|((stat2|stat3)&(enter_key=1))
+		getkey stat2,key2.(6+2*analogsw)
+		getkey stat3,key2.(8-2*analogsw)
+		stat1=stat1|((stat2|stat3|getjoykeystat(6+2*analogsw)|getjoykeystat(8-2*analogsw)|(stickstat.0<0)|(stickstat.1<0))&(enter_key=1))
+		if((stat1=1)&(ts2>60)&(ctrl_key=0)){
+			if((hstypenow=0)&(hsr>5)){
+				hsr--
+			}else:if((hstypenow=1)&(hso>25)){
+				hso-=25
+			}else:if((hstypenow=2)&(hsc>25)){
+				hsc-=25
+			}else:if((hstypenow=3)&(hsm>25)){
+				hsm-=25
+			}else:if((hstypenow=4)&(hsa>25)){
+				hsa-=25
+			}
+			minforefresh=1
+		}
+		getkey stat1,37
+		getkey stat2,key.4
+		stat1=stat1|(stat2&(enter_key=1))
+		getkey stat2,key2.4
+		stat1=stat1|((stat2|getjoykeystat(4))&(enter_key=1))
+		if((stat1=1)&(ts>120)&(ctrl_key=0)){
+			gosub *refreshhs
+			if(hstypenow=0){
+				stat2=bpm*hsr/10
+			}else:if(hstypenow=1){
+				stat2=int(double(hso)*bpm/oftbpm*1000)
+			}else:if(hstypenow=2){
+				stat2=hsc*1000
+			}else:if(hstypenow=3){
+				stat2=int(double(hsm)*bpm/maxbpm*1000)
+			}else:if(hstypenow=4){
+				stat2=int(double(hsa)*bpm/avebpm*1000)
+			}
+			hsr=10
+			hsc=-1
+			hsm=-1
+			hsa=-1
+			hso=-1
+			repeat 5
+				hstypenow--
+				if(hstypenow<0):hstypenow=4
+				if(vhstype.hstypenow=1):break
+			loop
+			if(hstypenow=0){
+				hsr=max(min(int(round(double(stat2)/bpm*10)),99),5)
+			}else:if(hstypenow=1){
+				hso=ran(int(round(double(stat2)*oftbpm/bpm/25/1000))*25,25,2000)
+			}else:if(hstypenow=2){
+				hsc=ran(int(round(double(stat2)/25/1000))*25,25,2000)
+			}else:if(hstypenow=3){
+				hsm=ran(int(round(double(stat2)*maxbpm/bpm/25/1000))*25,25,2000)
+			}else:if(hstypenow=4){
+				hsa=ran(int(round(double(stat2)*avebpm/bpm/25/1000))*25,25,2000)
+			}
+			minforefresh=1
+		}
+		getkey_a stat1,39
+		getkey stat2,key.5
+		stat1=stat1|(stat2&(enter_key=1))
+		getkey stat2,key2.5
+		stat1=stat1|((stat2|getjoykeystat(5))&(enter_key=1))
+		if((stat1=1)&(ts>120)&(ctrl_key=0)){
+			gosub *refreshhs
+			if(hstypenow=0){
+				stat2=bpm*hsr/10
+			}else:if(hstypenow=1){
+				stat2=int(double(hso)*bpm/oftbpm*1000)
+			}else:if(hstypenow=2){
+				stat2=hsc*1000
+			}else:if(hstypenow=3){
+				stat2=int(double(hsm)*bpm/maxbpm*1000)
+			}else:if(hstypenow=4){
+				stat2=int(double(hsa)*bpm/avebpm*1000)
+			}
+			hsr=10
+			hsc=-1
+			hsm=-1
+			hsa=-1
+			hso=-1
+			repeat 5
+				hstypenow++
+				if(hstypenow>4):hstypenow=0
+				if(vhstype.hstypenow=1):break
+			loop
+			if(hstypenow=0){
+				hsr=max(min(int(round(double(stat2)/bpm*10)),99),5)
+			}else:if(hstypenow=1){
+				hso=ran(int(round(double(stat2)*oftbpm/bpm/25/1000))*25,25,2000)
+			}else:if(hstypenow=2){
+				hsc=ran(int(round(double(stat2)/25/1000))*25,25,2000)
+			}else:if(hstypenow=3){
+				hsm=ran(int(round(double(stat2)*maxbpm/bpm/25/1000))*25,25,2000)
+			}else:if(hstypenow=4){
+				hsa=ran(int(round(double(stat2)*avebpm/bpm/25/1000))*25,25,2000)
+			}
+			minforefresh=1
+		}
+	}
+	gosub *refreshhs
+	if(hstypenow=0){
+		hs=108*hsr/10/2
+	}else:if(hstypenow=1){
+		hs=108*hso*1000/oftbpm/2
+	}else:if(hstypenow=2){
+		no_hstype_c=0
+		hs=108/2
+	}else:if(hstypenow=3){
+		hs=108*hsm*1000/maxbpm/2
+	}else{
+		hs=108*hsa*1000/avebpm/2
+	}
+	if(hs<1):hs=1
 	return

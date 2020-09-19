@@ -1,0 +1,174 @@
+#deffunc processPlayTiming
+	nowsttp=-1
+	stat1=BASS_ChannelGetPosition_ms(mid.0)
+	if((stat1<mtp-500)&(mstop=0)&(stat179p=0)){
+		mrepeat=1
+		foreach mid
+			BASS_ChannelSlideAttribute mid.cnt,2,0.0,0
+		loop
+		repeat swaudionum
+			BASS_ChannelSlideAttribute mid_sw.cnt,2,0.0,0
+		loop
+	}
+	mtp=stat1
+	if(mshift!=0){
+		// 早送りの実行
+		stat1+=mshift
+		hgsettime t_mo+stat1,INT_MAX
+		at=t_mo+stat1
+		timingdif=0.0f
+		mtotalshift-=mshift
+		tadj=1
+		foreach mid
+			BASS_ChannelSetPosition_ms mid.cnt,stat1
+		loop
+		repeat swaudionum
+			BASS_ChannelSetPosition_ms mid_sw.cnt,stat1
+		loop
+		mshift=0
+	}
+	t=t_mo+stat1
+	t2=t
+	if(cnt=0):time_scene_start=d3timer()
+	if(output=0){
+		hggettime at,0
+		if(mfl=0){
+			if((disableadjtimer=1)&((t>at)|(abs(at-t)>50))&(mendt=-1)&(t_mo!=-50000)){
+				hgsettime t,INT_MAX
+				at=t
+			}
+		}
+	}else{
+		at=100*cnt/3-3400-1000*(cmovfile!="")
+	}
+	if((output=1)|(mfl=0)|(csongfile_empty)|(csongfile_exist=0)|(at>=mlength-1)){
+		t=at
+	}else:if((disableadjtimer=0)&(mstop=0)){
+		if(timingdif<-40000):timingdif=double(t-at)
+		timingdif=(timingdif*7+double(t-at))/8f
+		t=at+int(round(timingdif))
+	}
+	if(mstop=1):t=t_mo+stoppos:at=t
+	if((endtype=0)&(adjmode=0)){
+		if((tochu=0)&(mendt=-1)){
+			endfl=1
+			mendt=tp
+			mendc=cnowp
+			mendat=d3timerp
+		}
+	}else{
+		if(mendt!=-1){
+			endfl=1
+		}
+		if((mlength<=stat1)&(mendt=-1)){
+			mendt=tp
+			mendc=cnowp
+			mendat=d3timerp
+		}
+	}
+	d3timerp=d3timer()
+	if(mlength=0):mlength=1
+
+	// 再生カーソルの位置
+	cpos=200*t/mlength
+	if(mendt!=-1):cpos=200
+
+	// 音声エフェクトの1フレームの処理時間によるずれを
+	// 補正するためのタイマー
+	tfx_diff=d3timer()
+
+	// 判定に使用する再生時間tを計算
+	if(cnt!=0){
+		t+=sync
+		rt=t
+	}else{
+		rt=t
+		tp2=t-16
+	}
+	if((mendt!=-1)&(output=0)){
+		t=d3timer()-mendat+mendt
+	}
+	tstat=t
+	if(cnt=0):tp=t-16
+	if(output=1):t=at
+	t_tp=t-tp
+
+	return
+
+#deffunc fixPlaybackDelay
+	stat1=BASS_ChannelGetPosition_ms(mid.0)
+	repeat max(length(mid)-1,0),1
+		stat2=BASS_ChannelGetPosition_ms(mid.cnt)
+		if(abs(stat1-stat2)>100){
+			tadj=2
+		}
+	loop
+	return
+
+#deffunc processLaserSlamSound
+	analoganflag=0
+	canvol=0
+	if(anvolnum>0){
+		repeat anvolnum-anvolfcnt,anvolfcnt
+			if(anvol.cnt.2<=t+30){
+				canvol=anvol.cnt.1
+				anvolfcnt=cnt
+			}else:break
+		loop
+	}
+	repeat analoganjnum-max(min(chokkakup.0,chokkakup.1),0),max(min(chokkakup.0,chokkakup.1),0)
+		if((analog.(analoganj.cnt.1).2<=UNIT_MEASURE_32)&(((auto_chokkaku_se=0)&&(analoganj.cnt.2=1))|(analogmode=mode_auto)|(auto_chokkaku_se!=0))){
+			if((analog.(analoganj.cnt.1).6>=t-500)&(chokkakup.(analoganj.cnt.0)<cnt)){
+				if(analog.(analoganj.cnt.1).6<=t+30){
+					stat1=min(abs(analog.(analoganj.cnt.1).3-analog.(analoganj.cnt.1).4)*(1+(anagrran.(analog.(analoganj.cnt.1).0).(analoggr.(analoganj.cnt.1))=2)),25)
+					if(disableautoanvol=1):stat1=25
+					if(cnt+1<analoganjnum){
+						if((chokkakup.(1-analoganj.cnt.0)<cnt+1)&(analog.(analoganj.cnt.1).1=analog.(analoganj.(cnt+1).1).1)&(analog.(analoganj.cnt.1).0!=analog.(analoganj.(cnt+1).1).0)){
+							chokkakup.(1-analoganj.cnt.0)=cnt+1
+							if(abs(analog.(analoganj.(cnt+1).1).3-analog.(analoganj.(cnt+1).1).4)>stat1):stat1=min(abs(analog.(analoganj.(cnt+1).1).3-analog.(analoganj.(cnt+1).1).4),25)
+						}
+					}
+					if(cnt-1>=0){
+						if((chokkakup.(1-analoganj.cnt.0)<cnt-1)&(analog.(analoganj.cnt.1).1=analog.(analoganj.(cnt-1).1).1)&(analog.(analoganj.cnt.1).0!=analog.(analoganj.(cnt-1).1).0)){
+							chokkakup.(1-analoganj.cnt.0)=cnt-1
+							if(abs(analog.(analoganj.(cnt-1).1).3-analog.(analoganj.(cnt-1).1).4)>stat1):stat1=min(abs(analog.(analoganj.(cnt-1).1).3-analog.(analoganj.(cnt-1).1).4),25)
+						}
+					}
+					playLaserSlamSound analoganj.cnt.4, double(canvol)/100*stat1/25*mastervol/100*dirvol/100
+					analoganflag=1
+					chokkakup.(analoganj.cnt.0)=cnt
+					chocnt++
+					if(chocnt=50):chocnt=0
+					if(analog.(analoganj.cnt.1).9>=-1){
+						shaket=tp
+						shakewidth=50*sgn(analog.(analoganj.cnt.1).4-analog.(analoganj.cnt.1).3)
+					}
+				}else{
+					break
+				}
+			}
+		}
+	loop
+
+#deffunc processKeySound
+	repeat notesejnum-notesejfcnt,notesejfcnt
+		if(note.(notesej.cnt.0).3<t-1000){
+			notesejfcnt=cnt
+		}else:if(note.(notesej.cnt.0).3>t+1000){
+			break
+		}
+		if((note.(notesej.cnt.0).2=0)&(notesej.cnt.1!=2)&(((auto_note_se=0)&&(notesej.cnt.1=1))|(((note.(notesej.cnt.0).0<4)&(shortmode=mode_auto))|((note.(notesej.cnt.0).0>=4)&(longmode=mode_auto)))|(auto_note_se!=0))){
+			if(note.(notesej.cnt.0).3>=t-500){
+				if(note.(notesej.cnt.0).3<=t+30){
+					if (notesej.cnt.2 != 0) {
+						// KeySoundのポインタがNULLでなければ再生
+						PlayKeySound notesej.cnt.2, double(mastervol) / 100 * dirvol / 100 * notesej.cnt.3 / 100
+					}
+					notesej.cnt.1=2
+				}else{
+					break
+				}
+			}
+		}
+	loop
+	return

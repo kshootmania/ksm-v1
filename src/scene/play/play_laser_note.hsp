@@ -644,4 +644,17 @@
 			if(af.0+af.1=2):break
 		loop
 	}
+
+	// ƒ‚[ƒh‚ªOFF‚Ìê‡‚Ì©“®‰ñ“]
+	if(analogmode=mode_off){
+		repeat spinnum
+			if((cnow+sttp*adj>=spin.cnt.1)&(cnow+sttp*adj<spin.cnt.1+spin.cnt.2)&(spin.cnt.0!=-1)){
+				spinnow.0=spin.cnt.0
+				spinnow0p=spin.cnt.0
+				spinnow.1=spin.cnt.1
+				spinnow.2=spin.cnt.2
+				spinnow.3=cnt
+			}
+		loop
+	}
 	return

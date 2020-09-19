@@ -312,3 +312,932 @@
 		loop
 	}
 	return
+
+#deffunc processAudioEffects
+	canagain=0
+	if(anagainnum>0){
+		repeat anagainnum-anagainfcnt,anagainfcnt
+			if(anagain.cnt.2<=t+laserdelay0){
+				canagain=anagain.cnt.1
+				anagainfcnt=cnt
+			}else:break
+		loop
+	}
+	dim leffstata,2
+	if(arstat.4.1+arstat.5.1=0){
+		leffstat=0
+	}else{
+		repeat 2,4
+			if(arstat.cnt.1=1){
+				if((note.(arstat.cnt.2).2>0)&(ljudge.(cnt-4)=1)&(note.(arstat.cnt.2).1<=cnow)){
+					leffstata.(cnt-4)=1
+				}
+				if((note.(arstat.cnt.2).2>0)&(ljudge.(cnt-4)=0)&(note.(arstat.cnt.2).1<=cnow)){
+					leffstata.(cnt-4)=-1
+				}
+			}
+		loop
+		if(leffstata.0+leffstata.1>=1){
+			leffstat=1
+		}else:leffstat=0
+	} 
+	if(fadeoutfl=0){
+		// ロングエフェクト
+		if(feffect=1){
+			tfx_diff=d3timer()-tfx_diff
+			cnowfx=0
+			tt=0
+			if(bpmlnum>0){
+				repeat bpmlnum-max(bpmlcfcnt_fx,1),max(bpmlcfcnt_fx,1)
+					if(bpml.cnt.2<t+laserdelay0+tfx_diff){
+						tt=bpml.cnt.2
+						cnowfx=bpml.cnt.0
+						bpmlcfcnt_fx=cnt
+					}else:break
+				loop
+				bpmfx=bpml.bpmlcfcnt_fx.1
+				cnowfx+=int(round(double(t+laserdelay0+tfx_diff-tt)*bpmfx/24000))
+			}
+			cnowfx_50ms=0
+			tt=0
+			if(bpmlnum>0){
+				repeat bpmlnum-max(bpmlcfcnt_fx_50ms,1),max(bpmlcfcnt_fx_50ms,1)
+					if(bpml.cnt.2<t+laserdelay0+tfx_diff+50){
+						tt=bpml.cnt.2
+						cnowfx_50ms=bpml.cnt.0
+						bpmlcfcnt_fx_50ms=cnt
+					}else:break
+				loop
+				bpmfx_50ms=bpml.bpmlcfcnt_fx_50ms.1
+				cnowfx_50ms+=int(round(double(t+laserdelay0+tfx_diff-tt+50)*bpmfx_50ms/24000))
+			}
+			if(cnt=0){
+				repeat userfilternum,userfxnum-userfilternum
+					if(int(userfx_params.cnt.0)=FXDEF_FXTYPE_RETR){
+						if(userfilter_params.(cnt-(userfxnum-userfilternum)).2>0.0f){
+							user_now.cnt=int(1.0f/userfilter_params.(cnt-(userfxnum-userfilternum)).2)
+						}
+					}else:if(int(userfx_params.cnt.0)=FXDEF_FXTYPE_GATE){
+						if(userfilter_params.(cnt-(userfxnum-userfilternum)).1>0.0f){
+							user_now.cnt=int(1.0f/userfilter_params.(cnt-(userfxnum-userfilternum)).1)
+						}
+					}else:if(int(userfx_params.cnt.0)=FXDEF_FXTYPE_WOBB){
+						if(userfilter_params.(cnt-(userfxnum-userfilternum)).1>0.0f){
+							user_now.cnt=int(1.0f/userfilter_params.(cnt-(userfxnum-userfilternum)).1)
+						}
+					}else:if(int(userfx_params.cnt.0)=FXDEF_FXTYPE_BITC){
+						BASS_VST_SetParam_R hFX_User.cnt,0,maxf(minf(userfilter_params.(cnt-(userfxnum-userfilternum)).1/128.0f,1.0f),0.0f)
+					}else:if(int(userfx_params.cnt.0)=FXDEF_FXTYPE_TSTP){
+						BASS_VST_SetParam_R hFX_User.cnt,1,maxf(minf(userfilter_params.(cnt-(userfxnum-userfilternum)).1,1.0f),0.0f)
+					}else:if(int(userfx_params.cnt.0)=FXDEF_FXTYPE_ECHO){
+						if(userfilter_params.(cnt-(userfxnum-userfilternum)).2>0.0f){
+							user_now.cnt=int(1.0f/userfilter_params.(cnt-(userfxnum-userfilternum)).2)
+						}
+					}else:if(int(userfx_params.cnt.0)=FXDEF_FXTYPE_PITC){
+						BASS_VST_SetParam_R hFX_User.cnt,0,maxf(minf(absf(userfilter_params.(cnt-(userfxnum-userfilternum)).1),1.0f),0.0f)
+					}
+				loop
+			}
+			if(bpmfx!=bpmfxp){
+				if(fl_Flan=1):BASS_VST_SetParam_R hFX_Flan,0,maxf(minf(2.0f*60.0f*4*1000/bpmfx/10,1.0f),0.0f)
+				if(fl_Phas=1):BASS_VST_SetParam_R hFX_Phas,0,maxf(minf(60.0f*2*1000/bpmfx/10,1.0f),0.0f)
+				if(fl_SiCh=1):BASS_VST_SetParam_R hFX_SiCh,4,maxf(minf(60.0f*0.5f*1000/bpmfx/10,1.0f),0.0f)
+				if((fl_Retr=1)&(retr_now>0)){
+					BASS_VST_SetParam_R hFX_Retr,1,60.0f*4.0f*1000.0f/bpmfx/10.0f/retr_now
+				}
+				if((fl_Gate=1)&(gate_now>0)){
+					BASS_VST_SetParam_R hFX_Gate,6,60.0f*4.0f*1000.0f/bpmfx/10.0f/gate_now
+				}
+				if((fl_Gate=1)&(wobble_now>0)){
+					BASS_VST_SetParam_R hFX_Gate,9,60.0f*4.0f*1000.0f/bpmfx/10.0f/wobble_now
+				}
+				repeat 2
+					if((fl_Echo=1)&(echo_now.cnt>0)){
+						BASS_VST_SetParam_R hFX_Echo.cnt,1,60.0f*4.0f*1000.0f/bpmfx/10.0f/echo_now.cnt
+						BASS_VST_SetParam_R hFX_Echo.cnt,3,60.0f*4.0f*1000.0f/bpmfx/10.0f/echo_now.cnt*1.25f
+					}
+				loop
+				repeat userfxnum
+					cnt2=cnt
+					repeat fxdef_prmnum.(int(userfx_params.cnt2.0)),1
+						if((fxdef_prmno.cnt.(int(userfx_params.cnt2.0))!=-1)&(fxdef_type.cnt.(int(userfx_params.cnt2.0))=FXDEF_LENGTH)&(userfx_params.cnt2.cnt>=0.0f)&(fxdef_linkprm.(int(userfx_params.cnt2.0))!=cnt)){
+							BASS_VST_SetParam_R hFX_User.cnt2,fxdef_prmno.cnt.(int(userfx_params.cnt2.0)),maxf(minf(userfx_params.cnt2.cnt*60.0f*4*1000/bpmfx/10,1.0f),0.0f)
+						}else:if((fxdef_prmno.cnt.(int(userfx_params.cnt2.0))!=-1)&(fxdef_type.cnt.(int(userfx_params.cnt2.0))=FXDEF_LENGTH)&(userfx_params.cnt2.cnt>=0.0f)&(fxdef_linkprm.(int(userfx_params.cnt2.0))=cnt)){
+							if(user_now.cnt2>0){
+								BASS_VST_SetParam_R hFX_User.cnt2,fxdef_prmno.cnt.(int(userfx_params.cnt2.0)),maxf(minf(60.0f*4*1000/bpmfx/10/user_now.cnt2,1.0f),0.0f)
+							}
+						}
+						if((int(userfx_params.cnt2.0)=FXDEF_FXTYPE_ECHO)&(cnt=2)){
+							if(user_now.cnt2>0){
+								BASS_VST_SetParam_R hFX_User.cnt2,3,maxf(minf(60.0f*4*1000/bpmfx/10/user_now.cnt2*1.25f,1.0f),0.0f)
+							}
+						}
+					loop
+				loop
+			}
+			if(ts_bass>max(updateperiod/5,1)){
+				c2bnow=c2b(cnowfx)
+				sich_beat=(cnowfx-b2c(c2bnow))/(UNIT_MEASURE_4)
+				c2bnow_50ms=c2b(cnowfx_50ms)
+				retr_beat=(cnowfx_50ms-b2c(c2bnow_50ms))/(UNIT_MEASURE_2)
+				// Retrigger/Gate/Wobble 更新トリガ判定
+				if((retr_beat!=retr_beatp)|(c2bnow_50ms!=c2bnowp_50ms)){
+					// 小節頭から数えたカウUNIT_MEASUREUNIT_MEASURE/2間隔にそろえて時間変換、現在時刻からの時間差分を求める(Retrigger用)
+					dstat=c2tf(b2c(c2bnow_50ms)+(cnowfx_50ms-b2c(c2bnow_50ms))/(UNIT_MEASURE_2)*(UNIT_MEASURE_2))-double(t+laserdelay0+tfx_diff)
+					if(fl_Retr=1):BASS_VST_SetParam_R hFX_Retr,19,maxf(minf(dstat/10000.0f,1.0f),0.0f)
+					if(c2bnow_50ms!=c2bnowp_50ms){
+						// ユーザー定義FXのGate/Wobble更新(1小節間隔固定)
+						if(fl_Gate=1):BASS_VST_SetParam_R hFX_Gate,19,maxf(minf(dstat/10000.0f,1.0f),0.0f)
+						repeat userfxnum
+							if((userfx_params.cnt.0=FXDEF_FXTYPE_GATE)|(userfx_params.cnt.0=FXDEF_FXTYPE_WOBB)){
+								BASS_VST_SetParam_R hFX_User.cnt,19,maxf(minf(dstat/10000.0f,1.0f),0.0f)
+							}
+						loop
+					}
+				}
+				retr_beatp=retr_beat
+				repeat userfxnum
+					if((userfx_params.cnt.0=FXDEF_FXTYPE_RETR)||(userfx_params.cnt.0=FXDEF_FXTYPE_ECHO)){
+						// ユーザー定義FXのRetrigger/Echo 更新トリガ判定
+						if((userfx_params.cnt.1>0.0f)&(int(userfx_params.cnt.1*UNIT_MEASURE)>0)&(userfx_params.cnt.1<1.0f)){
+							user_beat.cnt=(cnowfx_50ms-b2c(c2bnow_50ms))/max(int(userfx_params.cnt.1*UNIT_MEASURE),1)
+						}else:if(userfx_params.cnt.1>=1.0f){
+							stat1=b2c(c2bnow_50ms)
+							user_beat.cnt=int((double(c2bnow_50ms)+double(cnowfx_50ms-stat1)/(b2c(c2bnow_50ms+1)-stat1))/userfx_params.cnt.1)
+						}else:user_beat.cnt=0
+						if(((user_beat.cnt!=user_beatp.cnt)|(c2bnow_50ms!=c2bnowp_50ms))&(int(userfx_params.cnt.1*UNIT_MEASURE)>0)&(userfx_params.cnt.1<1.0f)){
+							dstat=c2tf(b2c(c2bnow_50ms)+(cnowfx_50ms-b2c(c2bnow_50ms))/int(userfx_params.cnt.1*UNIT_MEASURE)*int(userfx_params.cnt.1*UNIT_MEASURE))-double(t+laserdelay0+tfx_diff)
+							BASS_VST_SetParam_R hFX_User.cnt,19,maxf(minf(dstat/10000.0f,1.0f),0.0f)
+						}else:if((user_beat.cnt!=user_beatp.cnt)&(userfx_params.cnt.1>=1.0f)){
+							stat1=int(double(user_beat.cnt)*userfx_params.cnt.1)
+							stat1=b2c(stat1)+int(double(b2c(stat1+1)-b2c(stat1))*(double(user_beat.cnt)*userfx_params.cnt.1-double(stat1)))
+							dstat=c2tf(stat1)-double(t+laserdelay0+tfx_diff)
+							BASS_VST_SetParam_R hFX_User.cnt,19,maxf(minf(dstat/10000.0f,1.0f),0.0f)
+						}
+					}
+				loop
+				f=0
+				feffectnow=0,0
+				feffectparam=0,0
+				feffectparam2=0,0
+				feffectnow_real=0,0
+				repeat notefxnum-min(notefxfcnt.0,notefxfcnt.1),min(notefxfcnt.0,notefxfcnt.1)
+					if((notefx.cnt.3<=t)&(notefx.cnt.4>t)&(leffstata.(notefx.cnt.0-4)=1)){
+						feffectnow_real.(notefx.cnt.0-4)=notefx.cnt.5
+					}
+					if((notefx.cnt.3<=t+laserdelay0)&(notefx.cnt.4>t+laserdelay0)&((leffstata.(notefx.cnt.0-4)=1)|(notefx.cnt.3+30>t))){
+						feffectnow.(notefx.cnt.0-4)=notefx.cnt.5
+						feffectparam.(notefx.cnt.0-4)=notefx.cnt.6
+						feffectparam2.(notefx.cnt.0-4)=notefx.cnt.7
+						f=1
+					}
+					if(notefx.cnt.3>t+laserdelay0):break
+					if(notefx.cnt.4<=t):notefxfcnt.(notefx.cnt.0-4)=cnt+1
+				loop
+				// ByPassの設定
+				if(f=1){
+					repeat userfxnum-userfilternum
+						BASS_VST_SetParam_R hFX_User.cnt,29,0.0f
+					loop
+				}else{
+					repeat userfxnum-userfilternum
+						BASS_VST_SetParam_R hFX_User.cnt,29,1.0f
+					loop
+				}
+				// ユーザー定義FXの手動パラメータ変更
+				repeat max(userchprmnum-userchprmfcnt,0),userchprmfcnt
+					if(userchprm.cnt.0<=t+laserdelay0+tfx_diff){
+						cnt2=int(userchprm.cnt.1)
+						cnt3=int(userchprm.cnt.2)
+						if((userchprm.cnt.3=1.0f)&(userchprm.cnt.4=1.0f)&(fxdef_max.cnt3.(int(userfx_params.cnt2.0))=-1.0f)){
+							BASS_VST_SetParam_R hFX_User.cnt2,fxdef_prmno.cnt3.(int(userfx_params.cnt2.0)),0.000003
+						}else{
+							userfx_params.cnt2.cnt3=userchprm.cnt.3
+							userfx_params_enable.cnt2.cnt3=userchprm.cnt.4
+							if(cnt2>=userfxnum-userfilternum){
+								userfilter_params_min.(cnt2-(userfxnum-userfilternum)).cnt3=userchprm.cnt.4
+								userfilter_params_max.(cnt2-(userfxnum-userfilternum)).cnt3=userchprm.cnt.5
+							}
+							if((feffectnow.0=100+cnt2)|(feffectnow.1=100+cnt2)){
+								// 変更タイミングと対象ロングFXの有効時が重なった場合
+								if((userfx_params_enable.cnt2.cnt3<0.0f)&(fxdef_type.cnt3.(int(userfx_params.cnt2.0))=FXDEF_LENGTH)){
+									BASS_VST_SetParam_R hFX_User.cnt2,fxdef_prmno.cnt3.(int(userfx_params.cnt2.0)),minf(maxf(-userfx_params_enable.cnt2.cnt3/10.0f,0.0f),1.0f)
+								}else:if(fxdef_max.cnt3.(int(userfx_params.cnt2.0))>0.0f){
+									BASS_VST_SetParam_R hFX_User.cnt2,fxdef_prmno.cnt3.(int(userfx_params.cnt2.0)),minf(maxf(fxdef_prmmax.cnt3.(int(userfx_params.cnt2.0))*userfx_params_enable.cnt2.cnt3/fxdef_max.cnt3.(int(userfx_params.cnt2.0)),0.0f),1.0f)
+								}else:if((fxdef_prmno.cnt3.(int(userfx_params.cnt2.0))!=-1)&(fxdef_type.cnt3.(int(userfx_params.cnt2.0))=FXDEF_PITCH)){
+									// PitchShift pitch
+									BASS_VST_SetParam_R hFX_User.cnt2,fxdef_prmno.cnt3.(int(userfx_params.cnt2.0)),maxf(minf(absf(userfx_params_enable.cnt2.cnt3),1.0f),0.0f)
+								}
+								if(fxdef_linkprm.(int(userfx_params.cnt2.0))>=0){
+									if((cnt3=fxdef_linkprm.(int(userfx_params.cnt2.0)))&(userfx_params_enable.cnt2.(fxdef_linkprm.(int(userfx_params.cnt2.0)))>0)){
+										user_now.cnt2=int(1.0f/userfx_params_enable.cnt2.(fxdef_linkprm.(int(userfx_params.cnt2.0))))
+									}
+								}
+							}else{
+								if((userfx_params.cnt2.cnt3<0.0f)&(fxdef_type.cnt3.(int(userfx_params.cnt2.0))=FXDEF_LENGTH)){
+									BASS_VST_SetParam_R hFX_User.cnt2,fxdef_prmno.cnt3.(int(userfx_params.cnt2.0)),minf(maxf(-userfx_params.cnt2.cnt3/10.0f,0.0f),1.0f)
+								}else:if(fxdef_max.cnt3.(int(userfx_params.cnt2.0))>0.0f){
+									BASS_VST_SetParam_R hFX_User.cnt2,fxdef_prmno.cnt3.(int(userfx_params.cnt2.0)),minf(maxf(fxdef_prmmax.cnt3.(int(userfx_params.cnt2.0))*userfx_params.cnt2.cnt3/fxdef_max.cnt3.(int(userfx_params.cnt2.0)),0.0f),1.0f)
+								}else:if((fxdef_prmno.cnt3.(int(userfx_params.cnt2.0))!=-1)&(fxdef_type.cnt3.(int(userfx_params.cnt2.0))=FXDEF_PITCH)){
+									// PitchShift pitch
+									BASS_VST_SetParam_R hFX_User.cnt2,fxdef_prmno.cnt3.(int(userfx_params.cnt2.0)),maxf(minf(absf(userfx_params.cnt2.cnt3),1.0f),0.0f)
+								}
+								if(fxdef_linkprm.(int(userfx_params.cnt2.0))>=0){
+									if((cnt3=fxdef_linkprm.(int(userfx_params.cnt2.0)))&(userfx_params.cnt2.(fxdef_linkprm.(int(userfx_params.cnt2.0)))>0)){
+										user_now.cnt2=int(1.0f/userfx_params.cnt2.(fxdef_linkprm.(int(userfx_params.cnt2.0))))
+									}
+								}
+							}
+							if((fxdef_prmno.cnt3.(int(userfx_params.cnt2.0))!=-1)&(fxdef_type.cnt3.(int(userfx_params.cnt2.0))=FXDEF_LENGTH)&(userfx_params.cnt2.cnt3>=0.0f)&(fxdef_linkprm.(int(userfx_params.cnt2.0))!=cnt3)){
+								BASS_VST_SetParam_R hFX_User.cnt2,fxdef_prmno.cnt3.(int(userfx_params.cnt2.0)),maxf(minf(userfx_params.cnt2.cnt3*60.0f*4*1000/bpmfx/10,1.0f),0.0f)
+							}else:if((fxdef_prmno.cnt3.(int(userfx_params.cnt2.0))!=-1)&(fxdef_type.cnt3.(int(userfx_params.cnt2.0))=FXDEF_LENGTH)&(userfx_params.cnt2.cnt3>=0.0f)&(fxdef_linkprm.(int(userfx_params.cnt2.0))=cnt3)){
+								if(user_now.cnt2>0){
+									BASS_VST_SetParam_R hFX_User.cnt2,fxdef_prmno.cnt3.(int(userfx_params.cnt2.0)),maxf(minf(60.0f*4*1000/bpmfx/10/user_now.cnt2,1.0f),0.0f)
+								}
+							}
+							if((int(userfx_params.cnt2.0)=FXDEF_FXTYPE_ECHO)&(cnt3=2)){
+								if(user_now.cnt2>0){
+									BASS_VST_SetParam_R hFX_User.cnt2,3,maxf(minf(60.0f*4*1000/bpmfx/10/user_now.cnt2*1.25f,1.0f),0.0f)
+								}
+							}
+						}
+						userchprmfcnt=cnt+1
+					}
+					if(userchprm.cnt.0>t+laserdelay0+tfx_diff):break
+				loop
+				repeat 2
+					// SwitchAudioの処理
+					if(feffectnow_real.cnt!=feffectp_real.cnt){
+						if(feffectp_real.cnt>=100){
+							cnt2=feffectp_real.cnt-100
+							if(int(userfx_params.cnt2.0)=FXDEF_FXTYPE_AUDI){
+								if(feffectnow_real.(1-cnt)<100){
+									swaudionow=-1
+								}else:if(int(userfx_params.(feffectnow_real.(1-cnt)-100).0)=FXDEF_FXTYPE_AUDI){
+									swaudionow=userfx_swaudiomid.(feffectnow_real.(1-cnt)-100)
+								}else{
+									swaudionow=-1
+								}
+							}
+						}
+						if(feffectnow_real.cnt>=100){
+							cnt2=feffectnow_real.cnt-100
+							if(int(userfx_params.cnt2.0)=FXDEF_FXTYPE_AUDI){
+								swaudionow=userfx_swaudiomid.cnt2
+							}
+						}
+					}
+					if(feffectnow.cnt!=feffectp.cnt){
+						// 以下, エフェクト解除
+						if((feffectp.cnt=FX_PHAS)&(feffectnow.(1-cnt)!=FX_PHAS)){
+							BASS_VST_SetParam_R hFX_Phas,1,0.0f
+							BASS_VST_SetParam_R hFX_Phas,8,0
+						}
+						if((feffectp.cnt=FX_FLAN)&(feffectnow.(1-cnt)!=FX_FLAN)){
+							BASS_VST_SetParam_R hFX_Flan,6,0
+						}
+						if((feffectp.cnt=FX_PITC)&(feffectnow.(1-cnt)!=FX_PITC)){
+							BASS_VST_SetParam_R hFX_Pitc,3,0
+							if(feffectnow.(1-cnt)=FX_PITC){
+								BASS_VST_SetParam_R hFX_Pitc,0,double(feffectparam.(1-cnt))/48.0f/2.0f+0.50f
+							}
+						}
+						if((feffectp.cnt=FX_BITC)&(feffectnow.(1-cnt)!=FX_BITC)){
+							BASS_VST_SetParam_R hFX_BitC,0,0
+							if(feffectnow.(1-cnt)=FX_BITC){
+								BASS_VST_SetParam_R hFX_BitC,0,double(feffectparam.(1-cnt))/128.0f
+							}
+						}
+						if(feffectp.cnt=FX_TSTP){
+							BASS_VST_SetParam_R hFX_TStp.cnt,0,0
+							if(feffectnow.(1-cnt)=FX_TSTP){
+								BASS_VST_SetParam_R hFX_TStp.(1-cnt),2,1.0f
+							}
+						}
+						if((feffectp.cnt>=FX_RE8)&(feffectp.cnt<=FX_RE32)&(feffectnow.(1-cnt)<FX_RE8)|(feffectnow.(1-cnt)>FX_RE32)){
+							BASS_VST_SetParam_R hFX_Retr,29,1.0f
+							BASS_VST_SetParam_R hFX_Retr,1,0
+							retr_now=0
+						}
+						if((feffectp.cnt>=FX_RE8)&(feffectp.cnt<=FX_RE32)&(feffectnow.(1-cnt)>=FX_RE8)&(feffectnow.(1-cnt)<=FX_RE32)){
+							BASS_VST_SetParam_R hFX_Retr,29,0.0f
+							BASS_VST_SetParam_R hFX_Retr,1,60.0f*4.0f*1000.0f/bpmfx/10.0f/feffectparam.(1-cnt)
+							retr_now=feffectparam.(1-cnt)
+						}
+						if((feffectp.cnt>=FX_GA4)&(feffectp.cnt<=FX_GA32)&(feffectnow.(1-cnt)<FX_GA4)|(feffectnow.(1-cnt)>FX_GA32)){
+							//BASS_VST_SetParam_R hFX_Gate,29,1.0f
+							BASS_VST_SetParam_R hFX_Gate,6,0
+							gate_now=0
+						}
+						if((feffectp.cnt>=FX_GA4)&(feffectp.cnt<=FX_GA32)&(feffectnow.(1-cnt)>=FX_GA4)&(feffectnow.(1-cnt)<=FX_GA32)){
+							//BASS_VST_SetParam_R hFX_Gate,29,0.0f
+							BASS_VST_SetParam_R hFX_Gate,6,60.0f*4.0f*1000.0f/bpmfx/10.0f/feffectparam.(1-cnt)
+							gate_now=feffectparam.(1-cnt)
+						}
+						if((feffectp.cnt=FX_WO12)&(feffectnow.(1-cnt)!=FX_WO12)){
+							//BASS_VST_SetParam_R hFX_Gate,29,1.0f
+							BASS_VST_SetParam_R hFX_Gate,9,0
+							wobble_now=0
+						}
+						if((feffectp.cnt=FX_WO12)&(feffectnow.(1-cnt)=FX_WO12)){
+							//BASS_VST_SetParam_R hFX_Gate,29,0.0f
+							BASS_VST_SetParam_R hFX_Gate,9,60.0f*4.0f*1000.0f/bpmfx/10.0f/feffectparam.(1-cnt)
+							wobble_now=feffectparam.(1-cnt)
+						}
+						if(feffectp.cnt=FX_EC4){
+							BASS_VST_SetParam_R hFX_Echo.cnt,29,1.0f
+							BASS_VST_SetParam_R hFX_Echo.cnt,1,0
+							if(feffectnow.(1-cnt)=FX_EC4){
+								BASS_VST_SetParam_R hFX_Echo.(1-cnt),29,0.0f
+								BASS_VST_SetParam_R hFX_Echo.(1-cnt),5,1.0f
+							}
+						}
+						if((feffectp.cnt=FX_SICH)&(feffectnow.(1-cnt)!=FX_SICH)){
+							BASS_VST_SetParam_R hFX_SiCh,5,0.01
+						}
+						if(feffectp.cnt>=100){
+							cnt2=feffectp.cnt-100
+							if((int(userfx_params.cnt2.0)=FXDEF_FXTYPE_RETR)|(int(userfx_params.cnt2.0)=FXDEF_FXTYPE_GATE)|(int(userfx_params.cnt2.0)=FXDEF_FXTYPE_WOBB)){
+								if(feffectnow.(1-cnt)=feffectp.cnt){
+									BASS_VST_SetParam_R hFX_User.cnt2,(int(userfx_params.cnt2.0)=FXDEF_FXTYPE_RETR)*1+(int(userfx_params.cnt2.0)=FXDEF_FXTYPE_GATE)*6+(int(userfx_params.cnt2.0)=FXDEF_FXTYPE_WOBB)*9,60.0f*4.0f*1000.0f/bpmfx/10.0f/feffectparam.(1-cnt)
+									user_now.cnt2=feffectparam.(1-cnt)
+								}
+							}else:if(int(userfx_params.cnt2.0)=FXDEF_FXTYPE_BITC){
+								if(feffectnow.(1-cnt)=feffectp.cnt){
+									BASS_VST_SetParam_R hFX_User.cnt2,0,minf(maxf(double(feffectparam.(1-cnt))/128.0f,0.0f),1.0f)
+									user_now.cnt2=feffectparam.(1-cnt)
+								}
+							}else:if(int(userfx_params.cnt2.0)=FXDEF_FXTYPE_TSTP){
+								if(feffectnow.(1-cnt)=feffectp.cnt){
+									BASS_VST_SetParam_R hFX_User.cnt2,1,minf(maxf(double(feffectparam.(1-cnt))/100.0f,0.0f),1.0f)
+									user_now.cnt2=feffectparam.(1-cnt)
+								}
+							}else:if(int(userfx_params.cnt2.0)=FXDEF_FXTYPE_PITC){
+								if(feffectnow.(1-cnt)=feffectp.cnt){
+									BASS_VST_SetParam_R hFX_User.cnt2,0,minf(maxf(double(feffectparam.(1-cnt))/48.0f/2.0f+0.5f,0.0f),1.0f)
+									user_now.cnt2=feffectparam.(1-cnt)
+								}
+							}
+							repeat fxdef_prmnum.(int(userfx_params.cnt2.0)),1
+								if(userfx_params.cnt2.cnt!=userfx_params_enable.cnt2.cnt){
+									if((userfx_params.cnt2.cnt<0.0f)&(fxdef_type.cnt.(int(userfx_params.cnt2.0))=FXDEF_LENGTH)){
+										BASS_VST_SetParam_R hFX_User.cnt2,fxdef_prmno.cnt.(int(userfx_params.cnt2.0)),minf(maxf(-userfx_params.cnt2.cnt/10.0f,0.0f),1.0f)
+									}else:if(fxdef_max.cnt.(int(userfx_params.cnt2.0))>0.0f){
+										BASS_VST_SetParam_R hFX_User.cnt2,fxdef_prmno.cnt.(int(userfx_params.cnt2.0)),minf(maxf(fxdef_prmmax.cnt.(int(userfx_params.cnt2.0))*userfx_params.cnt2.cnt/fxdef_max.cnt.(int(userfx_params.cnt2.0)),0.0f),1.0f)
+									}else:if((userfx_params.cnt2.cnt=1.0f)&(fxdef_max.cnt.(int(userfx_params.cnt2.0))=-1.0f)){
+										BASS_VST_SetParam_R hFX_User.cnt2,fxdef_prmno.cnt.(int(userfx_params.cnt2.0)),0.000003
+									}
+								}
+							loop
+						}
+						// 以下, エフェクト付加
+						if(feffectnow.cnt=FX_PHAS){
+							BASS_VST_SetParam_R hFX_Phas,1,0.50f
+							BASS_VST_SetParam_R hFX_Phas,8,0.50f
+						}
+						if(feffectnow.cnt=FX_FLAN){
+							BASS_VST_SetParam_R hFX_Flan,6,0.80f
+						}
+						if(feffectnow.cnt=FX_PITC){
+							BASS_VST_SetParam_R hFX_Pitc,0,double(feffectparam.cnt)/48.0f/2.0f+0.50f
+							BASS_VST_SetParam_R hFX_Pitc,3,1.00f
+						}
+						if(feffectnow.cnt=FX_BITC){
+							BASS_VST_SetParam_R hFX_BitC,0,double(feffectparam.cnt)/128.0f
+						}
+						if(feffectnow.cnt=FX_TSTP){
+							BASS_VST_SetParam_R hFX_TStp.cnt,1,double(feffectparam.cnt)/100.0f
+							BASS_VST_SetParam_R hFX_TStp.cnt,0,1.0f
+							BASS_VST_SetParam_R hFX_TStp.cnt,2,1.0f
+							BASS_VST_SetParam_R hFX_TStp.(1-cnt),2,0.0f
+						}
+						if((feffectnow.cnt>=FX_RE8)&(feffectnow.cnt<=FX_RE32)){
+							BASS_VST_SetParam_R hFX_Retr,29,0.0f
+							BASS_VST_SetParam_R hFX_Retr,1,60.0f*4.0f*1000.0f/bpmfx/10.0f/feffectparam.cnt
+							retr_now=feffectparam.cnt
+						}
+						if((feffectnow.cnt>=FX_GA4)&(feffectnow.cnt<=FX_GA32)){
+							//BASS_VST_SetParam_R hFX_Gate,29,0.0f
+							BASS_VST_SetParam_R hFX_Gate,6,60.0f*4.0f*1000.0f/bpmfx/10.0f/feffectparam.cnt
+							gate_now=feffectparam.cnt
+						}
+						if(feffectnow.cnt=FX_WO12){
+							//BASS_VST_SetParam_R hFX_Gate,29,0.0f
+							BASS_VST_SetParam_R hFX_Gate,9,60.0f*4.0f*1000.0f/bpmfx/10.0f/feffectparam.cnt
+							wobble_now=feffectparam.cnt
+						}
+						if(feffectnow.cnt=FX_EC4){
+							echo_trigger.cnt=1-echo_trigger.cnt
+							BASS_VST_SetParam_R hFX_Echo.cnt,29,0.0f
+							BASS_VST_SetParam_R hFX_Echo.cnt,0,double(echo_trigger.cnt)
+							BASS_VST_SetParam_R hFX_Echo.cnt,1,60.0f*4.0f*1000.0f/bpmfx/10.0f/feffectparam.cnt
+							BASS_VST_SetParam_R hFX_Echo.cnt,3,60.0f*4.0f*1000.0f/bpmfx/10.0f/feffectparam.cnt*1.25f
+							BASS_VST_SetParam_R hFX_Echo.cnt,4,double(feffectparam2.cnt)/100
+							BASS_VST_SetParam_R hFX_Echo.cnt,5,1.0f
+							BASS_VST_SetParam_R hFX_Echo.(1-cnt),5,0.0f
+						}
+						if(feffectnow.cnt=FX_SICH){
+							BASS_VST_SetParam_R hFX_SiCh,5,0.05f
+						}
+						if(feffectnow.cnt>=100){
+							cnt2=feffectnow.cnt-100
+							if((int(userfx_params.cnt2.0)=FXDEF_FXTYPE_RETR)|(int(userfx_params.cnt2.0)=FXDEF_FXTYPE_GATE)|(int(userfx_params.cnt2.0)=FXDEF_FXTYPE_WOBB)|(int(userfx_params.cnt2.0)=FXDEF_FXTYPE_ECHO)){
+								BASS_VST_SetParam_R hFX_User.cnt2,((int(userfx_params.cnt2.0)=FXDEF_FXTYPE_RETR)|(int(userfx_params.cnt2.0)=FXDEF_FXTYPE_ECHO))*1+(int(userfx_params.cnt2.0)=FXDEF_FXTYPE_GATE)*6+(int(userfx_params.cnt2.0)=FXDEF_FXTYPE_WOBB)*9,60.0f*4.0f*1000.0f/bpmfx/10.0f/feffectparam.cnt
+								user_now.cnt2=feffectparam.cnt
+							}else:if(int(userfx_params.cnt2.0)=FXDEF_FXTYPE_BITC){
+								BASS_VST_SetParam_R hFX_User.cnt2,0,minf(maxf(double(feffectparam.cnt)/128.0f,0.0f),1.0f)
+								user_now.cnt2=feffectparam.cnt
+							}else:if(int(userfx_params.cnt2.0)=FXDEF_FXTYPE_TSTP){
+								BASS_VST_SetParam_R hFX_User.cnt2,1,minf(maxf(double(feffectparam.cnt)/100.0f,0.0f),1.0f)
+								user_now.cnt2=feffectparam.cnt
+							}else:if(int(userfx_params.cnt2.0)=FXDEF_FXTYPE_PITC){
+								BASS_VST_SetParam_R hFX_User.cnt2,0,minf(maxf(double(feffectparam.cnt)/48.0f/2.0f+0.5f,0.0f),1.0f)
+								user_now.cnt2=feffectparam.cnt
+							}
+							repeat fxdef_prmnum.(int(userfx_params.cnt2.0)),1
+								if(userfx_params.cnt2.cnt!=userfx_params_enable.cnt2.cnt){
+									if((userfx_params_enable.cnt2.cnt<0.0f)&(fxdef_type.cnt.(int(userfx_params.cnt2.0))=FXDEF_LENGTH)){
+										BASS_VST_SetParam_R hFX_User.cnt2,fxdef_prmno.cnt.(int(userfx_params.cnt2.0)),minf(maxf(-userfx_params_enable.cnt2.cnt/10.0f,0.0f),1.0f)
+									}else:if(fxdef_max.cnt.(int(userfx_params.cnt2.0))>0.0f){
+										BASS_VST_SetParam_R hFX_User.cnt2,fxdef_prmno.cnt.(int(userfx_params.cnt2.0)),minf(maxf(fxdef_prmmax.cnt.(int(userfx_params.cnt2.0))*userfx_params_enable.cnt2.cnt/fxdef_max.cnt.(int(userfx_params.cnt2.0)),0.0f),1.0f)
+									}else:if((userfx_params_enable.cnt2.cnt=1.0f)&(fxdef_max.cnt.(int(userfx_params.cnt2.0))=-1.0f)){
+										BASS_VST_SetParam_R hFX_User.cnt2,fxdef_prmno.cnt.(int(userfx_params.cnt2.0)),0.000003
+									}
+								}
+							loop
+							if(int(userfx_params.cnt2.0)=FXDEF_FXTYPE_ECHO){
+								BASS_VST_SetParam_R hFX_User.cnt2,4,minf(maxf(double(feffectparam2.cnt)/100.0f,0.0f),1.0f)
+							}
+						}
+					}
+					feffectp_real.cnt=feffectnow_real.cnt
+					feffectp.cnt=feffectnow.cnt
+				loop
+				if(((sich_beat!=sich_beatp)|(c2bnow!=c2bnowp))&((feffectnow.0=FX_SICH)|(feffectnow.1=FX_SICH))){
+					if(cnt!=0){
+						sich_trigger=1-sich_trigger
+						if(fl_SiCh=1):BASS_VST_SetParam_R hFX_SiCh,0,double(sich_trigger)
+					}
+				}
+				sich_beatp=sich_beat
+			}
+		}
+		// レーザーエフェクト
+		dim peffstata,2
+		dim peffstata2,2
+		dim peffstata3,2
+		repeat 2
+			if(panalognow.cnt!=1000*cnt){
+				if((analognow.cnt=-1)|(abs(analogpos.cnt-analognow.cnt)<100+abs(analognow.cnt-analogfuture.cnt)/24*(analogfuture.cnt!=-1))|(t-analoganokt.cnt<=50)){
+					peffstata.cnt=1
+				}else:peffstata.cnt=-1
+			}
+			if(panalognow2.cnt!=-1){
+				if((analognow.cnt=-1)|(abs(analogpos.cnt-analognow.cnt)<100+abs(analognow.cnt-analogfuture.cnt)/24*(analogfuture.cnt!=-1))|(t-analoganokt.cnt<=50)){
+					peffstata2.cnt=1
+				}else:peffstata2.cnt=-1
+			}
+			if(analognow.cnt!=-1){
+				if((abs(analogpos.cnt-analognow.cnt)<100+abs(analognow.cnt-analogfuture.cnt)/24*(analogfuture.cnt!=-1))|(t-analoganokt.cnt<=50)){
+					peffstata3.cnt=1
+					if(arstat.(6+cnt).0=1){
+						if((analog.(arstat.(6+cnt).1).2<=UNIT_MEASURE_32)&(analog.(arstat.(6+cnt).1).8=1)){
+							peffstata3.cnt=0
+						}
+					}
+				}else:peffstata3.cnt=-1
+			}
+		loop
+		if(peffstata.0+peffstata.1>=1){
+			peffstat=1
+		}else:peffstat=0
+		if(peffstata2.0+peffstata2.1>=1){
+			peffstat2=1
+		}else:peffstat2=0
+		if(peffstata3.0+peffstata3.1>=1){
+			peffstat3=1
+		}else:peffstat3=0
+		if((peffect=1)&(ts_bass>max(updateperiod/5,1))){
+			ddim pdstat2,1
+			pdstat2=pdstat
+			ddim pdstat,1
+			panalogstat=panalognow.0,panalognow.1
+			repeat 2
+				if((abs(analognow.cnt-analogpos.cnt)>50)&(abs(analognowp.cnt-analogposp.cnt)<=50)):pdoutt.cnt=t
+			loop
+			repeat 2
+				if((abs(analognow.cnt-analogpos.cnt)>50)&(analognow.cnt!=-1)&(t-pdoutt>50)):panalogstat.cnt=analogpos.cnt
+			loop
+			pdstat=double(max((panalognow.0>=0)*panalogstat.0*((peffstata.0=1)|(analognow.0=-1)),(1000-panalogstat.1)*((peffstata.1=1)|(analognow.1=-1))))/1000.0f
+			pstat3=pstat2
+			pstat2=(((analognow.0!=-1)&(analog.(arstat.6.1).2<=UNIT_MEASURE_32)&(analog.(arstat.6.1).8=1))|((analognow.1!=-1)&(analog.(arstat.7.1).2<=UNIT_MEASURE_32)&(analog.(arstat.7.1).8=1))|((panalogstat.0<=20)&((panalogstat.1>=980))))|(pdstat=0.0f)
+			if((pstat2=1)&(pstat3=0)){
+				shuwat=t
+				shuwapos=pdstat2
+			}
+			if(analoganflag=1){
+				shuwat=t
+				shuwapos=pdstat2
+			}
+		}
+		if(filtertype2<0){
+			// FX音源に切り替えるレーザー音声エフェクトの場合
+			f=0
+			repeat 2
+				if(arstat.(4+cnt).1=1){
+					f+=(1+cnt)*((note.(arstat.(4+cnt).2).2=0)|(arstat.(4+cnt).0<note.(arstat.(4+cnt).2).3-note.(arstat.(4+cnt).2).4))
+				}
+			loop
+			stat1=(leffstat+peffstat3*2)*(peffect=0)+(leffstat|(((f\2)|(arstat.4.0>0)|(arstat.4.1=0))&((f/2)|(arstat.5.0>0)|(arstat.5.1=0))))*(peffstat3|((analognow.0=-1)&(analognow.1=-1)))*(peffect=1)
+		}else{
+			stat1=leffstat+peffstat3*2*(peffect=0)+((max(peffstata.0,0)+max(peffstata.1,0)+((t-shuwat<=200)&(disableshuwa=0)))>=1)*(peffect=1)*2
+		}
+		if(auto=1):stat1/=2
+		if(peffect=1):stat1\=2
+		if(feffect=1):stat1=0
+		if(stat1>=length(mid)):stat1=length(mid)-1
+		mnow=0
+		// 音声の切り替え
+		if(feffect=1){
+			mnow=0
+		}
+		if((stat1>=0)&(feffect=0)){
+			foreach mid
+				if(cnt!=stat1):BASS_ChannelSetAttribute mid.cnt,2,0.0
+			loop
+			if(mrepeat=0):BASS_ChannelSetAttribute mid.stat1,2,double(csongvol)/100*mastervol/100
+			mnow=stat1
+		}
+		// SwitchAudioの処理
+		swaudionow_filter=-1
+		if(feffect=1){
+			if((peffstat3=1)&(filtertype2>=100)){
+				if(int(userfx_params.(filtertype2-100).0)=FXDEF_FXTYPE_AUDI){
+					swaudionow_filter=userfx_swaudiomid.(filtertype2-100)
+				}
+			}
+			// SwitchAudioの音声切り替え処理
+			swaudionow_result=-1
+			if(swaudionow_filter!=-1):swaudionow_result=swaudionow_filter
+			if(swaudionow!=-1):swaudionow_result=swaudionow
+			if(swaudionow_result<0){
+				BASS_ChannelSetAttribute mid.0,2,double(csongvol)/100*mastervol/100
+				repeat swaudionum
+					BASS_ChannelSetAttribute mid_sw.cnt,2,0.0
+				loop
+			}else{
+				BASS_ChannelSetAttribute mid.0,2,0.0
+				repeat swaudionum
+					if(cnt!=swaudionow_result):BASS_ChannelSetAttribute mid_sw.cnt,2,0.0
+				loop
+				BASS_ChannelSetAttribute mid_sw.swaudionow_result,2,double(csongvol)/100*mastervol/100
+			}
+			swaudionow_resultp=swaudionow_result
+		}
+		if((peffect=1)&(ts_bass>max(updateperiod/5,1))){
+			if((filtertype=0)&(1|(cnt=0)|(t_tp>500)|(pdstat!=pdstat2)|(filtertype!=filtertypep2)|(pstat2!=pstat3)|((t-shuwat<=200)&(disableshuwa=0))|(canagain!=canagainp2))){
+				if(filtertype!=filtertypep):shuwat=-50000
+				if((pstat2=1)&(disableshuwa=0)){
+					pfilter=6,tofloat(3000.0f*((maxf(shuwapos,0.8f)-0.8f)/0.2f)+10000.0f-9950.0f*(cos(shuwapos)*4.0f+cos(shuwapos)*cos(shuwapos)*5.0f)/9.0f),tofloat(minf(maxf(14.0f*minf(shuwapos,0.15f)/0.15f+3.0f*(1.0-absf(shuwapos-0.35f)/0.35f)-3.5f*((maxf(shuwapos,0.8f)-0.8f)/0.2f),0.0f),18.0f)*1.1f*(50-min(t-shuwat,50))/50.0f*min(canagain,50)/50),tofloat(1.2f),tofloat(0.0f),tofloat(0.0f),-1*(t-shuwat<=50)
+					foreach mid
+						BASS_FXSetParameters hPeakFX.cnt,pfilter
+					loop
+					repeat swaudionum
+						BASS_FXSetParameters hPeakFX_sw.cnt,pfilter
+					loop
+					pfilter=6,tofloat(3000.0f*((maxf(shuwapos,0.8f)-0.8f)/0.2f)+10000.0f-9950.0f*(cos(shuwapos)*4.0f+cos(shuwapos)*cos(shuwapos)*5.0f)/9.0f),tofloat(minf(maxf(14.0f*minf(shuwapos,0.15f)/0.15f+3.0f*(1.0-absf(shuwapos-0.35f)/0.35f)-3.5f*((maxf(shuwapos,0.8f)-0.8f)/0.2f),0.0f),18.0f)*1.1f*(50-min(t-shuwat,50))/50.0f*min(canagain,50)/50),tofloat(1.2f),tofloat(0.0f),tofloat(0.0f),0
+					foreach mid
+						BASS_FXSetParameters hPeakFX2.cnt,pfilter
+					loop
+					repeat swaudionum
+						BASS_FXSetParameters hPeakFX2_sw.cnt,pfilter
+					loop
+				}else{
+					pfilter=6,tofloat(3000.0f*((maxf(pdstat,0.8f)-0.8f)/0.2f)+10000.0f-9950.0f*(cos(pdstat)*4.0f+cos(pdstat)*cos(pdstat)*5.0f)/9.0f),tofloat(minf(maxf(14.0f*minf(pdstat,0.15f)/0.15f+3.0f*(1.0-absf(pdstat-0.35f)/0.35f)-3.5f*((maxf(pdstat,0.8f)-0.8f)/0.2f),0.0f),18.0f)*(1.0f+0.5f*(disableshuwa=0)*(50-min(t-shuwat,50))/50.0f*(shuwapos>=100.0f))*canagain/50),tofloat(1.2f),tofloat(0.0f),tofloat(0.0f),-1
+					foreach mid
+						BASS_FXSetParameters hPeakFX.cnt,pfilter
+					loop
+					repeat swaudionum
+						BASS_FXSetParameters hPeakFX_sw.cnt,pfilter
+					loop
+					pfilter=6,tofloat(3000.0f*((maxf(pdstat,0.8f)-0.8f)/0.2f)+10000.0f-9950.0f*(cos(pdstat)*4.0f+cos(pdstat)*cos(pdstat)*5.0f)/9.0f),tofloat(minf(maxf(14.0f*minf(pdstat,0.15f)/0.15f+3.0f*(1.0-absf(pdstat-0.35f)/0.35f)-3.5f*((maxf(pdstat,0.8f)-0.8f)/0.2f),0.0f),18.0f)*(1.0f+0.5f*(disableshuwa=0)*(50-min(t-shuwat,50))/50.0f*(shuwapos>=100.0f))*canagain/50),tofloat(1.2f),tofloat(0.0f),tofloat(0.0f),0
+					foreach mid
+						BASS_FXSetParameters hPeakFX2.cnt,pfilter
+					loop
+					repeat swaudionum
+						BASS_FXSetParameters hPeakFX2_sw.cnt,pfilter
+					loop
+				}
+				foreach mid
+					BASS_VST_SetParam_R hBitCFX.cnt,0,0.0f
+				loop
+				repeat swaudionum
+					BASS_VST_SetParam_R hBitCFX_sw.cnt,0,0.0f
+				loop
+				repeat userfilternum,userfxnum-userfilternum
+					cnt2=cnt
+					repeat fxdef_prmnum.(int(userfx_params.cnt.0)),1
+						if((userfilter_params.(cnt2-(userfxnum-userfilternum)).cnt!=userfilter_params_min.(cnt2-(userfxnum-userfilternum)).cnt)|(userfilter_params_min.(cnt2-(userfxnum-userfilternum)).cnt!=userfilter_params_max.(cnt2-(userfxnum-userfilternum)).cnt)){
+							if((userfx_params.cnt2.cnt<0.0f)&(fxdef_type.cnt.(int(userfx_params.cnt2.0))=FXDEF_LENGTH)){
+								BASS_VST_SetParam_R hFX_User.cnt2,fxdef_prmno.cnt.(int(userfx_params.cnt2.0)),minf(maxf(-userfx_params.cnt2.cnt/10.0f,0.0f),1.0f)
+							}else:if(fxdef_max.cnt.(int(userfx_params.cnt2.0))>0.0f){
+								BASS_VST_SetParam_R hFX_User.cnt2,fxdef_prmno.cnt.(int(userfx_params.cnt2.0)),minf(maxf(fxdef_prmmax.cnt.(int(userfx_params.cnt2.0))*userfx_params.cnt2.cnt/fxdef_max.cnt.(int(userfx_params.cnt2.0)),0.0f),1.0f)
+							}
+						}
+					loop
+				loop
+				filtertypep2=filtertype
+				canagainp2=canagain
+			}else:if((filtertype!=0)&(filtertype<100)&(1|(cnt=1)|(t_tp>500)|(pdstat!=pdstat2)|(filtertype!=filtertypep2)|(pstat2!=pstat3)|(canagain!=canagainp2))){
+				if((filtertype<0)|(filtertype>=5)){
+					pfilter=6,tofloat(1000.0f),tofloat(0.0f),tofloat(1.2f),tofloat(0.0f),tofloat(0.0f),0
+				}
+				if(filtertype=1):pfilter=1,tofloat(4600.0f-4500.0f*cos(pdstat)),tofloat(minf(maxf(13.0f*minf(pdstat,0.2f)/0.2f+4.0f*(1.0-absf(pdstat-0.35f)/0.35f)-3.0f*((maxf(pdstat,0.8f)-0.8f)/0.2f),0.0f),16.0f)*(1.0f+0.1f*(1-disableshuwa)*(50-min(t-shuwat,50))/50.0f*(shuwapos>=100.0f))*canagain/50),tofloat(0.8f),tofloat(0.0f),tofloat(0.0f),-1*(pstat2=0)
+				//if(filtertype=2):pfilter=1,tofloat(10000.0f-10000.0f+9950.0f*(cos(pdstat)*4.0f+cos(pdstat)*5.0f)/9.0f),tofloat(minf(maxf(11.0f*minf(pdstat,0.2f)/0.2f+6.0f*(1.0-absf(pdstat-0.35f)/0.35f)-1.5f*((maxf(pdstat,0.8f)-0.8f)/0.2f),0.0f),16.0f)*(1.0f+0.1f*(50-min(t-shuwat,50))/50.0f*(shuwapos>=100.0f))*canagain/50),tofloat(1.25f),tofloat(0.0f),tofloat(0.0f),-1
+				if(filtertype=3):pfilter=0,tofloat(15000.0f-14200.0f*sin(sin(pdstat*1.25)/sin(1.25f)*1.5)/sin(1.5f)),tofloat(minf(maxf(13.0f*minf(pdstat,0.15f)/0.15f+4.0f*(1.0-absf(pdstat-0.35f)/0.35f)-3.0f*((maxf(pdstat,0.8f)-0.8f)/0.2f),0.0f),16.0f)*(1.0f+0.5f*(1-disableshuwa)*(50-min(t-shuwat,50))/50.0f*(shuwapos>=100.0f))*canagain/50),tofloat(0.8f),tofloat(0.0f),tofloat(0.0f),-1*(pstat2=0)
+				//if(filtertype=4):pfilter=0,tofloat(10000.0f-5000.0f+4950.0f*(cos(pdstat)*4.0f+cos(pdstat)*5.0f)/9.0f),tofloat(minf(maxf(11.0f*minf(pdstat,0.2f)/0.2f+6.0f*(1.0-absf(pdstat-0.35f)/0.35f)-1.5f*((maxf(pdstat,0.8f)-0.8f)/0.2f),0.0f),16.0f)*(1.0f+0.1f*(50-min(t-shuwat,50))/50.0f*(shuwapos>=100.0f))*canagain/50),tofloat(1.25f),tofloat(0.0f),tofloat(0.0f),-1
+				foreach mid
+					BASS_FXSetParameters hPeakFX.cnt,pfilter
+				loop
+				repeat swaudionum
+					BASS_FXSetParameters hPeakFX_sw.cnt,pfilter
+				loop
+				if(filtertype=1):pfilter=6,tofloat(4600.0f-4500.0f*cos(pdstat)),tofloat(minf(maxf(13.0f*minf(pdstat,0.2f)/0.2f+4.0f*(1.0-absf(pdstat-0.35f)/0.35f)-3.0f*((maxf(pdstat,0.8f)-0.8f)/0.2f),0.0f),16.0f)*(1.0f+0.1f*(1-disableshuwa)*(50-min(t-shuwat,50))/50.0f*(shuwapos>=100.0f))*canagain/65),tofloat(0.8f),tofloat(0.0f),tofloat(0.0f),-1*(pstat2=0)
+				//if(filtertype=2):pfilter=6,tofloat(2000.0f-10000.0f+9950.0f*(cos(pdstat)*4.0f+cos(pdstat)*5.0f)/9.0f),tofloat(minf(maxf(11.0f*minf(pdstat,0.2f)/0.2f+6.0f*(1.0-absf(pdstat-0.35f)/0.35f)-1.5f*((maxf(pdstat,0.8f)-0.8f)/0.2f),0.0f),16.0f)*(1.0f+0.1f*(50-min(t-shuwat,50))/50.0f*(shuwapos>=100.0f))*canagain/50),tofloat(1.25f),tofloat(0.0f),tofloat(0.0f),-1
+				if(filtertype=3):pfilter=6,tofloat(15000.0f-14200.0f*sin(sin(pdstat*1.25)/sin(1.25f)*1.5)/sin(1.5f)),tofloat(minf(maxf(15.0f*minf(pdstat,0.15f)/0.15f+2.0f*(1.0-absf(pdstat-0.35f)/0.35f)-3.0f*((maxf(pdstat,0.8f)-0.8f)/0.2f),0.0f),16.0f)*(1.0f+0.5f*(1-disableshuwa)*(50-min(t-shuwat,50))/50.0f*(shuwapos>=100.0f))*canagain/90),tofloat(0.8f),tofloat(0.0f),tofloat(0.0f),-1*(pstat2=0)
+				//if(filtertype=4):pfilter=6,tofloat(1000.0f-5000.0f+4950.0f*(cos(pdstat)*4.0f+cos(pdstat)*5.0f)/9.0f),tofloat(minf(maxf(11.0f*minf(pdstat,0.2f)/0.2f+6.0f*(1.0-absf(pdstat-0.35f)/0.35f)-1.5f*((maxf(pdstat,0.8f)-0.8f)/0.2f),0.0f),16.0f)*(1.0f+0.1f*(50-min(t-shuwat,50))/50.0f*(shuwapos>=100.0f))*canagain/50),tofloat(1.25f),tofloat(0.0f),tofloat(0.0f),-1
+				if(filtertype=0){
+					if(filtertype!=filtertypep):shuwat=-50000
+					if((pstat2=1)&(disableshuwa=0)){
+						pfilter=6,tofloat(3000.0f*((maxf(shuwapos,0.8f)-0.8f)/0.2f)+10000.0f-9950.0f*(cos(shuwapos)*4.0f+cos(shuwapos)*cos(shuwapos)*5.0f)/9.0f),tofloat(minf(maxf(14.0f*minf(shuwapos,0.15f)/0.15f+3.0f*(1.0-absf(shuwapos-0.35f)/0.35f)-3.5f*((maxf(shuwapos,0.8f)-0.8f)/0.2f),0.0f),18.0f)*1.1f*(50-min(t-shuwat,50))/50.0f*min(canagain,50)/50),tofloat(1.2f),tofloat(0.0f),tofloat(0.0f),-1*(t-shuwat<=50)
+					}else{
+						pfilter=6,tofloat(3000.0f*((maxf(pdstat,0.8f)-0.8f)/0.2f)+10000.0f-9950.0f*(cos(pdstat)*4.0f+cos(pdstat)*cos(pdstat)*5.0f)/9.0f),tofloat(minf(maxf(14.0f*minf(pdstat,0.15f)/0.15f+3.0f*(1.0-absf(pdstat-0.35f)/0.35f)-3.5f*((maxf(pdstat,0.8f)-0.8f)/0.2f),0.0f),18.0f)*(1.0f+0.5f*(disableshuwa=0)*(50-min(t-shuwat,50))/50.0f*(shuwapos>=100.0f))*canagain/50),tofloat(1.2f),tofloat(0.0f),tofloat(0.0f),0
+					}
+				}
+				foreach mid
+					BASS_FXSetParameters hPeakFX2.cnt,pfilter
+				loop
+				repeat swaudionum
+					BASS_FXSetParameters hPeakFX2_sw.cnt,pfilter
+				loop
+				if(filtertype=5){
+					foreach mid
+						BASS_VST_SetParam_R hBitCFX.cnt,0,pdstat*30.0f/128.0f
+					loop
+					repeat swaudionum
+						BASS_VST_SetParam_R hBitCFX_sw.cnt,0,pdstat*30.0f/128.0f
+					loop
+				}else{
+					foreach mid
+						BASS_VST_SetParam_R hBitCFX.cnt,0,0.0f
+					loop
+					repeat swaudionum
+						BASS_VST_SetParam_R hBitCFX_sw.cnt,0,0.0f
+					loop
+				}
+				repeat userfilternum,userfxnum-userfilternum
+					cnt2=cnt/*
+					if(filtertype=cnt2+100){
+						repeat fxdef_prmnum.(int(userfx_params.cnt.0)),1
+							if((userfilter_params.(cnt2-(userfxnum-userfilternum)).cnt!=userfilter_params_min.(cnt2-(userfxnum-userfilternum)).cnt)|(userfilter_params_min.(cnt2-(userfxnum-userfilternum)).cnt!=userfilter_params_max.(cnt2-(userfxnum-userfilternum)).cnt)){
+								if((userfilter_params_min.(cnt2-(userfxnum-userfilternum)).cnt<0.0f)&(userfilter_params_max.(cnt2-(userfxnum-userfilternum)).cnt<0.0f)&(fxdef_type.cnt.(int(userfx_params.cnt2.0))=FXDEF_LENGTH)){
+									// linkされていない * ms
+									BASS_VST_SetParam_R hFX_User.cnt2,fxdef_prmno.cnt.(int(userfx_params.cnt2.0)),minf(maxf(-userfilter_params_min.(cnt2-(userfxnum-userfilternum)).cnt/10.0f,0.0f),1.0f)*(1.0f-pdstat)+minf(maxf(-userfilter_params_max.(cnt2-(userfxnum-userfilternum)).cnt/10.0f,0.0f),1.0f)*pdstat
+								}else:if(fxdef_max.cnt.(int(userfx_params.cnt2.0))>0.0f){
+									// 一般
+									BASS_VST_SetParam_R hFX_User.cnt2,fxdef_prmno.cnt.(int(userfx_params.cnt2.0)),minf(maxf(fxdef_prmmax.cnt.(int(userfx_params.cnt2.0))*(userfilter_params_min.(cnt2-(userfxnum-userfilternum)).cnt*(1.0f-pdstat)+userfilter_params_max.(cnt2-(userfxnum-userfilternum)).cnt*pdstat)/fxdef_max.cnt.(int(userfx_params.cnt2.0)),0.0f),1.0f)
+								}else:if((fxdef_prmno.cnt.(int(userfx_params.cnt2.0))!=-1)&(fxdef_type.cnt.(int(userfx_params.cnt2.0))=FXDEF_LENGTH)&(userfilter_params_min.(cnt2-(userfxnum-userfilternum)).cnt>=0.0f)&(userfilter_params_max.(cnt2-(userfxnum-userfilternum)).cnt>=0.0f)&(fxdef_linkprm.(int(userfx_params.cnt2.0))=cnt)){
+									// linkされた 1/* 小節 (waveLength, Wobble period)
+									if((userfilter_params_min.(cnt2-(userfxnum-userfilternum)).cnt>0.0f)&(userfilter_params_max.(cnt2-(userfxnum-userfilternum)).cnt>0.0f)){
+										user_now.cnt2=divconv3(int((1.0f-pdstat)*divconv2(divconv(int(1.0f/userfilter_params_min.(cnt2-(userfxnum-userfilternum)).cnt)))+minf(pdstat,0.999f)*(divconv2(divconv(int(1.0f/userfilter_params_max.(cnt2-(userfxnum-userfilternum)).cnt)))+1)))
+									}else{
+										user_now.cnt2=0
+									}
+									if(user_now.cnt2>0){
+										BASS_VST_SetParam_R hFX_User.cnt2,fxdef_prmno.cnt.(int(userfx_params.cnt2.0)),maxf(minf(60.0f*4*1000/bpmfx/10/user_now.cnt2,1.0f),0.0f)
+									}
+									if(int(userfx_params.cnt2.0)=FXDEF_FXTYPE_ECHO){
+										BASS_VST_SetParam_R hFX_User.cnt2,3,maxf(minf(60.0f*4*1000/bpmfx/10/user_now.cnt2*1.25f,1.0f),0.0f)
+									}
+								}else:if((fxdef_prmno.cnt.(int(userfx_params.cnt2.0))!=-1)&(fxdef_type.cnt.(int(userfx_params.cnt2.0))=FXDEF_RATE)&(fxdef_linkprm.(int(userfx_params.cnt2.0))=cnt)){
+									// linkされた rate (Tapestop speed)
+									BASS_VST_SetParam_R hFX_User.cnt2,fxdef_prmno.cnt.(int(userfx_params.cnt2.0)),minf(maxf(userfilter_params_min.(cnt2-(userfxnum-userfilternum)).cnt*(1.0f-pdstat)+userfilter_params_max.(cnt2-(userfxnum-userfilternum)).cnt*pdstat,0.0f),1.0f)
+								}else:if((fxdef_prmno.cnt.(int(userfx_params.cnt2.0))!=-1)&(fxdef_type.cnt.(int(userfx_params.cnt2.0))=FXDEF_PITCH)){
+									// PitchShift pitch
+									if((userfilter_params_min.(cnt2-(userfxnum-userfilternum)).cnt<0.0f)&(userfilter_params_max.(cnt2-(userfxnum-userfilternum)).cnt<0.0f)){
+										BASS_VST_SetParam_R hFX_User.cnt2,fxdef_prmno.cnt.(int(userfx_params.cnt2.0)),minf(maxf(round((absf(userfilter_params_min.(cnt2-(userfxnum-userfilternum)).cnt)*(1.0f-pdstat)+absf(userfilter_params_max.(cnt2-(userfxnum-userfilternum)).cnt)*pdstat)*96.0f)/96.0f,0.0f),1.0f)
+									}else{
+										BASS_VST_SetParam_R hFX_User.cnt2,fxdef_prmno.cnt.(int(userfx_params.cnt2.0)),minf(maxf(absf(userfilter_params_min.(cnt2-(userfxnum-userfilternum)).cnt)*(1.0f-pdstat)+absf(userfilter_params_max.(cnt2-(userfxnum-userfilternum)).cnt)*pdstat,0.0f),1.0f)
+									}
+								}else:if((fxdef_prmno.cnt.(int(userfx_params.cnt2.0))!=-1)&(fxdef_type.cnt.(int(userfx_params.cnt2.0))=FXDEF_SAMPLE)&(fxdef_linkprm.(int(userfx_params.cnt2.0))=cnt)){
+									// linkされた sample (reduction)
+									BASS_VST_SetParam_R hFX_User.cnt2,fxdef_prmno.cnt.(int(userfx_params.cnt2.0)),minf(maxf((userfilter_params_min.(cnt2-(userfxnum-userfilternum)).cnt*(1.0f-pdstat)+userfilter_params_max.(cnt2-(userfxnum-userfilternum)).cnt*pdstat)/128.0f,0.0f),1.0f)
+								}else:if((int(userfx_params.cnt2.0)=FXDEF_FXTYPE_SICH)&(cnt=1)){
+									// SideChain period
+									if((userfilter_params_min.(cnt2-(userfxnum-userfilternum)).cnt>0.0f)&(userfilter_params_max.(cnt2-(userfxnum-userfilternum)).cnt>0.0f)){
+										userfx_params.cnt2.cnt=1.0f/(divconv3(int((1.0f-pdstat)*divconv2(divconv(int(1.0f/userfilter_params_min.(cnt2-(userfxnum-userfilternum)).cnt)))+minf(pdstat,0.999f)*(divconv2(divconv(int(1.0f/userfilter_params_max.(cnt2-(userfxnum-userfilternum)).cnt)))+1))))
+									}else{
+										userfx_params.cnt2.cnt=0.0f
+									}
+								}else:if((fxdef_prmno.cnt.(int(userfx_params.cnt2.0))!=-1)&(fxdef_type.cnt.(int(userfx_params.cnt2.0))=FXDEF_LENGTH)&(userfilter_params_min.(cnt2-(userfxnum-userfilternum)).cnt>=0.0f)&(userfilter_params_max.(cnt2-(userfxnum-userfilternum)).cnt>=0.0f)){
+									// linkされていない 1/* 小節 (Flanger periodなど)
+									BASS_VST_SetParam_R hFX_User.cnt2,fxdef_prmno.cnt.(int(userfx_params.cnt2.0)),maxf(minf((userfilter_params_min.(cnt2-(userfxnum-userfilternum)).cnt*(1.0f-pdstat)+userfilter_params_max.(cnt2-(userfxnum-userfilternum)).cnt*pdstat)*60.0f*4*1000/bpmfx/10,1.0f),0.0f)
+								}else:if((fxdef_prmno.cnt.(int(userfx_params.cnt2.0))!=-1)&(userfx_params_enable.cnt2.cnt=1.0f)&(fxdef_max.cnt.(int(userfx_params.cnt2.0))=-1.0f)&((peffstat2p!=peffstat2)|(filtertypep!=filtertype))){
+									// updateTrigger
+									BASS_VST_SetParam_R hFX_User.cnt2,fxdef_prmno.cnt.(int(userfx_params.cnt2.0)),0.000003
+								}
+							}
+						loop
+					}else{*/
+						repeat fxdef_prmnum.(int(userfx_params.cnt.0)),1
+							if((userfilter_params.(cnt2-(userfxnum-userfilternum)).cnt!=userfilter_params_min.(cnt2-(userfxnum-userfilternum)).cnt)|(userfilter_params_min.(cnt2-(userfxnum-userfilternum)).cnt!=userfilter_params_max.(cnt2-(userfxnum-userfilternum)).cnt)){
+								if((userfx_params.cnt2.cnt<0.0f)&(fxdef_type.cnt.(int(userfx_params.cnt2.0))=FXDEF_LENGTH)){
+									BASS_VST_SetParam_R hFX_User.cnt2,fxdef_prmno.cnt.(int(userfx_params.cnt2.0)),minf(maxf(-userfx_params.cnt2.cnt/10.0f,0.0f),1.0f)
+								}else:if(fxdef_max.cnt.(int(userfx_params.cnt2.0))>0.0f){
+									BASS_VST_SetParam_R hFX_User.cnt2,fxdef_prmno.cnt.(int(userfx_params.cnt2.0)),minf(maxf(fxdef_prmmax.cnt.(int(userfx_params.cnt2.0))*userfx_params.cnt2.cnt/fxdef_max.cnt.(int(userfx_params.cnt2.0)),0.0f),1.0f)
+								}
+							}
+						loop
+					//}
+				loop
+				filtertypep2=filtertype
+				canagainp2=canagain
+			}else:if((peffstata2.0=1)|(peffstata2.1=1)){
+				if((filtertype<0)|(filtertype>=5)){
+					pfilter=6,tofloat(1000.0f),tofloat(0.0f),tofloat(1.2f),tofloat(0.0f),tofloat(0.0f),0
+					foreach mid
+						BASS_FXSetParameters hPeakFX.cnt,pfilter
+						BASS_FXSetParameters hPeakFX2.cnt,pfilter
+					loop
+					repeat swaudionum
+						BASS_FXSetParameters hPeakFX_sw.cnt,pfilter
+						BASS_FXSetParameters hPeakFX2_sw.cnt,pfilter
+					loop
+					foreach mid
+						BASS_VST_SetParam_R hBitCFX.cnt,0,0.0f
+					loop
+					repeat swaudionum
+						BASS_VST_SetParam_R hBitCFX_sw.cnt,0,0.0f
+					loop
+				}
+				repeat userfilternum,userfxnum-userfilternum
+					cnt2=cnt
+					if(filtertype=cnt2+100){
+						repeat fxdef_prmnum.(int(userfx_params.cnt.0)),1
+							if((userfilter_params.(cnt2-(userfxnum-userfilternum)).cnt!=userfilter_params_min.(cnt2-(userfxnum-userfilternum)).cnt)|(userfilter_params_min.(cnt2-(userfxnum-userfilternum)).cnt!=userfilter_params_max.(cnt2-(userfxnum-userfilternum)).cnt)){
+								if((userfilter_params_min.(cnt2-(userfxnum-userfilternum)).cnt<0.0f)&(userfilter_params_max.(cnt2-(userfxnum-userfilternum)).cnt<0.0f)&(fxdef_type.cnt.(int(userfx_params.cnt2.0))=FXDEF_LENGTH)){
+									// * ms
+									BASS_VST_SetParam_R hFX_User.cnt2,fxdef_prmno.cnt.(int(userfx_params.cnt2.0)),minf(maxf(-userfilter_params_min.(cnt2-(userfxnum-userfilternum)).cnt/10.0f,0.0f),1.0f)*(1.0f-pdstat)+minf(maxf(-userfilter_params_max.(cnt2-(userfxnum-userfilternum)).cnt/10.0f,0.0f),1.0f)*pdstat
+									if((int(userfx_params.cnt2.0)=FXDEF_FXTYPE_ECHO)&(cnt=2)){
+										BASS_VST_SetParam_R hFX_User.cnt2,3,minf(maxf(-userfilter_params_min.(cnt2-(userfxnum-userfilternum)).cnt/10.0f,0.0f),1.0f)*(1.0f-pdstat)+minf(maxf(-userfilter_params_max.(cnt2-(userfxnum-userfilternum)).cnt/10.0f*1.25f,0.0f),1.0f)*pdstat
+									}
+								}else:if(fxdef_max.cnt.(int(userfx_params.cnt2.0))>0.0f){
+									// 一般
+									BASS_VST_SetParam_R hFX_User.cnt2,fxdef_prmno.cnt.(int(userfx_params.cnt2.0)),minf(maxf(fxdef_prmmax.cnt.(int(userfx_params.cnt2.0))*(userfilter_params_min.(cnt2-(userfxnum-userfilternum)).cnt*(1.0f-pdstat)+userfilter_params_max.(cnt2-(userfxnum-userfilternum)).cnt*pdstat)/fxdef_max.cnt.(int(userfx_params.cnt2.0)),0.0f),1.0f)
+								}else:if((fxdef_prmno.cnt.(int(userfx_params.cnt2.0))!=-1)&(fxdef_type.cnt.(int(userfx_params.cnt2.0))=FXDEF_LENGTH)&(userfilter_params_min.(cnt2-(userfxnum-userfilternum)).cnt>=0.0f)&(userfilter_params_max.(cnt2-(userfxnum-userfilternum)).cnt>=0.0f)&(fxdef_linkprm.(int(userfx_params.cnt2.0))=cnt)){
+									// linkされた 1/* 小節 (waveLength, Wobble period)
+									if((userfilter_params_min.(cnt2-(userfxnum-userfilternum)).cnt>0.0f)&(userfilter_params_max.(cnt2-(userfxnum-userfilternum)).cnt>0.0f)){
+										user_now.cnt2=divconv3(int((1.0f-pdstat)*divconv2(divconv(int(1.0f/userfilter_params_min.(cnt2-(userfxnum-userfilternum)).cnt)))+minf(pdstat,0.999f)*(divconv2(divconv(int(1.0f/userfilter_params_max.(cnt2-(userfxnum-userfilternum)).cnt)))+1)))
+									}else{
+										user_now.cnt2=0
+									}
+									if(user_now.cnt2>0){
+										BASS_VST_SetParam_R hFX_User.cnt2,fxdef_prmno.cnt.(int(userfx_params.cnt2.0)),maxf(minf(60.0f*4*1000/bpmfx/10/user_now.cnt2,1.0f),0.0f)
+									}
+									if(int(userfx_params.cnt2.0)=FXDEF_FXTYPE_ECHO){
+										BASS_VST_SetParam_R hFX_User.cnt2,3,maxf(minf(60.0f*4*1000/bpmfx/10/user_now.cnt2*1.25f,1.0f),0.0f)
+									}
+								}else:if((fxdef_prmno.cnt.(int(userfx_params.cnt2.0))!=-1)&(fxdef_type.cnt.(int(userfx_params.cnt2.0))=FXDEF_RATE)&(fxdef_linkprm.(int(userfx_params.cnt2.0))=cnt)){
+									// linkされた rate (speed)
+									BASS_VST_SetParam_R hFX_User.cnt2,fxdef_prmno.cnt.(int(userfx_params.cnt2.0)),minf(maxf(userfilter_params_min.(cnt2-(userfxnum-userfilternum)).cnt*(1.0f-pdstat)+userfilter_params_max.(cnt2-(userfxnum-userfilternum)).cnt*pdstat,0.0f),1.0f)
+								}else:if((fxdef_prmno.cnt.(int(userfx_params.cnt2.0))!=-1)&(fxdef_type.cnt.(int(userfx_params.cnt2.0))=FXDEF_PITCH)){
+									// PitchShift pitch
+									if((userfilter_params_min.(cnt2-(userfxnum-userfilternum)).cnt<0.0f)&(userfilter_params_max.(cnt2-(userfxnum-userfilternum)).cnt<0.0f)){
+										BASS_VST_SetParam_R hFX_User.cnt2,fxdef_prmno.cnt.(int(userfx_params.cnt2.0)),minf(maxf(round((absf(userfilter_params_min.(cnt2-(userfxnum-userfilternum)).cnt)*(1.0f-pdstat)+absf(userfilter_params_max.(cnt2-(userfxnum-userfilternum)).cnt)*pdstat)*96.0f)/96.0f,0.0f),1.0f)
+									}else{
+										BASS_VST_SetParam_R hFX_User.cnt2,fxdef_prmno.cnt.(int(userfx_params.cnt2.0)),minf(maxf(absf(userfilter_params_min.(cnt2-(userfxnum-userfilternum)).cnt)*(1.0f-pdstat)+absf(userfilter_params_max.(cnt2-(userfxnum-userfilternum)).cnt)*pdstat,0.0f),1.0f)
+									}
+								}else:if((fxdef_prmno.cnt.(int(userfx_params.cnt2.0))!=-1)&(fxdef_type.cnt.(int(userfx_params.cnt2.0))=FXDEF_SAMPLE)&(fxdef_linkprm.(int(userfx_params.cnt2.0))=cnt)){
+									// linkされた sample (reduction)
+									BASS_VST_SetParam_R hFX_User.cnt2,fxdef_prmno.cnt.(int(userfx_params.cnt2.0)),minf(maxf((userfilter_params_min.(cnt2-(userfxnum-userfilternum)).cnt*(1.0f-pdstat)+userfilter_params_max.(cnt2-(userfxnum-userfilternum)).cnt*pdstat)/128.0f,0.0f),1.0f)
+								}else:if((int(userfx_params.cnt2.0)=FXDEF_FXTYPE_SICH)&(cnt=1)){
+									// SideChain period
+									if((userfilter_params_min.(cnt2-(userfxnum-userfilternum)).cnt>0.0f)&(userfilter_params_max.(cnt2-(userfxnum-userfilternum)).cnt>0.0f)){
+										userfx_params.cnt2.cnt=1.0f/(divconv3(int((1.0f-pdstat)*divconv2(divconv(int(1.0f/userfilter_params_min.(cnt2-(userfxnum-userfilternum)).cnt)))+minf(pdstat,0.999f)*(divconv2(divconv(int(1.0f/userfilter_params_max.(cnt2-(userfxnum-userfilternum)).cnt)))+1))))
+									}else{
+										userfx_params.cnt2.cnt=0.0f
+									}
+								}else:if((fxdef_prmno.cnt.(int(userfx_params.cnt2.0))!=-1)&(fxdef_type.cnt.(int(userfx_params.cnt2.0))=FXDEF_LENGTH)&(userfilter_params_min.(cnt2-(userfxnum-userfilternum)).cnt>=0.0f)&(userfilter_params_max.(cnt2-(userfxnum-userfilternum)).cnt>=0.0f)){
+									// linkされていない 1/* 小節 (Flanger periodなど)
+									BASS_VST_SetParam_R hFX_User.cnt2,fxdef_prmno.cnt.(int(userfx_params.cnt2.0)),maxf(minf((userfilter_params_min.(cnt2-(userfxnum-userfilternum)).cnt*(1.0f-pdstat)+userfilter_params_max.(cnt2-(userfxnum-userfilternum)).cnt*pdstat)*60.0f*4*1000/bpmfx/10,1.0f),0.0f)
+								}else:if((fxdef_prmno.cnt.(int(userfx_params.cnt2.0))!=-1)&(userfx_params_enable.cnt2.cnt=1.0f)&(fxdef_max.cnt.(int(userfx_params.cnt2.0))=-1.0f)&((peffstat2p!=peffstat2)|(filtertypep!=filtertype))){
+									// updateTrigger
+									BASS_VST_SetParam_R hFX_User.cnt2,fxdef_prmno.cnt.(int(userfx_params.cnt2.0)),0.000003
+								}
+							}
+						loop
+					}else{
+						repeat fxdef_prmnum.(int(userfx_params.cnt.0)),1
+							if((userfilter_params.(cnt2-(userfxnum-userfilternum)).cnt!=userfilter_params_min.(cnt2-(userfxnum-userfilternum)).cnt)|(userfilter_params_min.(cnt2-(userfxnum-userfilternum)).cnt!=userfilter_params_max.(cnt2-(userfxnum-userfilternum)).cnt)){
+								if((userfx_params.cnt2.cnt<0.0f)&(fxdef_type.cnt.(int(userfx_params.cnt2.0))=FXDEF_LENGTH)){
+									BASS_VST_SetParam_R hFX_User.cnt2,fxdef_prmno.cnt.(int(userfx_params.cnt2.0)),minf(maxf(-userfx_params.cnt2.cnt/10.0f,0.0f),1.0f)
+								}else:if(fxdef_max.cnt.(int(userfx_params.cnt2.0))>0.0f){
+									BASS_VST_SetParam_R hFX_User.cnt2,fxdef_prmno.cnt.(int(userfx_params.cnt2.0)),minf(maxf(fxdef_prmmax.cnt.(int(userfx_params.cnt2.0))*userfx_params.cnt2.cnt/fxdef_max.cnt.(int(userfx_params.cnt2.0)),0.0f),1.0f)
+								}
+							}
+						loop
+					}
+				loop
+			}else{
+				pfilter=6,tofloat(1000.0f),tofloat(0.0f),tofloat(1.2f),tofloat(0.0f),tofloat(0.0f),0
+				foreach mid
+					BASS_FXSetParameters hPeakFX.cnt,pfilter
+					BASS_FXSetParameters hPeakFX2.cnt,pfilter
+				loop
+				repeat swaudionum
+					BASS_FXSetParameters hPeakFX_sw.cnt,pfilter
+					BASS_FXSetParameters hPeakFX2_sw.cnt,pfilter
+				loop
+				foreach mid
+					BASS_VST_SetParam_R hBitCFX.cnt,0,0.0f
+				loop
+				repeat swaudionum
+					BASS_VST_SetParam_R hBitCFX_sw.cnt,0,0.0f
+				loop
+				repeat userfilternum,userfxnum-userfilternum
+					cnt2=cnt
+					repeat fxdef_prmnum.(int(userfx_params.cnt.0)),1
+						if((userfilter_params.(cnt2-(userfxnum-userfilternum)).cnt!=userfilter_params_min.(cnt2-(userfxnum-userfilternum)).cnt)|(userfilter_params_min.(cnt2-(userfxnum-userfilternum)).cnt!=userfilter_params_max.(cnt2-(userfxnum-userfilternum)).cnt)){
+							if((userfx_params.cnt2.cnt<0.0f)&(fxdef_type.cnt.(int(userfx_params.cnt2.0))=FXDEF_LENGTH)){
+								BASS_VST_SetParam_R hFX_User.cnt2,fxdef_prmno.cnt.(int(userfx_params.cnt2.0)),minf(maxf(-userfx_params.cnt2.cnt/10.0f,0.0f),1.0f)
+							}else:if(fxdef_max.cnt.(int(userfx_params.cnt2.0))>0.0f){
+								BASS_VST_SetParam_R hFX_User.cnt2,fxdef_prmno.cnt.(int(userfx_params.cnt2.0)),minf(maxf(fxdef_prmmax.cnt.(int(userfx_params.cnt2.0))*userfx_params.cnt2.cnt/fxdef_max.cnt.(int(userfx_params.cnt2.0)),0.0f),1.0f)
+							}
+						}
+					loop
+				loop
+			}
+			// ByPassの設定
+			if(peffstat2=1){
+				repeat userfilternum,userfxnum-userfilternum
+					BASS_VST_SetParam_R hFX_User.cnt,29,0.0f
+				loop
+			}else{
+				repeat userfilternum,userfxnum-userfilternum
+					BASS_VST_SetParam_R hFX_User.cnt,29,1.0f
+				loop
+			}
+			peffstat2p=peffstat2
+			foreach mid
+				if(hCompFX.cnt=-1){
+					if(mnow=cnt){
+						hCompFX.cnt=BASS_ChannelSetFX(mid.cnt,0x10011,0)
+						BASS_FXSetParameters hCompFX.cnt,compparam
+						hVolFX2.cnt=BASS_ChannelSetFX(mid.cnt,0x10003,10)
+						dim volfx,2
+						volfx=0,tofloat(0.1f)
+						BASS_FXSetParameters hVolFX2.cnt,volfx
+					}
+				}
+			loop
+			repeat swaudionum
+				if(hCompFX_sw.cnt=-1){
+					if(swaudionow_result=cnt){
+						hCompFX_sw.cnt=BASS_ChannelSetFX(mid_sw.cnt,0x10011,0)
+						BASS_FXSetParameters hCompFX_sw.cnt,compparam
+						hVolFX2_sw.cnt=BASS_ChannelSetFX(mid_sw.cnt,0x10003,10)
+						dim volfx,2
+						volfx=0,tofloat(0.1f)
+						BASS_FXSetParameters hVolFX2_sw.cnt,volfx
+					}
+				}
+			loop
+		}
+	}
+	if(fadeoutfl=0){
+		// ロングエフェクト (SideChainのみレーザーの後に処理)
+		if(feffect=1){
+			_cnt=cnt
+			repeat userfxnum
+				if(userfx_params.cnt.0=FXDEF_FXTYPE_SICH){
+					// ユーザー定義FXのSideChain 更新トリガ判定
+					if((userfx_params.cnt.1>0.0f)&(int(userfx_params.cnt.1*UNIT_MEASURE)>0)&(userfx_params.cnt.1<1.0f)){
+						user_beat.cnt=(cnowfx-b2c(c2bnow))/max(int(userfx_params.cnt.1*UNIT_MEASURE),1)
+					}else:if(userfx_params.cnt.1>=1.0f){
+						stat1=b2c(c2bnow)
+						user_beat.cnt=int((double(c2bnow)+double(cnowfx-stat1)/(b2c(c2bnow+1)-stat1))/userfx_params.cnt.1)
+					}else:user_beat.cnt=0
+					if(((user_beat.cnt!=user_beatp.cnt)|(c2bnow!=c2bnowp))&(userfx_params.cnt.1>0.0f)&(userfx_params.cnt.1<1.0f)&((feffectnow.0=100+cnt)|(feffectnow.1=100+cnt)|(cnt>=userfxnum-userfilternum))){
+						if(_cnt!=0){
+							user_trigger.cnt=1-user_trigger.cnt
+							BASS_VST_SetParam_R hFX_User.cnt,0,double(user_trigger.cnt)
+						}
+					}
+				}
+				user_beatp.cnt=user_beat.cnt
+			loop
+			c2bnowp=c2bnow
+			c2bnowp_50ms=c2bnow_50ms
+		}
+	}
+	return

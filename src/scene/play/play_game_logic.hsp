@@ -112,3 +112,171 @@
 		analogmode=mode_hide
 	}
 	return
+
+#deffunc calculateCurrentTick
+	cnow=0
+	tt=0
+	if(bpmlnum>0){
+		repeat bpmlnum-max(bpmlcfcnt,1),max(bpmlcfcnt,1)
+			if(bpml.cnt.2<t){
+				tt=bpml.cnt.2
+				cnow=bpml.cnt.0
+				bpmlcfcnt=cnt
+			}else:break
+		loop
+		bpm=bpml.bpmlcfcnt.1
+		cnow+=int(round(double(t-tt)*bpm/24000))
+	}
+	return
+
+#deffunc specifyJudgmentTargetOfButtonNotes
+	de=0
+	repeat 6
+		tcnt=cnt
+		rcnt=jfcnt.tcnt
+		repeat
+			if((rcnt>=notenum)|(rcnt<0)):break
+			if(note.rcnt.0!=tcnt){
+				jfcnt.tcnt=rcnt
+				rcnt++
+			}else{
+				// ショート/ロングオブジェクト (一番近いものを決定)
+				if(t-note.rcnt.4>200):jfcnt.tcnt=rcnt
+				if(noteresult.rcnt=0){
+					stat1=note.rcnt.3
+					if((note.rcnt.2=0)&((abs(stat1-(t-judgedelay)+de)<abs(arstat.tcnt.0))|(arstat.tcnt.1=0))){
+						arstat.tcnt.0=stat1-(t-judgedelay)+de // 距離
+						arstat.tcnt.1=1 // ノーツ存在フラグ
+						arstat.tcnt.2=rcnt // ノート番号
+						arfcnt.tcnt=rcnt // ノート番号
+					}else:if((note.rcnt.2>0)&(stat1-(t-judgedelay)+de<=150)&((abs(note.rcnt.3-(t-judgedelay))<abs(arstat.tcnt.0))|(arstat.tcnt.1=0))&(note.rcnt.1+note.rcnt.2>cnow)){
+						arstat.tcnt.0=stat1-(t-judgedelay)+de // 距離
+						arstat.tcnt.1=1 // ノーツ存在フラグ
+						arstat.tcnt.2=rcnt // ノート番号
+						arfcnt.tcnt=rcnt // ノート番号
+						break
+					}else:if((note.rcnt.2=0)&(abs(stat1-(t-judgedelay)+de)>=abs(arstat.(note.rcnt.0).0))&(arstat.tcnt.1=1)&(note.rcnt.1>cnow)){
+						break
+					}else:if((note.rcnt.2>0)&(stat1-(t-judgedelay)+de>200)&(arstat.tcnt.1=1)&(note.rcnt.1>cnow)){
+						break
+					}
+				}
+				rcnt=note.rcnt.5
+			}
+		loop
+	loop
+	return
+
+#deffunc specifyJudgmentTargetOfLaserNotes
+	repeat analognum-min(analogjfcnt.0,analogjfcnt.1),min(analogjfcnt.0,analogjfcnt.1)
+		if(analog.cnt.6-max(t,t-analogdelay)>=2100):break
+		if(min(min(min(t+ttp2+30,t+ttp*adj),t+ttp*adj-analogdelay),t)>analog.cnt.7){
+			analogjfcnt.(analog.cnt.0)=cnt
+			continue
+		}
+		// アナログデバイス (被っているor被る予定のものを早い者勝ちで決定)
+		if(arstat.(6+analog.cnt.0).0=0){
+			if((analog.cnt.6-(t-analogdelay)<2100)&(analog.cnt.7>t-analogdelay)){
+				arstat.(6+analog.cnt.0).0=1 // 現在被っているor被る予定か
+				arstat.(6+analog.cnt.0).1=cnt // ノート番号
+				arstat.(6+analog.cnt.0).2=analog.cnt.5 // アナログデバイスの始点か
+			}
+		}else:if(arstat.6.0+arstat.7.0=2){
+			break
+		}
+	loop
+	return
+
+#deffunc processLaneSpin
+	spinangle=0.0f
+	spinangles=0.0f
+	if(spinnow.0>=0){
+		if(spinnow.1+spinnow.2<cnow+sttp*adj){
+			spinnow.0=-1
+			spinangle=0.0f
+		}else:if((spinnow.2>0)&(spinnow.1<=cnow+sttp*adj)){
+			if(spinnow.0<2){
+				// 通常の回転
+				if(((cnow+sttp*adj-bgmouikkaic>bgmouikkai/2)|(bgmouikkai=0))&(spinnow.3>bgmouikkaicnt)){
+					bgmouikkaic=cnow+sttp*adj
+					bgmouikkai=spinnow.2*75/100
+					bgmouikkaia=1-spinnow.0*2
+					bgmouikkaicnt=spinnow.3
+					bgmouikkaikaisu=2
+				}
+				spinangle=675.0f*(cnow+sttp*adj-spinnow.1)/spinnow.2
+				spinangles=520.0f*(cnow+sttp*adj-spinnow.1)/spinnow.2
+				if(spinangle<360.0f){
+					spinangle=sin(double(spinangle)*0.75f/360.0f)*360.0f/sin(0.75f)
+				}else:if(spinangle<440.0f){
+					dstat=sin(deg2rad((spinangle-360.0f)*90.0f/80.0f))
+					dstat*=30.0f
+					spinangle=360.0f+dstat
+				}else{
+					dstat=675.0f-spinangle
+					dstat*=90.0f
+					dstat/=235.0f
+					dstat=cos(deg2rad(dstat))*cos(deg2rad(dstat))
+					dstat*=30.0f
+					spinangle=30.0f-dstat
+				}
+				spinangle*=1-spinnow.0*2
+				spinangles*=1-spinnow.0*2
+				spinanglepp=spinangle
+			}else{
+				// 半回転
+				if(((cnow+sttp*adj-bgmouikkaic>bgmouikkai/2)|(bgmouikkai=0))&(spinnow.3>bgmouikkaicnt)){
+					bgmouikkaic=cnow+sttp*adj
+					bgmouikkai=spinnow.2*75/100
+					bgmouikkaia=1-(spinnow.0-2)*2
+					bgmouikkaicnt=spinnow.3
+					bgmouikkaikaisu=1
+				}
+				spinangle=400.0f*(cnow+sttp*adj-spinnow.1)/spinnow.2
+				spinangles=520.0f*(cnow+sttp*adj-spinnow.1)/spinnow.2
+				if(spinangle<110.0f){
+					spinangle=sin(double(spinangle)*1.8/110)/sin(1.8)*60
+				}else:if(spinangle<220.0f){
+					spinangle=(cos(double(spinangle-110)*1.8/110)-cos(1.8))/(1.0-cos(1.8))*60
+				}else:if(spinangle<310.0f){
+					spinangle=-sin(double(spinangle-220)*1.8/90)/sin(1.8)*15
+				}else{
+					spinangle=-(cos(double(spinangle-310)*1.8/90)-cos(1.8))/(1.0-cos(1.8))*15
+				}
+				spinangle*=1-(spinnow.0-2)*2
+				spinangles*=1-(spinnow.0-2)*2
+				spinanglepp=spinangle
+			}
+		}
+		spintp=t+ttp*adj+75*adj3
+		spincp=cnow+sttp*adj
+	}
+	return
+
+#deffunc calculateTotalScore
+	tochu=(critical+near+errorn<totalcombo)
+	ddim dstat,1
+	if(shortnum+shljnum+lshnum+longjnum+analoganjnum+analogjnum>0){
+		dstat=double(10000000)/(shortnum+shljnum+lshnum+longjnum+analoganjnum+analogjnum)/2
+	}else{
+		dstat=0
+	}
+	if(critical=totalcombo){
+		totalscore=10000000
+	}else{
+		totalscore=int(dstat*(critical*2+near))
+	}
+	return
+
+#deffunc calculateDisplayedTotalScore
+	if(totalscorep!=totalscore){
+		totalscore_disp_base=totalscorep
+		totalscore_disp_baset=t
+	}
+	if((t>=totalscore_disp_baset)&(t-totalscore_disp_baset<200)){
+		totalscore_disp=totalscore_disp_base+int(double(totalscore-totalscore_disp_base)*(t-totalscore_disp_baset)/200) // 推移中のスコアを表示
+	}else{
+		totalscore_disp=totalscore // 時間が経っていれば真のスコアを表示
+	}
+	totalscorep=totalscore
+	return

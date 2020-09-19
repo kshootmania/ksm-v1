@@ -7,6 +7,7 @@
 #include "src/scene/play/play_chart_load.hsp"
 #include "src/scene/play/play_game_logic.hsp"
 #include "src/scene/play/play_graphics.hsp"
+#include "src/scene/play/play_audio.hsp"
 #include "src/scene/play/play_audio_effects.hsp"
 #include "src/scene/play/play_utils.hsp"
 #include "src/scene/play/play_splash_screen.hsp"

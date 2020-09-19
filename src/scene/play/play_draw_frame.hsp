@@ -1069,19 +1069,19 @@
 		}
 	}
 	
-	; ゲージ外枠
+	// ゲージ外枠
 	pos scrsize_w/2+round(erxsh1*scrsize_h/480),round(erysh1*scrsize_h/480)
 	hgcopy_a tex_er,round((192.0f*errate1)*scrsize_h/480)*((effratetype+1)*(iscourse=0)+2*(iscourse=1))*2+((effratetype<=0)&(iscourse=0))*(stat1>=70)*round((192.0f*errate1)*scrsize_h/480)+((effratetype=1)|(iscourse=1))*(stat1>=30)*round((192.0f*errate1)*scrsize_h/480),0,round((192.0f*errate1)*scrsize_h/480),round(double(570.0f*errate1)*scrsize_h/480),3,255
 	
-	; ゲージ自体(内部)
+	// ゲージ自体(内部)
 	pos scrsize_w/2+round(erxsh1*scrsize_h/480)+int((34.0f*errate1)*scrsize_h/480),round(erysh1*scrsize_h/480)+round(126.0f*errate1*scrsize_h/480)+ceil(435.0f*errate1*scrsize_h/480)-ceil(435.0f*errate1*scrsize_h/480)*stat1/100
 	hgcopy_a tex_er_g,ceil(48.0f*errate1*scrsize_h/480)*2*(effratetype+1)+((effratetype<=0)&(iscourse=0))*((stat1>=70)*ceil(48.0f*errate1*scrsize_h/480))+((effratetype=1)|(iscourse=1))*((stat1>=30)*ceil(48.0f*errate1*scrsize_h/480)),ceil(435.0f*errate1*scrsize_h/480)-ceil(435.0f*errate1*scrsize_h/480)*stat1/100,ceil(48.0f*errate1*scrsize_h/480),ceil(435.0f*errate1*scrsize_h/480)*stat1/100,5,255
 	
-	; ゲージエフェクト
+	// ゲージエフェクト
 	pos scrsize_w/2+round(erxsh1*scrsize_h/480)+int((34.0f*errate1)*scrsize_h/480),round(erysh1*scrsize_h/480)+round(126.0f*errate1*scrsize_h/480)+ceil(435.0f*errate1*scrsize_h/480)-ceil(435.0f*errate1*scrsize_h/480)*stat1/100
 	hgcopy_a tex_er_g_pattern,ceil(48.0f*errate1*scrsize_h/480)*2*(effratetype+1)+((effratetype<=0)&(iscourse=0))*((stat1>=70)*ceil(48.0f*errate1*scrsize_h/480))+((effratetype=1)|(iscourse=1))*((stat1>=30)*ceil(48.0f*errate1*scrsize_h/480)),ceil(435.0f*errate1*scrsize_h/480)*2*(((cnow-cnowstart)*2/3)\UNIT_MEASURE)/UNIT_MEASURE+ceil(435.0f*errate1*scrsize_h/480)-ceil(435.0f*errate1*scrsize_h/480)*stat1/100,ceil(48.0f*errate1*scrsize_h/480),ceil(435.0f*errate1*scrsize_h/480)*stat1/100,5,255
 	
-	; ゲージパーセント表示
+	// ゲージパーセント表示
 	pos scrsize_w/2+round(erxsh1*scrsize_h/480)+round(72.0f*errate1*scrsize_h/480),round(erysh1*scrsize_h/480)+round(127.0f*errate1*scrsize_h/480)+ceil(435.0f*errate1*scrsize_h/480)-ceil(435.0f*errate1*scrsize_h/480)*stat1/100-round(42.0f*errate1*scrsize_h/480/2)
 	hgcopy_a tex_er_p,0,0,round(96.0f*errate1*scrsize_h/480),round(42.0f*errate1*scrsize_h/480),3,255
 	
@@ -1090,7 +1090,7 @@
 		pos scrsize_w/2+round(erxsh1*scrsize_h/480)+round((144.0f-20.0f*(strlen(stat2)-cnt))*errate1*scrsize_h/480),round(erysh1*scrsize_h/480)+round(127.0f*errate1*scrsize_h/480)+ceil(435.0f*errate1*scrsize_h/480)-ceil(435.0f*errate1*scrsize_h/480)*stat1/100-round(15.9f*errate1*scrsize_h/480/2)
 		hgzoom_a round(16.0f*errate1*scrsize_h/480),round(15.9f*errate1*scrsize_h/480),tex_num0,0,120*int(strmid(stat2,cnt,1)),136,120,3,255
 	loop
-	
+
 	gmode 0
 	if(mendt!=-1){
 		if(((effratetype>0)|(iscourse=1))&(gauge/1000<=0)){
@@ -1121,7 +1121,7 @@
 			fadeoutfl=1
 		}
 		if((d3timerstat-mendat>=1000+2400*((mendtype=0)&(((effratetype<=0)&(iscourse=0))|(gauge/1000>0))))&(output=0)){
-			// フェードアウト
+			// プレイ終了時のフェードアウト
 			if(fadeoutfl=0){
 				foreach mid
 					if(cnt!=stat1):BASS_ChannelSetAttribute mid.cnt,2,0.0
@@ -1138,5 +1138,30 @@
 			color 0,0,0
 			hgrect 0.0f,0.0f,0.0f,scrsize_w*4,scrsize_h*4
 		}
+
+		// プレイ開始時のフェードイン
+		if(t<500-3400-1000*(cmovfile!="")){
+			gmode 3,,,256*(500-3400-1000*(cmovfile!="")-t)/500
+			color 0,0,0
+			hgrect 0.0f,0.0f,0.0f,scrsize_w*4,scrsize_h*4
+		}
 	}
+
+	return
+
+#deffunc saveFrameImage
+	gsel 0
+	hgcapture2 0,0,0,scrsize_w,scrsize_h,0,0
+	alSelectImage 50
+	alCopyScreenToImage 0,50
+	if(outputds>1){
+		alStretchImageToImage 50,50,0,0,alGetWidth(),alGetHeight(),0,0,alGetWidth()/outputds,alGetHeight()/outputds
+	}
+	alSelectImage 50
+	stat1=str(cnt)
+	stat2=""
+	repeat max(6-strlen(stat1),0)
+		stat2+="0"
+	loop
+	alSaveFile outputpath+stat2+cnt+".png", "image/png",0,0,alGetWidth()/outputds,alGetHeight()/outputds
 	return
