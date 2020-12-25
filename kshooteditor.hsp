@@ -148,6 +148,7 @@
 #enum CMD_TOOL_ANALOGDETAIL0
 #enum CMD_TOOL_ANALOGDETAIL1
 #enum CMD_TOOL_ANALOGDETAIL2
+#enum CMD_TOOL_DIRECTCHARTEDITING
 
 #enum MODE_POINT = 0
 #enum MODE_PENCIL
@@ -392,6 +393,7 @@ edittarget=0
 disableanan=1
 disableanmin=1
 anaranadjpos=1
+isDirectChartEditingEnabled = 0
 
 vol=100
 
@@ -750,6 +752,7 @@ addmenu htoolmenu, "", 0, 0x0800
 addmenu htoolmenu, lang.4.55/*"16分挿入時に直角LASERの連続を避ける (推奨)"*/, CMD_TOOL_DISABLEANAN, 0x08
 addmenu htoolmenu, lang.4.56/*"幅の小さい直角LASERの挿入を避ける (推奨)"*/, CMD_TOOL_DISABLEANMIN, 0x08
 addmenu htoolmenu, lang.4.60/*"はみ出しLASER挿入時に始点位置を通常の標準位置にする"*/, CMD_TOOL_ANARAN2XSTARTPOS, 0x08
+addmenu htoolmenu, lang.4.70/*"注釈による譜面ファイルの直接編集を有効にする"*/, CMD_TOOL_DIRECTCHARTEDITING, 0x08 * isDirectChartEditingEnabled
 newmenu hplayvolmenu, 1
 addmenu hplayvolmenu, lang.5.30/*"100%"*/, CMD_PLAY_VOL_100, 0x08
 addmenu hplayvolmenu, lang.5.31/*" 75%"*/, CMD_PLAY_VOL_75, 0x00
@@ -1464,6 +1467,8 @@ stop
 		pos (41+9*2)/2+3,(vyoko*vtate)*vUNIT_MEASURE-(vzoom(anvol.cnt.0)-posnow*vtate*UNIT_MEASURE)*rate/100-8-stat2*9-1
 		mes str(anvol.cnt.1)
 	loop
+
+	// 注釈の描画
 	gmode 5,,,256
 	commentfcnt=0
 	repeat commentnum
@@ -1505,7 +1510,19 @@ stop
 			if(anvol.cnt.0=comment.cnt2):stat2++
 			if(anvol.cnt.0>comment.cnt2):break
 		loop
-		if(strmid(commentstr.cnt,0,3)="fx:"){
+		if (isDirectChartEditingEnabled | (strmid(commentstr.cnt,0,2)="//")) {
+			color 220,180,140
+			line (41+9*2)/2,(vyoko*vtate)*vUNIT_MEASURE-(vzoom(comment.cnt)-posnow*vtate*UNIT_MEASURE)*rate/100,(41+9*2)/2+41+9*2+1,(vyoko*vtate)*vUNIT_MEASURE-(vzoom(comment.cnt)-posnow*vtate*UNIT_MEASURE)*rate/100
+			if(isutf8=1){
+				stat1=sjisenc(commentstr.cnt)
+			}else:stat1=commentstr.cnt
+			stat1 = strmid(stat1, 2*(1 - isDirectChartEditingEnabled), 512) // 注釈による直接編集が有効の場合は注釈先頭の"//"も表示する
+			CoAutoLF stat1,_kaigyobuf,13
+			CoAutoLF _kaigyobuf,_kaigyobuf2,13,1
+			notesel _kaigyobuf2
+			pos (41+9*2)/2+3,(vyoko*vtate)*vUNIT_MEASURE-(vzoom(comment.cnt)-posnow*vtate*UNIT_MEASURE)*rate/100-stat2*9-getstrh(hdc,_kaigyobuf2)
+			mes _kaigyobuf2
+		}else:if(strmid(commentstr.cnt,0,3)="fx:"){
 			color 180,220,140
 			line (41+9*2)/2,(vyoko*vtate)*vUNIT_MEASURE-(vzoom(comment.cnt)-posnow*vtate*UNIT_MEASURE)*rate/100,(41+9*2)/2+41+9*2+1,(vyoko*vtate)*vUNIT_MEASURE-(vzoom(comment.cnt)-posnow*vtate*UNIT_MEASURE)*rate/100
 			pos (41+9*2)/2+3,(vyoko*vtate)*vUNIT_MEASURE-(vzoom(comment.cnt)-posnow*vtate*UNIT_MEASURE)*rate/100-8-stat2*9-1-9
@@ -1534,18 +1551,6 @@ stop
 			}else{
 				mes strmid(commentstr.cnt,7+instr(commentstr.cnt,7,":")+1,12)+"..."
 			}
-		}else:if(strmid(commentstr.cnt,0,2)="//"){
-			color 220,180,140
-			line (41+9*2)/2,(vyoko*vtate)*vUNIT_MEASURE-(vzoom(comment.cnt)-posnow*vtate*UNIT_MEASURE)*rate/100,(41+9*2)/2+41+9*2+1,(vyoko*vtate)*vUNIT_MEASURE-(vzoom(comment.cnt)-posnow*vtate*UNIT_MEASURE)*rate/100
-			if(isutf8=1){
-				stat1=sjisenc(commentstr.cnt)
-			}else:stat1=commentstr.cnt
-			stat1=strmid(stat1,2,256)
-			CoAutoLF stat1,_kaigyobuf,13
-			CoAutoLF _kaigyobuf,_kaigyobuf2,13,1
-			notesel _kaigyobuf2
-			pos (41+9*2)/2+3,(vyoko*vtate)*vUNIT_MEASURE-(vzoom(comment.cnt)-posnow*vtate*UNIT_MEASURE)*rate/100-stat2*9-getstrh(hdc,_kaigyobuf2)
-			mes _kaigyobuf2
 		}
 	loop
 	color 150,240,60
@@ -6398,8 +6403,8 @@ stop
 			stat1=0 // ループ中に削除された配列要素の個数を表す一時変数
 			repeat commentnum
 				// 注釈("//"から始まるもの)のみを削除
-				// (配列commentにはユーザー定義エフェクトのパラメータ変更なども含まれている)
-				if(StartsWith(commentstr.(cnt-stat1), "//")){
+				// (直接編集が有効の場合は注釈以外も削除する)
+				if (isDirectChartEditingEnabled | StartsWith(commentstr.(cnt-stat1), "//")) {
 					ardel comment,commentnum,(cnt-stat1)
 					ardel commentstr,commentnum,(cnt-stat1)
 					commentnum--
@@ -6909,6 +6914,10 @@ stop
 	}else:if(cmd=CMD_TOOL_ANARAN2XSTARTPOS){
 		anaranadjpos=1-anaranadjpos
 		CheckMenuItem hmenu, CMD_TOOL_ANARAN2XSTARTPOS, 0x08*anaranadjpos
+	}else:if(cmd=CMD_TOOL_DIRECTCHARTEDITING){
+		isDirectChartEditingEnabled = 1 - isDirectChartEditingEnabled
+		CheckMenuItem hmenu, CMD_TOOL_DIRECTCHARTEDITING, 0x08 * isDirectChartEditingEnabled
+		gosub *draw
 	}else:if(cmd=CMD_VIEW_VSEPMINIMIZE){
 		if(vsep=7){
 			CheckMenuItem hmenu, CMD_VIEW_VSEPMINIMIZE, 0x00
@@ -10938,13 +10947,14 @@ stop
 			sdim opt,128,1
 			i=0
 			stat1=""
-			stat2_=0
-			stat7=commentnum
+			stat2_=0 // 同じ場所に既に注釈が存在するか
+			stat7=commentnum // 同じ場所に存在した注釈のID
+			stat8 = 2 * (1 - isDirectChartEditingEnabled) // 付加される"//"の文字数(直接編集の場合は"//"を付加しないので0)
 			repeat commentnum
-				if((comment.cnt=cc)&(StartsWith(commentstr.cnt, "//"))){
+				if((comment.cnt=cc)&(isDirectChartEditingEnabled | StartsWith(commentstr.cnt, "//"))){
 					stat7=cnt
-					stat2_=1
-					stat1=strmid(commentstr.cnt,2,strlen(commentstr.cnt)-2)
+					stat2_=1 // 注釈が存在した
+					stat1=strmid(commentstr.cnt,stat8,strlen(commentstr.cnt) - stat8)
 					break
 				}else:if(comment.cnt=cc){
 					stat7=cnt
@@ -10957,24 +10967,32 @@ stop
 			_input lang.8.80/*"注釈の挿入"*/,it,t,opt,r,2,INPUT_LARGEWIDTH
 			if((r.0!=stat1)&(stat!=-1)){
 				gosub *undokakuho
-				strrep r.0,"|",""
+				strrep r.0,"|","" // 譜面の行("0000|00|--")と誤る可能性のある文字('|')を除去
+				if (isDirectChartEditingEnabled = 0) {
+					// 直接編集が無効の場合は注釈の内容部分のみが入力対象なので先頭に"//"を付加
+					r.0 = "//" + r.0
+				}
 				if(stat2_=1){
+					// 既存の注釈の上書き
 					if(r.0=""){
+						// 空文字列が指定された場合は注釈を削除
 						ardel comment,commentnum,stat7
 						ardel commentstr,commentnum,stat7
 						commentnum--
 					}else:if(commentstr.stat7!=r.0){
-						commentstr.stat7="//"+r.0
+						// 以前と異なる内容ならば上書き
+						commentstr.stat7=r.0
 						e=1:gosub *refreshtitle
 					}
 				}else{
+					// 注釈の新規挿入
 					for i,commentnum,stat7-1,-1
 						comment.(i+1)=comment.i
 						commentstr.(i+1)=commentstr.i
 					next
 					commentnum++
 					comment.stat7=cc
-					commentstr.stat7="//"+r.0
+					commentstr.stat7=r.0
 					e=1:gosub *refreshtitle
 				}
 			}

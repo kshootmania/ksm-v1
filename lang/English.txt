@@ -277,6 +277,7 @@ e04-052|LASER object placement: Very fine
 e04-055|Prevent adding repeated LASER slams when editing on 1/16th (Recommended)
 e04-056|Prevent adding narrow LASER slams (Recommended)
 e04-060|Wide range LASERs start from default position
+e04-070|Enable direct editing of KSH files with the comment feature
 e05-000|&Play
 e05-010|&Play/Stop\tSpace
 e05-015|Lane scrolls with cursor(&Y)

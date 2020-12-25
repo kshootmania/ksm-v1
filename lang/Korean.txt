@@ -277,6 +277,7 @@ e04-052|LASER 오브젝트 배치: 가장 세밀하게
 e04-055|16분음 삽입시 직각 LASER 지속입력을 방지 (권장)
 e04-056|폭이 좁은 직각 LASER 삽입을 방지 (권장)
 e04-060|레인 이탈 LASER 삽입시 시작 지점을 통상 표준 위치로 지정
+e04-070|Enable direct editing of KSH files with the comment feature
 e05-000|재생(&P)
 e05-010|재생/정지(&P)\tSpace
 e05-015|채보 화면 스크롤 활성화(&Y)

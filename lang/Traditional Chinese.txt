@@ -277,6 +277,7 @@ e04-052|LASER對象的配置: 非常詳細
 e04-055|防止16分編輯時直角LASER連續插入 (推薦)
 e04-056|防止在直角LASER中插入方向 (推薦)
 e04-060|插入外擴LASER時起始位置通常為標准位置
+e04-070|Enable direct editing of KSH files with the comment feature
 e05-000|播放(&P)
 e05-010|播放(&P)/停止(&S)\tSpace
 e05-015|播放時跟隨光標移動(&Y)
