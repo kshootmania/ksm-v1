@@ -1511,12 +1511,16 @@ stop
 			if(anvol.cnt.0>comment.cnt2):break
 		loop
 		if (isDirectChartEditingEnabled | (strmid(commentstr.cnt,0,2)="//")) {
-			color 220,180,140
+			if (strmid(commentstr.cnt, 0, 2) = "//") {
+				color 220,180,140
+			} else {
+				color 180,220,140
+			}
 			line (41+9*2)/2,(vyoko*vtate)*vUNIT_MEASURE-(vzoom(comment.cnt)-posnow*vtate*UNIT_MEASURE)*rate/100,(41+9*2)/2+41+9*2+1,(vyoko*vtate)*vUNIT_MEASURE-(vzoom(comment.cnt)-posnow*vtate*UNIT_MEASURE)*rate/100
 			if(isutf8=1){
 				stat1=sjisenc(commentstr.cnt)
 			}else:stat1=commentstr.cnt
-			stat1 = strmid(stat1, 2*(1 - isDirectChartEditingEnabled), 512) // 注釈による直接編集が有効の場合は注釈先頭の"//"も表示する
+			stat1 = strmid(stat1, 2 * (1 - isDirectChartEditingEnabled), 512) // 注釈による直接編集が有効の場合は注釈先頭の"//"も表示する
 			CoAutoLF stat1,_kaigyobuf,13
 			CoAutoLF _kaigyobuf,_kaigyobuf2,13,1
 			notesel _kaigyobuf2
