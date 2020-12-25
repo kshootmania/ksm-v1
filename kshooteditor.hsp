@@ -6391,14 +6391,19 @@ stop
 		gosub *draw
 		gosub *refreshtitle
 	}else:if(cmd=CMD_EDIT_CLEARCOMMENT){
+		// 注釈の全消去
 		if(pendfl!=-1):pendfl=1:return
 		if(commentnum>0){
 			gosub *undokakuho
+			stat1=0 // ループ中に削除された配列要素の個数を表す一時変数
 			repeat commentnum
-				if(StartsWith(commentstr.cnt, "//")){
-					ardel comment,commentnum,cnt
-					ardel commentstr,commentnum,cnt
+				// 注釈("//"から始まるもの)のみを削除
+				// (配列commentにはユーザー定義エフェクトのパラメータ変更なども含まれている)
+				if(StartsWith(commentstr.(cnt-stat1), "//")){
+					ardel comment,commentnum,(cnt-stat1)
+					ardel commentstr,commentnum,(cnt-stat1)
 					commentnum--
+					stat1++
 					e=1
 				}
 			loop
