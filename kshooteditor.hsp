@@ -278,8 +278,8 @@ dim anafil,131072,3
 dim anvol,131072,3
 dim anse,131072,2
 dim beatl,131072,3
-dim comment,512
-sdim commentstr,512,1024
+dim comment,8192
+sdim commentstr,512,8192
 
 ud_cnt=0
 ud_cur=0
@@ -301,8 +301,8 @@ dim ud_beatl,131072,3,UNDO_MAX
 dim ud_stp,131072,2,UNDO_MAX
 dim ud_analogparent,131072,UNDO_MAX
 dim ud_analogparentran,131072,UNDO_MAX
-dim ud_comment,512,UNDO_MAX
-sdim ud_commentstr,512,1280,UNDO_MAX
+dim ud_comment,8192,UNDO_MAX
+sdim ud_commentstr,512,8192,UNDO_MAX
 dim ud_num,16,UNDO_MAX
 
 dim div,131072
