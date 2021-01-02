@@ -272,9 +272,6 @@
 		d.cnt=buf2
 	loop
 
-	// バッファを初期化(メモリを食うので)
-	buf=""
-
 	// 各小節ごとの譜面行の行数(分解能)を調べる
 	dim div,8192
 	divnum=0
@@ -301,6 +298,9 @@
 
 	// IR用に正規化後のファイルハッシュを計算
 	csongmd5hash_ir_chart = getChartIRHash(buf)
+
+	// バッファを初期化(メモリを食うので)
+	buf=""
 
 	return
 
