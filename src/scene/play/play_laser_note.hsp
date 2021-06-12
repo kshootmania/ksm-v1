@@ -24,18 +24,20 @@
 	ddim ro,2         // レーンの傾き
 	sh=0
 	analognow=-1,-1    // 理想カーソル位置として使用される値(判定調整に依存)
-	panalognow=0,1000  // LASER音声エフェクトに使用される値(バッファリングによるエフェクトのタイミングずれを考慮したもの)
+	panalognow=0,1000  // LASER音声エフェクトに使用される値(バッファリングによるエフェクトのタイミングずれを考慮したもの、pはPeaking filterの頭文字)
 	panalognow2=-1,-1  // LASER音声エフェクトに使用される値(上のものをLASER非アクティブ時を-1にしたもの)
-	canalognow=-1,-1   // 理想カーソル位置として使用される値(判定調整に非依存)
+	canalognow=-1,-1   // 理想カーソル位置として使用される値(判定調整に非依存, cはcursorの頭文字)
 	canalognow2=-1,-1  // 理想カーソル位置として使用される値(上のものをLASER非アクティブ時を-1にしたもの)
 	analogfuture=-1,-1 // 30ms後のanalognowの値(LASER判定の補正およびLASER音声エフェクトで理想値を鳴らすかどうかの判断に活用)
-	dim prerofl,2
+	dim prerofl,2 // 事前傾きフラグ(PRE-ROtation FLag)
 	repeat analognum-min(analogjfcnt.0,analogjfcnt.1),min(analogjfcnt.0,analogjfcnt.1)
 		if((min(min(analog.cnt.6-(t+ttp2),analog.cnt.6-(t)),analog.cnt.6-(t-analogdelay))>0)&(analog.cnt.1>cnow+UNIT_MEASURE_2)):break
 		if((t+30>=analog.cnt.6)&(t-analogdelay+30<analog.cnt.7)){
+			// 30ms後のanalognowの値を取得
 			analogfuture.(analog.cnt.0)=x20(analog.cnt.3)+(x20(analog.cnt.4)-x20(analog.cnt.3))*(analog.cnt.7-analog.cnt.6-(analog.cnt.7-(t+30)))/(analog.cnt.7-analog.cnt.6)
 		}
 		if((analog.cnt.6<=t+ttp2)&(analog.cnt.7>t+ttp2)){
+			// バッファリングによるエフェクトのタイミングずれを考慮した値panalognowを取得
 			if(analog.cnt.2<=UNIT_MEASURE_32){
 				panalognow.(analog.cnt.0)=x20(analog.cnt.4)*(analog.cnt.8=0)+1000*analog.cnt.0*(analog.cnt.8=1)
 				if(analog.cnt.8=0):panalognow2.(analog.cnt.0)=panalognow.(analog.cnt.0)
@@ -45,6 +47,7 @@
 			}
 		}
 		if((analog.cnt.6<=t)&(analog.cnt.7>t)){
+			// 理想カーソル位置として使用される値canalognowを取得
 			if(analog.cnt.2<=UNIT_MEASURE_32){
 				if(analog.cnt.8=0){
 					if(analog.cnt.0=0){
@@ -63,6 +66,7 @@
 				canalognow.(analog.cnt.0)=x20(analog.cnt.3)+(x20(analog.cnt.4)-x20(analog.cnt.3))*(analog.cnt.7-analog.cnt.6-(analog.cnt.7-(t)))/(analog.cnt.7-analog.cnt.6)
 			}
 		}else:if((analog.cnt.1<=cnow+UNIT_MEASURE_2)&(analog.cnt.1>cnow)&(canalognow.(analog.cnt.0)=-1)&(prerofl.(analog.cnt.0)=0)){
+			// 1/2小節前の事前傾き
 			if(analog.cnt.0=0){
 				ro.0+=double(analog.cnt.3)*20//*min((cnow+UNIT_MEASURE_2)-analog.cnt.1,UNIT_MEASURE_4)/(UNIT_MEASURE_4)
 			}else{
@@ -71,6 +75,7 @@
 			prerofl.(analog.cnt.0)=1
 		}
 		if((analog.cnt.6<=t-analogdelay)&(analog.cnt.7>t-analogdelay)){
+			// 判定に使用する値analognowを取得
 			if(analog.cnt.2<=UNIT_MEASURE_32){
 				analognow.(analog.cnt.0)=x20(analog.cnt.4)
 			}else{
