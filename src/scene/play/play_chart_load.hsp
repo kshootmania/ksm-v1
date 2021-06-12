@@ -894,7 +894,6 @@
 
 #deffunc parseKSHChartBody
 	ddim rorp,1
-	ddim ror_p,1
 	cnt3=-1
 	cnt2a=-1
 	stat4=0

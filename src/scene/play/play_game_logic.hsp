@@ -10,9 +10,7 @@
 	analogcnt=0
 	chocnt=0
 	mfl=0
-	mflp=0
 	vfl=0
-	vflp=0
 	mstop=0
 	mshift=0
 	mtotalshift=0
@@ -20,7 +18,6 @@
 	mendc=-1
 	mendat=-1
 	fadeoutfl=0
-	ldelayresett=-5000
 	at=0
 	bpm=120000
 	beatn=4
@@ -43,7 +40,6 @@
 	ttp_=16.6f
 	laserdelay0_orig=bufferlength-soundfx_delay-GLOBAL_SOUNDFX_DELAY
 	t_mo=-50000
-	t_mop=-50000
 	t_moex=0
 	chainvt=-1
 	chainefft=-1

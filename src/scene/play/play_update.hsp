@@ -139,9 +139,7 @@
 
 	// 次フレーム用に値を保管
 	peffstatap=peffstata.0,peffstata.1
-	canagainp=canagain
 	filtertypep=filtertype
-	filtertype2p=filtertype2
 
 	// 画面回転の計算
 	processLaneSpin	
@@ -199,13 +197,8 @@
 	// 次フレーム用に各種値を保管
 	rop=ro.0,ro.1
 	rorp=ror
-	tiltrnowp=tiltrnow
 	tiltnowp=tiltnow
 	tp=t
-	tp2=tstat
-	t_mop=t_mo
-	rtp=rt
-	atp=at
 	bpmp=bpm
 	bpmfxp=bpmfx
 	repeat 8
@@ -228,7 +221,6 @@
 	ztiltnowp=ztiltnow
 	ztiltratep=ztiltrate
 	cnowp=cnow
-	cnowfxp=cnowfx
 
 	// IMEの無効化
 	if(output=0){

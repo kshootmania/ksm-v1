@@ -550,7 +550,6 @@
 	fast=0
 	slow=0
 	ddim tiltrnow,1
-	ddim tiltrnowp,1
 	ddim tiltnowstart,1
 	tiltnow=0
 	tiltnowp=0
@@ -565,7 +564,6 @@
 	tiltnowstart=tiltrnow
 	filtertypep=0
 	filtertypep2=0
-	canagainp=0
 	canagainp2=0
 	retr_beat=-1
 	retr_beatp=-2
@@ -722,8 +720,6 @@
 		loop
 	}
 	cnowp=0
-	cnowfxp=0
-	cnowfxp_50ms=0
 	bpmfxp=-1
 	slider=0
 	dim arstat,8,3

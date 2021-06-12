@@ -83,12 +83,10 @@
 		rt=t
 	}else{
 		rt=t
-		tp2=t-16
 	}
 	if((mendt!=-1)&(output=0)){
 		t=d3timer()-mendat+mendt
 	}
-	tstat=t
 	if(cnt=0):tp=t-16
 	if(output=1):t=at
 	t_tp=t-tp
@@ -137,7 +135,6 @@
 			mfl=1
 		}
 	}
-	mflp=mfl
 	return
 
 #deffunc fixPlaybackDelay

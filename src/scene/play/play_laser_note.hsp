@@ -17,9 +17,6 @@
 			}else:break
 		loop
 	}
-	if(filtertype!=filtertypep){
-		ldelayresett=t
-	}
 	// アナログデバイスによる傾き処理
 	ddim ro,2         // レーンの傾き
 	sh=0
@@ -127,13 +124,6 @@
 	tiltrnow=double(max(tiltnowslidet,16)-max(min(t-tiltnowt,max(tiltnowslidet,16)),0))*tiltnowstart/max(tiltnowslidet,16)+double(max(min(t-tiltnowt,max(tiltnowslidet,16)),0))*romaxstat.2/max(tiltnowslidet,16)
 	ddim ror,1
 	ror=ro.0+ro.1
-	rotimed=2
-	if((csongver!="")&(strmid(csongver,0,3)!="120")&(t-tiltnowt<150)&(ror=0)&(tiltnow<3)&((tiltpre>=3)|(tiltnow>tiltpre))):ror=double(tiltnowstart2):rotimed=3
-	ddim rotime2,1
-	rotime2=rotime*(0.15f+0.85f*minf(maxf(absf(double(ror)-double(rorp)),100.0f),400.0f)/400.0f)+25.0*(2*(abs(ro.0+ro.1)>=980)+7*(abs(ro.0+ro.1)<=20))
-	rotime2*=2
-	rotime2/=rotimed
-	ror_p=ror
 
 	// 傾きの値に向けて線形に推移
 	speed=4.5f

@@ -15687,8 +15687,6 @@ stop
 		cnow=min(cnowf,cnowf+cnowflen)
 		cnowp=min(cnowf,cnowf+cnowflen)
 		cnowfx=0
-		cnowfxp=0
-		cnowfxp_50ms=0
 		dim tickp,6
 		repeat 6
 			tickp.cnt=-1
@@ -16793,7 +16791,6 @@ stop
 			tpp=tp
 			tp=t
 			cnowp=cnow
-			cnowfxp=cnowfx
 			gsel 0
 			await 1
 		loop

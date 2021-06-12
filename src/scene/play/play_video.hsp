@@ -25,5 +25,4 @@
 			vfl=1
 		}
 	}
-    vflp=vfl
     return
