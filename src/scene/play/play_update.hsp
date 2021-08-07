@@ -159,8 +159,8 @@
 	gsel 0
 	if(output=0){
 		if(vsync=1){
-			if(cnt=0):d3d9vsync_init 60,0
-			d3d9vsync 0
+			if(cnt=0):d3d9vsync_init 60,1
+			processVsync
 		}
 		hgsync 0
 	}else{
@@ -241,3 +241,23 @@
 	}
 
 	return 1
+
+// ‚’¼“¯Šú‚ðŽÀs(Windows 10‘Î‰ž”Å)
+// ŽQl: http://hsp.tv/play/pforum.php?mode=pastwch&num=88650
+#module
+#deffunc processVsync
+	GetRasterStatus  v,r
+	if r>(ginfo_dispy/2) {
+		repeat
+			_Sleep@mod_d3d9vsync 1
+			GetRasterStatus  v,r
+			if r<(ginfo_dispy/2) {break}
+		loop 
+	}
+	repeat
+		_Sleep@mod_d3d9vsync 1
+		GetRasterStatus  v,r
+		if r>(ginfo_dispy/2) {break}
+	loop
+	return
+#global
