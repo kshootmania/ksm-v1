@@ -657,13 +657,14 @@
 		stat1=-voffset-T_MOEX_DELAY-globaloffset
 		if(stat1<0):mci "seek v to 0"
 	}
+
 	gsel 0
 	redraw 0
 	hgreset
-	selcang
-	objsetf2 0,-M_PI/12,0.0f
-	selcpos
-	objsetf2 1,-45.0f,366.0f
+
+	// ƒJƒƒ‰‚Ì‰Šú‰»
+	initCamera
+
 	buffer 156,82/ra,7/ra
 	pos 0,0
 	gzoom 82/ra,7/ra,1,0,1,82/ra,7
@@ -687,12 +688,6 @@
 	initJudgmentAnimObject
 	initLaserCursorObjects
 
-	// ƒJƒƒ‰‚Ì¶¬
-	initCamera
-
-	stat1=refstr
-	split stat1,",",fvstat
-	fv1=double(fvstat.0)
 	mdelayt=0
 	mrepeat=0
 	minforefresh=1

@@ -238,9 +238,14 @@
 	loop
 	return
 
+// カメラ初期化
+// ※レーンズーム(いわゆる"視点変更")はカメラではなくレーン自体の頂点座標を変更している形であり、カメラの状態は最後までこのまま
 #deffunc initCamera
-	getpos HGOBJ_CAMERA, camx, camy, camz
-	fvset fv1,0.0f,-2.6f,double(vh2)*13/20/2+0.4f
-	fvface fv1,camx,camy,camz
-	fv2str fv1
+	// カメラ向きの設定(下に15度傾ける)
+	selcang
+	objsetf2 0,-M_PI/12,0.0f
+
+	// カメラ位置の設定
+	selcpos
+	objsetf2 1,-45.0f,366.0f
 	return
