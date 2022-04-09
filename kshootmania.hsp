@@ -30,7 +30,6 @@
 #define _sjis_(%1)		if(isutf8=1):%1=sjisenc(%1)
 #define _utf8_(%1)		if(isutf8=1):%1=bom+%1
 #define effratetype		effratetype2 // Å©Ç»Ç∫?
-#define ra				max(powf(2,lowquality),1)
 #define vw				256
 #define vw2				304
 #define vh				1024

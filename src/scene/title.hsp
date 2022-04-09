@@ -10,7 +10,11 @@
 		if(imeget()=1):imeset 0
 		time_scene_start=d3timer()
 		if(prev_scene=SCENE_GATE):sdim glist,0
+		
 		if((prev_scene=SCENE_OPTION)&(imgrefresh=1)){
+			// テクスチャサイズの分母
+			ra=max(powf(2,lowquality),1)
+			
 			gmode 0
 			color 0,0,0
 			pos 0,0
