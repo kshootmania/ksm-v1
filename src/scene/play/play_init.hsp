@@ -665,9 +665,13 @@
 	// カメラの初期化
 	initCamera
 
+	// ロングFXの始点テクスチャ
 	buffer 156,82/ra,7/ra
 	pos 0,0
 	gzoom 82/ra,7/ra,1,0,1,82/ra,7
+
+	// ロングBTの始点テクスチャ
+	// (幅がロングFXの1/2のはずなのにテクスチャ幅が同じなのは、ロングBTは減算テクスチャも含んでいて横幅2倍のため)
 	buffer 157,82/ra,7/ra
 	pos 0,0
 	gzoom 82/ra,7/ra,42,0,1,82/ra,7
@@ -731,7 +735,6 @@
 	}
 	
 	csongfile_empty=(csongfile.0="")|(csongfile.0=".mp3")
-	scrsize480=double(scrsize_h)/480
 
 	// GameSystemの生成
 	game_system = 0

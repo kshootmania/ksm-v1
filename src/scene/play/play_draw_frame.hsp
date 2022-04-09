@@ -308,13 +308,13 @@
 			if(analog.i.0!=cnt0){
 				_continue
 			}else:if(colfl=0):analogfcnt.cnt0=i:colfl=1
-			hsrc12=hsrc(analog.i.1+analog.i.2+(analog.i.2<=UNIT_MEASURE_32),analog.i.7+75*adj3)
+			hsrc12=hsrc(analog.i.1+analog.i.2+(analog.i.2<=UNIT_MEASURE_32),analog.i.7)
 			analogcnt++
 			if(hsrc12<-UNIT_MEASURE_2){
 				analogfcnt.(analog.i.0)=i+1
 				_continue
 			}
-			hsrc1=hsrc(analog.i.1,analog.i.6+75*adj3)
+			hsrc1=hsrc(analog.i.1,analog.i.6)
 			if((hsrc1>UNIT_MEASURE*(vh+200)/(10*hs))&(colfl=1)){
 				_break
 			}

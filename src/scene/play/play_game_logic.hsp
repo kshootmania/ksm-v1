@@ -244,7 +244,7 @@
 				spinanglepp=spinangle
 			}
 		}
-		spintp=t+75*adj3
+		spintp=t
 		spincp=cnow
 	}
 	return

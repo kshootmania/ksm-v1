@@ -31,7 +31,6 @@
 #define _utf8_(%1)		if(isutf8=1):%1=bom+%1
 #define effratetype		effratetype2 // ←なぜ?
 #define ra				max(powf(2,lowquality),1)
-#define lanediv			2
 #define vw				256
 #define vw2				304
 #define vh				1024
@@ -43,9 +42,7 @@
 #define bt_xsh			44
 #define bt_width		42
 #define fx_width		84
-#define vxsh			-750
 #define slshift			0
-#define i3d				0
 #define analograte		106.5
 #define analogxsh		10
 #define errate1			(0.5f*errate2/100)
@@ -284,10 +281,6 @@ hsa=-1
 
 autosync=0
 
-adj=1
-adj2=0
-adj3=0
-
 endtype=0
 
 highquality=0
@@ -335,6 +328,7 @@ valldir=1
 
 hidealldir=0
 
+// マウスカーソルを隠すかどうか
 hidem=0
 
 mx=1
@@ -345,6 +339,7 @@ analogsw=0
 auto_chokkaku_se=0
 auto_note_se=0
 
+// 各HiSpeedの種類を表示するか
 vhstype=1,1,0,0,0
 
 usenumpad=0
@@ -856,12 +851,14 @@ hFont = stat
 
 onexit gosub *exit
 
+// title_img、artist_imgをグレースケール化するためのカラーマトリクス
+// 白色バージョン(楽曲選択・リザルト画面等)
 ddim colmatrix,20
 colmatrix(MAT_R) = 0.0, 0.0, 0.0, 0.0, 1.0
 colmatrix(MAT_G) = 0.0, 0.0, 0.0, 0.0, 1.0
 colmatrix(MAT_B) = 0.0, 0.0, 0.0, 0.0, 1.0
 colmatrix(MAT_A) = 0.299, 0.587, 0.114, 0.0, 0.0
-
+// 黒色バージョン(プレイ前のスプラッシュ画面、プレイ中の左上の表示)
 ddim colmatrix2,20
 colmatrix2(MAT_R) = 0.0, 0.0, 0.0, 0.0, 0.0
 colmatrix2(MAT_G) = 0.0, 0.0, 0.0, 0.0, 0.0
@@ -912,10 +909,10 @@ chdir dir_default + "\\songs"
 prev_scene=SCENE_OPTION
 imgrefresh=1
 keshuoff=1
-dim ke,16
 
 if(hidem=1):mouse -1,-1
 
+// 楽曲プレビュー時のID
 mpid=-1
 
 await 0
@@ -1539,7 +1536,7 @@ end
 		//cnt3=cnt
 		if((scene=SCENE_SELECT)&(keshucnt<3)){
 			if(analoginput=1){
-				if((wparam/*ke.cnt*/=key.(6+analogsw*2))&(timenow-levminustp>50)&(levnow>0)&(keshukeyp=key.(6+2*analogsw))&(keshukeypp=key.(6+2*analogsw))){
+				if((wparam=key.(6+analogsw*2))&(timenow-levminustp>50)&(levnow>0)&(keshukeyp=key.(6+2*analogsw))&(keshukeypp=key.(6+2*analogsw))){
 					stat3=0
 					if((minfostr.selnow.(levnow-1).0!="")&(minfo.j.0.0>=0)){
 						stat1=BASS_SampleGetChannel(sellid,0)
@@ -1604,7 +1601,7 @@ end
 						gosub *refreshjacket
 						gosub *refreshsonginfo
 					}
-				}else:if((wparam/*ke.cnt*/=key.(7+analogsw*2))&(timenow-levplustp>50)&(levnow<3)&(minfo.j.0.0>=0)&(keshukeyp=key.(7+2*analogsw))&(keshukeypp=key.(7+2*analogsw))){
+				}else:if((wparam=key.(7+analogsw*2))&(timenow-levplustp>50)&(levnow<3)&(minfo.j.0.0>=0)&(keshukeyp=key.(7+2*analogsw))&(keshukeypp=key.(7+2*analogsw))){
 					stat3=0
 					if(minfostr.selnow.(levnow+1).0!=""){
 						stat1=BASS_SampleGetChannel(sellid,0)
@@ -1670,7 +1667,7 @@ end
 						gosub *refreshsonginfo
 					}
 				}
-				if((wparam/*ke.cnt*/=key.(8-analogsw*2))&(timenow-selminustp>50)&(keshukeyp=key.(8-2*analogsw))&(keshukeypp=key.(8-2*analogsw))){
+				if((wparam=key.(8-analogsw*2))&(timenow-selminustp>50)&(keshukeyp=key.(8-2*analogsw))&(keshukeypp=key.(8-2*analogsw))){
 					stat1=BASS_SampleGetChannel(selmid,0)
 					BASS_ChannelSetAttribute stat1,2,double(mastervol)/100
 					BASS_ChannelPlay stat1
@@ -1721,7 +1718,7 @@ end
 					gosub *refreshjacketup
 					gosub *refreshscore
 					gosub *refreshsonginfo
-				}else:if((wparam/*ke.cnt*/=key.(9-analogsw*2))&(timenow-selplustp>50)&(keshukeyp=key.(9-2*analogsw))&(keshukeypp=key.(9-2*analogsw))){
+				}else:if((wparam=key.(9-analogsw*2))&(timenow-selplustp>50)&(keshukeyp=key.(9-2*analogsw))&(keshukeypp=key.(9-2*analogsw))){
 					stat1=BASS_SampleGetChannel(selmid,0)
 					BASS_ChannelSetAttribute stat1,2,double(mastervol)/100
 					BASS_ChannelPlay stat1
@@ -1780,7 +1777,7 @@ end
 			if((analoginput=1)&(enter_key2=1)){
 				repeat 2
 					cnt0=cnt
-					if((wparam/*ke.cnt3*/=key.(6+(cnt^analogsw)*2))&(anakp.cnt=0)&(d3timer()-keshuhstp2>50)){
+					if((wparam=key.(6+(cnt^analogsw)*2))&(anakp.cnt=0)&(d3timer()-keshuhstp2>50)){
 						gosub *refreshhs
 						if((hstypenow=0)&(hsr>5)){
 							hsr--
@@ -1795,8 +1792,8 @@ end
 						}
 						keshuhstp2=d3timer()
 						anakp.cnt=-1
-					}else:if(wparam/*ke.cnt3*/=key.(6+(cnt^analogsw)*2)):anakp.cnt=0
-					if((wparam/*ke.cnt3*/=key.(7+(cnt^analogsw)*2))&(anakp.cnt=1)&(d3timer()-keshuhstp2>50)){
+					}else:if(wparam=key.(6+(cnt^analogsw)*2)):anakp.cnt=0
+					if((wparam=key.(7+(cnt^analogsw)*2))&(anakp.cnt=1)&(d3timer()-keshuhstp2>50)){
 						gosub *refreshhs
 						if((hstypenow=0)&(hsr<99)){
 							hsr++
@@ -1811,7 +1808,7 @@ end
 						}
 						keshuhstp2=d3timer()
 						anakp.cnt=-1
-					}else:if(wparam/*ke.cnt3*/=key.(7+(cnt^analogsw)*2)):anakp.cnt=1
+					}else:if(wparam=key.(7+(cnt^analogsw)*2)):anakp.cnt=1
 				loop
 			}
 		}
@@ -1819,7 +1816,7 @@ end
 			if((analoginput=1)&(enter_key=1)){
 				repeat 2
 					cnt0=cnt
-					if((wparam/*ke.cnt3*/=key.(6+(cnt^analogsw)*2))&(anakp.cnt=0)&(t-keshuhstp>50)){
+					if((wparam=key.(6+(cnt^analogsw)*2))&(anakp.cnt=0)&(t-keshuhstp>50)){
 						gosub *refreshhs
 						if((hstypenow=0)&(hsr>5)){
 							hsr--
@@ -1834,8 +1831,8 @@ end
 						}
 						keshuhstp=t
 						anakp.cnt=-1
-					}else:if(wparam/*ke.cnt3*/=key.(6+(cnt^analogsw)*2)):anakp.cnt=0
-					if((wparam/*ke.cnt3*/=key.(7+(cnt^analogsw)*2))&(anakp.cnt=1)&(t-keshuhstp>50)){
+					}else:if(wparam=key.(6+(cnt^analogsw)*2)):anakp.cnt=0
+					if((wparam=key.(7+(cnt^analogsw)*2))&(anakp.cnt=1)&(t-keshuhstp>50)){
 						gosub *refreshhs
 						if((hstypenow=0)&(hsr<99)){
 							hsr++
@@ -1850,14 +1847,14 @@ end
 						}
 						keshuhstp=t
 						anakp.cnt=-1
-					}else:if(wparam/*ke.cnt3*/=key.(7+(cnt^analogsw)*2)):anakp.cnt=1
+					}else:if(wparam=key.(7+(cnt^analogsw)*2)):anakp.cnt=1
 				loop
 			}else:if((analoginput=1)&(analogmode=mode_on)&(((effratetype<=0)&(iscourse=0))|(gauge/1000>0))){
 				repeat 2
 					anow=analognow.cnt
 					cnt0=cnt
 					if(arstat.(6+cnt).0=1){
-						if(wparam/*ke.cnt3*/=key.(6+(cnt^analogsw)*2)){
+						if(wparam=key.(6+(cnt^analogsw)*2)){
 							if(anakp.cnt!=0){
 								anakdiff.cnt++
 								anaktp.cnt=t
@@ -1939,7 +1936,7 @@ end
 								}
 							//}
 						}
-						if(wparam/*ke.cnt3*/=key.(7+(cnt^analogsw)*2)){
+						if(wparam=key.(7+(cnt^analogsw)*2)){
 							if(anakp.cnt!=1){
 								anakdiff.cnt++
 								anaktp.cnt=t
