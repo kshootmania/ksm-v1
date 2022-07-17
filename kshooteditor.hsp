@@ -13026,7 +13026,7 @@ stop
 			}
 		}else:if((edittarget=TARGET_POS)&(ctrl_key=1)&(shift_key=1)){
 			repeat commentnum
-				if((comment.cnt=cc)&(StartsWith(commentstr.cnt, "//"))){
+				if((comment.cnt=cc)&(isDirectChartEditingEnabled | StartsWith(commentstr.cnt, "//"))){
 					gosub *undokakuho
 					ardel comment,commentnum,cnt
 					ardel commentstr,commentnum,cnt
