@@ -314,7 +314,7 @@
 			continue
 		}
 		if(StartsWith(d.cnt, "bg=")){
-			bgname=strmid(d.cnt,3,128)
+			bgname=strmid(d.cnt,3,256)
 			_sjis_ bgname
 			continue
 		}
@@ -324,7 +324,7 @@
 			continue
 		}
 		if(StartsWith(d.cnt, "title=")){
-			csongtitle=strmid(d.cnt,6,128)
+			csongtitle=strmid(d.cnt,6,256)
 			_utf8_ csongtitle
 			if(vfoldername=1){
 				csongtitle+="("+utf8enc(strmid(csongdir,instr(csongdir,0,"\\")+1,strlen(csongdir)-instr(csongdir,0,"\\")-1))+")"
@@ -332,37 +332,37 @@
 			continue
 		}
 		if(StartsWith(d.cnt, "title_img=")){
-			csongtitleimg=strmid(d.cnt,10,128)
+			csongtitleimg=strmid(d.cnt,10,256)
 			_sjis_ csongtitleimg
 			continue
 		}
 		if(StartsWith(d.cnt, "artist=")){
-			csongartist=strmid(d.cnt,7,128)
+			csongartist=strmid(d.cnt,7,256)
 			_utf8_ csongartist
 			continue
 		}
 		if(StartsWith(d.cnt, "effect=")){
-			csongeffect=strmid(d.cnt,7,128)
+			csongeffect=strmid(d.cnt,7,256)
 			_sjis_ csongeffect
 			continue
 		}
 		if(StartsWith(d.cnt, "illustrator=")){
-			csongillustrator=strmid(d.cnt,12,128)
+			csongillustrator=strmid(d.cnt,12,256)
 			_sjis_ csongillustrator
 			continue
 		}
 		if(StartsWith(d.cnt, "information=")){
-			csonginfo=strmid(d.cnt,12,128)
+			csonginfo=strmid(d.cnt,12,256)
 			_sjis_ csonginfo
 			continue
 		}
 		if(StartsWith(d.cnt, "artist_img=")){
-			csongartistimg=strmid(d.cnt,11,128)
+			csongartistimg=strmid(d.cnt,11,256)
 			_sjis_ csongartistimg
 			continue
 		}
 		if(StartsWith(d.cnt, "jacket=")){
-			csongjacket=strmid(d.cnt,7,128)
+			csongjacket=strmid(d.cnt,7,256)
 			_sjis_ csongjacket
 			if(instr(csongjacket,0,".")=-1){
 				if(iscmdline=0){
@@ -624,7 +624,7 @@
 			continue
 		}
 		if(StartsWith(d.cnt, "v=")){
-			cmovfile=strmid(d.cnt,2,128)
+			cmovfile=strmid(d.cnt,2,256)
 			_sjis_ cmovfile
 			continue
 		}

@@ -2571,7 +2571,7 @@
 		sortlist.cnt=stat2
 	loop
 	dim minfo,SONG_MAX,4,5
-	sdim minfostr,128,SONG_MAX,4,13
+	sdim minfostr,256,SONG_MAX,4,13
 	mnum=0
 	filelist=""
 	filelistkco=""
@@ -2979,7 +2979,7 @@
 		sndir=""
 		if(fname=""):continue
 		dim minfonow,5
-		sdim minfonowstr,128,13
+		sdim minfonowstr,256,13
 		minfonowstr.0=dir
 		minfonowstr.5=sndirstat.(max(stat1-1,0))
 		mnum++
@@ -2997,16 +2997,16 @@
 			noteget stat1,cnt
 			if(strmid(stat1,0,2)="--"):break
 			if(StartsWith(stat1, "title=")){
-				minfonowstr.8=strmid(stat1,6,128)
+				minfonowstr.8=strmid(stat1,6,256)
 				if(is_course_utf8=1):minfonowstr.8=bom+minfonowstr.8
 			}else:if(StartsWith(stat1, "title_img=")){
-				minfonowstr.10=strmid(stat1,10,128)
+				minfonowstr.10=strmid(stat1,10,256)
 				course_sjis_ minfonowstr.10
 			}else:if(StartsWith(stat1, "information=")){// ※minfonowstr.5はファイル名
-				minfonowstr.6=strmid(stat1,12,128)
+				minfonowstr.6=strmid(stat1,12,256)
 				if(is_course_utf8=1):minfonowstr.6=bom+minfonowstr.6
 			}else:if(StartsWith(stat1, "icon=")){
-				minfonowstr.12=strmid(stat1,5,128)
+				minfonowstr.12=strmid(stat1,5,256)
 				course_sjis_ minfonowstr.12
 				if(instr(minfonowstr.12,0,".")=-1){
 					minfonowstr.12="..\\..\\imgs\\icon\\"+minfonowstr.12+".png"
@@ -3129,7 +3129,7 @@
 				if((fname = "") | (getpath(fname, 2) != ".ksh")):continue
 	
 				dim minfonow,5
-				sdim minfonowstr,128,13
+				sdim minfonowstr,256,13
 				minfonowstr.0=dir+"\\"+sndir
 				minfonowstr.5=sndirstat.(max(stat1-1,0))
 				mnum++
@@ -3194,22 +3194,22 @@
 					noteget stat1,cnt
 					if(strmid(stat1,0,2)="--"):break
 					if(StartsWith(stat1, "title=")){
-						minfonowstr.8=strmid(stat1,6,128)
+						minfonowstr.8=strmid(stat1,6,256)
 						if(isutf8=1):minfonowstr.8=bom+minfonowstr.8
 					}else:if(StartsWith(stat1, "title_img=")){
-						minfonowstr.10=strmid(stat1,10,128)
+						minfonowstr.10=strmid(stat1,10,256)
 						_sjis_ minfonowstr.10
 					}else:if(StartsWith(stat1, "artist=")){
-						minfonowstr.1=strmid(stat1,7,128)
+						minfonowstr.1=strmid(stat1,7,256)
 						if(isutf8=1):minfonowstr.1=bom+minfonowstr.1
 					}else:if(StartsWith(stat1, "artist_img=")){
-						minfonowstr.11=strmid(stat1,11,128)
+						minfonowstr.11=strmid(stat1,11,256)
 						_sjis_ minfonowstr.11
 					}else:if(StartsWith(stat1, "effect=")){
-						minfonowstr.2=strmid(stat1,7,128)
+						minfonowstr.2=strmid(stat1,7,256)
 						if(isutf8=1):minfonowstr.2=bom+minfonowstr.2
 					}else:if(StartsWith(stat1, "jacket=")){
-						minfonowstr.3=strmid(stat1,7,128)
+						minfonowstr.3=strmid(stat1,7,256)
 						_sjis_ minfonowstr.3
 						if(instr(minfonowstr.3,0,".")=-1){
 							if(instr(minfonowstr.0,instr(minfonowstr.0,0,"\\")+1,"\\")>=0){
@@ -3217,10 +3217,10 @@
 							}else:minfonowstr.3="..\\..\\..\\imgs\\jacket\\"+minfonowstr.3+".jpg"
 						}
 					}else:if(StartsWith(stat1, "illustrator=")){
-						minfonowstr.4=strmid(stat1,12,128)
+						minfonowstr.4=strmid(stat1,12,256)
 						if(isutf8=1):minfonowstr.4=bom+minfonowstr.4
 					}else:if(StartsWith(stat1, "information=")){// ※minfonowstr.5はファイル名
-						minfonowstr.6=strmid(stat1,12,128)
+						minfonowstr.6=strmid(stat1,12,256)
 						if(isutf8=1):minfonowstr.6=bom+minfonowstr.6
 					}else:if(StartsWith(stat1, "m=")){
 						stat2=strmid(stat1,2,1024)
@@ -3230,11 +3230,11 @@
 					}else:if(StartsWith(stat1, "mvol=")){
 						minfonow.4=int(strmid(stat1,5,3))
 					}else:if(StartsWith(stat1, "ver=")){
-						csongver=strmid(stat1,4,128)
+						csongver=strmid(stat1,4,256)
 					}else:if(StartsWith(stat1, "t=")){
-						minfonowstr.9=strmid(stat1,2,128)
+						minfonowstr.9=strmid(stat1,2,256)
 					}else:if(StartsWith(stat1, "icon=")){
-						minfonowstr.12=strmid(stat1,5,128)
+						minfonowstr.12=strmid(stat1,5,256)
 						_sjis_ minfonowstr.12
 						if(instr(minfonowstr.12,0,".")=-1){
 							if(instr(minfonowstr.0,instr(minfonowstr.0,0,"\\")+1,"\\")>=0){
@@ -3511,22 +3511,22 @@
 						noteget stat1,cnt
 						if(strmid(stat1,0,2)="--"):break
 						if(StartsWith(stat1, "title=")){
-							minfostr.cnt3.dif.8=strmid(stat1,6,128)
+							minfostr.cnt3.dif.8=strmid(stat1,6,256)
 							if(isutf8=1):minfostr.cnt3.dif.8=bom+minfostr.cnt3.dif.8
 						}else:if(StartsWith(stat1, "title_img=")){
-							minfostr.cnt3.dif.10=strmid(stat1,10,128)
+							minfostr.cnt3.dif.10=strmid(stat1,10,256)
 							_sjis_ minfostr.cnt3.dif.10
 						}else:if(StartsWith(stat1, "artist=")){
-							minfostr.cnt3.dif.1=strmid(stat1,7,128)
+							minfostr.cnt3.dif.1=strmid(stat1,7,256)
 							if(isutf8=1):minfostr.cnt3.dif.1=bom+minfostr.cnt3.dif.1
 						}else:if(StartsWith(stat1, "artist_img=")){
-							minfostr.cnt3.dif.11=strmid(stat1,11,128)
+							minfostr.cnt3.dif.11=strmid(stat1,11,256)
 							_sjis_ minfostr.cnt3.dif.11
 						}else:if(StartsWith(stat1, "effect=")){
-							minfostr.cnt3.dif.2=strmid(stat1,7,128)
+							minfostr.cnt3.dif.2=strmid(stat1,7,256)
 							if(isutf8=1):minfostr.cnt3.dif.2=bom+minfostr.cnt3.dif.2
 						}else:if(StartsWith(stat1, "jacket=")){
-							minfostr.cnt3.dif.3=strmid(stat1,7,128)
+							minfostr.cnt3.dif.3=strmid(stat1,7,256)
 							_sjis_ minfostr.cnt3.dif.3
 							if(instr(minfostr.cnt3.dif.3,0,".")=-1){
 								if(instr(minfostr.cnt3.dif.0,instr(minfostr.cnt3.dif.0,0,"\\")+1,"\\")>=0){
@@ -3534,10 +3534,10 @@
 								}else:minfostr.cnt3.dif.3="..\\..\\..\\imgs\\jacket\\"+minfostr.cnt3.dif.3+".jpg"
 							}
 						}else:if(StartsWith(stat1, "illustrator=")){
-							minfostr.cnt3.dif.4=strmid(stat1,12,128)
+							minfostr.cnt3.dif.4=strmid(stat1,12,256)
 							if(isutf8=1):minfostr.cnt3.dif.4=bom+minfostr.cnt3.dif.4
 						}else:if(StartsWith(stat1, "information=")){// ※minfonowstr.5はファイル名
-							minfostr.cnt3.dif.6=strmid(stat1,12,128)
+							minfostr.cnt3.dif.6=strmid(stat1,12,256)
 							if(isutf8=1):minfostr.cnt3.dif.6=bom+minfostr.cnt3.dif.6
 						}else:if(StartsWith(stat1, "m=")){
 							stat2=strmid(stat1,2,1024)
@@ -3549,9 +3549,9 @@
 						}else:if(StartsWith(stat1, "ver=")){
 							csongver=strmid(stat1,4,128)
 						}else:if(StartsWith(stat1, "t=")){
-							minfostr.cnt3.dif.9=strmid(stat1,2,128)
+							minfostr.cnt3.dif.9=strmid(stat1,2,256)
 						}else:if(StartsWith(stat1, "icon=")){
-							minfostr.cnt3.dif.12=strmid(stat1,5,128)
+							minfostr.cnt3.dif.12=strmid(stat1,5,256)
 							_sjis_ minfostr.cnt3.dif.12
 							if(instr(minfostr.cnt3.dif.12,0,".")=-1){
 								if(instr(minfostr.cnt3.dif.0,instr(minfostr.cnt3.dif.0,0,"\\")+1,"\\")>=0){
@@ -4580,10 +4580,10 @@
 						noteget stat1,cnt
 						if(strmid(stat1,0,2)="--"):break
 						if(StartsWith(stat1, "title=")){
-							course_songtitle=strmid(stat1,6,128)
+							course_songtitle=strmid(stat1,6,256)
 							if(isutf8=0):course_songtitle=utf8enc(course_songtitle)
 						}else:if(StartsWith(stat1, "artist=")){
-							course_songartist=strmid(stat1,7,128)
+							course_songartist=strmid(stat1,7,256)
 							if(isutf8=0):course_songartist=utf8enc(course_songartist)
 						}else:if(StartsWith(stat1, "difficulty=")){
 							stat2_=strmid(stat1,11,16)
@@ -4597,19 +4597,19 @@
 						}else:if(StartsWith(stat1, "level=")){
 							course_songlevel=max(int(strmid(stat1,6,2)),1)
 						}else:if(StartsWith(stat1, "jacket=")){
-							course_songjacket=strmid(stat1,7,128)
+							course_songjacket=strmid(stat1,7,256)
 							_sjis_ course_songjacket
 							if(instr(course_songjacket,0,".")=-1){
 								course_songjacket=dir_default+"\\imgs\\jacket\\"+course_songjacket+".jpg"
 							}else:course_songjacket=getpath(_fname,32)+course_songjacket
 						}else:if(StartsWith(stat1, "title_img=")){
-							course_songtitle_img=strmid(stat1,10,128)
+							course_songtitle_img=strmid(stat1,10,256)
 							_sjis_ course_songtitle_img
 						}else:if(StartsWith(stat1, "artist_img=")){
-							course_songartist_img=strmid(stat1,11,128)
+							course_songartist_img=strmid(stat1,11,256)
 							_sjis_ course_songartist_img
 						}/*else:if(StartsWith(stat1, "information=")){// ※minfonowstr.5はファイル名
-							minfonowstr.6=strmid(stat1,12,128)
+							minfonowstr.6=strmid(stat1,12,256)
 							if(isutf8=1):minfonowstr.6=bom+minfonowstr.6
 						}*/
 					loop
