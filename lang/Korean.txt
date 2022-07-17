@@ -189,6 +189,7 @@ e00-055|
 e00-056|마디 
 e00-060|OK
 e00-061|취소
+e00-070|Failed to export KSON file.
 e01-000|파일(&F)
 e01-010|새로 만들기(&N)\tCtrl+N
 e01-011|열기(&O)...\tCtrl+O
@@ -197,6 +198,7 @@ e01-013|다른 이름으로 저장(&A)...\tCtrl+Shift+S
 e01-016|내보내기(&E)
 e01-020|종료(&C)
 e01-030|REAPER 프로젝트로 내보내기(&E)...\tCtrl+Alt+R
+e01-031|Export in &KSON format (experimental)...
 e02-000|편집(&E)
 e02-010|실행 취소(&U)\tCtrl+Z
 e02-011|반복(&R)\tCtrl+Y

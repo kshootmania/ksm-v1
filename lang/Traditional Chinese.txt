@@ -189,6 +189,7 @@ e00-055|小節
 e00-056|
 e00-060|確定
 e00-061|取消
+e00-070|Failed to export KSON file.
 e01-000|文件(&F)
 e01-010|新建(&N)\tCtrl+N
 e01-011|打開(&O)...\tCtrl+O
@@ -197,6 +198,7 @@ e01-013|另存為(&A)...\tCtrl+Shift+S
 e01-016|導出(&E)
 e01-020|退出(&C)
 e01-030|導出為 REAPER 工程(&E)...\tCtrl+Alt+R
+e01-031|Export in &KSON format (experimental)...
 e02-000|編輯(&E)
 e02-010|撤銷(&U)\tCtrl+Z
 e02-011|重做(&R)\tCtrl+Y

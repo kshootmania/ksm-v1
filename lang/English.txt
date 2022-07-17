@@ -189,6 +189,7 @@ e00-055|Measure
 e00-056|
 e00-060|OK
 e00-061|Cancel
+e00-070|Failed to export KSON file.
 e01-000|&File
 e01-010|&New\tCtrl+N
 e01-011|&Open...\tCtrl+O
@@ -197,6 +198,7 @@ e01-013|Save &As...\tCtrl+Shift+S
 e01-016|&Export
 e01-020|&Close
 e01-030|&Export REAPER project...\tCtrl+Alt+R
+e01-031|Export in &KSON format (experimental)...
 e02-000|&Edit
 e02-010|&Undo\tCtrl+Z
 e02-011|&Redo\tCtrl+Y

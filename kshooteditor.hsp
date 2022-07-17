@@ -11,6 +11,7 @@
 
 #include "src/winapi.as"
 #include "src/ksmcore.as"
+#include "src/kson.as"
 
 #include "src/audio/key_sound.as"
 #include "src/audio/laser_slam_sound.as"
@@ -55,6 +56,7 @@
 #enum CMD_QUIT
 #enum CMD_EXPORT
 #enum CMD_EXPORT_RPP
+#enum CMD_EXPORT_KSON
 #enum CMD_EDIT_UNDO
 #enum CMD_EDIT_RED
 #enum CMD_EDIT_CUT
@@ -440,6 +442,8 @@ pstartfl=0
 
 clickngt=d3timer()
 
+is_kson_export=0
+
 posnow=0
 dim selnote,131072
 dim selanalog,131072
@@ -652,6 +656,7 @@ addmenu hfilemenu, lang.1.13/*"名前を付けて保存(&A)...\tCtrl+Shift+S"*/, CMD_SAV
 addmenu hfilemenu, "", 0, 0x0800
 newmenu hfileexportmenu, 1
 addmenu hfileexportmenu, lang.1.30/*"REAPERプロジェクト書き出し(&E)...\tCtrl+Alt+R"*/, CMD_EXPORT_RPP
+addmenu hfileexportmenu, lang.1.31/*"KSON形式で書き出し(&K)..."*/, CMD_EXPORT_KSON
 addmenu hfilemenu, lang.1.16/*"エクスポート(&E)"*/, hfileexportmenu, 0x10
 addmenu hfilemenu, "", 0, 0x0800
 //if(DBGSW=1):addmenu hfilemenu, "RAW抽出(デバッグ用)(&S)", CMD_DEBUG, 0x00 : addmenu hfilemenu, "", 0, 0x0800
@@ -5110,6 +5115,18 @@ stop
 		buf+="\n  >\n>\n"
 		notesel buf
 		notesave rppfname
+	}else:if(cmd=CMD_EXPORT_KSON){
+		if(pendfl!=-1):pendfl=1:return
+		dialog "kson",17,lang.0.30
+		if(refstr=""){
+			acmd=-1:return
+		}
+		fname_kson_export=refstr
+		if(getpath(fname_kson_export,18)!=".kson"):fname_kson_export+=".kson"
+		is_kson_export=1
+		gosub *command_save
+		is_kson_export=0
+		fname_kson_export=""
 	}else:if(cmd=CMD_QUIT){
 		if(pendfl!=-1):pendfl=1:return
 		gosub *exit
@@ -14621,7 +14638,7 @@ stop
 
 *command_save
 	savestat=1
-	if(fname=""){
+	if((is_kson_export!=0)&(fname="")){
 		acmd=CMD_SAVEAS
 		if(saveasstat=0):savestat=0
 		gosub *OnCommand
@@ -14652,9 +14669,11 @@ stop
 		}
 	}
 	inputnow=0
-	if((strmid(fname,-1,4)!=".ksh")&(strmid(fname,-1,4)!=".ksh")):fname+=".ksh"
-	exist fname
-	if(strsize!=-1):bcopy fname,dir_default+"\\backup.bak"
+	if(is_kson_export=0){
+		if((strmid(fname,-1,4)!=".ksh")&(strmid(fname,-1,4)!=".ksh")):fname+=".ksh"
+		exist fname
+		if(strsize!=-1):bcopy fname,dir_default+"\\backup.bak"
+	}
 	buf=bom
 	buf+="title="+csongtitle+"\n"
 	if(csongtitleimg!=""):buf+="title_img="+utf8enc(csongtitleimg)+"\n"
@@ -15280,9 +15299,24 @@ stop
 	buf+=fxdefbuf_fx
 	buf+=fxdefbuf_filter
 	buf+=sharpstr
-	notesel buf
-	notesave fname
-	e=0:gosub *refreshtitle
+	if(is_kson_export){
+		KSON_FromKSH buf, 0 // サイズ取得
+		if(stat<0){
+			dialog lang.0.70/*"KSONファイルのエクスポートに失敗しました。"*/,1,lang.0.1/*"エラー"*/
+			buf=""
+			return
+		}
+		sdim kson, stat
+		KSON_FromKSH buf@, varptr(kson)
+		notesel kson
+		notesave fname_kson_export
+		kson=""
+	}else{
+		notesel buf
+		notesave fname
+		e=0:gosub *refreshtitle
+	}
+	buf=""
 	return
 
 *saveconfig
