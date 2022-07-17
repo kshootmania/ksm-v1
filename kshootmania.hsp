@@ -142,6 +142,7 @@
 #include "src/winapi.as"
 #include "src/kshlib.as"
 #include "src/ksmcore.as"
+#include "src/kson.as"
 
 #include "src/audio/key_sound.as"
 #include "src/audio/laser_slam_sound.as"
@@ -768,6 +769,11 @@ if(KSHLib_GetVersion()<1663){
 	dialog "最新版のkshlib.dllをコピーする必要があります。\nMake sure to copy the latest version of kshlib.dll.",1,lang.0.2:end
 }
 KSHLib_Init dir_default
+exist "kson.dll"
+if(strsize=-1):dialog "Cannot find the file kson.dll.",1,lang.0.2:end
+if(KSON_GetVersion()<1720){
+	dialog "最新版のkson.dllをコピーする必要があります。\nMake sure to copy the latest version of kson.dll.",1,lang.0.2:end
+}
 exist "hspinet.dll"
 if(strsize=-1):dialog "Cannot find the file hspinet.dll.",1,lang.0.2:end
 exist "bass_vst.dll"
