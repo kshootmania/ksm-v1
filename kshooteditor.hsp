@@ -172,8 +172,8 @@
 #enum TARGET_ZOOMSIDE
 #enum TARGET_STOP
 
-#define atitle "K-Shoot Editor v1.71d"
-#const CURRENT_KSH_VERSION 171
+#define atitle "K-Shoot Editor v1.72"
+#const CURRENT_KSH_VERSION 171 // ※譜面バージョンが上がった場合のみ更新
 
 // 1小節あたりのカウント値
 #define UNIT_MEASURE	192
