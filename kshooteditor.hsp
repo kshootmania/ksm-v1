@@ -15354,34 +15354,31 @@ stop
 			repeat length(confex)-cex-1,cex+1
 				if(confex.cnt=0):cex=cnt:break
 			loop
-			confstr_line=""
-		}else{
-			confstr_line=confstr.cnt
 		}
-		if((StartsWith(confstr_line, "currentlang="))|(cex=0)){
+		if((StartsWith(confstr.cnt, "currentlang="))|(cex=0)){
 			confs+="currentlang="+clang+stat1
-		}else:if((StartsWith(confstr_line, "editor_disabledd="))|(cex=1)){
+		}else:if((StartsWith(confstr.cnt, "editor_disabledd="))|(cex=1)){
 			confs+="editor_disabledd="+disabledd+stat1
-		}else:if((StartsWith(confstr_line, "editor_assisttick="))|(cex=2)){
+		}else:if((StartsWith(confstr.cnt, "editor_assisttick="))|(cex=2)){
 			confs+="editor_assisttick="+assisttick+stat1
-		}else:if((StartsWith(confstr_line, "editor_reducespacing="))|(cex=3)){
+		}else:if((StartsWith(confstr.cnt, "editor_reducespacing="))|(cex=3)){
 			stat2=0
 			if(vsep=24):stat2=0
 			if(vsep=72):stat2=-1
 			if(vsep=7):stat2=1
 			confs+="editor_reducespacing="+stat2+stat1
-		}else:if((StartsWith(confstr_line, "editor_zoomlanex="))|(cex=4)){
+		}else:if((StartsWith(confstr.cnt, "editor_zoomlanex="))|(cex=4)){
 			confs+="editor_zoomlanex="+vzoomx+stat1
-		}else:if((StartsWith(confstr_line, "editor_increasewinsize="))|(cex=5)){
+		}else:if((StartsWith(confstr.cnt, "editor_increasewinsize="))|(cex=5)){
 			confs+="editor_increasewinsize="+maximize+stat1
-		}else:if((StartsWith(confstr_line, "editor_measurepercolumn="))|(cex=6)){
+		}else:if((StartsWith(confstr.cnt, "editor_measurepercolumn="))|(cex=6)){
 			confs+="editor_measurepercolumn="+vtate+stat1
-		}else:if((StartsWith(confstr_line, "editor_linebrightness="))|(cex=7)){
+		}else:if((StartsWith(confstr.cnt, "editor_linebrightness="))|(cex=7)){
 			confs+="editor_linebrightness="+linebright+stat1
-		}else:if((StartsWith(confstr_line, "editor_loopplayback="))|(cex=8)){
+		}else:if((StartsWith(confstr.cnt, "editor_loopplayback="))|(cex=8)){
 			confs+="editor_loopplayback="+loopplayback+stat1
 		}else{
-			confs+=confstr_line+stat1
+			confs+=confstr.cnt+stat1
 		}
 	loop
 	notesel confs
