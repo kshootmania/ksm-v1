@@ -15354,6 +15354,7 @@ stop
 			repeat length(confex)-cex-1,cex+1
 				if(confex.cnt=0):cex=cnt:break
 			loop
+			confstr.cnt=""
 		}
 		if((StartsWith(confstr.cnt, "currentlang="))|(cex=0)){
 			confs+="currentlang="+clang+stat1
