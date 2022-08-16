@@ -161,7 +161,7 @@
 	repeat analoganjnum-max(min(chokkakup.0,chokkakup.1),0),max(min(chokkakup.0,chokkakup.1),0)
 		if((analog.(analoganj.cnt.1).2<=UNIT_MEASURE_32)&(((auto_chokkaku_se=0)&&(analoganj.cnt.2=1))|(analogmode=mode_auto)|(auto_chokkaku_se!=0))){
 			if((analog.(analoganj.cnt.1).6>=t-500)&(chokkakup.(analoganj.cnt.0)<cnt)){
-				if(analog.(analoganj.cnt.1).6<=t+30){
+				if(analog.(analoganj.cnt.1).6<=t+globaloffset+30){
 					stat1=min(abs(analog.(analoganj.cnt.1).3-analog.(analoganj.cnt.1).4)*(1+(anagrran.(analog.(analoganj.cnt.1).0).(analoggr.(analoganj.cnt.1))=2)),25)
 					if(disableautoanvol=1):stat1=25
 					if(cnt+1<analoganjnum){
@@ -201,7 +201,7 @@
 		}
 		if((note.(notesej.cnt.0).2=0)&(notesej.cnt.1!=2)&(((auto_note_se=0)&&(notesej.cnt.1=1))|(((note.(notesej.cnt.0).0<4)&(shortmode=mode_auto))|((note.(notesej.cnt.0).0>=4)&(longmode=mode_auto)))|(auto_note_se!=0))){
 			if(note.(notesej.cnt.0).3>=t-500){
-				if(note.(notesej.cnt.0).3<=t+30){
+				if(note.(notesej.cnt.0).3<=t+globaloffset+30){
 					if (notesej.cnt.2 != 0) {
 						// KeySound‚Ìƒ|ƒCƒ“ƒ^‚ªNULL‚Å‚È‚¯‚ê‚ÎÄ¶
 						PlayKeySound notesej.cnt.2, double(mastervol) / 100 * dirvol / 100 * notesej.cnt.3 / 100
