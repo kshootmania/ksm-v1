@@ -631,7 +631,7 @@ if(instr(lang.0.0,0,";")!=-1){
 
 exist "kson.dll"
 if(strsize=-1):dialog "Cannot find the file kson.dll.",1,lang.0.2:end
-if(KSON_GetVersion()<1720){
+if(KSON_GetVersion()<1730){
 	dialog "最新版のkson.dllをコピーする必要があります。\nMake sure to copy the latest version of kson.dll.",1,lang.0.2:end
 }
 exist "bassconv.dll"
