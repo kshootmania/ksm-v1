@@ -636,7 +636,7 @@
 		if(cnt=0):setobjmodel obj_bg,mod_bg1
 		if(cnt=1):setobjmodel obj_bg,mod_bg0
 	}
-	if(bg>=1):setang obj_bg,0.0f,0.0f,deg2rad(ror*minf(tiltrnow,14.0f)/1000/3)
+	if(bg>=1):setang obj_bg,0.0f,0.0f,deg2rad((ror*minf(tiltrnow,14.0f)/1000*(1.0f-ztiltrate)+ztiltnow*ztiltrate)/3)
 	if(bg>=2){
 		stat1=0
 		if((bgmouikkai!=0)&(cnow-bgmouikkaic<bgmouikkai)):stat1=int(sin(double(cnow-bgmouikkaic)/bgmouikkai*1.1)/sin(1.1)*360*bgmouikkaikaisu*bgmouikkaia)
