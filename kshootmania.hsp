@@ -2236,6 +2236,9 @@ end
 	if(a>=b):return b
 	return a
 
+#defcfunc ranf double a,double b,double c
+	return minf(maxf(a,b),c)
+
 #defcfunc getjoykeystat int knum
 	joykeystat1=0
 	if(knum=11){

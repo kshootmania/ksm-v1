@@ -623,6 +623,8 @@
 	}
 	if(cnt=0):ztiltnowp=ztiltnow2
 	ztiltnow=ztiltnow2*min(max(t_tp,1),ztilttime)/ztilttime+ztiltnowp*(ztilttime-min(max(t_tp,1),ztilttime))/ztilttime
+	ztiltnow_clamped=wrappedFmod(ztiltnow+180.0,360.0)-180.0
+	ztiltnow_clamped=ranf(ztiltnow_clamped,-14.0,14.0)*(1.0-maxf(absf(ztiltnow_clamped),90.0)/180.0)*(1.0-absf(maxf(absf(ztiltnow_clamped),90.0)-90.0)/90.0) // 180“x‚Åƒ[ƒ‚É‚È‚é‚æ‚¤‚É‚·‚é
 	ztiltrate=1.0f*ztilton*min(max(t_tp,1),ztiltontime)/ztiltontime+ztiltratep*(ztiltontime-min(max(t_tp,1),ztiltontime))/ztiltontime
 
 	// ”wŒi•`‰æ
@@ -636,7 +638,7 @@
 		if(cnt=0):setobjmodel obj_bg,mod_bg1
 		if(cnt=1):setobjmodel obj_bg,mod_bg0
 	}
-	if(bg>=1):setang obj_bg,0.0f,0.0f,deg2rad((ror*minf(tiltrnow,14.0f)/1000*(1.0f-ztiltrate)+ztiltnow*ztiltrate)/3)
+	if(bg>=1):setang obj_bg,0.0f,0.0f,deg2rad((ror*minf(tiltrnow,14.0f)/1000*(1.0f-ztiltrate)+ztiltnow_clamped*ztiltrate)/3)
 	if(bg>=2){
 		stat1=0
 		if((bgmouikkai!=0)&(cnow-bgmouikkaic<bgmouikkai)):stat1=int(sin(double(cnow-bgmouikkaic)/bgmouikkai*1.1)/sin(1.1)*360*bgmouikkaikaisu*bgmouikkaia)
@@ -653,7 +655,7 @@
 		layernow=max(layernow,0)
 		if(layernow/3!=layernowp/3):setobjmodel obj_layer,mod_layer.(layernow/3)
 		if(layernow\3!=layernowp\3):setevent obj_layer,ev_layeruv.bgnow.(layernow\3),0
-		setang obj_layer,0.0f,0.0f,deg2rad((ror*0.8*minf(tiltrnow,14.0)/1000*(1.0f-ztiltrate)+ztiltnow*ztiltrate)*((bgrotation=1)|(bgrotation=3))+stat1*((bgrotation=2)|(bgrotation=3)))
+		setang obj_layer,0.0f,0.0f,deg2rad((ror*0.8*minf(tiltrnow,14.0)/1000*(1.0f-ztiltrate)+ztiltnow_clamped*0.8*ztiltrate)*((bgrotation=1)|(bgrotation=3))+stat1*((bgrotation=2)|(bgrotation=3)))
 		layernowp=layernow
 	}
 	gmode 0
@@ -1165,3 +1167,10 @@
 	loop
 	alSaveFile outputpath+stat2+cnt+".png", "image/png",0,0,alGetWidth()/outputds,alGetHeight()/outputds
 	return
+
+#defcfunc wrappedFmod double a, double b
+	fmod_result=fmod(a,b)
+	if(fmod_result>=0.0){
+		return fmod_result
+	}
+	return a+absf(b) // fmod‚ÌŒ‹‰Ê‚ª•‰‚Ì’l‚É‚È‚Á‚½ê‡‚Í³‚Ì’l‚Ö
