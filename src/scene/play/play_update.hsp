@@ -131,10 +131,10 @@
 
 	// 音声バッファの更新
 	foreach mid
-		BASS_ChannelUpdate mid.cnt
+		BASS_ChannelUpdate mid.cnt,0
 	loop
 	repeat swaudionum
-		BASS_ChannelUpdate mid_sw.cnt
+		BASS_ChannelUpdate mid_sw.cnt,0
 	loop
 
 	// 次フレーム用に値を保管
