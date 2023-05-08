@@ -876,6 +876,7 @@ if((shift_key+ctrl_key=2)&(esc_key=0)){
 	disabledd=min(max(1-disabledd,0),1)
 }
 oncmd gosub *OnCommand, WM_COMMAND ; メッセージ割り込み
+oncmd gosub *do_redraw, 0x0200/*WM_MOUSEMOVE*/
 oncmd gosub *OnNotify,  WM_NOTIFY
 onkey gosub *OnKeshu ; キー割り込み
 onclick gosub *OnClick_ ; クリック時割り込み
@@ -934,6 +935,12 @@ gosub *createtoolbar
 stop
 
 *do_redraw
+	// 以下はvUNIT_MEASUREとUNIT_MEASUREが同じであることを前提にした計算なので注意
+	cursorc=(posnow+mousex/(41+9*2+vsp))*vtate*UNIT_MEASURE+(-10+topsep+vUNIT_MEASURE*vtate-mousey)
+	cursorc*=10:cursorc/=vzoom(10)
+	stat2=b2c(c2b(cursorc))
+	cursorc=stat2+(cursorc-stat2)/(UNIT_MEASURE/editdiv)*(UNIT_MEASURE/editdiv)
+	
 	gsel 0
 	redraw 0
 	pos 0,0
@@ -952,6 +959,12 @@ stop
 				gzoom (41+9*2)*3,vUNIT_MEASURE+1,6,0,vUNIT_MEASURE*(vtate*vyoko-1)-vUNIT_MEASURE*(cnt2*vtate+cnt),(41+9*2)*2,vUNIT_MEASURE+1,0
 				gsel 0
 				gcopy BUF_ZOOMTEMP,0,0,(41+9*2)*3,vUNIT_MEASURE+(cnt=0)
+			}
+			if((vzoom(cursorc)>=UNIT_MEASURE*(vtate*(posnow+cnt2)+cnt))&(vzoom(cursorc)<=UNIT_MEASURE*(vtate*(posnow+cnt2)+cnt+1))&(delayfl=0)){
+				color 128,64,64
+				cx=ginfo_cx
+				cy=ginfo_cy
+				line (41+9*2)*(2+vzoomx)/4+8+cx,cy+UNIT_MEASURE-(vzoom(cursorc)-UNIT_MEASURE*(vtate*(posnow+cnt2)+cnt)),41*(2+vzoomx)/4+cx+(41+9*2)*(2+vzoomx)/2,cy+UNIT_MEASURE-(vzoom(cursorc)-UNIT_MEASURE*(vtate*(posnow+cnt2)+cnt))
 			}
 		loop
 	loop
