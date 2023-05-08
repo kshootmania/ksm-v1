@@ -771,7 +771,7 @@ if(KSHLib_GetVersion()<1663){
 KSHLib_Init dir_default
 exist "kson.dll"
 if(strsize=-1):dialog "Cannot find the file kson.dll.",1,lang.0.2:end
-if(KSON_GetVersion()<1730){
+if(KSON_GetVersion()<1731){
 	dialog "最新版のkson.dllをコピーする必要があります。\nMake sure to copy the latest version of kson.dll.",1,lang.0.2:end
 }
 exist "hspinet.dll"
