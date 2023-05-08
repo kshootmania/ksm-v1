@@ -3292,6 +3292,8 @@
 				vsave_put mnum
 				vsave_put minfo
 				vsave_put minfostr
+				vsave_put subcnt
+				vsave_put subcntnum
 				vsave_end dir_default+"\\cache\\songs\\"+dir+"_abc.cache"
 			}
 		}
