@@ -846,7 +846,7 @@
 
 	hgdraw
 	if((chainvt!=-1)&(t-chainvt<500)){
-		// CHAIN”‚Ì•\Ž¦
+		// COMBO”‚Ì•\Ž¦
 		stat1=str(chainnow)
 		if(strlen(stat1)=3){
 			stat1="0"+stat1
@@ -856,11 +856,11 @@
 			stat1="000"+stat1
 		}
 		if(stat1!="0000"){
-			pos scrsize_w/2+round(t\100*scrsize_h/480/50/(1+(round(t\100*scrsize_h/480/50)>=2))),(290+20/2)*scrsize_h/480
+			pos scrsize_w/2+round(t\66*scrsize_h/480/33/(1+(round(t\66*scrsize_h/480/33)>=2))),(290+20/2)*scrsize_h/480
 			hgzoom 80*scrsize_h/480,getsize(20),tex_combonum,0,getsize(20)*noerror,getsize(80),getsize(20),5,255
 			repeat strlen(stat1)
 				stat2=int(strmid(stat1,cnt,1))
-				pos scrsize_w/2+(40/2-8+32*(cnt*2-strlen(stat1))/2)*scrsize_h/480+round(t\100*scrsize_h/480/50/(1+(round(t\100*scrsize_h/480/50)>=2))),(320+36/2)*scrsize_h/480
+				pos scrsize_w/2+(40/2-8+32*(cnt*2-strlen(stat1))/2)*scrsize_h/480+round(t\66*scrsize_h/480/33/(1+(round(t\66*scrsize_h/480/33)>=2))),(320+36/2)*scrsize_h/480
 				hgzoom 40*scrsize_h/480,getsize(50),tex_combonum,getsize(40)*noerror,(40+stat2*50)*scrsize_h/480,getsize(40),getsize(50),5,255
 			loop
 		}
