@@ -498,7 +498,7 @@
 	color 0,0,0
 	boxf
 	gmode 5,,,255
-	repeat 6
+	repeat 6 // チップノーツの判定アニメーション
 		cnt0=cnt
 		repeat judgelmax,judgelnext.cnt0
 			cnt2=cnt\judgelmax
@@ -506,50 +506,62 @@
 			if(t-judgel.cnt0.cnt2.0>=500):judgelnext.cnt0=(cnt2+1)\judgelmax:continue
 			if(t-judgel.cnt0.cnt2.0<0):break
 			if(cnt0<=3){
+				// BTレーンの座標
 				pos (92+60*cnt0)*scrsize_h/480+(anaranfl=2)*judgel_winx/2+int(center_split_now*60)/2*(cnt0/2*2-1),getsize(17)
 			}else{
+				// FXレーンの座標
 				pos (92+30+120*(cnt0-4))*scrsize_h/480+(anaranfl=2)*judgel_winx/2+int(center_split_now*60)/2*((cnt0-4)*2-1),getsize(17)
 			}
 			if((t-judgel.cnt0.cnt2.0<500)&(judgel.cnt0.cnt2.1=4)){
+				// NEAR(FAST)
 				gcopy 17,getsize(86),getsize(86)*((t-judgel.cnt0.cnt2.0)*12/500),getsize(86),getsize(86)
 			}else:if((t-judgel.cnt0.cnt2.0<500)&(judgel.cnt0.cnt2.1=3)){
+				// CRITICAL
 				gcopy 16,0,getsize(86)*((t-judgel.cnt0.cnt2.0)*12/500),getsize(86),getsize(86)
 			}else:if((t-judgel.cnt0.cnt2.0<500)&(judgel.cnt0.cnt2.1=2)){
+				// NEAR
 				gcopy 17,0,getsize(86)*((t-judgel.cnt0.cnt2.0)*12/500),getsize(86),getsize(86)
 			}else:if((t-judgel.cnt0.cnt2.0<500)&(judgel.cnt0.cnt2.1=1)){
+				// ERROR
 				gcopy 18,0,getsize(86)*((t-judgel.cnt0.cnt2.0)*12/500),getsize(86),getsize(86)
 			}
 		loop
 	loop
-	repeat 4
+	repeat 4 // ロングBTノーツの判定アニメーション
 		if(t-shlstartt.cnt>=0){
 			pos (92-17+60*cnt)*scrsize_h/480+(anaranfl=2)*judgel_winx/2+int(center_split_now*60)/2*(cnt/2*2-1),getsize(20)/2
 			if((t-shlstartt.cnt<500)&(shljudge.cnt=1)){
+				// 押し始め
 				gcopy 45,0,getsize(120)*((t-shlstartt.cnt)*8/500),getsize(120),getsize(120)
 			}else:if(shljudge.cnt=1){
-				gcopy 45,0,getsize(120)*(9+((t-shlstartt.cnt-500)\1625)*26/1625),getsize(120),getsize(120)
+				// 押している間
+				gcopy 45,0,getsize(120)*(8+((t-shlstartt.cnt-500)\1625)*26/1625),getsize(120),getsize(120)
 			}else{
 				if(shljudgep.cnt=1){
 					shljudgeendt.cnt=t
 				}
 				if(t-shljudgeendt.cnt<500){
+					// 押し終わった後
 					gcopy 45,0,getsize(120)*(34+(t-shljudgeendt.cnt)*8/500),getsize(120),getsize(120)
 				}
 			}
 		}
 	loop
-	repeat 2
+	repeat 2 // ロングFXノーツの判定アニメーション
 		if(t-lstartt.cnt>=0){
 			pos (96+120*cnt)*scrsize_h/480+(anaranfl=2)*judgel_winx/2+int(center_split_now*60)/2*(cnt*2-1),0
 			if((t-lstartt.cnt<500)&(ljudge.cnt=1)){
+				// 押し始め
 				gcopy 30,0,getsize(140)*((t-lstartt.cnt)*8/500),getsize(140),getsize(140)
 			}else:if(ljudge.cnt=1){
-				gcopy 30,0,getsize(140)*(9+(((t-lstartt.cnt-500)\1625)*26/1625)),getsize(140),getsize(140)
+				// 押している間
+				gcopy 30,0,getsize(140)*(8+(((t-lstartt.cnt-500)\1625)*26/1625)),getsize(140),getsize(140)
 			}else{
 				if(ljudgep.cnt=1){
 					ljudgeendt.cnt=t
 				}
 				if(t-ljudgeendt.cnt<500){
+					// 押し終わった後
 					gcopy 30,0,getsize(140)*(34+(t-ljudgeendt.cnt)*8/500),getsize(140),getsize(140)
 				}
 			}
