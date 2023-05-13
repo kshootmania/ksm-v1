@@ -1866,7 +1866,9 @@ end
 							}else:anakdiff.cnt=0
 							anasame=(anakp.cnt=0)
 							anakp.cnt=0
-							if(anow=analogpos.cnt){
+							if(anow=-1){
+								// LASERがまだ到達していない場合はカーソルを固定(v1.74～)
+							}else:if(anow=analogpos.cnt){
 								if((anaturnnextfl.cnt=1)&(anastraight.cnt=0)&(analogokt.cnt>(t_tp)*2)&(anadirection.cnt=1)){
 									if(anaturnnextt.cnt0-(t-analogdelay)>500-250*(analog.(arstat.(6+cnt).1).8=0)-100*(analog.(arstat.(6+cnt).1).7-analog.(arstat.(6+cnt).1).6<=500)&(anasame=1)&((t>30+analoganokt.cnt)|(analoganokcnt.cnt=-1))){
 										if(t-analogngt.cnt<=(t_tp)*5){
@@ -1882,7 +1884,7 @@ end
 								if((anastraight.cnt=0)&(anadirection.cnt=1)&((t>30+analoganokt.cnt)|(analoganokcnt.cnt=-1))){
 									analogpos.cnt-=40
 								}
-							}else:if((abs(anow-analogpos.cnt)<150+abs(anow-analogfuture.cnt)/12*(analogfuture.cnt!=-1))&(anow!=-1)){
+							}else:if(abs(anow-analogpos.cnt)<150+abs(anow-analogfuture.cnt)/12*(analogfuture.cnt!=-1)){
 								if(anow<=analogpos.cnt){
 									analogpos.cnt=anow
 									anadjp.cnt=1
@@ -1892,7 +1894,7 @@ end
 								}else{
 									analogpos.cnt-=50-40*(anaturnnextt.cnt0-(t-analogdelay)<=500-250*(analog.(arstat.(6+cnt).1).8=0)-100*(analog.(arstat.(6+cnt).1).7-analog.(arstat.(6+cnt).1).6<=500))
 								}
-							}else:if(((abs(anow-analogpos.cnt)>200)&(anow>analogpos.cnt))|(anow=-1)){
+							}else:if((abs(anow-analogpos.cnt)>200)&(anow>analogpos.cnt)){
 								if(((analog.(arstat.(6+cnt).1).1-cnow>UNIT_MEASURE*3/32)|(analog.(arstat.(6+cnt).1).1+UNIT_MEASURE_32<cnow))&((t-analog.(arstat.(6+cnt).1).6>50)|(anow=-1))){
 									if((t-anastartt.cnt>120)&(t-anaendt.cnt>0)):analogpos.cnt-=80
 								}
