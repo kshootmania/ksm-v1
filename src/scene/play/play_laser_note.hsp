@@ -181,7 +181,7 @@
 		if(analoganokcnt.cnt!=-1){
 			if(((t-analoganokt.cnt<=18)&(analoggr.(arstat.(6+cnt).1)=analoggr.(analoganokcnt.cnt)))&(analoganokcnt.cnt!=arstat.(6+cnt).1)&(analog.(arstat.(6+cnt).1).2<=UNIT_MEASURE_32)){
 				analoganokcnt.cnt=-1
-			}else:if(((t-analoganokt.cnt<=75)&(analoggr.(arstat.(6+cnt).1)=analoggr.(analoganokcnt.cnt)))):analogpos.cnt=analognow.cnt
+			}else:if((analognow.cnt!=-1)&(t-analoganokt.cnt<=75)&(analoggr.(arstat.(6+cnt).1)=analoggr.(analoganokcnt.cnt))):analogpos.cnt=analognow.cnt
 		}
 		if((t-analogngt.cnt<(t_tp)*3/5+20*(analoginput=0)+20*(analoginput=2))&(anakdiff.cnt<9)&(anaturnnextt.cnt0-(t-analogdelay)>400+100*(analoginput=1)-200*(analog.(arstat.(6+cnt).1).8=0)-80*(analog.(arstat.(6+cnt).1).7-analog.(arstat.(6+cnt).1).6<=400))&((t>30+analoganokt.cnt)|(analoganokcnt.cnt=-1))){
 			if(t-analogokt.cnt<40+10*(analoginput=1)):analogpos.cnt+=sgn(analognow.cnt-analogpos.cnt)*min(abs(analognow.cnt-analogpos.cnt)/4,(t_tp)*(40+10*(analoginput=1))/1000)
