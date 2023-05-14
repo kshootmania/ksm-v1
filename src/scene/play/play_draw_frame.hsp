@@ -607,7 +607,7 @@
 	gmode 5,,,130
 	repeat 2
 		cnt2=cnt
-		repeat max(analogefftnum.cnt2-analogefffcnt.cnt2-1,0),analogefffcnt.cnt2+1
+		repeat max(analogefftnum.cnt2-analogefffcnt.cnt2,0),analogefffcnt.cnt2
 			if(t-analogefft.cnt2.cnt.0<90){
 				pos (analogefft.cnt2.cnt.1*scrsize_h*30/100)/480+(anaranfl=2)*judgel_winx/2,getsize(17)
 				gcopy 41,getsize(172)*cnt2,(t-analogefft.cnt2.cnt.0)/30*86*scrsize_h/480,getsize(172),getsize(86)
@@ -615,11 +615,11 @@
 				pos (analogefft.cnt2.cnt.1*scrsize_h*30/100)/480+(anaranfl=2)*judgel_winx/2,getsize(17)
 				gcopy 41,getsize(172)*cnt2,(3+(t-analogefft.cnt2.cnt.0-90)/40)*86*scrsize_h/480,getsize(172),getsize(86)
 			}else{
-				analogefffcnt.cnt2=cnt
+				analogefffcnt.cnt2=cnt+1
 				continue
 			}
 		loop
-		if(analogefftnum.cnt2-analogefffcnt.cnt2-1>4):analogefffcnt.cnt2=analogefftnum.cnt2-5
+		if(analogefftnum.cnt2-analogefffcnt.cnt2>5):analogefffcnt.cnt2=analogefftnum.cnt2-5
 	loop
 	if(anaranfl=2){
 		settex judgel_winx*2,judgel_winy,0,tex_judgel2x
