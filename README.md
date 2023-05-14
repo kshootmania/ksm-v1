@@ -59,7 +59,7 @@ Windows用の音楽ゲームです。
     - The code has lots of magic numbers like coordinates, and some of them are pre-calculated for a better performance
     - However, since no code optimization is operated in HSP, refactoring can lead to a bad performance.
 
-- Unfortunately, comments are written in Japanese. Good luck with Google Translate!
+- Unfortunately, comments are written in Japanese. Good luck with DeepL Translate!
 
 - Main program:
     - `kshootmania.hsp`: Game
