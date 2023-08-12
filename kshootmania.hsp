@@ -178,7 +178,6 @@
 #include "third_party/alib_hash.as"
 
 #include "encode.as"
-#include "third_party/TsubuyakiSoup_mod.hsp"
 
 #include "src/ir.hsp"
 
