@@ -14645,7 +14645,7 @@ stop
 
 *command_save
 	savestat=1
-	if((is_kson_export!=0)&(fname="")){
+	if((is_kson_export=0)&(fname="")){
 		acmd=CMD_SAVEAS
 		if(saveasstat=0):savestat=0
 		gosub *OnCommand
