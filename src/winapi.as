@@ -11,6 +11,12 @@
 #func f_SetWindowPos "SetWindowPos" int , int , int , int , int , int , int
 #func SetWindowTextW "SetWindowTextW" wptr,wptr
 #func GetWindowTextW "GetWindowTextW" wptr,wptr,wptr
+#func GetDC "GetDC" sptr
+#func OpenClipboard "OpenClipboard" sptr
+#func CloseClipboard "CloseClipboard"
+#func SetClipboardData "SetClipboardData" sptr,sptr
+#func EmptyClipboard "EmptyClipboard"
+#func ReleaseDC "ReleaseDC" sptr,sptr
 
 #func CheckMenuItem "CheckMenuItem" int,int,int
 #func EnableMenuItem "EnableMenuItem" int,int,int
@@ -48,6 +54,11 @@
 #uselib "gdi32"
 #func CreateFontIndirect "CreateFontIndirectA" sptr
 #func DeleteObject "DeleteObject" sptr
+#func CreateCompatibleDC "CreateCompatibleDC" sptr
+#func CreateCompatibleBitmap "CreateCompatibleBitmap" sptr,sptr,sptr
+#func SelectObject "SelectObject" sptr,sptr
+#func DeleteDC "DeleteDC" sptr
+#func BitBlt "BitBlt" sptr,sptr,sptr,sptr,sptr,sptr,sptr,sptr,sptr
 
 #const DT_WORDBREAK		0x00000010
 #const DT_EDITCONTROL	0x00002000

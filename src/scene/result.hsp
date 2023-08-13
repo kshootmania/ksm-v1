@@ -629,7 +629,7 @@
 			if((tweet_key=1)&(tweet_keyp=0)&(tweetfl=0)){
 				diffstartt=t-1000
 				diffendt=max(diffendt,t+5000)
-				tweetfl=1
+				tweetfl=1 // スクショ用にツイートボタンを消す
 			}else:tweet_key=0
 			getkey stat1,13
 			stat1=stat1|getjoykeystat(11)
@@ -828,8 +828,16 @@
 			ir_popup_draw
 			redraw 1
 			if(tweet_key=1){
-				// Note: ソースコード公開用につき削除
-				dialog "This version does not support linking with Twitter."
+				// 画面の画像をクリップボードにコピー
+				buffer BUF_RESULT_TWEET,scrsize_w,scrsize_h
+				gcopy 0,0,0,scrsize_w,scrsize_h
+				ClipB_SetBmp 0,0,scrsize_w,scrsize_h
+				tweetfl=0
+				dialog lang.2.60/*"スクリーンショットをクリップボードにコピーしました。\n投稿画面でCtrl+Vを押すと画像を添付できます。"*/
+
+				// ブラウザで投稿画面を開く
+				urlencode tweet_text_urlencoded,tweet_text
+				exec "https://twitter.com/intent/tweet?text="+tweet_text_urlencoded,16
 			}
 			await 7
 			gosub *volactive

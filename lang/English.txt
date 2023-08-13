@@ -61,6 +61,7 @@ m02-051|ms)
 m02-052|[  Yes  ]    No   
 m02-053|   Yes     [ No ] 
 m02-055|Saving...
+m02-060|The screenshot has been copied to the clipboard.\nPress Ctrl+V in the post window to attach the image.
 m02-070|Unlocked track:
 m03-000|Window
 m03-001|Fullscreen
