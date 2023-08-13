@@ -105,7 +105,7 @@
 #define IMG_IR_POPUP_TEMP				171		// IRポップアップ一時イメージ
 
 #define BUF_RESULT_TEMP					184		// リザルト画面一時保管用バッファ
-#define BUF_TWEET_DIALOG				183		// Twitter投稿用スクリーン
+#define BUF_RESULT_TWEET				183		// Twitter投稿時クリップボードコピー用バッファ
 
 #define BUF_IR_LOGIN_DIALOG				185		// IRログイン画面用スクリーン
 
@@ -176,6 +176,7 @@
 #include "third_party/a2d.hsp"
 #include "third_party/jstick.as"
 #include "third_party/alib_hash.as"
+#include "third_party/clipboard.as"
 
 #include "encode.as"
 
@@ -2081,10 +2082,6 @@ end
 
 *exit
 	if(ginfo_act!=-1){
-		if(ginfo_act=BUF_TWEET_DIALOG){
-			tweet_stat=-1
-			return
-		}
 		if(ginfo_act=BUF_IR_LOGIN_DIALOG){
 			cancel@ksm_ir=1
 			return
