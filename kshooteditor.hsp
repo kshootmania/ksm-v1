@@ -172,7 +172,9 @@
 #enum TARGET_ZOOMSIDE
 #enum TARGET_STOP
 
-#define atitle "K-Shoot Editor v1.74"
+#define aname "K-Shoot Editor"
+#define aversion "1.74"
+#define atitle (aname+" v"+aversion)
 #const CURRENT_KSH_VERSION 171 // ※譜面バージョンが上がった場合のみ更新
 
 // 1小節あたりのカウント値
@@ -631,7 +633,7 @@ if(instr(lang.0.0,0,";")!=-1){
 
 exist "kson.dll"
 if(strsize=-1):dialog "Cannot find the file kson.dll.",1,lang.0.2:end
-if(KSON_GetVersion()<1740){
+if(KSON_GetVersion()<1750){
 	dialog "最新版のkson.dllをコピーする必要があります。\nMake sure to copy the latest version of kson.dll.",1,lang.0.2:end
 }
 exist "bassconv.dll"
@@ -15305,14 +15307,14 @@ stop
 	buf+=fxdefbuf_filter
 	buf+=sharpstr
 	if(is_kson_export){
-		KSON_FromKSH buf, 0 // サイズ取得
+		KSON_FromKSH buf, 0, aname, aversion // サイズ取得
 		if(stat<0){
 			dialog lang.0.70/*"KSONファイルのエクスポートに失敗しました。"*/,1,lang.0.1/*"エラー"*/
 			buf=""
 			return
 		}
 		sdim kson, stat
-		KSON_FromKSH buf@, varptr(kson)
+		KSON_FromKSH buf, varptr(kson), aname, aversion
 		notesel kson
 		notesave fname_kson_export
 		kson=""
