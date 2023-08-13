@@ -855,25 +855,3 @@
 		loop
 	}
 	return
-
-*tweet_pin_okbtn
-	tweet_stat=1
-	return
-
-*tweet_btn
-	if(280-KSHLib_GetTwitterStringLength(tweet_text)>=0){
-		tweet_stat=1
-	}
-	return
-
-*tweet_btn_cancel
-	tweet_stat=-1
-	return
-
-*tweet_btn_logout
-	ACCESS_TOKEN=""
-	ACCESS_SECRET=""
-	ACCESS_SECRET1=""
-	ACCESS_SECRET2=""
-	tweet_stat=-1
-	return

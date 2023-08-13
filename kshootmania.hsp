@@ -413,13 +413,6 @@ disableadjtimer=0
 iscourse=0
 isendbyesckey=0
 
-ACCESS_TOKEN=""
-ACCESS_SECRET1=""
-ACCESS_SECRET2=""
-ACCESS_SECRET3_=""
-sdim ACCESS_SECRET,128
-ACCESS_SECRET=""
-
 ir_selnow=1
 
 proxy_host=""
