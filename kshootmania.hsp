@@ -99,8 +99,6 @@
 #define IMG_CRESULT_GAUGE				160		// コースモードリザルト画面 達成率ゲージ
 #define IMG_CRESULT_NEWRECORD			155		// コースモードリザルト画面 ハイスコア更新時の通知
 
-#define IMG_TWEET_TEMP					165		// Twitter画像保存用一時イメージ
-
 #define IMG_IR_SIGNIN					168		// IRログイン選択画面
 #define IMG_IR_SIGNIN_CURSOR			169		// IRログイン選択画面
 #define IMG_IR_POPUP					170		// IRポップアップ背景
@@ -110,8 +108,6 @@
 #define BUF_RESULT_TWEET				183		// Twitter投稿時クリップボードコピー用バッファ
 
 #define BUF_IR_LOGIN_DIALOG				185		// IRログイン画面用スクリーン
-
-#define TWITTER_REPEAT_COUNT 20
 
 #define GATE_PATH		""
 #define GATE_GLIST_FNAME	"glist164.lst"
@@ -185,8 +181,6 @@
 #include "src/ir.hsp"
 
 hosts="" // Note: ソースコード公開用に削除
-
-#define CONSUMER_KEY    "" // Note: ソースコード公開用に削除
 
 #define ksm_id ksm_id@ksm_ir
 
@@ -654,7 +648,6 @@ repeat notemax
 	if(StartsWith(confstr.cnt, "effrate_shifty=")){
 		erysh2=int(strmid(confstr.cnt,15,6))
 	}
-	// Note: ソースコード公開用にTwitter連携関連のコードを削除
 	if(StartsWith(confstr.cnt, "hideitem_all=")){
 		hidealldir=int(strmid(confstr.cnt,13,1))
 	}
@@ -687,8 +680,6 @@ repeat notemax
 	}
 loop
 if(outputpath=""):output=0
-
-// Note: ソースコード公開用にTwitter連携関連のコードを削除
 
 noteget buf2,0
 dim key,14
@@ -846,8 +837,6 @@ font lang.0.0,14
 mref BMSCR, 67
 CreateFontIndirect varptr(BMSCR(49))
 hFont = stat
-
-// Note: ソースコード公開用に接続関連のコードを削除
 
 onexit gosub *exit
 
@@ -1310,7 +1299,7 @@ end
 *saveconfig
 	confs=""
 	dir_curp=dir_cur
-	dim confex,51
+	dim confex,47
 	repeat length(confstr)
 		if(StartsWith(confstr.cnt, "key=")):confex.0=1
 		if(StartsWith(confstr.cnt, "key2=")):confex.1=1
@@ -1356,12 +1345,8 @@ end
 		if(StartsWith(confstr.cnt, "inputdelay=")):confex.42=1
 		if(StartsWith(confstr.cnt, "vsync=")):confex.43=1
 		if(StartsWith(confstr.cnt, "esckey_bt3=")):confex.44=1
-		if(StartsWith(confstr.cnt, "twitter_token=")):confex.45=1
-		if(StartsWith(confstr.cnt, "twitter_token_secret1=")):confex.46=1
-		if(StartsWith(confstr.cnt, "twitter_token_secret2=")):confex.47=1
-		if(StartsWith(confstr.cnt, "twitter_token_secret3=")):confex.48=1
-		if(StartsWith(confstr.cnt, "hideitem_all=")):confex.49=1
-		if(StartsWith(confstr.cnt, "ir_sign_in_cursor=")):confex.50=1
+		if(StartsWith(confstr.cnt, "hideitem_all=")):confex.45=1
+		if(StartsWith(confstr.cnt, "ir_sign_in_cursor=")):confex.46=1
 	loop
 	ex=0
 	cex=-1
@@ -1498,10 +1483,9 @@ end
 				confs+="esckey_bt3="+esc_bt3+stat1
 				confex.44=2
 			}
-		// Note: ソースコード公開用にTwitter連携関連の処理を削除
-		}else:if(StartsWith(confstr.cnt, "hideitem_all=") | (cex = 49)){
+		}else:if(StartsWith(confstr.cnt, "hideitem_all=") | (cex = 45)){
 			confs+="hideitem_all="+hidealldir+stat1
-		}else:if(StartsWith(confstr.cnt, "ir_sign_in_cursor=") | (cex = 50)){
+		}else:if(StartsWith(confstr.cnt, "ir_sign_in_cursor=") | (cex = 46)){
 			confs+="ir_sign_in_cursor="+ir_selnow+stat1
 		}else{
 			confs+=confstr.cnt+stat1
