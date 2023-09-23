@@ -1,5 +1,5 @@
 #ifndef __MOD_STRLU_AS__
-#const  __MOD_STRLU_AS__
+#define  __MOD_STRLU_AS__
 #module "m_strlu"
 #uselib "user32.dll"
 #func CharLower@m_strlu "CharLowerA" var
