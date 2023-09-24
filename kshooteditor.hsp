@@ -15313,7 +15313,7 @@ stop
 			buf=""
 			return
 		}
-		sdim kson, stat
+		sdim kson, stat + 1
 		KSON_FromKSH buf, varptr(kson), aname, aversion
 		notesel kson
 		notesave fname_kson_export
