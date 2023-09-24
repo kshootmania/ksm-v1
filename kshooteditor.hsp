@@ -173,7 +173,7 @@
 #enum TARGET_STOP
 
 #define aname "K-Shoot Editor"
-#define aversion "1.75"
+#define aversion "1.75a"
 #define atitle (aname+" v"+aversion)
 #const CURRENT_KSH_VERSION 171 // ※譜面バージョンが上がった場合のみ更新
 

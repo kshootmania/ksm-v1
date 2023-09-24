@@ -72,9 +72,9 @@
 #define defy			ginfo_dispy/2
 #define siteurl			"https://www.kshootmania.com/"
 #define aname			"K-Shoot MANIA"
-#define aversion		"1.75"
+#define aversion		"1.75a"
 #define atitle			(aname+" v"+aversion)
-#define currentver		"175"
+#define currentver		"175a"
 
 #const  T_MOEX_DELAY			0
 #const  GLOBAL_SOUNDFX_DELAY	0
