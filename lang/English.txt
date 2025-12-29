@@ -1,4 +1,4 @@
-﻿m00-000|MS PGothic
+m00-000|MS PGothic
 m00-001|MS Gothic
 m00-002|Error
 m00-003|Cannot find the file bassconv.dll.
@@ -89,8 +89,8 @@ m03-022|Mouse X/Y signal (for Controller)
 m03-023|Analog Stick
 m03-024|Slider signal (for Controller)
 m03-025|Analog Stick X/Y
-m03-028|On
-m03-029|Off
+m03-028|Off
+m03-029|On
 m03-030|Off
 m03-031|On - Low
 m03-032|On - Mid
