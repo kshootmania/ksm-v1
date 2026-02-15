@@ -50,7 +50,7 @@ popup_text=""
 //
 #defcfunc getChartIRHash var p1, local buf, local p1Line, local ignoreList, local f, local ret
 	sdim buf, strlen(p1)
-	ignoreList = "//","title=","title_img=","artist=","artist_img=","effect=","illustrator=","jacket=","level=","difficulty=","m=","o=","v=","vo=","mvol=","bg=","layer=","po=","plength=","pfiltergain=","filtertype=","chokkakuautovol=","chokkakuvol=","chokkakuse=","icon=","ver=","fx-l=","fx-r=","#define","information="
+	ignoreList = "//","title=","title_img=","artist=","artist_img=","effect=","illustrator=","jacket=","level=","difficulty=","m=","o=","v=","vo=","mvol=","bg=","layer=","po=","plength=","pfiltergain=","filtertype=","chokkakuautovol=","chokkakuvol=","chokkakuse=","icon=","ver=","fx-l=","fx-r=","#define","information=","ver_compat=","title_translit=","artist_translit="
 	repeat notemax
 		noteget p1Line, cnt
 		f=1
