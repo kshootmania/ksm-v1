@@ -191,6 +191,10 @@ e00-056|
 e00-060|OK
 e00-061|Cancel
 e00-070|Failed to export KSON file.
+e00-071|Warnings occurred during KSON file export.\n----------\n
+e00-075|The file will be converted from KSON format (new format from v2 onwards) to KSH format for import.\n\nIf the file uses new features supported by the KSON format, some information may be lost during import.
+e00-076|Failed to import KSON file.
+e00-077|Warnings occurred during KSON file import. Some information may have been lost.\n----------\n
 e01-000|&File
 e01-010|&New\tCtrl+N
 e01-011|&Open...\tCtrl+O
@@ -199,7 +203,7 @@ e01-013|Save &As...\tCtrl+Shift+S
 e01-016|&Export
 e01-020|&Close
 e01-030|&Export REAPER project...\tCtrl+Alt+R
-e01-031|Export in &KSON format (experimental)...
+e01-031|Export in &KSON format...
 e02-000|&Edit
 e02-010|&Undo\tCtrl+Z
 e02-011|&Redo\tCtrl+Y
