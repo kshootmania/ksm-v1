@@ -72,9 +72,9 @@
 #define defy			ginfo_dispy/2
 #define siteurl			"https://www.kshootmania.com/"
 #define aname			"K-Shoot MANIA"
-#define aversion		"1.75a"
+#define aversion		"1.75b"
 #define atitle			(aname+" v"+aversion)
-#define currentver		"175a"
+#define currentver		"175b"
 
 #const  T_MOEX_DELAY			0
 #const  GLOBAL_SOUNDFX_DELAY	0
@@ -757,7 +757,7 @@ if(KSHLib_GetVersion()<1663){
 KSHLib_Init dir_default
 exist "kson.dll"
 if(strsize=-1):dialog "Cannot find the file kson.dll.",1,lang.0.2:end
-if(KSON_GetVersion()<1750){
+if(KSON_GetVersion()<1752){
 	dialog "最新版のkson.dllをコピーする必要があります。\nMake sure to copy the latest version of kson.dll.",1,lang.0.2:end
 }
 exist "hspinet.dll"
